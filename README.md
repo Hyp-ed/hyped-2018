@@ -1,4 +1,4 @@
-[![Build](https://img.shields.io/travis/rust-lang/rust.svg)]())
+[![Build](https://img.shields.io/travis/rust-lang/rust.svg)]()
 
 <p align="center">
   <img src="./logo.png"  />
@@ -10,6 +10,9 @@ This is the official repository of HYPED. HYPED is a student society at the Univ
 # Contributing
 
 The following is a set of guidelines for contributing to HYPED. These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+
+## Coding Style
+ Since we will have dozens of developers coding for the pod, it is very important that everyone adheres to the same code style. For that purpose we have created the following [style guide](https://hyp-ed.github.io/styleguide/).
 
 ## Git
 
