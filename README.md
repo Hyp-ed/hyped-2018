@@ -58,11 +58,10 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 
     >You are welcome to use `git commit` without the `-m "<message>"` flag. This will bring up a text editor (likely nano or vim so make sure you know how to use those first). You can write your short commit message on the first line and then a longer description on the next line. The longer description should explain _why_ you did what you did and should be phrased as if it was an email. Don't use this for small and obvious commits.
     
-    ## Do **NOT**
+    ### Do **NOT**
 * Force push (`git push -f`)
 * Squash branches
     
-    ## Getting started
     ### Everyday workflow
     
 * Checkout a feature branch.
