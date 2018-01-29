@@ -94,6 +94,7 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 
 * Start new feature branch. The prefix of the branch should be the standard abbreviation of your subteam (nav, state, etc.)
     ```sh
+    git checkout develop
     git branch -u origin/<subteam-feature> <subteam-feature>
     git checkout <subteam-feature>
     ```
