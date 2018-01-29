@@ -31,6 +31,12 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
     
     _Why:_
     >Because this way all work is done in isolation on a dedicated branch rather than the main branch. It allows you to submit multiple pull requests without confusion. You can iterate without polluting the master branch with potentially unstable, unfinished code. [Read more...](https://www.atlassian.com/git/tutorials/comparing-workflows#feature-branch-workflow)
+    
+* Always use `git pull --rebase` while working in a feature branch
+
+    _Why:_
+    >Because `git pull` (without `--rebase`) would create merge commits which only clutter up the history without providing any useful information.
+
 * Branch out from `develop`
     
     _Why:_
@@ -39,36 +45,29 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 * Never push into `develop` or `master` branch. Make a pull request.
     
     _Why:_
-    > It notifies team members that they have completed a feature. It also enables easy reviews of the code.
+    > It notifies team members that they have completed a feature. It also enables and enforces easy code reviews.
 
-* Update your local `develop` branch and do a rebase before pushing your feature and making a pull request.
-
-    _Why:_
-    > Rebasing will merge in the requested branch (`master` or `develop`) and apply the commits that you have made locally to the top of the history without creating a merge commit (assuming there were no conflicts). Resulting in a nice and clean history. [Read more ...](https://www.atlassian.com/git/tutorials/merging-vs-rebasing)
-
-* Resolve potential conflicts while rebasing and before making a pull request.
 * Delete local and remote feature branches after merging.
     
     _Why:_
     > It will clutter up your list of branches with dead branches. It insures you only ever merge the branch back into (`master` or `develop`) once. Feature branches should only exist while the work is still in progress.
 
 * Before making a pull request, make sure your feature branch builds successfully and passes all tests (including code style checks).
-    
-    _Why:_
-    > You are about to add your code to a stable branch. If your feature-branch tests fail, there is a high chance that your destination branch build will fail too. Additionally, you need to apply code style check before making a pull request. It aids readability and reduces the chance of formatting fixes being mingled in with actual changes.
 
-* Protect your `develop` and `master` branch.
-  
-    _Why:_
-    > It protects your production-ready branches from receiving unexpected and irreversible changes. Read more on [Github](https://help.github.com/articles/about-protected-branches/) and [Bitbucket](https://confluence.atlassian.com/bitbucketserver/using-branch-permissions-776639807.html)
-    
 * Write good commit messages. Write in imperative mood style and capitalise the messages.
+
+    >You are welcome to use `git commit` without the `-m "<message>"` flag. This will bring up a text editor (likely nano or vim so make sure you know how to use those first). You can write your short commit message on the first line and then a longer description on the next line. The longer description should explain _why_ you did what you did and should be phrased as if it was an email. Don't use this for small and obvious commits.
+    
+    ## Do **NOT**
+* Force push (`git push -f`)
+* Squash branches
     
     ## Getting started
+    ### Everyday workflow
     
-* Checkout a new feature branch. The prefix of the branch should be the standard abbreviation of your subteam (nav, state, etc.)
+* Checkout a feature branch.
     ```sh
-    git checkout -b <subteam_feature>
+    git checkout <subteam-feature>
     ```
 * Make changes.
     ```sh
@@ -78,44 +77,34 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 
 * Sync with remote to get changes you have missed.
     ```sh
-    git checkout develop
-    git pull
+    git pull --rebase
     ```
-    
-    _Why:_
-    > This will give you a chance to deal with conflicts on your machine while rebasing (later) rather than creating a pull request that contains conflicts.
-    
-* Update your feature branch with latest changes from develop with rebase or interactive rebase.
-    ```sh
-    git checkout <subteam_feature>
-    git rebase -i --autosquash develop
-    ```
-    
-    _Why:_
-    > You can use --autosquash to squash all your commits to a single commit. Nobody wants many commits for a single feature in develop branch. [Read more...](https://robots.thoughtbot.com/autosquashing-git-commits)
-    
-* If you do not have any conflicts skip this step. If you have conflicts, [resolve them](https://help.github.com/articles/resolving-a-merge-conflict-using-the-command-line/) and continue rebase.
+
+* If you have conflicts, [resolve them](https://help.github.com/articles/resolving-a-merge-conflict-using-the-command-line/) and continue rebase. (Remember **not** to commit.)
     ```sh
     git add <file1> <file2> ...
     git rebase --continue
     ```
-* Push your branch. Rebase will change history, so you'll have to use `-f` to force changes into the remote branch. If someone else is working on your branch, use the less destructive `--force-with-lease`.
+    
+* Push your branch.
     ```sh
-    git push -f
+    git push origin <subteam_feature>
     ```
     
-    _Why:_
-    > When you do a rebase, you are changing the history on your feature branch. As a result, Git will reject normal `git push`. Instead, you'll need to use the -f or --force flag. [Read more...](https://developer.atlassian.com/blog/2015/04/force-with-lease/)
+    ### Start new feature
+
+* Start new feature branch. The prefix of the branch should be the standard abbreviation of your subteam (nav, state, etc.)
+    ```sh
+    git branch -u origin/<subteam-feature> <subteam-feature>
+    git checkout <subteam-feature>
+    ```
     
+    ### Submit completed feature
     
-* Make a pull request.
+* Make a pull request and resolve conflicts.
 * Pull requests will be accepted, merged and closed by a reviewer.
 * Remove your local feature branch if you are done.
 
   ```sh
   git branch -d <subteam_feature>
-  ```
-* To remove all branches which are no longer on remote
-  ```sh
-  git fetch -p && for branch in `git branch -vv | grep ': gone]' | awk '{print $1}'`; do git branch -D $branch; done
   ```
