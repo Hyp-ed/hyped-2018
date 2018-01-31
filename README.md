@@ -90,14 +90,23 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
     git push origin <subteam_feature>
     ```
     
-### Start new feature
+### Start a new feature
 
-* Start new feature branch. The prefix of the branch should be the standard abbreviation of your subteam (nav, state, etc.)
+* Start a new feature branch. The prefix of the branch should be the standard abbreviation of your subteam.
+
     ```sh
     git checkout develop
     git branch -u origin/<subteam-feature> <subteam-feature>
     git checkout <subteam-feature>
     ```
+#### Standard abbreviations
+``mgt`` - Management (Heads)  
+``stm`` - State Machine  
+``nav`` - Navigation  
+``cmn`` - Communications  
+``lib`` - Libraries  
+``mot`` - Motor Control  
+
     
 ### Submit completed feature
     
