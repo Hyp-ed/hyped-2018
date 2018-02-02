@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# AtmelStudio
+.vs/*
+Debug/
+*.componentinfo.xml
+

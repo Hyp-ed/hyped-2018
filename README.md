@@ -87,7 +87,7 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
     
 * Push your branch.
     ```sh
-    git push origin <subteam_feature>
+    git push origin <subteam-feature>
     ```
     
 ### Start a new feature
@@ -96,8 +96,8 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 
     ```sh
     git checkout develop
-    git branch -u origin/<subteam-feature> <subteam-feature>
-    git checkout <subteam-feature>
+    git checkout -b <subteam-feature>
+    git push -u origin <subteam-feature>
     ```
 #### Standard abbreviations
 ``mgt`` - Management (Heads)  
@@ -115,5 +115,5 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 * Remove your local feature branch if you are done.
 
   ```sh
-  git branch -d <subteam_feature>
+  git branch -d <subteam-feature>
   ```
