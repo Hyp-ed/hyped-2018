@@ -27,6 +27,8 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 
 ### Rules
 
+* Always use `git status`. 
+
 * Perform work in a feature branch.
     
     _Why:_
