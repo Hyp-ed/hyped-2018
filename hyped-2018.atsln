@@ -7,6 +7,10 @@ Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "SAMV71_getting_started", "S
 EndProject
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "SAMC21_getting_started", "SAMC21_getting_started\SAMC21_getting_started.cproj", "{B2A6D639-1286-47F2-B570-9614C586E594}"
 EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Hello_SAMV71", "Hello_SAMV71\Hello_SAMV71.cppproj", "{F2A4BC4C-2D87-4952-A1FC-A26435206DA4}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Hello_SAMC21", "Hello_SAMC21\Hello_SAMC21.cppproj", "{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -21,6 +25,14 @@ Global
 		{B2A6D639-1286-47F2-B570-9614C586E594}.Debug|ARM.Build.0 = Debug|ARM
 		{B2A6D639-1286-47F2-B570-9614C586E594}.Release|ARM.ActiveCfg = Release|ARM
 		{B2A6D639-1286-47F2-B570-9614C586E594}.Release|ARM.Build.0 = Release|ARM
+		{F2A4BC4C-2D87-4952-A1FC-A26435206DA4}.Debug|ARM.ActiveCfg = Debug|ARM
+		{F2A4BC4C-2D87-4952-A1FC-A26435206DA4}.Debug|ARM.Build.0 = Debug|ARM
+		{F2A4BC4C-2D87-4952-A1FC-A26435206DA4}.Release|ARM.ActiveCfg = Release|ARM
+		{F2A4BC4C-2D87-4952-A1FC-A26435206DA4}.Release|ARM.Build.0 = Release|ARM
+		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Debug|ARM.ActiveCfg = Debug|ARM
+		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Debug|ARM.Build.0 = Debug|ARM
+		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Release|ARM.ActiveCfg = Release|ARM
+		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Release|ARM.Build.0 = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
