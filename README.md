@@ -32,12 +32,12 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
     _Why:_
     >Because this way all work is done in isolation on a dedicated branch rather than the main branch. It allows you to submit multiple pull requests without confusion. You can iterate without polluting the master branch with potentially unstable, unfinished code. [Read more...](https://www.atlassian.com/git/tutorials/comparing-workflows#feature-branch-workflow)
     
-* Always use `git pull --rebase` while working in a feature branch
+* Always use `git pull --rebase` while working in a feature branch.
 
     _Why:_
     >Because `git pull` (without `--rebase`) would create merge commits which only clutter up the history without providing any useful information.
 
-* Branch out from `develop`
+* Branch out from `develop`.
     
     _Why:_
     >This way, you can make sure that code in master will almost always build without problems.
