@@ -101,13 +101,13 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
     git checkout -b <subteam-feature>
     git push -u origin <subteam-feature>
     ```
-#### Standard abbreviations
-``mgt`` - Management (Heads)  
-``stm`` - State Machine  
-``nav`` - Navigation  
-``cmn`` - Communications  
-``lib`` - Libraries  
-``mot`` - Motor Control  
+    #### Standard abbreviations
+    ``mgt`` - Management (Heads)  
+    ``stm`` - State Machine  
+    ``nav`` - Navigation  
+    ``cmn`` - Communications  
+    ``lib`` - Libraries  
+    ``mot`` - Motor Control  
 
     
 ### Submit completed feature
