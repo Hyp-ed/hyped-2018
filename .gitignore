@@ -36,3 +36,5 @@
 Debug/
 *.componentinfo.xml
 
+# Other rubbish
+.DS_Store
