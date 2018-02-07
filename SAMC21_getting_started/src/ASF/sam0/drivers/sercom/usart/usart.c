@@ -1,48 +1,4 @@
-/**
- * \file
- *
- * \brief SAM SERCOM USART Driver
- *
- * Copyright (C) 2012-2016 Atmel Corporation. All rights reserved.
- *
- * \asf_license_start
- *
- * \page License
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *
- * 3. The name of Atmel may not be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * 4. This software may only be redistributed and used in connection with an
- *    Atmel microcontroller product.
- *
- * THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
- * EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
- * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- * \asf_license_stop
- *
- */
-/*
- * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
- */
+
 #include "usart.h"
 #include <pinmux.h>
 #if USART_CALLBACK_MODE == true
@@ -336,18 +292,7 @@ enum status_code usart_init(
 
 	uint32_t sercom_index = _sercom_get_sercom_inst_index(module->hw);
 	uint32_t pm_index, gclk_index; 
-#if (SAML22) || (SAMC20) 
-	pm_index	= sercom_index + MCLK_APBCMASK_SERCOM0_Pos;
-	gclk_index	= sercom_index + SERCOM0_GCLK_ID_CORE;
-#elif (SAML21) || (SAMR30)
-	if (sercom_index == 5) {
-		pm_index     = MCLK_APBDMASK_SERCOM5_Pos;
-		gclk_index   = SERCOM5_GCLK_ID_CORE;
-	} else {
-		pm_index     = sercom_index + MCLK_APBCMASK_SERCOM0_Pos;
-		gclk_index   = sercom_index + SERCOM0_GCLK_ID_CORE;
-	}
-#elif (SAMC21)
+
 	pm_index	= sercom_index + MCLK_APBCMASK_SERCOM0_Pos;
 	
 	if (sercom_index == 5){
@@ -355,10 +300,6 @@ enum status_code usart_init(
     } else {
     	gclk_index	= sercom_index + SERCOM0_GCLK_ID_CORE;
     }
-#else
-	pm_index     = sercom_index + PM_APBCMASK_SERCOM0_Pos;
-	gclk_index   = sercom_index + SERCOM0_GCLK_ID_CORE;
-#endif
 
 	if (usart_hw->CTRLA.reg & SERCOM_USART_CTRLA_SWRST) {
 		/* The module is busy resetting itself */
@@ -370,17 +311,7 @@ enum status_code usart_init(
 		return STATUS_ERR_DENIED;
 	}
 
-	/* Turn on module in PM */
-#if (SAML21) || (SAMR30)
-	if (sercom_index == 5) {
-		system_apb_clock_set_mask(SYSTEM_CLOCK_APB_APBD, 1 << pm_index);
-	} else {
-		system_apb_clock_set_mask(SYSTEM_CLOCK_APB_APBC, 1 << pm_index);	
-	}
-#else
 	system_apb_clock_set_mask(SYSTEM_CLOCK_APB_APBC, 1 << pm_index);
-#endif
-
 	/* Set up the GCLK for the module */
 	struct system_gclk_chan_config gclk_chan_conf;
 	system_gclk_chan_get_config_defaults(&gclk_chan_conf);

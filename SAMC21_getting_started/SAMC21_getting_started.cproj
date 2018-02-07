@@ -20,10 +20,10 @@
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
     <ProgFlashFromRam>true</ProgFlashFromRam>
-    <RamSnippetAddress />
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
     <UncachedRange />
     <preserveEEPROM>true</preserveEEPROM>
-    <OverrideVtorValue />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
@@ -624,9 +624,6 @@
     <Folder Include="src\config\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\asf.h">
-      <SubType>compile</SubType>
-    </None>
     <None Include="src\config\conf_board.h">
       <SubType>compile</SubType>
     </None>
