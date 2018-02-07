@@ -11,6 +11,8 @@ Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Hello_SAMV71", "Hello_SAMV7
 EndProject
 Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "Hello_SAMC21", "Hello_SAMC21\Hello_SAMC21.cppproj", "{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}"
 EndProject
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "I2C_SAMC21", "I2C_UNIT_TEST1\I2C_SAMC21.cproj", "{CB785E30-B64F-4DFE-857B-02EEA8FAAED8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -33,6 +35,10 @@ Global
 		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Debug|ARM.Build.0 = Debug|ARM
 		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Release|ARM.ActiveCfg = Release|ARM
 		{9D95F9EE-DA4E-4C50-92FF-64B5E59AD271}.Release|ARM.Build.0 = Release|ARM
+		{CB785E30-B64F-4DFE-857B-02EEA8FAAED8}.Debug|ARM.ActiveCfg = Debug|ARM
+		{CB785E30-B64F-4DFE-857B-02EEA8FAAED8}.Debug|ARM.Build.0 = Debug|ARM
+		{CB785E30-B64F-4DFE-857B-02EEA8FAAED8}.Release|ARM.ActiveCfg = Release|ARM
+		{CB785E30-B64F-4DFE-857B-02EEA8FAAED8}.Release|ARM.Build.0 = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
