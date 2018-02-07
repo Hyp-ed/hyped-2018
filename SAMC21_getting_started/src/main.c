@@ -1,5 +1,5 @@
-#include "asf.h"
-#include "stdio_serial.h"
+
+#include "usart.h"
 #include "conf_uart_serial.h"
 
 #ifdef __cplusplus
@@ -23,32 +23,36 @@ static void configure_console(void)
 	usart_conf.pinmux_pad3 = CONF_STDIO_PINMUX_PAD3;
 	usart_conf.baudrate    = CONF_STDIO_BAUDRATE;
 
-	stdio_serial_init(&cdc_uart_module, CONF_STDIO_USART_MODULE, &usart_conf);
+	//usart_serial_init(&cdc_uart_module, CONF_STDIO_USART_MODULE, &usart_conf);
+	usart_init(&cdc_uart_module, CONF_STDIO_USART_MODULE, &usart_conf);
 	usart_enable(&cdc_uart_module);
 }
 
+void write(const char* data, uint8_t len);
+void write(const char* data, uint8_t len) {
+	for (int i=0; i<len; i++) {
+		while(STATUS_OK !=usart_write_wait(&cdc_uart_module, data[i]));
+	}
+}
 
 int main(void)
 {
-	struct port_config pin;
 	system_init();
 	/*Configure UART console.*/
 	configure_console();
 	/*Initialize the delay driver*/
-	delay_init();
-	/* Output example information */
-	puts("Starting up\r\n");
-	/*Configures PORT for LED0*/
-	port_get_config_defaults(&pin);
-	pin.direction = PORT_PIN_DIR_OUTPUT;
-	port_pin_set_config(LED0_PIN, &pin);
-	port_pin_set_output_level(LED0_PIN, LED0_INACTIVE);
-
+	write("Hello world\r\n",13);
 	/*main loop*/
+	
+	uint count = 0;
 	while(1) {
-		puts("hello world! stay hyped\r");
-		delay_s(1);
-		port_pin_toggle_output_level(LED0_PIN);
+		char c = '0' + (count%10);
+		count++;
+		write(&c, 1);
+		write("\r\n",2);
+		write("stay hyped\r\n", 12);
+		
+		for (int i=0; i<1000000; i++);
 	}
 }
 
