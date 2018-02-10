@@ -7,13 +7,13 @@
 
 
 #include "sam.h"
-
+#include "i2c/i2c.hpp"
 
 int main(void)
 {
     /* Initialize the SAM system */
     SystemInit();
-
+	i2c::Driver device1 = i2c::Driver();
     /* Replace with your application code */
     while (1) 
     {
