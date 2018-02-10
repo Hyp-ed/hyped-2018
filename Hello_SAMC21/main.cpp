@@ -5,7 +5,6 @@
  * Author : martin
  */ 
 
-
 #include "sam.h"
 #include "i2c/i2c.hpp"
 
