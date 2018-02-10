@@ -29,7 +29,12 @@ struct Context {
 
 class Driver {
 public:
-	void Configure();
+	void Configure(Context* ctx){} // Set up hardware controller parameters, make connection ready
+	void Configure_channels(Channel *channels, int len){} // Register continuous periodic communication channels
+	void Control(){} // Called in while loop to update devices and do channel communications
+	void DirectComn(uint8_t addr, Packet& packet) {}
+private:
+	Context* ctx_;
 };
 	
 }
