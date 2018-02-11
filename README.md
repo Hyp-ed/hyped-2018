@@ -1,4 +1,4 @@
-[![Build](https://img.shields.io/travis/rust-lang/rust.svg)]()
+[![Build](https://travis-ci.org/Hyp-ed/hyped-2018.svg?branch=develop)]()
 
 <p align="center">
   <img src="./logo.png"  />
