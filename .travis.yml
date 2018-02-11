@@ -1,7 +1,5 @@
 language: cpp
 compiler:
-  - clang
   - gcc
- script : 
+ before_script : 
  - cd BeagleBone_black
- - g++ main.cpp -o main
