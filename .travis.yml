@@ -4,3 +4,7 @@ compiler:
 script : 
 - cd BeagleBone_black
 - g++ main.cpp -o main
+notifications:
+ slack:
+   rooms:
+     - hypedunlimited:M4b0wIeS08PAzYYDcJpHCi0d#tech-software
