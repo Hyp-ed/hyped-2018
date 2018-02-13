@@ -111,11 +111,7 @@ For our project we are using the [Gitflow](http://nvie.com/posts/a-successful-gi
 
     
 ### Submit completed feature
-
-* Rebase your feature branch from `develop`.
-  ```sh
-  git rebase develop
-  ```    
+   
 * Make a pull request and resolve conflicts.
 * Pull requests will be accepted, merged and closed by a reviewer.
 * Remove your local feature branch if you are done.
