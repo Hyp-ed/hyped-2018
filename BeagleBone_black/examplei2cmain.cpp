@@ -33,12 +33,12 @@ int example_main(void)
   i2c::Channel inputs[10]; // This should be further initialised
   device1.Configure_channels(inputs, 10); // Requires no communications, purely registration in software. 
   
-    while (1) 
-    {
-    device1.Control();
-    // It is suggested that in the while loop the health
-    // of the I2C connection is monitored by checking error counters and statuses
-    // Meanwhile, Control() will be automatically running communications
-    // and calling callback functions to make aware of new results
-    }
+  while (1) 
+  {
+  device1.Control();
+  // It is suggested that in the while loop the health
+  // of the I2C connection is monitored by checking error counters and statuses
+  // Meanwhile, Control() will be automatically running communications
+  // and calling callback functions to make aware of new results
+  }
 }

@@ -41,30 +41,69 @@ struct Context {
 
 
 class Driver {
-public:
-  // Init Functions:
-  void Configure(Context* ctx){} // Set up hardware controller parameters, make connection ready, copy ctx into here
-  void Configure_channels(Channel *channels, int len){} // Register continuous periodic communication channels
+ public:
+  /**
+   * @brief      Configure library with channel-agnostic data. Setup hardware
+   *             controller parameters. Make I2C hardware ready.
+   *
+   * @param      ctx   Configuration context
+   */
+  void Configure(Context* ctx) { ctx_ = ctx; }
+
+  /**
+   * @brief      Register continuous periodic communication channels.
+   *
+   * @param      channels  pointer to an array of communication channels
+   * @param[in]  len       number of channels in the array
+   */
+  void Configure_channels(Channel *channels, int len) {
+    activated_channels_ = channels;
+    channel_number_      = len;
+  }
   
-  void Control(){} // Called in while loop to update devices and cycle channel communications
+  /**
+   * @brief      Periodically called routine to handle channel manipulations
+   */
+  void Control() { /* EMPTY */ } 
   
-  // DirectWrite does a blocking write operation. It writes data from the writebuffer and returns
-  // a status. This is to be defined but suggested 0 for success, -1 for writing failure and -2 for bus busy.
-  // This function is not to be used by end-user but most likely in setup phase in initialise_slaves()
+  /**
+   * @brief      Blocking write operation. Can be used to initialise slave devices.
+   *
+   * @param[in]  addr         I2C slave address
+   * @param      writebuffer  data buffer pointer
+   * @param[in]  len          number of bytes to write
+   *
+   * @return     success status
+   */
   int DirectWrite(uint8_t addr, char* writebuffer, int len) { return 0; }
-  // DirectRead is similarly defined and has same behaviour
+  
+  /**
+   * @brief      Blocking read operation. Can be used to initialise slave devices.
+   *
+   * @param[in]  addr         I2C slave address
+   * @param      writebuffer  data buffer pointer
+   * @param[in]  len          number of bytes to read
+   *
+   * @return     success status
+   */
   int DirectRead(uint8_t addr, char* readbuffer, int len) { return 0; }
-private:
-  Context* ctx_; // Contains device settings
-  Channel* activated_channels; // Pointer to array with all channels to be used
-  int channel_number; // Number of elements in activated_channels
-  void do_communication(Channel* message); // This function will execute a single communication as specified
-  // Furthermore it will increment counters, set appropriate error bytes, call callbackfunction
-  void cycle_channels(); // This will cycle through all current activated channels
-  // with do_communication and run if necessary.
+
+ private:
+  /**
+   * @brief      Handle communication of I2C packet corresponding to one channel.
+   *
+   * @param      message  pointer to the corresponding channel
+   */
+  void do_communication(Channel* message);
+
+// -----------------------------------------------------------------------------
+ private:
+  Context* ctx_;
+  Channel* activated_channels_;
+  int channel_number_;
 };
   
-}
+}   // namespace i2c
 
 
 #endif /* I2C_HPP_ */
