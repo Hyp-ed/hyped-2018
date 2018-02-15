@@ -1,8 +1,23 @@
+
 /*
- * examplei2cmain.cpp
+ * Authors : M. Kristien, E. van Woerkom
+ * Organisation: HYPED
+ * Date: 3. February 2018
+ * Description:
  *
- * Created: 03/02/2018 11:56:25
- * Author : M. Kristien, E. van Woerkom
+ *    Copyright 2018 HYPED
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
  * This is an example of how a main function using I2C would look like
  */ 
 
@@ -11,19 +26,19 @@
 #include "i2c/i2c.hpp"
 
 void initialise_slaves(i2c::Driver &instance) {
-/* What this does is slave dependent, suggested for VL6180X:
-Turn on/off GPIO pins to boot
-Set registers to continuous operation mode with given frequency
-Get test values to establish working
-*/
+  /* What this does is slave dependent, suggested for VL6180X:
+  Turn on/off GPIO pins to boot
+  Set registers to continuous operation mode with given frequency
+  Get test values to establish working
+  */
 }
 
 int example_main(void)
 {
-    /* Initialize the SAM system */
-    SystemInit();
+  /* Initialize the SAM system */
+  SystemInit();
   i2c::Driver device1 = i2c::Driver();
-    /* Replace with your application code */
+  /* Replace with your application code */
   
   // Set up context for driver configuration:
   i2c::Context device1_settings; // Must be filled appropriately
@@ -35,10 +50,10 @@ int example_main(void)
   
   while (1) 
   {
-  device1.Control();
-  // It is suggested that in the while loop the health
-  // of the I2C connection is monitored by checking error counters and statuses
-  // Meanwhile, Control() will be automatically running communications
-  // and calling callback functions to make aware of new results
+    device1.Control();
+    // It is suggested that in the while loop the health
+    // of the I2C connection is monitored by checking error counters and statuses
+    // Meanwhile, Control() will be automatically running communications
+    // and calling callback functions to make aware of new results
   }
 }

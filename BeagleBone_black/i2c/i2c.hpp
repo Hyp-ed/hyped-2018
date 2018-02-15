@@ -1,13 +1,27 @@
+
 /*
- * i2c.hpp
- *
- * Created: 10/02/2018 10:18:58
  * Authors: M. Kristien, E. van Woerkom
+ * Organisation: HYPED
+ * Date: 10. February 2018
+ * Description:
+ *
+ *    Copyright 2018 HYPED
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */ 
 
 
-#ifndef I2C_HPP_
-#define I2C_HPP_
+#ifndef BEAGLEBONE_BLACK_I2C_I2C_HPP_ 
+#define BEAGLEBONE_BLACK_I2C_I2C_HPP_ 
 
 namespace i2c {
 
@@ -15,19 +29,22 @@ struct Channel;
 struct Context;
 class Driver;
 
-// Single instance of R/W periodic communications channel with a slave i2c device
+// Single instance of R/W periodic communications channel with a slave i2c dev
 struct Channel {
   uint8_t address;
   char direction;
   // 3 direction possibilities: W(rite), R(ead), G(et),
   // with get being a write-read operation to retrieve register data,
   // read is most likely never used, get often.
-  char* readbuffer, writebuffer; // Pointers to be left null if no read or write takes place
-  int readbuflength, writebuflength;
+  char* readbuffer;
+  char* writebuffer;
+  int readbuflength;
+  int writebuflength;
   int period; // Number of microseconds to wait to start a new reading
-  int* status; // If something goes wrong, this must be set using || (or) so as not to remove unreseted errors
-  int* error_counter, success_counter; // To be incremented after every failure and success
-  void *callbackfunction(Channel* current_channel, Driver current_device);
+  int* status;
+  int* error_counter;
+  int* success_counter;
+  void (*callback)(Channel* current_channel, Driver current_device);
   // The above callbackfunction is called after every operation in this channel
 };
 
@@ -48,7 +65,7 @@ class Driver {
    *
    * @param      ctx   Configuration context
    */
-  void Configure(Context* ctx) { ctx_ = ctx; }
+  void configure(Context* ctx) { ctx_ = ctx; }
 
   /**
    * @brief      Register continuous periodic communication channels.
@@ -56,7 +73,7 @@ class Driver {
    * @param      channels  pointer to an array of communication channels
    * @param[in]  len       number of channels in the array
    */
-  void Configure_channels(Channel *channels, int len) {
+  void configureChannels(Channel *channels, int len) {
     activated_channels_ = channels;
     channel_number_      = len;
   }
@@ -64,7 +81,7 @@ class Driver {
   /**
    * @brief      Periodically called routine to handle channel manipulations
    */
-  void Control() { /* EMPTY */ } 
+  void control() { /* EMPTY */ } 
   
   /**
    * @brief      Blocking write operation. Can be used to initialise slave devices.
@@ -75,7 +92,7 @@ class Driver {
    *
    * @return     success status
    */
-  int DirectWrite(uint8_t addr, char* writebuffer, int len) { return 0; }
+  int directWrite(uint8_t addr, char* writebuffer, int len) { return 0; }
   
   /**
    * @brief      Blocking read operation. Can be used to initialise slave devices.
@@ -86,7 +103,7 @@ class Driver {
    *
    * @return     success status
    */
-  int DirectRead(uint8_t addr, char* readbuffer, int len) { return 0; }
+  int directRead(uint8_t addr, char* readbuffer, int len) { return 0; }
 
  private:
   /**
@@ -94,10 +111,8 @@ class Driver {
    *
    * @param      message  pointer to the corresponding channel
    */
-  void do_communication(Channel* message);
+  void doCommunication(Channel* message);
 
-// -----------------------------------------------------------------------------
- private:
   Context* ctx_;
   Channel* activated_channels_;
   int channel_number_;
@@ -106,4 +121,4 @@ class Driver {
 }   // namespace i2c
 
 
-#endif /* I2C_HPP_ */
+#endif  /* BEAGLEBONE_BLACK_I2C_I2C_HPP_  */
