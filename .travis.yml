@@ -7,4 +7,4 @@ script :
 notifications:
  slack:
    rooms:
-     - hypedunlimited:M4b0wIeS08PAzYYDcJpHCi0d#tech-software
+     - hypedunlimited:M4b0wIeS08PAzYYDcJpHCi0d#tech-software-repo
