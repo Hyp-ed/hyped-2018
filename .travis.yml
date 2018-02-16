@@ -1,7 +1,11 @@
 language: cpp
 compiler:
 - gcc
+env:
+- ARCH=x64
+- ARCH=arm
 script : 
+- "bash -ex .travis-ci.sh"
 - cd BeagleBone_black
 - g++ main.cpp -o main
 notifications:
