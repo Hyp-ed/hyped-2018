@@ -37,7 +37,7 @@ int example_main(void)
   /* Replace with your application code */
   
   // Set up context for driver configuration:
-  i2c::Context device1_settings; // Must be filled appropriately
+  i2c::Context device1_settings;  // Must be filled appropriately
   
   device1.configure(&device1_settings);     // Performs no I2C operations but will interact with controller hardware
   initialiseSlaves(device1);       // Will perform real I2C operations, will take some time to run to setup VL6180X
