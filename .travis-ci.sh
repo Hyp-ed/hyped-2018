@@ -13,7 +13,7 @@ HOST_DEPENDENCIES="debootstrap qemu-user-static binfmt-support sbuild"
 GUEST_DEPENDENCIES="build-essential git m4 sudo python"
 
 # Command used to run the tests
-TEST_COMMAND="make test"
+TEST_COMMAND="cd BeagleBone_black && g++ main.cpp -o main"
 
 function setup_arm_chroot {
     # Host dependencies
