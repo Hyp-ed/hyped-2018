@@ -3,7 +3,8 @@
  * Authors : M. Kristien, E. van Woerkom
  * Organisation: HYPED
  * Date: 3. February 2018
- * Description:
+ * Description: 
+ * This is an example of how a main function using I2C would look like
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,8 +18,6 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
- *
- * This is an example of how a main function using I2C would look like
  */ 
 
 
@@ -43,10 +42,10 @@ int example_main(void)
   // Set up context for driver configuration:
   i2c::Context device1_settings; // Must be filled appropriately
   
-  device1.Configure(&device1_settings); // Performs no I2C operations but will interact with controller hardware
-  initialise_slaves(device1); // Will perform real I2C operations, will take some time to run to setup VL6180X
-  i2c::Channel inputs[10]; // This should be further initialised
-  device1.Configure_channels(inputs, 10); // Requires no communications, purely registration in software. 
+  device1.Configure(&device1_settings);     // Performs no I2C operations but will interact with controller hardware
+  initialise_slaves(device1);       // Will perform real I2C operations, will take some time to run to setup VL6180X
+  i2c::Channel inputs[10];          // This should be further initialised
+  device1.Configure_channels(inputs, 10);   // Requires no communications, purely registration in software. 
   
   while (1) 
   {

@@ -40,7 +40,7 @@ struct Channel {
   char* writebuffer;
   int readbuflength;
   int writebuflength;
-  int period; // Number of microseconds to wait to start a new reading
+  int period;   // Number of microseconds to wait to start a new reading
   int* status;
   int* error_counter;
   int* success_counter;
