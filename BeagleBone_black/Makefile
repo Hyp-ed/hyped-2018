@@ -14,6 +14,10 @@ OBJS := $(SRCS:.cpp=.o)
 SRCS := $(patsubst %,$(SRCS_DIR)/%,$(SRCS))
 OBJS := $(patsubst %,$(OBJS_DIR)/%,$(OBJS))
 
+DEPDIR := $(OBJS_DIR)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+
+
 ifndef VERBOSE
 	Verb := @
 endif
@@ -30,7 +34,7 @@ $(TARGET): $(OBJS)
 $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	$(Echo) "Compiling $<"
 	$(Verb) mkdir -p $(dir $@)
-	$(Verb) $(CC) -o $@ -c $<
+	$(Verb) $(CC) $(DEPFLAGS) -o $@ -c $<
 
 
 clean:
