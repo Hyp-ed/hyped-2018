@@ -3,6 +3,7 @@
 # define VERBOSE to see executed commands
 CC:=g++
 LL:=g++
+TARGET=hyped
 SRCS_DIR:=src
 OBJS_DIR:=bin
 TOP:=$(shell pwd)
@@ -19,9 +20,9 @@ endif
 Echo := $(Verb)echo
 
 
-all: hyped
+all: $(TARGET)
 
-hyped: $(OBJS)
+$(TARGET): $(OBJS)
 	$(Echo) "Linking executable $>"
 	$(Verb) $(LL) -o $@ $(OBJS)
 
@@ -33,7 +34,8 @@ $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 
 
 clean:
-	$(Verb) rm -r $(OBJS_DIR)/*
+	$(Verb) rm -rf $(OBJS_DIR)/*
+	$(Verb) rm $(TARGET)
 
 define echo_var
 	@echo $(1) = $($1)
