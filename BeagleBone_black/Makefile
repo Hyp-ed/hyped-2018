@@ -25,7 +25,7 @@ endif
 Echo := $(Verb)echo
 
 
-all: $(TARGET)
+all: lint $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(Echo) "Linking executable $>"
@@ -37,10 +37,13 @@ $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	$(Verb) mkdir -p $(dir $@)
 	$(Verb) $(CC) $(DEPFLAGS) -o $@ -c $(INC_DIR) $<
 
+lint:
+	$(Verb) python utils/Lint/presubmit.py
 
 clean:
 	$(Verb) rm -rf $(OBJS_DIR)/*
 	$(Verb) rm -f $(TARGET)
+	$(Verb) rm -f $(SRCS_DIR)/.cpplint-cache
 
 define echo_var
 	@echo $(1) = $($1)

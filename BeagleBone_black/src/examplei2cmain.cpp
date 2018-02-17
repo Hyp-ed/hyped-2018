@@ -5,7 +5,7 @@
  * Date: 3. February 2018
  * Description: 
  * This is an example of how a main function using I2C would look like
- *
+ * 
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
