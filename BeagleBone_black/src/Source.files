@@ -1,0 +1,9 @@
+
+# Makefile include defining variable SRCS containing list of all source files
+
+SRCS := \
+  main.cpp \
+  state_machine/hyped-machine.cpp \
+  state_machine/machine-states.cpp \
+
+
