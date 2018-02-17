@@ -43,7 +43,7 @@ lint:
 clean:
 	$(Verb) rm -rf $(OBJS_DIR)/*
 	$(Verb) rm -f $(TARGET)
-	$(Verb) rm -f $(SRCS_DIR)/.cpplint-cache
+	$(Verb) rm -f .cpplint-cache
 
 define echo_var
 	@echo $(1) = $($1)
