@@ -1,3 +1,4 @@
+sudo: required
 language: bash
 services:
 - docker
@@ -13,11 +14,10 @@ script:
 - docker build -t au/test .
 - docker run -it au/test uname -a
 
-  notifications:
-    slack:
-      rooms:
+notifications:
+  slack:
+    rooms:
         - hypedunlimited:M4b0wIeS08PAzYYDcJpHCi0d#tech-software-repo
    
    
-        sudo: required
    
