@@ -13,6 +13,7 @@ before_script:
 script:
 - docker build -t au/test .
 - docker run -it au/test uname -a
+- docker run -it au/test g++ BeagleBone_black/main.cpp -o main
 
 notifications:
   slack:
