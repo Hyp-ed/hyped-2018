@@ -19,7 +19,7 @@
  *    limitations under the License.
  */
 
-#include "hyped-machine.hpp"
+#include "state_machine/hyped-machine.hpp"
 #include <iostream>
 
 HypedMachine::HypedMachine() : current_state(new Idle()) {

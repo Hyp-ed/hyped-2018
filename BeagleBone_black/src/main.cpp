@@ -1,9 +1,10 @@
 
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Authors : HYPED
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 3. February 2018
  * Description:
+ * This is the main executable for BeagleBone pod node
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,20 +20,9 @@
  *    limitations under the License.
  */
 
-#pragma once
+#include <iostream>
 
-#include "event.hpp"
-#include "machine-states.hpp"
-
-class State;
-class HypedMachine {
-  friend class State;
-
- public:
-  HypedMachine();
-  void handleEvent(Event event);
-  void transition(State *state);
-
- private:
-  State *current_state;
-};
+int main() {
+  std::cout << "Starting BeagleBone Black..." << std::endl;
+  return 0;
+}

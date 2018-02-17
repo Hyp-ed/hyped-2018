@@ -20,11 +20,11 @@
  */
 
 #include <iostream>
-#include "event.hpp"
-#include "hyped-machine.cpp"
-#include "machine-states.cpp"
+#include "state_machine/event.hpp"
+#include "state_machine/hyped-machine.hpp"
+#include "state_machine/machine-states.hpp"
 
-int main() {
+int stateMachineMain() {
   HypedMachine hypedMachine;
   hypedMachine.handleEvent(kOnStart);
   hypedMachine.handleEvent(kMaxDistanceReached);
