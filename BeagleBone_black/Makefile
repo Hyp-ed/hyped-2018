@@ -14,8 +14,9 @@ OBJS := $(SRCS:.cpp=.o)
 SRCS := $(patsubst %,$(SRCS_DIR)/%,$(SRCS))
 OBJS := $(patsubst %,$(OBJS_DIR)/%,$(OBJS))
 
-DEPDIR := $(OBJS_DIR)
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
+DEP_DIR := $(OBJS_DIR)
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
+INC_DIR := -I$(SRCS_DIR)
 
 
 ifndef VERBOSE
@@ -34,12 +35,12 @@ $(TARGET): $(OBJS)
 $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	$(Echo) "Compiling $<"
 	$(Verb) mkdir -p $(dir $@)
-	$(Verb) $(CC) $(DEPFLAGS) -o $@ -c $<
+	$(Verb) $(CC) $(DEPFLAGS) -o $@ -c $(INC_DIR) $<
 
 
 clean:
 	$(Verb) rm -rf $(OBJS_DIR)/*
-	$(Verb) rm $(TARGET)
+	$(Verb) rm -f $(TARGET)
 
 define echo_var
 	@echo $(1) = $($1)

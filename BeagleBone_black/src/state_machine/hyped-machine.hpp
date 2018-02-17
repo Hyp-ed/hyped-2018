@@ -21,8 +21,8 @@
 
 #pragma once
 
-#include "event.hpp"
-#include "machine-states.hpp"
+#include "state_machine/event.hpp"
+#include "state_machine/machine-states.hpp"
 
 class State;
 class HypedMachine {

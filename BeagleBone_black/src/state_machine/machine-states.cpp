@@ -19,7 +19,7 @@
  *    limitations under the License.
  */
 
-#include "machine-states.hpp"
+#include "state_machine/machine-states.hpp"
 #include <iostream>
 
 void Idle::react(HypedMachine &machine, Event event) {

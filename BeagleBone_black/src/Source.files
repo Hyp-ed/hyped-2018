@@ -5,5 +5,7 @@ SRCS := \
   main.cpp \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
+  state_machine/main.cpp \
+  examplei2cmain.cpp \
 
 
