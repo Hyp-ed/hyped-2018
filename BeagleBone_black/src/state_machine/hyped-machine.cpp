@@ -22,6 +22,9 @@
 #include "state_machine/hyped-machine.hpp"
 #include <iostream>
 
+namespace hyped {
+namespace state_machine {
+
 HypedMachine::HypedMachine() : current_state(new Idle()) {
   current_state->entry();
 }
@@ -38,3 +41,5 @@ void HypedMachine::transition(State *state) {
   current_state->entry();
   // delete prevState;
 }
+
+}}   // namespace hyped::state_machine

@@ -52,6 +52,7 @@ from subprocess import PIPE
 
 # Disabled LINT rules and reason.
 # readability/streams: are we using streams?
+# runtime/references: too many errors, somebody should look at the uses of reference
 
 ENABLED_LINT_RULES = """
 build/class
@@ -84,7 +85,6 @@ runtime/mutex
 runtime/nonconf
 runtime/printf
 runtime/printf_format
-runtime/references
 runtime/rtti
 runtime/sizeof
 runtime/string

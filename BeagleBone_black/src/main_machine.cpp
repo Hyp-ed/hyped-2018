@@ -24,7 +24,9 @@
 #include "state_machine/hyped-machine.hpp"
 #include "state_machine/machine-states.hpp"
 
-int stateMachineMain() {
+using namespace hyped::state_machine;
+
+int main() {
   HypedMachine hypedMachine;
   hypedMachine.handleEvent(kOnStart);
   hypedMachine.handleEvent(kMaxDistanceReached);
