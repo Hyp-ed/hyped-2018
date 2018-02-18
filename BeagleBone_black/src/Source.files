@@ -2,5 +2,6 @@
 # Makefile include defining variable SRCS containing list of all source files
 
 SRCS := \
+  data/data.cpp \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \

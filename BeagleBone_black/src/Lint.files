@@ -1,6 +1,8 @@
 main.cpp
 main_i2c.cpp
 main_machine.cpp
+data/data.cpp
+data/data.hpp
 state_machine/event.hpp
 state_machine/hyped-machine.cpp
 state_machine/hyped-machine.hpp
