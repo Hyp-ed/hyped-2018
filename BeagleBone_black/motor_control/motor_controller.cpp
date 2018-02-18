@@ -22,7 +22,8 @@
 #include "motor_controller.hpp"
 #include <iostream>
 
-MotorController::MotorController() {
+MotorController::MotorController() 
+{
   motor = new Motor();
   // Variables for testing
   rpm = 0;
@@ -33,14 +34,16 @@ MotorController::MotorController() {
 /**
   *  @brief  { Establish CAN connections with motor controllers }
   */
-void MotorController::setupMotors() {
+void MotorController::setupMotors() 
+{
   std::cout << "CAN connections established" << std::endl;
 }
 
 /**
   *  @brief  { Will accelerate motors until maximum acceleration distance is reached }
   */
-void MotorController::accelerateMotors() {
+void MotorController::accelerateMotors() 
+{
   // Current distance will be continuosly read from shared data structure
   while(current_distance <= 500) {
     // Read translational velocity from shared data structure
@@ -55,7 +58,8 @@ void MotorController::accelerateMotors() {
 /**
   *  @brief  { Will decelerate motors until total distance is reached }
   */
-void MotorController::decelerateMotors() {
+void MotorController::decelerateMotors() 
+{
   while(current_distance <= 1000) {
     // Read translational velocity from shared data structure
     rpm = calculateDecelerationRPM(translational_velocity);
@@ -66,7 +70,8 @@ void MotorController::decelerateMotors() {
   }
 }
 
-void MotorController::stopMotors() {
+void MotorController::stopMotors() 
+{
   motor->setSpeed(0);
   std::cout << "Motors stopped" << std::endl;
 }
@@ -79,7 +84,8 @@ void MotorController::stopMotors() {
   *
   *  @return  { Acceleration RPM calculation of type int }
   */
-int MotorController::calculateAccelerationRPM(double translational_velocity) {
+int MotorController::calculateAccelerationRPM(double translational_velocity) 
+{
   //dummy calculation to increase rpm
   return rpm += 1000;
 }
@@ -92,7 +98,8 @@ int MotorController::calculateAccelerationRPM(double translational_velocity) {
   *
   *  @return  { Deceleration RPM calculation of type int }
   */
-int MotorController::calculateDecelerationRPM(double translational_velocity) {
+int MotorController::calculateDecelerationRPM(double translational_velocity) 
+{
   //dummy function to decrease rpm
   return rpm -= 1000;
 }

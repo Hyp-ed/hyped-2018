@@ -18,23 +18,26 @@
  *    limitations under the License.
  */
 
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
+
 #include "motor.hpp"
 
 class MotorController {
-
-  public:
-    MotorController();
-    void setupMotors();
-    void accelerateMotors();
-    void decelerateMotors();
-    void stopMotors();
-    int calculateAccelerationRPM(double translational_velocity);
-    int calculateDecelerationRPM(double translational_velocity);
-
-  private:
-    Motor* motor;
-    // these are temporary variables for testing only
-    int rpm;
-    int current_distance;
-    int translational_velocity;
+ public:
+   MotorController();
+   void setupMotors();
+   void accelerateMotors();
+   void decelerateMotors();
+   void stopMotors();
+   int calculateAccelerationRPM(double translational_velocity);
+   int calculateDecelerationRPM(double translational_velocity);
+ private:
+   Motor* motor;
+   // these are temporary variables for testing only
+   int rpm;
+   int current_distance;
+   int translational_velocity;
 };
+
+#endif /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_ */

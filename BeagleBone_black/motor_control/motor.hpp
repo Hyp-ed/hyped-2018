@@ -18,11 +18,13 @@
  *    limitations under the License.
  */
 
- 
-#pragma once
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
 
 class Motor {
-  public:
-    Motor();
-    void setSpeed(int rpm);
+ public:
+  Motor();
+  void setSpeed(int rpm);
 };
+
+#endif /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_ */
