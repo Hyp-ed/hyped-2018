@@ -23,6 +23,8 @@
 #include <stdint.h>
 #include "i2c/i2c.hpp"
 
+using namespace hyped;
+
 void initialiseSlaves(i2c::Driver &instance) {
   /* What this does is slave dependent, suggested for VL6180X:
   Turn on/off GPIO pins to boot
