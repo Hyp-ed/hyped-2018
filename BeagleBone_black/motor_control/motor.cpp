@@ -18,8 +18,11 @@
  *    limitations under the License.
  */
 
-#include "motor.hpp"
+#include "motor_control/motor.hpp"
 #include <iostream>
+
+using namespace hyped {
+using namespace motor_control {
 
 Motor::Motor() 
 {
@@ -33,3 +36,5 @@ void Motor::setSpeed(int rpm)
 {
   std::cout << "RPM: " << rpm << std::endl;
 }
+
+}} // namespace hyped::motor_control

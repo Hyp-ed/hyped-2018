@@ -21,23 +21,29 @@
 #ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 
-#include "motor.hpp"
+#include "motor_control/motor.hpp"
+
+using namespace hyped {
+using namespace motor_control {
 
 class MotorController {
  public:
-   MotorController();
-   void setupMotors();
-   void accelerateMotors();
-   void decelerateMotors();
-   void stopMotors();
-   int calculateAccelerationRPM(double translational_velocity);
-   int calculateDecelerationRPM(double translational_velocity);
+  MotorController();
+  void setupMotors();
+  void accelerateMotors();
+  void decelerateMotors();
+  void stopMotors();
+  int calculateAccelerationRPM(double translational_velocity);
+  int calculateDecelerationRPM(double translational_velocity);
+
  private:
-   Motor* motor;
-   // these are temporary variables for testing only
-   int rpm;
-   int current_distance;
-   int translational_velocity;
+  Motor* motor;
+  // these are temporary variables for testing only
+  int rpm;
+  int current_distance;
+  int translational_velocity;
 };
+
+}} // namespace hyped::motor_control
 
 #endif /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_ */

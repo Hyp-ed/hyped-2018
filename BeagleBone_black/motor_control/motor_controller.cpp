@@ -18,9 +18,12 @@
  *    limitations under the License.
  */
 
-#include "motor.hpp"
-#include "motor_controller.hpp"
+#include "motor_control/motor.hpp"
+#include "motor_control/motor_controller.hpp"
 #include <iostream>
+
+using namespace hyped {
+using namespace motor_control {
 
 MotorController::MotorController() 
 {
@@ -103,3 +106,5 @@ int MotorController::calculateDecelerationRPM(double translational_velocity)
   //dummy function to decrease rpm
   return rpm -= 1000;
 }
+
+}} //namespace hyped::motor_control
