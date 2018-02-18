@@ -4,11 +4,13 @@
 CC:=g++
 LL:=g++
 TARGET=hyped
+MAIN=main.cpp
 SRCS_DIR:=src
 OBJS_DIR:=bin
 TOP:=$(shell pwd)
 
 include $(SRCS_DIR)/Source.files
+SRCS := $(SRCS) $(MAIN)
 OBJS := $(SRCS:.cpp=.o)
 
 SRCS := $(patsubst %,$(SRCS_DIR)/%,$(SRCS))
