@@ -18,14 +18,13 @@
  *    limitations under the License.
  */
 
+#include <iostream>
 #include "motor.cpp"
 #include "motor_controller.cpp"
-#include <iostream>
 
 using namespace hyped::motor_control;
 
-int main() 
-{
+int main() {
   MotorController* controller = new MotorController();
   controller->setupMotors();
   controller->accelerateMotors();
