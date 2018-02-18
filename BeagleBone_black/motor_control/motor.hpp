@@ -21,8 +21,8 @@
 #ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
 
-using namespace hyped {
-using namespace motor_control {
+namespace hyped {
+namespace motor_control {
 
 class Motor {
  public:

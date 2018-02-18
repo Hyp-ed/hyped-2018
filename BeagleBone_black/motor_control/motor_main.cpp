@@ -22,6 +22,8 @@
 #include "motor_controller.cpp"
 #include <iostream>
 
+using namespace hyped::motor_control;
+
 int main() 
 {
   MotorController* controller = new MotorController();

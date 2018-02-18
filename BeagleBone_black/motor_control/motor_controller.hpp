@@ -23,8 +23,8 @@
 
 #include "motor_control/motor.hpp"
 
-using namespace hyped {
-using namespace motor_control {
+namespace hyped {
+namespace motor_control {
 
 class MotorController {
  public:

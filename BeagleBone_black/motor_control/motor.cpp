@@ -21,8 +21,8 @@
 #include "motor_control/motor.hpp"
 #include <iostream>
 
-using namespace hyped {
-using namespace motor_control {
+namespace hyped {
+namespace motor_control {
 
 Motor::Motor() 
 {
