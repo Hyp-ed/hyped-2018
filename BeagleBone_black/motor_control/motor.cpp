@@ -37,4 +37,4 @@ void Motor::setSpeed(int rpm)
   std::cout << "RPM: " << rpm << std::endl;
 }
 
-}} // namespace hyped::motor_control
+}}  // namespace hyped::motor_control

@@ -89,8 +89,7 @@ void MotorController::stopMotors()
   */
 int MotorController::calculateAccelerationRPM(double translational_velocity) 
 {
-  //dummy calculation to increase rpm
-  return rpm += 1000;
+  return rpm += 1000;  // dummy calculation to increase rpm
 }
 
 /**
@@ -103,8 +102,7 @@ int MotorController::calculateAccelerationRPM(double translational_velocity)
   */
 int MotorController::calculateDecelerationRPM(double translational_velocity) 
 {
-  //dummy function to decrease rpm
-  return rpm -= 1000;
+  return rpm -= 1000;  // dummy calculation to decrease rpm
 }
 
-}} //namespace hyped::motor_control
+}}  // namespace hyped::motor_control

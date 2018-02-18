@@ -44,6 +44,6 @@ class MotorController {
   int translational_velocity;
 };
 
-}} // namespace hyped::motor_control
+}}  // namespace hyped::motor_control
 
-#endif /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_ */
+#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_ */

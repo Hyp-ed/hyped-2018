@@ -30,6 +30,6 @@ class Motor {
   void setSpeed(int rpm);
 };
 
-}} // namespace hyped::motor_control
+}}  // namespace hyped::motor_control
 
-#endif /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_ */
+#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_ */
