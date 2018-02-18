@@ -37,50 +37,51 @@ class State {
 
 class Idle : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class Accelerating : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class Decelerating : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class EmergencyBraking : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class RunComplete : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class FailureStopped : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class Exiting : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
 class Finished : public State {
  public:
-  virtual void react(HypedMachine &machine, Event event);
-  virtual void entry();
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
 };
 
-}}   // namespace hyped::state_machine
+}  // namespace state_machine
+}  // namespace hyped
