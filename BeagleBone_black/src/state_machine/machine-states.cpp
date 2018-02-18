@@ -22,7 +22,8 @@
 #include "state_machine/machine-states.hpp"
 #include <iostream>
 
-namespace hyped::state_machine {
+namespace hyped {
+namespace state_machine {
 
 void Idle::react(HypedMachine &machine, Event event) {
   std::cout << "Called Idle React " << std::endl;
@@ -109,4 +110,4 @@ void Finished::react(HypedMachine &machine, Event event) {
   std::cout << "Called Finished React" << std::endl;
 }
 
-}   // namespace hyped::state_machine
+}}   // namespace hyped::state_machine

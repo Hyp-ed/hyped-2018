@@ -21,7 +21,8 @@
 
 #pragma once
 
-namespace hyped::state_machine {
+namespace hyped {
+namespace state_machine {
 
 enum Event {
   kOnStart,
@@ -33,4 +34,4 @@ enum Event {
   kVelocityZeroReached
 };
 
-}   // namespace hyped::state_machine
+}}   // namespace hyped::state_machine

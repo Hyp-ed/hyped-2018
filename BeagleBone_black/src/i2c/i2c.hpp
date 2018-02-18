@@ -23,7 +23,8 @@
 #ifndef BEAGLEBONE_BLACK_I2C_I2C_HPP_ 
 #define BEAGLEBONE_BLACK_I2C_I2C_HPP_ 
 
-namespace hyped::i2c {
+namespace hyped {
+namespace i2c {
 
 struct Channel;
 struct Context;
@@ -118,7 +119,7 @@ class Driver {
   int channel_number_;
 };
   
-}   // namespace hyped::i2c
+}}  // namespace hyped::i2c
 
 
 #endif  /* BEAGLEBONE_BLACK_I2C_I2C_HPP_  */

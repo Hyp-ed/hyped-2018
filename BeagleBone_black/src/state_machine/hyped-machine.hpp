@@ -24,7 +24,8 @@
 #include "state_machine/event.hpp"
 #include "state_machine/machine-states.hpp"
 
-namespace hyped::state_machine {
+namespace hyped {
+namespace state_machine {
 
 class State;
 class HypedMachine {
@@ -39,4 +40,4 @@ class HypedMachine {
   State *current_state;
 };
 
-}   // namespace hyped::state_machine
+}}   // namespace hyped::state_machine
