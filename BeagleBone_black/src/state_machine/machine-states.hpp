@@ -24,6 +24,8 @@
 #include "state_machine/event.hpp"
 #include "state_machine/hyped-machine.hpp"
 
+namespace hyped::state_machine {
+
 class HypedMachine;
 
 class State {
@@ -79,3 +81,5 @@ class Finished : public State {
   virtual void react(HypedMachine &machine, Event event);
   virtual void entry();
 };
+
+}   // namespace hyped::state_machine

@@ -31,7 +31,7 @@ void initialiseSlaves(i2c::Driver &instance) {
   */
 }
 
-int i2CMain(void)
+int main(void)
 {
   i2c::Driver device1 = i2c::Driver();
   /* Replace with your application code */
