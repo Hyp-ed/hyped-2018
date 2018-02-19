@@ -21,14 +21,6 @@
  */
 
 #include <iostream>
-
-void foo()
-{
-  if (true) {
-  }
-}
-
-
 int main()
 {
   std::cout << "Starting BeagleBone Black..." << std::endl;
