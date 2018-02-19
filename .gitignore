@@ -39,3 +39,4 @@ Debug/
 # Other rubbish
 .DS_Store
 .cpplint-cache
+BeagleBone_black/hyped
