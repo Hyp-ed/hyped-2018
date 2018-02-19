@@ -25,7 +25,8 @@
 
 using namespace hyped;
 
-void initialiseSlaves(i2c::Driver* instance) {
+void initialiseSlaves(i2c::Driver* instance)
+{
   /* What this does is slave dependent, suggested for VL6180X:
   Turn on/off GPIO pins to boot
   Set registers to continuous operation mode with given frequency
@@ -33,7 +34,8 @@ void initialiseSlaves(i2c::Driver* instance) {
   */
 }
 
-int main(void) {
+int main(void)
+{
   i2c::Driver device1 = i2c::Driver();
   /* Replace with your application code */
 
