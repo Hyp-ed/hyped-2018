@@ -24,7 +24,8 @@
 
 using namespace hyped::motor_control;
 
-int main() {
+int main()
+{
   MotorController* controller = new MotorController();
   controller->setupMotors();
   controller->accelerateMotors();
