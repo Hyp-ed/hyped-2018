@@ -25,7 +25,8 @@
 namespace hyped {
 namespace state_machine {
 
-void Idle::react(HypedMachine &machine, Event event) {
+void Idle::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called Idle React " << std::endl;
   if (event == kOnStart) {
     machine.transition(new Accelerating());
@@ -36,7 +37,8 @@ void Idle::react(HypedMachine &machine, Event event) {
 
 void Idle::entry() { std::cout << "Current State: Idle" << std::endl; }
 
-void Accelerating::react(HypedMachine &machine, Event event) {
+void Accelerating::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called Accelerating React" << std::endl;
   if (event == kMaxDistanceReached) {
     machine.transition(new Decelerating());
@@ -45,11 +47,13 @@ void Accelerating::react(HypedMachine &machine, Event event) {
   }
 }
 
-void Accelerating::entry() {
+void Accelerating::entry()
+{
   std::cout << "Current State: Accelerating" << std::endl;
 }
 
-void Decelerating::react(HypedMachine &machine, Event event) {
+void Decelerating::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called Decelerating React" << std::endl;
   if (event == kEndOfRunReached) {
     machine.transition(new RunComplete());
@@ -58,30 +62,36 @@ void Decelerating::react(HypedMachine &machine, Event event) {
   }
 }
 
-void Decelerating::entry() {
+void Decelerating::entry()
+{
   std::cout << "Current State: Decelerating" << std::endl;
 }
 
-void EmergencyBraking::react(HypedMachine &machine, Event event) {
+void EmergencyBraking::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called EmergencyBraking React" << std::endl;
   if (event == kVelocityZeroReached) {
     machine.transition(new FailureStopped());
   }
 }
 
-void EmergencyBraking::entry() {
+void EmergencyBraking::entry()
+{
   std::cout << "Current State: EmergencyBraking" << std::endl;
 }
 
-void FailureStopped::react(HypedMachine &machine, Event event) {
+void FailureStopped::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called FailureStopped React" << std::endl;
 }
 
-void FailureStopped::entry() {
+void FailureStopped::entry()
+{
   std::cout << "Current State: FailureStopped" << std::endl;
 }
 
-void RunComplete::react(HypedMachine &machine, Event event) {
+void RunComplete::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called RunComplete React" << std::endl;
   if (event == kOnExit) {
     machine.transition(new Exiting());
@@ -90,13 +100,15 @@ void RunComplete::react(HypedMachine &machine, Event event) {
   }
 }
 
-void RunComplete::entry() {
+void RunComplete::entry()
+{
   std::cout << "Current State: RunComplete" << std::endl;
 }
 
 void Exiting::entry() { std::cout << "Current State: Exiting" << std::endl; }
 
-void Exiting::react(HypedMachine &machine, Event event) {
+void Exiting::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called Exiting React" << std::endl;
   if (event == kEndOfTubeReached) {
     machine.transition(new Finished());
@@ -106,7 +118,8 @@ void Exiting::react(HypedMachine &machine, Event event) {
 }
 void Finished::entry() { std::cout << "Current State: Finished" << std::endl; }
 
-void Finished::react(HypedMachine &machine, Event event) {
+void Finished::react(HypedMachine &machine, Event event)
+{
   std::cout << "Called Finished React" << std::endl;
 }
 
