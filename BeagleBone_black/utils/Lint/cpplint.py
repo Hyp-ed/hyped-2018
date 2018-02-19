@@ -2558,8 +2558,10 @@ def CheckBraces(filename, clean_lines, linenum, error):
     # previous non-blank line is ';', ':', '{', or '}', or if the previous
     # line starts a preprocessor block.
     prevline = GetPreviousNonBlankLine(clean_lines, linenum)[0]
-    if (not Search(r'[;:}{]\s*$', prevline) and
-        not Match(r'\s*#', prevline)):
+    if (not Search(r'[;}{]\s*$', prevline) and
+        not Match(r'\s*#', prevline) and 
+          Search(r'\s((if|else|switch|for|while|try|catch|case)\s)|default:', prevline)
+        ):
       error(filename, linenum, 'whitespace/braces', 4,
             '{ should almost always be at the end of the previous line')
 
