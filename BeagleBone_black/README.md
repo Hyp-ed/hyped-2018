@@ -10,6 +10,8 @@ When you add a new .cpp file to the project, make sure you record it in file `sr
 
 When you add a new .cpp or .hpp file to the project, make sure you record it in file `src/Lint.files` to ensure it is style-checked by linter.
 
+If you want to ignore a lint error for particular line in your source code, add `// NOLINT [rule]` at the end of the line, e.g. `// NOLINT [whitespace/line_length]`. [rule] part is optional, it selects which lint rule checking should be skipped. If no rule is provided, all lint rules will be skipped.
+
 ## Project Organisation
 Project is organised in a modular fashion to decrease dependencies among software teams.
 ### Multiple main()s
