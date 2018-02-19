@@ -22,7 +22,15 @@
 
 #include <iostream>
 
-int main() {
+void foo()
+{
+  if (true) {
+  }
+}
+
+
+int main()
+{
   std::cout << "Starting BeagleBone Black..." << std::endl;
   return 0;
 }

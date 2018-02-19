@@ -26,7 +26,8 @@
 
 using namespace hyped::state_machine;
 
-int main() {
+int main()
+{
   HypedMachine hypedMachine;
   hypedMachine.handleEvent(kOnStart);
   hypedMachine.handleEvent(kMaxDistanceReached);

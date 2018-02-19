@@ -25,16 +25,19 @@
 namespace hyped {
 namespace state_machine {
 
-HypedMachine::HypedMachine() : current_state(new Idle()) {
+HypedMachine::HypedMachine() : current_state(new Idle())
+{
   current_state->entry();
 }
 
-void HypedMachine::handleEvent(Event event) {
+void HypedMachine::handleEvent(Event event)
+{
   std::cout << "Raised event " << event << std::endl;
   current_state->react(*this, event);
 }
 
-void HypedMachine::transition(State *state) {
+void HypedMachine::transition(State *state)
+{
   // State *prevState = currState;
   current_state = state;
   std::cout << "Transitioning..." << std::endl;
