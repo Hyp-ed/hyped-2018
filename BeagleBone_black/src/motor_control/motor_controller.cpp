@@ -22,7 +22,7 @@
 #include "motor_control/motor_controller.hpp"
 #include <iostream>
 
-namespace hyped {
+amespace hyped {
 namespace motor_control {
 
 MotorController::MotorController() {
