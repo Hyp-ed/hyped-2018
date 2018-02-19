@@ -24,14 +24,16 @@
 namespace hyped {
 namespace motor_control {
 
-Motor::Motor() {
+Motor::Motor()
+{
   std::cout << "Motors initialised" << std::endl;
 }
 
 /**
   *  @brief  { Function will send RPM over CAN network to motor controllers }
   */
-void Motor::setSpeed(int rpm) {
+void Motor::setSpeed(int rpm)
+{
   std::cout << "RPM: " << rpm << std::endl;
 }
 
