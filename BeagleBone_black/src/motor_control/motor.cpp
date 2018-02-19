@@ -18,18 +18,23 @@
  *    limitations under the License.
  */
 
-#include "motor.cpp"
-#include "motor_controller.cpp"
+#include "motor_control/motor.hpp"
 #include <iostream>
 
-using namespace hyped::motor_control;
+namespace hyped {
+namespace motor_control {
 
-int main() 
+Motor::Motor()
 {
-  MotorController* controller = new MotorController();
-  controller->setupMotors();
-  controller->accelerateMotors();
-  controller->decelerateMotors();
-  controller->stopMotors();
-  return 0;
+  std::cout << "Motors initialised" << std::endl;
 }
+
+/**
+  *  @brief  { Function will send RPM over CAN network to motor controllers }
+  */
+void Motor::setSpeed(int rpm)
+{
+  std::cout << "RPM: " << rpm << std::endl;
+}
+
+}}  // namespace hyped::motor_control
