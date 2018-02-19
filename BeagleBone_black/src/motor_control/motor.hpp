@@ -1,8 +1,7 @@
-
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 17/02/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,21 +18,18 @@
  *    limitations under the License.
  */
 
-#include <iostream>
-#include "state_machine/event.hpp"
-#include "state_machine/hyped-machine.hpp"
-#include "state_machine/machine-states.hpp"
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
 
-using namespace hyped::state_machine;
+namespace hyped {
+namespace motor_control {
 
-int main()
-{
-  HypedMachine hypedMachine;
-  hypedMachine.handleEvent(kOnStart);
-  hypedMachine.handleEvent(kMaxDistanceReached);
-  hypedMachine.handleEvent(kEndOfRunReached);
-  hypedMachine.handleEvent(kOnExit);
-  hypedMachine.handleEvent(kEndOfTubeReached);
+class Motor {
+ public:
+  Motor();
+  void setSpeed(int rpm);
+};
 
-  return 0;
-}
+}}  // namespace hyped::motor_control
+
+#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_ */

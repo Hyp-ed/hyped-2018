@@ -16,7 +16,7 @@ script:
 notifications:
   slack:
     rooms:
-        - hypedunlimited:M4b0wIeS08PAzYYDcJpHCi0d#tech-software-repo
+        - hypedunlimited:gEtbY2l7hNP2rwgfelMxr6j1#tech-software-repo
    
    
    

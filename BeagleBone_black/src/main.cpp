@@ -21,8 +21,8 @@
  */
 
 #include <iostream>
-
-int main() {
+int main()
+{
   std::cout << "Starting BeagleBone Black..." << std::endl;
   return 0;
 }

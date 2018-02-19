@@ -5,3 +5,5 @@ SRCS := \
   data/data.cpp \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
+  motor_control/motor.cpp \
+  motor_control/motor_controller.cpp \

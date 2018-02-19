@@ -1,8 +1,7 @@
-
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 17/02/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,21 +18,23 @@
  *    limitations under the License.
  */
 
+#include "motor_control/motor.hpp"
 #include <iostream>
-#include "state_machine/event.hpp"
-#include "state_machine/hyped-machine.hpp"
-#include "state_machine/machine-states.hpp"
 
-using namespace hyped::state_machine;
+namespace hyped {
+namespace motor_control {
 
-int main()
+Motor::Motor()
 {
-  HypedMachine hypedMachine;
-  hypedMachine.handleEvent(kOnStart);
-  hypedMachine.handleEvent(kMaxDistanceReached);
-  hypedMachine.handleEvent(kEndOfRunReached);
-  hypedMachine.handleEvent(kOnExit);
-  hypedMachine.handleEvent(kEndOfTubeReached);
-
-  return 0;
+  std::cout << "Motors initialised" << std::endl;
 }
+
+/**
+  *  @brief  { Function will send RPM over CAN network to motor controllers }
+  */
+void Motor::setSpeed(int rpm)
+{
+  std::cout << "RPM: " << rpm << std::endl;
+}
+
+}}  // namespace hyped::motor_control
