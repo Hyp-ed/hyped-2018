@@ -19,10 +19,26 @@
 
 #include "data/data.hpp"
 
-using namespace hyped;
+#include <stdio.h>
+
+using hyped::data::Data;
+using hyped::data::Navigation;
+using hyped::data::Sensors;
 
 int main()
 {
-  data::Data& data = data::Data::getInstance();
+  Data& data = Data::getInstance();
+
+  Navigation  nav   = data.getNavigationData();
+  Sensors     sens  = data.getSensorsData();
+
+  printf("Hello hyped, here are some shared data\n");
+  printf("from Navigation: %d %d %d\n"
+    , nav.distance
+    , nav.velocity
+    , nav.acceleration);
+  printf("from Sensors: %d %d\n"
+    , sens.imu[0].acc_x
+    , sens.proxy[0].val);
   return 0;
 }

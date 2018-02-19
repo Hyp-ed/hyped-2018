@@ -28,12 +28,22 @@ Data& Data::getInstance()
 
 Navigation Data::getNavigationData() const
 {
-  return data_.navigation;
+  return navigation_;
 }
 
 void Data::setNavigationData(const Navigation& nav_data)
 {
-  data_.navigation = nav_data;
+  navigation_ = nav_data;
+}
+
+Sensors Data::getSensorsData() const
+{
+  return sensors_;
+}
+
+void Data::setSensorsData(const Sensors& sensors_data)
+{
+  sensors_ = sensors_data;
 }
 
 }}  // namespace hyped::data

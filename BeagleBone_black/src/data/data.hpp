@@ -24,6 +24,9 @@
 namespace hyped {
 namespace data {
 
+// -----------------------------------------------------------------------------
+// Navigation
+// -----------------------------------------------------------------------------
 struct Navigation {
   uint32_t distance;
   uint32_t velocity;
@@ -31,13 +34,35 @@ struct Navigation {
   uint64_t stripe_count;
 };
 
-/**
- * @brief      Collates sub-team data structs
- */
-struct DataStruct {
-  Navigation navigation;
+// -----------------------------------------------------------------------------
+// Raw Sensor data
+// -----------------------------------------------------------------------------
+#define IMU_NUM   3
+#define PROXY_NUM 3
+
+struct IMU {
+  uint8_t acc_x;
+  uint8_t acc_y;
+  uint8_t acc_z;
+
+  uint8_t gyr_x;
+  uint8_t gyr_y;
+  uint8_t gyr_z;
 };
 
+struct Proxy {
+  uint8_t val;
+};
+
+struct Sensors {
+  IMU     imu[IMU_NUM];
+  Proxy   proxy[PROXY_NUM];
+};
+
+
+// -----------------------------------------------------------------------------
+// Common Data structure/class
+// -----------------------------------------------------------------------------
 /**
  * @brief      A singleton class managing the data exchange between sub-team threads.
  */
@@ -57,8 +82,19 @@ class Data {
    */
   void setNavigationData(const Navigation& nav_data);
 
+  /**
+   * @brief      Retrieves data from all sensors
+   */
+  Sensors getSensorsData() const;
+
+  /**
+   * @brief      Should be called to update sensor data
+   */
+  void setSensorsData(const Sensors& sensors_data);
+
  private:
-  DataStruct data_;
+  Navigation  navigation_;
+  Sensors     sensors_;
 };
 
 }}  // namespace hyped::data
