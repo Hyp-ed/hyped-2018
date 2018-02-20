@@ -59,6 +59,15 @@ struct Sensors {
   Proxy   proxy[PROXY_NUM];
 };
 
+// -----------------------------------------------------------------------------
+// Motor data
+// -----------------------------------------------------------------------------
+struct Motors {
+  int32_t angular_velocity_FL;
+  int32_t angular_velocity_FR;
+  int32_t angular_velocity_BL;
+  int32_t angular_velocity_BR;
+};
 
 // -----------------------------------------------------------------------------
 // Common Data structure/class
@@ -92,9 +101,20 @@ class Data {
    */
   void setSensorsData(const Sensors& sensors_data);
 
+  /**
+   * @brief      Retrieves data produced by each of the four motors.
+   */
+  Motors getMotorData() const;
+
+  /**
+   * @brief      Should be called to update motor data.
+   */
+  void setMotorData(const Motors& motor_data);
+
  private:
   Navigation  navigation_;
   Sensors     sensors_;
+  Motors      motors_;
 };
 
 }}  // namespace hyped::data

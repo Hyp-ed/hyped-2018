@@ -46,4 +46,14 @@ void Data::setSensorsData(const Sensors& sensors_data)
   sensors_ = sensors_data;
 }
 
+Motors Data::getMotorData() const
+{
+  return motors_;
+}
+
+void Data::setMotorData(const Motors& motor_data)
+{
+  motors_ = motor_data;
+}
+
 }}  // namespace hyped::data
