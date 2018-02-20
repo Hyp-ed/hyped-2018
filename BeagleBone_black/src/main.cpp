@@ -25,8 +25,8 @@
 #include <list>
 #include <mutex>
 #include <thread>
-#include "main_machine.cpp"
-//#include "main_motor.cpp"
+//#include "motor_control/main_motor.cpp"
+#include "state_machine/main_machine.cpp"
 
 // global variable for shared data
 std::list<int> hypedList;

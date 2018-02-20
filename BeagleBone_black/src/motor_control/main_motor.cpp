@@ -19,8 +19,8 @@
  */
 
 #include <iostream>
-#include "motor.cpp"
-#include "motor_controller.cpp"
+#include "motor_control/motor.cpp"
+#include "motor_control/motor_controller.cpp"
 
 using namespace hyped::motor_control;
 
