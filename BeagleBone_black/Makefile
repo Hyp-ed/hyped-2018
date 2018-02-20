@@ -8,7 +8,7 @@ MAIN=main.cpp
 SRCS_DIR:=src
 OBJS_DIR:=bin
 
-CFLAGS:=-std=c++11 -Og -Wall
+CFLAGS:=-std=c++11 -Og -Wall -pthread
 
 include $(SRCS_DIR)/Source.files
 SRCS := $(SRCS) $(MAIN)
