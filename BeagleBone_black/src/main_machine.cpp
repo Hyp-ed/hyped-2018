@@ -25,9 +25,10 @@
 #include "state_machine/machine-states.hpp"
 
 using namespace hyped::state_machine;
+namespace hyped {
+namespace state_machine {
 
-int main()
-{
+int main() {
   HypedMachine hypedMachine;
   hypedMachine.handleEvent(kOnStart);
   hypedMachine.handleEvent(kMaxDistanceReached);
@@ -37,3 +38,5 @@ int main()
 
   return 0;
 }
+}  // namespace state_machine
+}  // namespace hyped

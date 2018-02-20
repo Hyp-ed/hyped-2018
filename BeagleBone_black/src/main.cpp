@@ -20,9 +20,30 @@
  *    limitations under the License.
  */
 
+#include <algorithm>
 #include <iostream>
-int main()
-{
+#include <list>
+#include <mutex>
+#include <thread>
+#include "main_machine.cpp"
+//#include "main_motor.cpp"
+
+// global variable for shared data
+std::list<int> hypedList;
+
+// a global instance of std::mutex to protect global variable
+std::mutex hypedMutex;
+
+/*
+Before using the shared data use the following instead of lock() and unlock():
+              std::lock_guard<std::mutex> guard(myMutex);
+*/
+
+int main() {
   std::cout << "Starting BeagleBone Black..." << std::endl;
+  std::thread t1(hyped::state_machine::main);
+  t1.join();
+  std::cout << "Started State Machine" << std::endl;
+
   return 0;
 }

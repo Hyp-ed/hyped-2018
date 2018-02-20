@@ -24,8 +24,10 @@
 
 using namespace hyped::motor_control;
 
-int main()
-{
+namespace hyped {
+namespace motor_control {
+
+int main() {
   MotorController* controller = new MotorController();
   controller->setupMotors();
   controller->accelerateMotors();
@@ -33,3 +35,6 @@ int main()
   controller->stopMotors();
   return 0;
 }
+
+}  // namespace motor_control
+}  // namespace hyped
