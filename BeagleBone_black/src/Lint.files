@@ -12,3 +12,6 @@ motor_control/motor.hpp
 motor_control/motor.cpp
 motor_control/motor_controller.hpp
 motor_control/motor_controller.cpp
+i2c/i2c.hpp
+utils/concurrent/Thread.hpp
+utils/concurrent/Thread.cpp

@@ -24,23 +24,37 @@
 
 #include <iostream>
 
+#include "utils/concurrent/Thread.hpp"
 
-/*
-Before using the shared data use the following instead of lock() and unlock():
-              std::lock_guard<std::mutex> guard(myMutex);
-*/
+using hyped::utils::concurrent::Thread;
 
 void foo()
 {
-  std::cout << "New thread started" << std::endl;
+  std::cout << "New foo thread started" << std::endl;
 }
+
+class DemoThread: public Thread {
+ public:
+  explicit DemoThread(uint8_t id): Thread(id) { /* EMPTY */ }
+  void run() override
+  {
+    std::cout << "Demo thread running with id " << getId();
+  }
+};
+
 
 int main()
 {
   std::cout << "Starting BeagleBone Black threading..." << std::endl;
   std::thread t1(foo);
   t1.join();
-  std::cout << "Started State Machine" << std::endl;
 
+  Thread* t2 = new Thread(1);
+  Thread* t3 = new DemoThread(2);
+
+  t2->start();
+  t3->start();
+  t2->join();
+  t2->join();
   return 0;
 }

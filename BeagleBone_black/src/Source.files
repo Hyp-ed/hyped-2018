@@ -6,3 +6,5 @@ SRCS := \
   state_machine/machine-states.cpp \
   motor_control/motor.cpp \
   motor_control/motor_controller.cpp \
+  utils/concurrent/Thread.cpp \
+  
