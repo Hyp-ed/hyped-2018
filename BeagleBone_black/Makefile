@@ -10,6 +10,7 @@ OBJS_DIR:=bin
 
 CFLAGS:=-pthread -std=c++11 -O0 -Wall
 
+
 include $(SRCS_DIR)/Source.files
 SRCS := $(SRCS) $(MAIN)
 OBJS := $(SRCS:.cpp=.o)
