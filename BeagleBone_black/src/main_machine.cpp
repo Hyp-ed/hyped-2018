@@ -1,7 +1,8 @@
+
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Authors: Yash Mittal and Ragnor Comerford
  * Organisation: HYPED
- * Date: 17/02/18
+ * Date: 11. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,22 +20,20 @@
  */
 
 #include <iostream>
-#include "motor_control/motor.cpp"
-#include "motor_control/motor_controller.cpp"
+#include "state_machine/event.hpp"
+#include "state_machine/hyped-machine.hpp"
+#include "state_machine/machine-states.hpp"
 
-using namespace hyped::motor_control;
+using namespace hyped::state_machine;
 
-namespace hyped {
-namespace motor_control {
+int main()
+{
+  HypedMachine hypedMachine;
+  hypedMachine.handleEvent(kOnStart);
+  hypedMachine.handleEvent(kMaxDistanceReached);
+  hypedMachine.handleEvent(kEndOfRunReached);
+  hypedMachine.handleEvent(kOnExit);
+  hypedMachine.handleEvent(kEndOfTubeReached);
 
-int main() {
-  MotorController* controller = new MotorController();
-  controller->setupMotors();
-  controller->accelerateMotors();
-  controller->decelerateMotors();
-  controller->stopMotors();
   return 0;
 }
-
-}  // namespace motor_control
-}  // namespace hyped

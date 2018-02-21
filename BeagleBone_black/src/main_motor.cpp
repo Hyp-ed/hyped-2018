@@ -1,10 +1,8 @@
-
 /*
- * Authors : HYPED
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
- * Date: 3. February 2018
+ * Date: 17/02/18
  * Description:
- * This is the main executable for BeagleBone pod node
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +19,17 @@
  */
 
 #include <iostream>
+#include "motor_control/motor.cpp"
+#include "motor_control/motor_controller.cpp"
+
+using namespace hyped::motor_control;
 
 int main()
 {
-  std::cout << "Starting BeagleBone Black..." << std::endl;
+  MotorController* controller = new MotorController();
+  controller->setupMotors();
+  controller->accelerateMotors();
+  controller->decelerateMotors();
+  controller->stopMotors();
   return 0;
 }

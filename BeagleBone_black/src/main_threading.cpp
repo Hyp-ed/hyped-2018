@@ -1,9 +1,10 @@
 
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Authors : HYPED
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 3. February 2018
  * Description:
+ * This is the main executable for BeagleBone pod node
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,24 +20,27 @@
  *    limitations under the License.
  */
 
+#include <thread>
+
 #include <iostream>
-#include "state_machine/event.hpp"
-#include "state_machine/hyped-machine.hpp"
-#include "state_machine/machine-states.hpp"
 
-using namespace hyped::state_machine;
-namespace hyped {
-namespace state_machine {
 
-int main() {
-  HypedMachine hypedMachine;
-  hypedMachine.handleEvent(kOnStart);
-  hypedMachine.handleEvent(kMaxDistanceReached);
-  hypedMachine.handleEvent(kEndOfRunReached);
-  hypedMachine.handleEvent(kOnExit);
-  hypedMachine.handleEvent(kEndOfTubeReached);
+/*
+Before using the shared data use the following instead of lock() and unlock():
+              std::lock_guard<std::mutex> guard(myMutex);
+*/
+
+void foo()
+{
+  std::cout << "New thread started" << std::endl;
+}
+
+int main()
+{
+  std::cout << "Starting BeagleBone Black threading..." << std::endl;
+  std::thread t1(foo);
+  t1.join();
+  std::cout << "Started State Machine" << std::endl;
 
   return 0;
 }
-}  // namespace state_machine
-}  // namespace hyped

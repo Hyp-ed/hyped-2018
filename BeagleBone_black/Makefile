@@ -8,7 +8,7 @@ MAIN=main.cpp
 SRCS_DIR:=src
 OBJS_DIR:=bin
 
-CFLAGS:=-std=c++11 -Og -Wall
+CFLAGS:=-pthread -std=c++11 -Og -Wall
 
 include $(SRCS_DIR)/Source.files
 SRCS := $(SRCS) $(MAIN)
@@ -18,7 +18,7 @@ SRCS := $(patsubst %,$(SRCS_DIR)/%,$(SRCS))
 OBJS := $(patsubst %,$(OBJS_DIR)/%,$(OBJS))
 
 DEP_DIR := $(OBJS_DIR)
-DEPFLAGS =  -pthread -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
+DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
 INC_DIR := -I$(SRCS_DIR)
 
 # run "make VERBOSE=1" to see all commands
