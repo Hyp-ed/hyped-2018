@@ -20,8 +20,6 @@
  *    limitations under the License.
  */
 
-#include <thread>
-
 #include <iostream>
 
 #include "utils/concurrent/Thread.hpp"
@@ -46,8 +44,6 @@ class DemoThread: public Thread {
 int main()
 {
   std::cout << "Starting BeagleBone Black threading..." << std::endl;
-  std::thread t1(foo);
-  t1.join();
 
   Thread* t2 = new Thread(1);
   Thread* t3 = new DemoThread(2);

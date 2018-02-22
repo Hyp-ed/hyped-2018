@@ -38,8 +38,8 @@ void thread_entry_point(Thread* this_)
 
 
 Thread::Thread(uint8_t id)
-  : id_(id)
-  , thread_(0)
+    : id_(id),
+      thread_(0)
 { /* EMPTY */ }
 
 Thread::~Thread() { /* EMPTY */ }
