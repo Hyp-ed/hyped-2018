@@ -1,6 +1,8 @@
 main.cpp
 main_i2c.cpp
 main_machine.cpp
+data/data.cpp
+data/data.hpp
 main_motor.cpp
 main_threading.cpp
 state_machine/event.hpp
