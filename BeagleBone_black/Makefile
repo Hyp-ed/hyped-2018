@@ -9,7 +9,7 @@ SRCS_DIR:=src
 OBJS_DIR:=bin
 
 CFLAGS:=-pthread -std=c++11 -O0 -Wall
-LFLAGS:=-lpthread
+LFLAGS:=-lpthread -pthread
 
 
 include $(SRCS_DIR)/Source.files
