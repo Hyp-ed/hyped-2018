@@ -33,7 +33,8 @@ Echo := $(Verb)echo
 default: $(TARGET) lint
 
 all:
-	$(Verb) for main in $(MAINS); do \
+	$(Verb) set -e; \
+	for main in $(MAINS); do \
 		$(MAKE) MAIN=$${main}.cpp TARGET=$$main NOLINT=1 --silent; \
 	done; \
 	$(MAKE) lint --no-print-directory
