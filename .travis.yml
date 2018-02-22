@@ -5,9 +5,6 @@ services:
 
 install: true
 
-before_script:
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
-
 script:
 - docker pull martinkristien/hyped
 - docker run -it martinkristien/hyped make -C BeagleBone_black -j --silent clean all
