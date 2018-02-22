@@ -8,7 +8,9 @@ MAIN=main.cpp
 SRCS_DIR:=src
 OBJS_DIR:=bin
 
-CFLAGS:=-std=c++11 -Og -Wall
+CFLAGS:=-pthread -std=c++11 -O0 -Wall
+LFLAGS:=-lpthread
+
 
 include $(SRCS_DIR)/Source.files
 SRCS := $(SRCS) $(MAIN)
@@ -28,11 +30,17 @@ endif
 Echo := $(Verb)echo
 
 
-all: $(TARGET) lint
+default: $(TARGET) lint
+
+all:
+	$(Verb) for main in $(MAINS); do \
+		$(MAKE) MAIN=$${main}.cpp TARGET=$$main NOLINT=1 --silent; \
+	done; \
+	$(MAKE) lint --no-print-directory
 
 $(TARGET): $(OBJS)
-	$(Echo) "Linking executable $>"
-	$(Verb) $(LL) -o $@ $(OBJS)
+	$(Echo) "Linking executable $(MAIN) into $@"
+	$(Verb) $(LL) $(LFLAGS) -o $@ $(OBJS)
 
 
 $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
@@ -41,11 +49,14 @@ $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	$(Verb) $(CC) $(DEPFLAGS) $(CFLAGS) -o $@ -c $(INC_DIR) $<
 
 lint:
+ifndef NOLINT
 	$(Verb) python utils/Lint/presubmit.py
+endif
 
 clean: cleanlint
 	$(Verb) rm -rf $(OBJS_DIR)/*
 	$(Verb) rm -f $(TARGET)
+	$(Verb) rm -f main*
 
 cleanlint:
 	$(Verb) rm -f .cpplint-cache
@@ -59,5 +70,6 @@ info:
 	$(call echo_var,TOP)
 	$(call echo_var,SRCS)
 	$(call echo_var,OBJS)
+	$(call echo_var,MAINS)
 
 -include $(OBJS:.o=.d)

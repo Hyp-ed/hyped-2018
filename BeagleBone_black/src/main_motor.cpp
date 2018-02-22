@@ -19,10 +19,10 @@
  */
 
 #include <iostream>
-#include "motor.cpp"
-#include "motor_controller.cpp"
+#include "motor_control/motor.hpp"
+#include "motor_control/motor_controller.hpp"
 
-using namespace hyped::motor_control;
+using hyped::motor_control::MotorController;
 
 int main()
 {

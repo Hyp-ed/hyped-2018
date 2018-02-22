@@ -40,3 +40,4 @@ Debug/
 .DS_Store
 .cpplint-cache
 BeagleBone_black/hyped
+BeagleBone_black/main*
