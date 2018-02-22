@@ -5,13 +5,15 @@ services:
 
 install: true
 
+git:
+  depth: 1
+
 before_script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 script:
-- docker build -t au/test .
-- docker run -it au/test uname -a
-- docker run -it au/test make -C BeagleBone_black all -j --silent
+- docker pull martinkristien/hyped
+- docker run -it martinkristien/hyped make -C BeagleBone_black -j --silent clean all
 
 notifications:
   slack:

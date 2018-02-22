@@ -36,7 +36,7 @@ class DemoThread: public Thread {
   explicit DemoThread(uint8_t id): Thread(id) { /* EMPTY */ }
   void run() override
   {
-    std::cout << "Demo thread running with id " << getId();
+    std::cout << "Demo thread running with id " << static_cast<int>(getId());
   }
 };
 
@@ -51,6 +51,6 @@ int main()
   t2->start();
   t3->start();
   t2->join();
-  t2->join();
+  t3->join();
   return 0;
 }
