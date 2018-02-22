@@ -22,8 +22,35 @@
 
 #include <iostream>
 
+#include "utils/concurrent/Thread.hpp"
+
+using hyped::utils::concurrent::Thread;
+
+void foo()
+{
+  std::cout << "New foo thread started" << std::endl;
+}
+
+class DemoThread: public Thread {
+ public:
+  explicit DemoThread(uint8_t id): Thread(id) { /* EMPTY */ }
+  void run() override
+  {
+    std::cout << "Demo thread running with id " << getId();
+  }
+};
+
+
 int main()
 {
-  std::cout << "Starting BeagleBone Black..." << std::endl;
+  std::cout << "Starting BeagleBone Black threading..." << std::endl;
+
+  Thread* t2 = new Thread(1);
+  Thread* t3 = new DemoThread(2);
+
+  t2->start();
+  t3->start();
+  t2->join();
+  t2->join();
   return 0;
 }

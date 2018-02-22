@@ -1,10 +1,8 @@
-
 /*
- * Authors : HYPED
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 3. February 2018
+ * Date: 21. February 2018
  * Description:
- * This is the main executable for BeagleBone pod node
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +18,46 @@
  *    limitations under the License.
  */
 
+#include "utils/concurrent/Thread.hpp"
+
+#include <thread>
 #include <iostream>
 
-int main()
+namespace hyped {
+namespace utils {
+namespace concurrent {
+
+namespace {
+
+void thread_entry_point(Thread* this_)
 {
-  std::cout << "Starting BeagleBone Black..." << std::endl;
-  return 0;
+  this_->run();
 }
+
+}   // namespace ::
+
+
+Thread::Thread(uint8_t id)
+    : id_(id),
+      thread_(0)
+{ /* EMPTY */ }
+
+Thread::~Thread() { /* EMPTY */ }
+
+void Thread::start()
+{
+  thread_ = new std::thread(thread_entry_point, this);
+}
+
+void Thread::join()
+{
+  thread_->join();
+}
+
+void Thread::run()
+{
+  std::cout << "You are starting EMPTY thread. Terminating now.\n";
+}
+
+}}}   // namespace hyped::utils::concurrent
+

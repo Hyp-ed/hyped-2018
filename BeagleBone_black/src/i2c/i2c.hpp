@@ -17,11 +17,11 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
- */ 
+ */
 
 
-#ifndef BEAGLEBONE_BLACK_I2C_I2C_HPP_ 
-#define BEAGLEBONE_BLACK_I2C_I2C_HPP_ 
+#ifndef BEAGLEBONE_BLACK_I2C_I2C_HPP_
+#define BEAGLEBONE_BLACK_I2C_I2C_HPP_
 
 namespace hyped {
 namespace i2c {
@@ -74,16 +74,17 @@ class Driver {
    * @param      channels  pointer to an array of communication channels
    * @param[in]  len       number of channels in the array
    */
-  void configureChannels(Channel *channels, int len) {
+  void configureChannels(Channel *channels, int len)
+  {
     activated_channels_ = channels;
     channel_number_      = len;
   }
-  
+
   /**
    * @brief      Periodically called routine to handle channel manipulations
    */
-  void control() { /* EMPTY */ } 
-  
+  void control() { /* EMPTY */ }
+
   /**
    * @brief      Blocking write operation. Can be used to initialise slave devices.
    *
@@ -94,7 +95,7 @@ class Driver {
    * @return     success status
    */
   int directWrite(uint8_t addr, char* writebuffer, int len) { return 0; }
-  
+
   /**
    * @brief      Blocking read operation. Can be used to initialise slave devices.
    *
@@ -118,7 +119,7 @@ class Driver {
   Channel* activated_channels_;
   int channel_number_;
 };
-  
+
 }}  // namespace hyped::i2c
 
 
