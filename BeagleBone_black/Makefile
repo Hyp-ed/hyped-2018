@@ -50,7 +50,7 @@ $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 
 lint:
 ifndef NOLINT
-	$(Verb) python utils/Lint/presubmit.py
+	$(Verb) python2.7 utils/Lint/presubmit.py
 endif
 
 clean: cleanlint
