@@ -21,6 +21,8 @@
  *    limitations under the License.
  */
 
+#include <initializer_list>
+
 #include <array>
 #include <cmath>
 
@@ -31,7 +33,7 @@ namespace hyped {
 namespace utils {
 namespace math {
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 class Vector {
  public:
   static_assert(dimension > 0,  "Dimension must be greater than zero.");
@@ -46,6 +48,7 @@ class Vector {
    * @brief    Constructors for the class for a particular vector.
    */
   Vector(const std::array<T, dimension>& vector);
+  explicit Vector(const std::initializer_list<T> elements);
 
   /**
    * @brief    Conversion from a vector type to another.
@@ -85,32 +88,44 @@ class Vector {
    */
   double norm();
 
+  /**
+   * @brief    Creates a new vector of magnitude one.
+   */
+  Vector<double, dimension> toUnitVector();
+
  private:
   std::array<T, dimension> elements_;
 };
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>::Vector()
 {
   for (int i = 0; i < dimension; i++)
     elements_[i] = 0;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>::Vector(const T element)
 {
   for (int i = 0; i < dimension; i++)
     elements_[i] = element;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>::Vector(const std::array<T, dimension>& vector)
 {
   for (int i = 0; i < dimension; i++)
     elements_[i] = vector[i];
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
+Vector<T, dimension>::Vector(const std::initializer_list<T> elements)
+{
+  for (int i = 0; i < dimension; i++)
+    elements_[i] = *(elements.begin()+i);
+}
+
+template <typename T, int dimension>
 template <typename U>
 Vector<T, dimension>::Vector(const Vector<U, dimension>& rhs)
 {
@@ -118,25 +133,25 @@ Vector<T, dimension>::Vector(const Vector<U, dimension>& rhs)
     elements_[i] = T(rhs[i]);
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 T& Vector<T, dimension>::operator[](int index)
 {
   return elements_[index];
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 T Vector<T, dimension>::operator[](int index) const
 {
   return elements_[index];
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension> Vector<T, dimension>::operator-() const
 {
   return (Vector<T, dimension>() - *this);
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator+=(const Vector<T, dimension>& rhs)
 {
   for (int i = 0; i < dimension; i++)
@@ -144,7 +159,7 @@ Vector<T, dimension>& Vector<T, dimension>::operator+=(const Vector<T, dimension
   return *this;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator-=(const Vector<T, dimension>& rhs)
 {
   for (int i = 0; i < dimension; i++)
@@ -152,7 +167,7 @@ Vector<T, dimension>& Vector<T, dimension>::operator-=(const Vector<T, dimension
   return *this;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator+=(const T rhs)
 {
   for (int i = 0; i < dimension; i++)
@@ -160,7 +175,7 @@ Vector<T, dimension>& Vector<T, dimension>::operator+=(const T rhs)
   return *this;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator-=(const T rhs)
 {
   for (int i = 0; i < dimension; i++)
@@ -168,7 +183,7 @@ Vector<T, dimension>& Vector<T, dimension>::operator-=(const T rhs)
   return *this;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator*=(const T rhs)
 {
   for (int i = 0; i < dimension; i++)
@@ -176,7 +191,7 @@ Vector<T, dimension>& Vector<T, dimension>::operator*=(const T rhs)
   return *this;
 }
 
-template <typename T,  int dimension>
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator/=(const T rhs)
 {
   for (int i = 0; i < dimension; i++)
@@ -191,6 +206,15 @@ double Vector<T, dimension>::norm()
   for (int i = 0; i < dimension; i++)
     ans += elements_[i]*elements_[i];
   return sqrt(ans);
+}
+
+
+template <typename T, int dimension>
+Vector<double, dimension> Vector<T, dimension>::toUnitVector()
+{
+  Vector<double, dimension> ans(*this);
+  ans /= this->norm();
+  return ans;
 }
 
 template <typename T1,  typename T2,  int dimension>

@@ -39,7 +39,8 @@ int main()
   Vector<int, 10> vector3;
   Vector<double, 10> vector4;
   Vector<double, 2> vector5({3, 4});
-  Vector<int, 3> vector6(1);
+  Vector<int, 2> vector6(1);
+  Vector<double, 2> vector7(1.0/sqrt(2));
 
   print(vector1);
   print(vector2);
@@ -63,14 +64,13 @@ int main()
   vector4 = vector4 + vector1;
   vector4 = vector4 - vector1;
 
-  (vector1 == vector3) ? std::cout << "False" :
-    std::cout << "True"; std::cout << '\n';
+  (vector1 == vector3) ? std::cout << "False\n" : std::cout << "True\n";
 
-  (vector5.norm() == 5) ? std::cout << "True" :
-    std::cout << "False"; std::cout << '\n';
+  (vector5.norm() == 5) ? std::cout << "True\n" : std::cout << "False\n";
 
-  (vector6.norm() == sqrt(3)) ? std::cout << "True" :
-    std::cout << "False"; std::cout << '\n';
+  (vector6.norm() == sqrt(2)) ? std::cout << "True\n" : std::cout << "False\n";
+
+  (vector6.toUnitVector() == vector7) ? std::cout << "True\n" : std::cout << "False\n";
 
   print(vector1);
   print(vector2);
