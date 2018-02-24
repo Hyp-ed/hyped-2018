@@ -54,12 +54,6 @@ class Vector {
   Vector(const Vector<U, dimension>& rhs);
 
   /**
-   * @brief    Conversion from a vector type by assignment.
-   */
-  template <typename U>
-  Vector<T, dimension>& operator=(const Vector<U, dimension>& rhs);
-
-  /**
    * @brief    For assigning values to entries in a vector.
    */
   T& operator[] (int index);
@@ -122,16 +116,6 @@ Vector<T, dimension>::Vector(const Vector<U, dimension>& rhs)
 {
   for (int i = 0; i < dimension; i++)
     elements_[i] = T(rhs[i]);
-}
-
-template <typename T,  int dimension>
-template <typename U>
-Vector<T, dimension>& Vector<T, dimension>::operator=
-(const Vector<U, dimension>& rhs)
-{
-  for (int i = 0; i < dimension; i++)
-    elements_[i] = T(rhs[i]);
-  return *this;
 }
 
 template <typename T,  int dimension>
