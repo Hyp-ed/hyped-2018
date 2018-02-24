@@ -84,6 +84,12 @@ class Vector {
   Vector<T, dimension>& operator/=(const T rhs);
 
   /**
+   * @brief    Multiplication and division of vectors.
+   */
+  Vector<T, dimension>& operator*=(const Vector<T, dimension>& rhs);
+  Vector<T, dimension>& operator/=(const Vector<T, dimension>& rhs);
+
+  /**
    * @brief    Calculates the magnitude of a vector.
    */
   double norm();
@@ -192,10 +198,26 @@ Vector<T, dimension>& Vector<T, dimension>::operator*=(const T rhs)
 }
 
 template <typename T, int dimension>
+Vector<T, dimension>& Vector<T, dimension>::operator*=(const Vector<T, dimension>& rhs)
+{
+  for (int i = 0; i < dimension; i++)
+    elements_[i] *= rhs[i];
+  return *this;
+}
+
+template <typename T, int dimension>
 Vector<T, dimension>& Vector<T, dimension>::operator/=(const T rhs)
 {
   for (int i = 0; i < dimension; i++)
     elements_[i] /= rhs;
+  return *this;
+}
+
+template <typename T, int dimension>
+Vector<T, dimension>& Vector<T, dimension>::operator/=(const Vector<T, dimension>& rhs)
+{
+  for (int i = 0; i < dimension; i++)
+    elements_[i] /= rhs[i];
   return *this;
 }
 
@@ -272,6 +294,15 @@ auto operator-(const T1 lhs,  const Vector<T2, dimension>& rhs)
 }
 
 template <typename T1,  typename T2,  int dimension>
+auto operator*(const Vector<T1, dimension>& lhs,  const Vector<T2, dimension>& rhs)
+    -> Vector<decltype(lhs[0]*rhs[0]), dimension>
+{
+  Vector<decltype(lhs[0]*rhs[0]), dimension> ans(lhs);
+  ans *= rhs;
+  return ans;
+}
+
+template <typename T1,  typename T2,  int dimension>
 auto operator*(const Vector<T1, dimension>& lhs,  const T2 rhs)
     -> Vector<decltype(lhs[0]*rhs), dimension>
 {
@@ -293,7 +324,16 @@ template <typename T1,  typename T2,  int dimension>
 auto operator/(const Vector<T1, dimension>& lhs,  const T2 rhs)
     -> Vector<decltype(lhs[0]*rhs), dimension>
 {
-  Vector<decltype(lhs[0]*rhs), dimension> ans(lhs);
+  Vector<decltype(lhs[0]/rhs), dimension> ans(lhs);
+  ans /= rhs;
+  return ans;
+}
+
+template <typename T1,  typename T2,  int dimension>
+auto operator/(const Vector<T1, dimension>& lhs,  const Vector<T2, dimension>& rhs)
+    -> Vector<decltype(lhs[0]*rhs[0]), dimension>
+{
+  Vector<decltype(lhs[0]/rhs[0]), dimension> ans(lhs);
   ans /= rhs;
   return ans;
 }
