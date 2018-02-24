@@ -16,4 +16,4 @@ MAINS := \
   main_machine \
   main_motor \
   main_threading \
-
+  main_vector \

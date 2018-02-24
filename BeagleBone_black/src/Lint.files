@@ -5,6 +5,7 @@ data/data.cpp
 data/data.hpp
 main_motor.cpp
 main_threading.cpp
+main_vector.cpp
 state_machine/event.hpp
 state_machine/hyped-machine.cpp
 state_machine/hyped-machine.hpp
@@ -17,3 +18,4 @@ motor_control/motor_controller.cpp
 i2c/i2c.hpp
 utils/concurrent/Thread.hpp
 utils/concurrent/Thread.cpp
+utils/math/vector.hpp
