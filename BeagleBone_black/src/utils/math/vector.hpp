@@ -22,6 +22,7 @@
  */
 
 #include <array>
+#include <cmath>
 
 #ifndef BEAGLEBONE_BLACK_UTILS_MATH_VECTOR_HPP_
 #define BEAGLEBONE_BLACK_UTILS_MATH_VECTOR_HPP_
@@ -84,6 +85,11 @@ class Vector {
    */
   Vector<T, dimension>& operator*=(const T rhs);
   Vector<T, dimension>& operator/=(const T rhs);
+
+  /**
+   * @brief    Calculates the magnitude of a vector.
+   */
+  double norm();
 
  private:
   std::array<T, dimension> elements_;
@@ -192,6 +198,15 @@ Vector<T, dimension>& Vector<T, dimension>::operator/=(const T rhs)
   for (int i = 0; i < dimension; i++)
     elements_[i] /= rhs;
   return *this;
+}
+
+template <typename T, int dimension>
+double Vector<T, dimension>::norm()
+{
+  double ans = 0;
+  for (int i = 0; i < dimension; i++)
+    ans += elements_[i]*elements_[i];
+  return sqrt(ans);
 }
 
 template <typename T1,  typename T2,  int dimension>

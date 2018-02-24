@@ -38,6 +38,8 @@ int main()
   Vector<int, 10> vector2;
   Vector<int, 10> vector3;
   Vector<double, 10> vector4;
+  Vector<double, 2> vector5({3, 4});
+  Vector<int, 3> vector6(1);
 
   print(vector1);
   print(vector2);
@@ -62,7 +64,13 @@ int main()
   vector4 = vector4 - vector1;
 
   (vector1 == vector3) ? std::cout << "False" :
-    std::cout << "True"; std :: cout << '\n';
+    std::cout << "True"; std::cout << '\n';
+
+  (vector5.norm() == 5) ? std::cout << "True" :
+    std::cout << "False"; std::cout << '\n';
+
+  (vector6.norm() == sqrt(3)) ? std::cout << "True" :
+    std::cout << "False"; std::cout << '\n';
 
   print(vector1);
   print(vector2);
