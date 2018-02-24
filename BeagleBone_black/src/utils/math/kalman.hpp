@@ -23,6 +23,8 @@
   TODO: Decide the process noise value
 */
 
+#include "utils/math/vector.hpp"
+
 #ifndef BEAGLEBONE_BLACK_UTILS_MATH_KALMAN_HPP_
 #define BEAGLEBONE_BLACK_UTILS_MATH_KALMAN_HPP_
 
@@ -30,18 +32,21 @@ namespace hyped {
 namespace utils {
 namespace math {
 
-template<typename T>
+template<typename T, int dimension>
 class Kalman {
  public:
-  Kalman(T input_value, T measurement_noise, T estimation_error = 0)
+  Kalman(Vector<T, dimension> input_value, Vector<T, dimension> measurement_noise,
+         Vector<T, dimension> process_noise,
+         Vector<T, dimension> estimation_error = Vector<T, dimension>())
     : measurement_noise_covariance_(measurement_noise),
-    estimation_error_covariance_(estimation_error),
-    filtered_value_(input_value)
+      estimation_error_covariance_(estimation_error),
+      filtered_value_(input_value),
+      process_noise_(process_noise)
     {}
 
-  T filter(T input)
+  Vector<T, dimension>& filter(const Vector<T, dimension>& input)
   {
-    estimation_error_covariance_ += k_process_noise_;
+    estimation_error_covariance_ += process_noise_;
     kalman_gain_ = estimation_error_covariance_ /
       (estimation_error_covariance_ + measurement_noise_covariance_);
     filtered_value_ += kalman_gain_ * (input - filtered_value_);
@@ -50,13 +55,17 @@ class Kalman {
     return filtered_value_;
   }
 
- private:
-  const T k_process_noise_ = 0.01;
+  Vector<T, dimension> getFiltered()
+  {
+    return filtered_value_;
+  }
 
-  T measurement_noise_covariance_;
-  T estimation_error_covariance_;
-  T kalman_gain_;
-  T filtered_value_;
+ private:
+  Vector<T, dimension> process_noise_;
+  Vector<T, dimension> measurement_noise_covariance_;
+  Vector<T, dimension> estimation_error_covariance_;
+  Vector<T, dimension> kalman_gain_;
+  Vector<T, dimension> filtered_value_;
 };
 }}}
 

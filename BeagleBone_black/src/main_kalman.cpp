@@ -21,13 +21,25 @@
 
 #include <iostream>
 #include "utils/math/kalman.hpp"
+#include "utils/math/vector.hpp"
 
 using hyped::utils::math::Kalman;
+using hyped::utils::math::Vector;
+
+template <typename T, int dimension>
+void print(const Vector<T, dimension>& vector)
+{
+  for (int i = 0; i < dimension; i++)
+    std::cout << vector[i] << '\t';
+  std::cout << '\n';
+}
 
 int main()
 {
-  Kalman<double> kalman(0, 1, 1);
+  Kalman<double, 1> kalman(Vector<double, 1>(0), Vector<double, 1>(1),
+                           Vector<double, 1>(1), Vector<double, 1>(0.01));
+
   for (int i = 0; i < 100; i++)
-    std::cout << kalman.filter(i) << '\t';
+    print(kalman.filter(Vector<double, 1>(i)));
   std::cout << '\n';
 }
