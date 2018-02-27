@@ -9,7 +9,7 @@ SRCS_DIR:=src
 OBJS_DIR:=bin
 
 CFLAGS:=-pthread -std=c++11 -O0 -Wall
-LFLAGS:=-lpthread
+LFLAGS:=-lpthread -pthread
 
 
 include $(SRCS_DIR)/Source.files
@@ -33,7 +33,8 @@ Echo := $(Verb)echo
 default: $(TARGET) lint
 
 all:
-	$(Verb) for main in $(MAINS); do \
+	$(Verb) set -e; \
+	for main in $(MAINS); do \
 		$(MAKE) MAIN=$${main}.cpp TARGET=$$main NOLINT=1 --silent; \
 	done; \
 	$(MAKE) lint --no-print-directory
@@ -50,7 +51,7 @@ $(OBJS): $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 
 lint:
 ifndef NOLINT
-	$(Verb) python utils/Lint/presubmit.py
+	$(Verb) python2.7 utils/Lint/presubmit.py
 endif
 
 clean: cleanlint
