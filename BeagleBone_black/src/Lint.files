@@ -17,3 +17,7 @@ motor_control/motor_controller.cpp
 i2c/i2c.hpp
 utils/concurrent/Thread.hpp
 utils/concurrent/Thread.cpp
+utils/concurrent/Lock.hpp
+utils/concurrent/Lock.cpp
+utils/concurrent/ConditionVariable.hpp
+utils/concurrent/ConditionVariable.cpp

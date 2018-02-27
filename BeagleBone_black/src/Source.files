@@ -8,6 +8,9 @@ SRCS := \
   motor_control/motor.cpp \
   motor_control/motor_controller.cpp \
   utils/concurrent/Thread.cpp \
+  utils/concurrent/Lock.cpp \
+  utils/concurrent/ConditionVariable.cpp \
+
 
 
 MAINS := \

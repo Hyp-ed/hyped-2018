@@ -20,37 +20,73 @@
  *    limitations under the License.
  */
 
-#include <iostream>
+// #include <iostream>
+#include <stdio.h>
 
 #include "utils/concurrent/Thread.hpp"
+#include "utils/concurrent/Lock.hpp"
+#include "utils/concurrent/ConditionVariable.hpp"
 
 using hyped::utils::concurrent::Thread;
+using hyped::utils::concurrent::Lock;
+using hyped::utils::concurrent::ScopedLock;
+using hyped::utils::concurrent::ConditionVariable;
 
-void foo()
-{
-  std::cout << "New foo thread started" << std::endl;
-}
+ConditionVariable cv;
+Lock              global_lock;
+Lock              lock_;
+
+int value = 0;
 
 class DemoThread: public Thread {
  public:
-  explicit DemoThread(uint8_t id): Thread(id) { /* EMPTY */ }
+  explicit DemoThread(uint8_t id, bool synchronise = false)
+    : Thread(id),
+      synchronise_(synchronise) { /* EMPTY */ }
   void run() override
   {
-    std::cout << "Demo thread running with id " << getId();
+    int i;
+
+    global_lock.lock();
+    cv.wait(&global_lock);
+    global_lock.unlock();
+
+    if (synchronise_) lock_.lock();
+    int temp = value;
+    i = 10000;
+    while (i--);
+    value = temp + 1;
+    if (synchronise_) lock_.unlock();
   }
+ private:
+  bool synchronise_;
 };
 
 
 int main()
 {
-  std::cout << "Starting BeagleBone Black threading..." << std::endl;
-
-  Thread* t2 = new Thread(1);
-  Thread* t3 = new DemoThread(2);
+  int i;
+  bool synchronise = false;
+  Thread* t2 = new DemoThread(2, synchronise);
+  Thread* t3 = new DemoThread(3, synchronise);
 
   t2->start();
   t3->start();
+
+  i = 100000;
+  while (i--);
+
+  cv.notifyAll();
+
+  i = 40000;
+  while (i--);
+  int temp = value;
+
   t2->join();
-  t2->join();
+  t3->join();
+  delete t2;
+  delete t3;
+  printf("synchronise: %d ", synchronise);
+  printf("temp vs final value: %d %d\n", temp, value);
   return 0;
 }
