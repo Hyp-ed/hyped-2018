@@ -38,6 +38,11 @@ Lock              lock_;
 
 int value = 0;
 
+void delay(uint32_t i)
+{
+  while (i--);
+}
+
 class DemoThread: public Thread {
  public:
   explicit DemoThread(uint8_t id, bool synchronise = false)
@@ -45,16 +50,14 @@ class DemoThread: public Thread {
       synchronise_(synchronise) { /* EMPTY */ }
   void run() override
   {
-    int i;
-
     global_lock.lock();
     cv.wait(&global_lock);
     global_lock.unlock();
 
     if (synchronise_) lock_.lock();
     int temp = value;
-    i = 10000;
-    while (i--);
+
+    delay(10000);
     value = temp + 1;
     if (synchronise_) lock_.unlock();
   }
@@ -65,7 +68,6 @@ class DemoThread: public Thread {
 
 int main()
 {
-  int i;
   bool synchronise = false;
   Thread* t2 = new DemoThread(2, synchronise);
   Thread* t3 = new DemoThread(3, synchronise);
@@ -73,13 +75,11 @@ int main()
   t2->start();
   t3->start();
 
-  i = 100000;
-  while (i--);
+  delay(100000);
 
   cv.notifyAll();
 
-  i = 40000;
-  while (i--);
+  delay(40000);
   int temp = value;
 
   t2->join();
