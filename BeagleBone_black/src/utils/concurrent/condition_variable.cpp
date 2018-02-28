@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 28. February 2018
+ * Date: 27. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,31 +18,38 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/Barrier.hpp"
+#include "utils/concurrent/condition_variable.hpp"
 
+#include "utils/concurrent/lock.hpp"
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-Barrier::Barrier(uint8_t required)
-    : required_(required),
-      calls_(0) { /* EMPTY */ }
-
-Barrier::~Barrier() { /* EMPTY */ }
-
-void Barrier::wait()
+ConditionVariable::ConditionVariable()
 {
-  ScopedLock L(&lock_);
-  calls_++;
-
-  if (calls_ != required_) {
-    cv_.wait(&lock_);
-  } else {
-    calls_ = 0;
-    cv_.notifyAll();
-  }
+  cond_var_ = new std::CV();
 }
 
-}}}   // namespace hyped::utils::concurrent
+ConditionVariable::~ConditionVariable()
+{
+  delete cond_var_;
+}
+
+void ConditionVariable::notify()
+{
+  cond_var_->notify_one();
+}
+
+void ConditionVariable::notifyAll()
+{
+  cond_var_->notify_all();
+}
+
+void ConditionVariable::wait(Lock* lock)
+{
+  cond_var_->wait(*lock->mutex_);
+}
+
+}}}   // hyped::utils::concurrent
 

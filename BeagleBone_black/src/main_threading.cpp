@@ -23,9 +23,9 @@
 // #include <iostream>
 #include <stdio.h>
 
-#include "utils/concurrent/Thread.hpp"
-#include "utils/concurrent/Lock.hpp"
-#include "utils/concurrent/ConditionVariable.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "utils/concurrent/lock.hpp"
+#include "utils/concurrent/condition_variable.hpp"
 
 using hyped::utils::concurrent::Thread;
 using hyped::utils::concurrent::Lock;

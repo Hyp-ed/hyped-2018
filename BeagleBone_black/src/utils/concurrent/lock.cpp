@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 28. February 2018
+ * Date: 27. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,33 +18,37 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
-#define BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
+#include "utils/concurrent/lock.hpp"
 
-#include <cstdint>
-
-#include "utils/concurrent/Lock.hpp"
-#include "utils/concurrent/ConditionVariable.hpp"
+#include <mutex>
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-class Barrier {
- public:
-  explicit Barrier(uint8_t required);
-  ~Barrier();
+Lock::Lock()
+{
+  mutex_ = new std::mutex();
+}
 
-  void wait();
+Lock::~Lock()
+{
+  delete mutex_;
+}
 
- private:
-  uint8_t required_;
-  uint8_t calls_;
+void Lock::lock()
+{
+  mutex_->lock();
+}
 
-  Lock    lock_;
-  ConditionVariable cv_;
-};
+bool Lock::tryLock()
+{
+  return mutex_->try_lock();
+}
+
+void Lock::unlock()
+{
+  return mutex_->unlock();
+}
 
 }}}   // namespace hyped::utils::concurrent
-
-#endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_

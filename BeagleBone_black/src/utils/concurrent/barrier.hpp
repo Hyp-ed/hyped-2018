@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 27. February 2018
+ * Date: 28. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,38 +18,33 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/ConditionVariable.hpp"
+#ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
+#define BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
 
-#include "utils/concurrent/Lock.hpp"
+#include <cstdint>
+
+#include "utils/concurrent/lock.hpp"
+#include "utils/concurrent/condition_variable.hpp"
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-ConditionVariable::ConditionVariable()
-{
-  cond_var_ = new std::CV();
-}
+class Barrier {
+ public:
+  explicit Barrier(uint8_t required);
+  ~Barrier();
 
-ConditionVariable::~ConditionVariable()
-{
-  delete cond_var_;
-}
+  void wait();
 
-void ConditionVariable::notify()
-{
-  cond_var_->notify_one();
-}
+ private:
+  uint8_t required_;
+  uint8_t calls_;
 
-void ConditionVariable::notifyAll()
-{
-  cond_var_->notify_all();
-}
+  Lock    lock_;
+  ConditionVariable cv_;
+};
 
-void ConditionVariable::wait(Lock* lock)
-{
-  cond_var_->wait(*lock->mutex_);
-}
+}}}   // namespace hyped::utils::concurrent
 
-}}}   // hyped::utils::concurrent
-
+#endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_

@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 27. February 2018
+ * Date: 21. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,37 +18,51 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/Lock.hpp"
+#include "utils/concurrent/thread.hpp"
 
-#include <mutex>
+#include <thread>
+#include <iostream>
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-Lock::Lock()
+namespace {
+
+void thread_entry_point(Thread* this_)
 {
-  mutex_ = new std::mutex();
+  this_->run();
 }
 
-Lock::~Lock()
+}   // namespace ::
+
+
+Thread::Thread(uint8_t id)
+    : id_(id),
+      thread_(0)
+{ /* EMPTY */ }
+
+Thread::~Thread() { /* EMPTY */ }
+
+void Thread::start()
 {
-  delete mutex_;
+  thread_ = new std::thread(thread_entry_point, this);
 }
 
-void Lock::lock()
+void Thread::join()
 {
-  mutex_->lock();
+  thread_->join();
 }
 
-bool Lock::tryLock()
+void Thread::run()
 {
-  return mutex_->try_lock();
+  std::cout << "You are starting EMPTY thread. Terminating now.\n";
 }
 
-void Lock::unlock()
+void Thread::yield()
 {
-  return mutex_->unlock();
+  std::this_thread::yield();
 }
 
 }}}   // namespace hyped::utils::concurrent
+
