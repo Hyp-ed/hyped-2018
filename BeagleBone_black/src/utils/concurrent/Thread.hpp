@@ -51,7 +51,10 @@ class Thread {
    */
   virtual void run();
 
+  static void yield();
+
   uint8_t getId() { return id_; }
+
  private:
   uint8_t id_;
   std::thread* thread_;

@@ -21,3 +21,5 @@ utils/concurrent/Lock.hpp
 utils/concurrent/Lock.cpp
 utils/concurrent/ConditionVariable.hpp
 utils/concurrent/ConditionVariable.cpp
+utils/concurrent/Barrier.hpp
+utils/concurrent/Barrier.cpp

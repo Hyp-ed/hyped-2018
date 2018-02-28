@@ -10,6 +10,7 @@ SRCS := \
   utils/concurrent/Thread.cpp \
   utils/concurrent/Lock.cpp \
   utils/concurrent/ConditionVariable.cpp \
+  utils/concurrent/Barrier.cpp \
 
 
 

@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 21. February 2018
+ * Date: 28. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,51 +18,33 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/Thread.hpp"
+#ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
+#define BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
 
-#include <thread>
-#include <iostream>
+#include <cstdint>
+
+#include "utils/concurrent/Lock.hpp"
+#include "utils/concurrent/ConditionVariable.hpp"
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-namespace {
+class Barrier {
+ public:
+  explicit Barrier(uint8_t required);
+  ~Barrier();
 
-void thread_entry_point(Thread* this_)
-{
-  this_->run();
-}
+  void wait();
 
-}   // namespace ::
+ private:
+  uint8_t required_;
+  uint8_t calls_;
 
-
-Thread::Thread(uint8_t id)
-    : id_(id),
-      thread_(0)
-{ /* EMPTY */ }
-
-Thread::~Thread() { /* EMPTY */ }
-
-void Thread::start()
-{
-  thread_ = new std::thread(thread_entry_point, this);
-}
-
-void Thread::join()
-{
-  thread_->join();
-}
-
-void Thread::run()
-{
-  std::cout << "You are starting EMPTY thread. Terminating now.\n";
-}
-
-void Thread::yield()
-{
-  std::this_thread::yield();
-}
+  Lock    lock_;
+  ConditionVariable cv_;
+};
 
 }}}   // namespace hyped::utils::concurrent
 
+#endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
