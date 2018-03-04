@@ -7,6 +7,7 @@ main_kalman.cpp
 main_motor.cpp
 main_threading.cpp
 main_vector.cpp
+main_quaternion.cpp
 state_machine/event.hpp
 state_machine/hyped-machine.cpp
 state_machine/hyped-machine.hpp
@@ -21,3 +22,4 @@ utils/concurrent/Thread.hpp
 utils/concurrent/Thread.cpp
 utils/math/kalman.hpp
 utils/math/vector.hpp
+utils/math/quaternion.hpp

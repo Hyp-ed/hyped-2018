@@ -18,3 +18,4 @@ MAINS := \
   main_threading \
   main_vector \
   main_kalman \
+  main_quaternion \
