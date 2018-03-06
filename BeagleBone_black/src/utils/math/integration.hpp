@@ -30,20 +30,28 @@ class Integration {
  public:
   Integration() {}
 
-  T update(hyped::data::DataPoint<T> point1,
-	   hyped::data::DataPoint<T> point2);
+  /**
+   * @brief    Calculates the area given two points for time T_(N)
+   *
+   * @param[in]  point1    The point for time T_(N-2)
+   * @param[in]  point2    The point for time T_(N-1)
+   *
+   */
+  hyped::data::DataPoint<T> update(hyped::data::DataPoint<T> point1,
+				   hyped::data::DataPoint<T> point2);
 
  private:
-  T previous_output_;
+  hyped::data::DataPoint<T> previous_output_;
   
 };
 
 template <typename T>
-T Integration<T>::update(hyped::data::DataPoint<T> point1,
-			 hyped::data::DataPoint<T> point2)
+hyped::data::DataPoint<T> Integration<T>::update(hyped::data::DataPoint<T> point1,
+				    hyped::data::DataPoint<T> point2)
 {
   T area = (point2.value + point1.value)/2 * (point2.timestamp - point1.timestamp);
-  previous_output_ += area;
+  previous_output_.value += area;
+  previous_output_.timestamp = point2.timestamp;
   return previous_output_;
 }
 

@@ -26,11 +26,16 @@ hyped::data::DataPoint<double> c(3,1);
 hyped::data::DataPoint<double> d(4,2);
 hyped::data::DataPoint<double> e(5,5);
 
+void print(hyped::data::DataPoint<double> x)
+{
+  std::cout << x.timestamp << '\t' << x.value << std::endl;
+}
+
 int main()
 {
   hyped::utils::math::Integration<double> area;
-  std::cout << area.update(a,b) << std::endl;
-  std::cout << area.update(b,c) << std::endl;
-  std::cout << area.update(c,d) << std::endl;
-  std::cout << area.update(d,e) << std::endl;
+  print(area.update(a,b));
+  print(area.update(b,c));
+  print(area.update(c,d));
+  print(area.update(d,e));
 }
