@@ -1,8 +1,8 @@
 /*
  * Author: Uday Patel
  * Organisation: HYPED
- * Date: 
- * Description: <What is this file for?>
+ * Date: 6 March 2018
+ * Description: Main file to test integration.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
