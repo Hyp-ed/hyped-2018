@@ -19,7 +19,10 @@
 #ifndef BEAGLEBONE_BLACK_DATA_DATA_HPP_
 #define BEAGLEBONE_BLACK_DATA_DATA_HPP_
 
+#include <array>
 #include <cstdint>
+
+#include "data/data_point.hpp"
 
 namespace hyped {
 namespace data {
@@ -31,32 +34,39 @@ struct Navigation {
   uint32_t distance;
   uint32_t velocity;
   int32_t acceleration;
-  uint64_t stripe_count;
+  uint32_t stripe_count;
 };
 
 // -----------------------------------------------------------------------------
 // Raw Sensor data
 // -----------------------------------------------------------------------------
-#define IMU_NUM   3
-#define PROXY_NUM 3
 
-struct IMU {
-  uint8_t acc_x;
-  uint8_t acc_y;
-  uint8_t acc_z;
+struct Imu {
+  uint16_t acc_x;
+  uint16_t acc_y;
+  uint16_t acc_z;
 
-  uint8_t gyr_x;
-  uint8_t gyr_y;
-  uint8_t gyr_z;
+  uint16_t gyr_x;
+  uint16_t gyr_y;
+  uint16_t gyr_z;
 };
 
-struct Proxy {
+struct Proximity {
   uint8_t val;
 };
 
+/*struct StripeCount {
+  DataPoint<uint32_t> count;
+};//*/
+typedef DataPoint<uint32_t> StripeCount;
+
 struct Sensors {
-  IMU     imu[IMU_NUM];
-  Proxy   proxy[PROXY_NUM];
+  static constexpr int kNumImus = 8;
+  static constexpr int kNumProximities = 24;
+
+  std::array<Imu, kNumImus> imu;
+  std::array<Proximity, kNumProximities> proxy;
+  StripeCount stripe_cnt;
 };
 
 // -----------------------------------------------------------------------------
