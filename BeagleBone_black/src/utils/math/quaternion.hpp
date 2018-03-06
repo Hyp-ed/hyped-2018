@@ -24,11 +24,11 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_MATH_QUATERNION_HPP_
 #define BEAGLEBONE_BLACK_UTILS_MATH_QUATERNION_HPP_
 
-#include "vector.hpp"
-
 #include <initializer_list>
 #include <array>
 #include <cmath>
+
+#include "vector.hpp"
 
 using hyped::utils::math::Vector;
 
@@ -39,25 +39,24 @@ namespace hyped {
 template <typename T>
 class Quaternion
 {
-  public:
-
+ public:
     /**
      * @brief    Constructors for the class for a zero Quaternion.
      */
     Quaternion();
-    Quaternion(const T element);
+    explicit Quaternion(const T element);
 
     /**
      * @brief    Conversion from a vector to a quaternion.
      */
     template <typename U>
-    Quaternion(const Vector<U,4>& rhs);
+    Quaternion(const Vector<U, 4>& rhs);
 
     template <typename U>
-    Quaternion(const Vector<U,3>& rhs);
+    Quaternion(const Vector<U, 3>& rhs);
 
     template <typename U1, typename U2>
-    Quaternion(const U1 scalar, const Vector<U2,3>& rhs);
+    Quaternion(const U1 scalar, const Vector<U2, 3>& rhs);
 
     /**
      * @brief    Creates quaternion from 4 numbers.
@@ -69,7 +68,7 @@ class Quaternion
      */
      template <typename U>
      Quaternion(const Quaternion<U>& rhs);
-  
+
     /**
      * @brief    For assigning values to entries in a vector.
      */
@@ -81,10 +80,10 @@ class Quaternion
     T operator[] (int index) const;
 
     Quaternion<T> operator-() const;
-  
+
     template <typename U>
     Quaternion<T>& operator+=(const Quaternion<U>& rhs);
-  
+
     template <typename U>
     Quaternion<T>& operator-=(const Quaternion<U>& rhs);
 
@@ -92,8 +91,8 @@ class Quaternion
      * @brief    Addition or subtraction of by a
      *           Vector.
      */
-    Quaternion<T>& operator+=(const Vector<T,4>& rhs);
-    Quaternion<T>& operator-=(const Vector<T,4>& rhs);
+    Quaternion<T>& operator+=(const Vector<T, 4>& rhs);
+    Quaternion<T>& operator-=(const Vector<T, 4>& rhs);
 
     /**
      * @brief    Addition or subtraction of every
@@ -101,8 +100,8 @@ class Quaternion
      */
     Quaternion<T>& operator+=(const T rhs);
     Quaternion<T>& operator-=(const T rhs);
-  
-  
+
+
     /**
      * @brief   Quaternion multiplication
      */
@@ -119,38 +118,39 @@ class Quaternion
      */
     double norm();
 
-    Vector<T,4> get_quaternion() const;
+    Vector<T, 4> get_quaternion() const;
 
-  private:
-    Vector<T,4> quaternion_;
+ private:
+    Vector<T, 4> quaternion_;
 };
 
 template <typename T>
 Quaternion<T>::Quaternion()
 {
-  //this->quaternion_ = new Vector<T,4>();
+  // TODO(Adi): Check this
+  // this->quaternion_ = new Vector<T, 4>();
 }
 
 template <typename T>
 Quaternion<T>::Quaternion(const T element)
 {
   this->quaternion_*=0;
-  Vector<T,4> quaternion(element);
+  Vector<T, 4> quaternion(element);
   this->quaternion_+=quaternion;
 }
 
 template <typename T>
 template <typename U>
-Quaternion<T>::Quaternion(const Vector<U,4>& rhs)
+Quaternion<T>::Quaternion(const Vector<U, 4>& rhs)
 {
   this->quaternion_*=0;
-  Vector<T,4> quaternion(rhs);
+  Vector<T, 4> quaternion(rhs);
   this->quaternion_+=quaternion;
 }
 
 template <typename T>
 template <typename U>
-Quaternion<T>::Quaternion(const Vector<U,3>& rhs)
+Quaternion<T>::Quaternion(const Vector<U, 3>& rhs)
 {
   this->quaternion_[0] = T(0);
   this->quaternion_[1] = T(rhs[0]);
@@ -160,7 +160,7 @@ Quaternion<T>::Quaternion(const Vector<U,3>& rhs)
 
 template <typename T>
 template <typename U1, typename U2>
-Quaternion<T>::Quaternion(const U1 scalar, const Vector<U2,3>& rhs)
+Quaternion<T>::Quaternion(const U1 scalar, const Vector<U2, 3>& rhs)
 {
   this->quaternion_[0] = T(scalar);
   this->quaternion_[1] = T(rhs[0]);
@@ -172,7 +172,7 @@ template <typename T>
 Quaternion<T>::Quaternion(T a, T b, T c, T d)
 {
   this->quaternion_*=0;
-  Vector<T,4> quaternion({a,b,c,d});
+  Vector<T, 4> quaternion({a, b, c, d});
   this->quaternion_+=quaternion;
 }
 
@@ -219,14 +219,14 @@ Quaternion<T>& Quaternion<T>::operator-=(const Quaternion<U>& rhs)
 }
 
 template <typename T>
-Quaternion<T>& Quaternion<T>::operator+=(const Vector<T,4>& rhs)
+Quaternion<T>& Quaternion<T>::operator+=(const Vector<T, 4>& rhs)
 {
   this->quaternion_+=rhs;
   return *this;
 }
 
 template <typename T>
-Quaternion<T>& Quaternion<T>::operator-=(const Vector<T,4>& rhs)
+Quaternion<T>& Quaternion<T>::operator-=(const Vector<T, 4>& rhs)
 {
   this->quaternion_-=rhs;
   return *this;
@@ -250,10 +250,15 @@ Quaternion<T>& Quaternion<T>::operator-=(const T rhs)
 template <typename T>
 Quaternion<T>& Quaternion<T>::operator*=(const Quaternion<T>& rhs)
 {
-  T a = rhs[0]*this->quaternion_[0] - rhs[1]*this->quaternion_[1] - rhs[2]*this->quaternion_[2] - rhs[3]*this->quaternion_[3];
-  T b = rhs[0]*this->quaternion_[1] + rhs[1]*this->quaternion_[0] - rhs[2]*this->quaternion_[3] + rhs[3]*this->quaternion_[2];
-  T c = rhs[0]*this->quaternion_[2] + rhs[1]*this->quaternion_[3] + rhs[2]*this->quaternion_[0] - rhs[3]*this->quaternion_[1];
-  T d = rhs[0]*this->quaternion_[3] - rhs[1]*this->quaternion_[2] + rhs[2]*this->quaternion_[1] + rhs[3]*this->quaternion_[0];
+  T a = rhs[0]*this->quaternion_[0] - rhs[1]*this->quaternion_[1] -
+    rhs[2]*this->quaternion_[2] - rhs[3]*this->quaternion_[3];
+  T b = rhs[0]*this->quaternion_[1] + rhs[1]*this->quaternion_[0] -
+    rhs[2]*this->quaternion_[3] + rhs[3]*this->quaternion_[2];
+  T c = rhs[0]*this->quaternion_[2] + rhs[1]*this->quaternion_[3] +
+    rhs[2]*this->quaternion_[0] - rhs[3]*this->quaternion_[1];
+  T d = rhs[0]*this->quaternion_[3] - rhs[1]*this->quaternion_[2] +
+    rhs[2]*this->quaternion_[1] + rhs[3]*this->quaternion_[0];
+
   this->quaternion_[0] = a;
   this->quaternion_[1] = b;
   this->quaternion_[2] = c;
@@ -281,8 +286,8 @@ double Quaternion<T>::norm()
   return this->quaternion_.norm();
 }
 
-template <typename T1,  typename T2>
-auto operator+(const Quaternion<T1>& lhs,  const Quaternion<T2>& rhs)
+template <typename T1, typename T2>
+auto operator+(const Quaternion<T1>& lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs[0]+rhs[0])>
 {
   Quaternion<decltype(lhs[0]+rhs[0])> ans(lhs);
@@ -290,8 +295,8 @@ auto operator+(const Quaternion<T1>& lhs,  const Quaternion<T2>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator+(const Quaternion<T1>& lhs,  const T2 rhs)
+template <typename T1, typename T2>
+auto operator+(const Quaternion<T1>& lhs, const T2 rhs)
     -> Quaternion<decltype(lhs[0]+rhs)>
 {
   Quaternion<decltype(lhs[0]+rhs)> ans(lhs);
@@ -299,7 +304,7 @@ auto operator+(const Quaternion<T1>& lhs,  const T2 rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
+template <typename T1, typename T2>
 auto operator+(const T1 lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs+rhs[0])>
 {
@@ -308,8 +313,8 @@ auto operator+(const T1 lhs, const Quaternion<T2>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator+(const Quaternion<T1>& lhs, const Vector<T2,4>& rhs)
+template <typename T1, typename T2>
+auto operator+(const Quaternion<T1>& lhs, const Vector<T2, 4>& rhs)
     -> Quaternion<decltype(lhs[0]+rhs[0])>
 {
   Quaternion<decltype(lhs[0]+rhs[0])> ans(lhs);
@@ -317,8 +322,8 @@ auto operator+(const Quaternion<T1>& lhs, const Vector<T2,4>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator+(const Vector<T1,4>& lhs, const Quaternion<T2>& rhs)
+template <typename T1, typename T2>
+auto operator+(const Vector<T1, 4>& lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs[0]+rhs[0])>
 {
   Quaternion<decltype(lhs[0]+rhs[0])> ans(lhs);
@@ -327,8 +332,8 @@ auto operator+(const Vector<T1,4>& lhs, const Quaternion<T2>& rhs)
 }
 
 
-template <typename T1,  typename T2>
-auto operator-(const Quaternion<T1>& lhs,  const Quaternion<T2>& rhs)
+template <typename T1, typename T2>
+auto operator-(const Quaternion<T1>& lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs[0]-rhs[0])>
 {
   Quaternion<decltype(lhs[0]-rhs[0])> ans(lhs);
@@ -336,8 +341,8 @@ auto operator-(const Quaternion<T1>& lhs,  const Quaternion<T2>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator-(const Quaternion<T1>& lhs,  const T2 rhs)
+template <typename T1, typename T2>
+auto operator-(const Quaternion<T1>& lhs, const T2 rhs)
     -> Quaternion<decltype(lhs[0]-rhs)>
 {
   Quaternion<decltype(lhs[0]-rhs)> ans(lhs);
@@ -345,7 +350,7 @@ auto operator-(const Quaternion<T1>& lhs,  const T2 rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
+template <typename T1, typename T2>
 auto operator-(const T1 lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs-rhs[0])>
 {
@@ -354,8 +359,8 @@ auto operator-(const T1 lhs, const Quaternion<T2>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator-(const Quaternion<T1>& lhs, const Vector<T2,4>& rhs)
+template <typename T1, typename T2>
+auto operator-(const Quaternion<T1>& lhs, const Vector<T2, 4>& rhs)
     -> Quaternion<decltype(lhs[0]-rhs[0])>
 {
   Quaternion<decltype(lhs[0]-rhs[0])> ans(lhs);
@@ -363,8 +368,8 @@ auto operator-(const Quaternion<T1>& lhs, const Vector<T2,4>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator-(const Vector<T1,4>& lhs, const Quaternion<T2>& rhs)
+template <typename T1, typename T2>
+auto operator-(const Vector<T1, 4>& lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs[0]-rhs[0])>
 {
   Quaternion<decltype(lhs[0]-rhs[0])> ans(lhs);
@@ -372,8 +377,8 @@ auto operator-(const Vector<T1,4>& lhs, const Quaternion<T2>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator*(const Quaternion<T1>& lhs,  const Quaternion<T2>& rhs)
+template <typename T1, typename T2>
+auto operator*(const Quaternion<T1>& lhs, const Quaternion<T2>& rhs)
     -> Quaternion<decltype(lhs[0]*rhs[0])>
 {
   Quaternion<decltype(lhs[0]*rhs[0])> ans(lhs);
@@ -381,8 +386,8 @@ auto operator*(const Quaternion<T1>& lhs,  const Quaternion<T2>& rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator*(const Quaternion<T1>& lhs,  const T2 rhs)
+template <typename T1, typename T2>
+auto operator*(const Quaternion<T1>& lhs, const T2 rhs)
     -> Quaternion<decltype(lhs[0]*rhs)>
 {
   Quaternion<decltype(lhs[0]*rhs)> ans(lhs);
@@ -390,17 +395,17 @@ auto operator*(const Quaternion<T1>& lhs,  const T2 rhs)
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator*(const T1 lhs,  const Quaternion<T2>& rhs)
-    -> Vector<decltype(lhs*rhs[0]),4>
+template <typename T1, typename T2>
+auto operator*(const T1 lhs, const Quaternion<T2>& rhs)
+    -> Vector<decltype(lhs*rhs[0]), 4>
 {
-  Vector<decltype(lhs*rhs[0]),4> ans(lhs);
+  Vector<decltype(lhs*rhs[0]), 4> ans(lhs);
   ans *= rhs;
   return ans;
 }
 
-template <typename T1,  typename T2>
-auto operator/(const Quaternion<T1>& lhs,  const T2 rhs)
+template <typename T1, typename T2>
+auto operator/(const Quaternion<T1>& lhs, const T2 rhs)
     -> Quaternion<decltype(lhs[0]*rhs)>
 {
   Quaternion<decltype(lhs[0]*rhs)> ans(lhs);
@@ -415,7 +420,7 @@ bool operator==(const Quaternion<T1>& lhs, const Quaternion<T2>& rhs)
 }
 
 template <typename T>
-Vector<T,4> Quaternion<T>::get_quaternion() const
+Vector<T, 4> Quaternion<T>::get_quaternion() const
 {
   return this->quaternion_;
 }
