@@ -1,8 +1,9 @@
 /*
  * Author: Uday Patel
  * Organisation: HYPED
- * Date: 
- * Description: <What is this file for?>
+ * Date: 6 March 2018
+ * Description: Integration class to calculate the area of the 
+ *              graph between two points.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
