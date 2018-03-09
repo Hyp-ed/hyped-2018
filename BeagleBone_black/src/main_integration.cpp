@@ -34,8 +34,9 @@ void print(hyped::data::DataPoint<double> x)
 int main()
 {
   hyped::utils::math::Integration<double> area;
-  print(area.update(a,b));
-  print(area.update(b,c));
-  print(area.update(c,d));
-  print(area.update(d,e));
+  print(area.update(a));
+  print(area.update(b));
+  print(area.update(c));
+  print(area.update(d));
+  print(area.update(e));
 }

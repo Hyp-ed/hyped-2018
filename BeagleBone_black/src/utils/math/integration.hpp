@@ -2,7 +2,7 @@
  * Author: Uday Patel
  * Organisation: HYPED
  * Date: 6 March 2018
- * Description: Integration class to calculate the area of the 
+ * Description: Integration class to calculate the area of the
  *              graph between two points.
  *
  *    Copyright 2018 HYPED
@@ -26,10 +26,12 @@ namespace hyped {
 namespace utils {
 namespace math {
 
+using namespace hyped::data;
+
 template <typename T>
 class Integration {
  public:
-  Integration() {}
+  Integration();
 
   /**
    * @brief    Calculates the area given two points for time T_(N)
@@ -38,21 +40,32 @@ class Integration {
    * @param[in]  point2    The point for time T_(N-1)
    *
    */
-  hyped::data::DataPoint<T> update(hyped::data::DataPoint<T> point1,
-				   hyped::data::DataPoint<T> point2);
+  DataPoint<T> update(DataPoint<T> point);
 
  private:
-  hyped::data::DataPoint<T> previous_output_;
-  
+  DataPoint<T> previous_point_;
+  DataPoint<T> previous_output_;
+
 };
 
 template <typename T>
-hyped::data::DataPoint<T> Integration<T>::update(hyped::data::DataPoint<T> point1,
-				    hyped::data::DataPoint<T> point2)
+Integration<T>::Integration()
 {
-  T area = (point2.value + point1.value)/2 * (point2.timestamp - point1.timestamp);
+  previous_point_ = DataPoint<T>(0,0);
+  previous_output_ = DataPoint<T>(0,0);
+}
+
+template <typename T>
+DataPoint<T> Integration<T>::update(DataPoint<T> point)
+{
+  T area = (point.value + previous_point_.value)/2 * (point.timestamp - previous_point_.timestamp);
+
   previous_output_.value += area;
-  previous_output_.timestamp = point2.timestamp;
+  previous_output_.timestamp = point.timestamp;
+
+  previous_point_.value = point.value;
+  previous_point_.timestamp = point.timestamp;
+
   return previous_output_;
 }
 
