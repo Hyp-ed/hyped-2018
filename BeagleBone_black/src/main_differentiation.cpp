@@ -34,8 +34,9 @@ void print(hyped::data::DataPoint<double> x)
 int main()
 {
   hyped::utils::math::Differentiation<double> gradient;
-  print(gradient.update(a,b));
-  print(gradient.update(b,c));
-  print(gradient.update(c,d));
-  print(gradient.update(d,e));
+  print(gradient.update(a));
+  print(gradient.update(b));
+  print(gradient.update(c));
+  print(gradient.update(d));
+  print(gradient.update(e));
 }

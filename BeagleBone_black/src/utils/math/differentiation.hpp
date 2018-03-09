@@ -26,10 +26,12 @@ namespace hyped {
 namespace utils {
 namespace math {
 
+using namespace hyped::data;
+  
 template <typename T>
 class Differentiation {
  public:
-  Differentiation() {}
+  Differentiation();
 
   /**
    * @brief    Calculates the gradient given two points for time T_(N)
@@ -38,17 +40,28 @@ class Differentiation {
    * @param[in]  point2    The point for time T_(N-1)
    *
    */
-  hyped::data::DataPoint<T> update(hyped::data::DataPoint<T> point1,
-				   hyped::data::DataPoint<T> point2);
+  DataPoint<T> update(DataPoint<T> point);
+
+ private:
+  DataPoint<T> prev_point_;
   
 };
 
 template <typename T>
-hyped::data::DataPoint<T> Differentiation<T>::update(hyped::data::DataPoint<T> point1,
-						     hyped::data::DataPoint<T> point2)
+Differentiation<T>::Differentiation()
 {
-  T gradient = (point2.value - point1.value) / (point2.timestamp - point1.timestamp);
-  return hyped::data::DataPoint<T>(point2.timestamp, gradient);
+  prev_point_ = DataPoint<T>(0,0);
+}
+  
+template <typename T>
+DataPoint<T> Differentiation<T>::update(DataPoint<T> point)
+{
+  T gradient = (point.value - prev_point_.value) / (point.timestamp - prev_point_.timestamp);
+  
+  prev_point_.value = point.value;
+  prev_point_.timestamp = point.timestamp;
+
+  return DataPoint<T>(point.timestamp, gradient);
 }
 
 }}}
