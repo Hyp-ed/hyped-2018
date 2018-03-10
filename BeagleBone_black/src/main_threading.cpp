@@ -46,8 +46,10 @@ void delay(uint32_t i)
 class DemoThread: public Thread {
  public:
   explicit DemoThread(uint8_t id, bool synchronise = false)
-    : Thread(id),
-      synchronise_(synchronise) { /* EMPTY */ }
+      : Thread(id),
+        synchronise_(synchronise)
+  { /* EMPTY */ }
+
   void run() override
   {
     global_lock.lock();
@@ -61,6 +63,7 @@ class DemoThread: public Thread {
     value = temp + 1;
     if (synchronise_) lock_.unlock();
   }
+
  private:
   bool synchronise_;
 };
