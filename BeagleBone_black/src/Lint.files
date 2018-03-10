@@ -7,6 +7,8 @@ main_kalman.cpp
 data/data_point.hpp
 main_motor.cpp
 main_threading.cpp
+main_differentiator.cpp
+main_integrator.cpp
 main_vector.cpp
 main_quaternion.cpp
 state_machine/event.hpp
@@ -21,6 +23,8 @@ motor_control/motor_controller.cpp
 i2c/i2c.hpp
 utils/concurrent/Thread.hpp
 utils/concurrent/Thread.cpp
+utils/math/differentiator.hpp
+utils/math/integrator.hpp
 utils/math/kalman.hpp
-utils/math/vector.hpp
 utils/math/quaternion.hpp
+utils/math/vector.hpp

@@ -19,3 +19,5 @@ MAINS := \
   main_vector \
   main_kalman \
   main_quaternion \
+  main_differentiator \
+  main_integrator \
