@@ -21,6 +21,8 @@
 #ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 
+#include <cstdint>
+
 #include "motor_control/motor.hpp"
 #include "utils/concurrent/thread.hpp"
 
@@ -37,17 +39,14 @@ class MotorController: public Thread {
   void accelerateMotors();
   void decelerateMotors();
   void stopMotors();
-  int calculateAccelerationRPM(double translational_velocity);
-  int calculateDecelerationRPM(double translational_velocity);
+  int32_t calculateAccelerationRPM(uint32_t velocity);
+  int32_t calculateDecelerationRPM(uint32_t velocity);
 
   void run() override;
 
  private:
   Motor* motor;
-  // these are temporary variables for testing only
-  int rpm;
-  int current_distance;
-  int translational_velocity;
+  int32_t rpm;
 };
 
 }}  // namespace hyped::motor_control

@@ -20,6 +20,7 @@
 
 #include "motor_control/motor.hpp"
 
+#include <cstdint>
 #include <iostream>
 
 #include "motor_control/motor_controller.hpp"
@@ -32,10 +33,36 @@ MotorController::MotorController(uint8_t id)
     : Thread(id)
 {
   motor = new Motor();
-  // Variables for testing
   rpm = 0;
-  current_distance = 0;
-  translational_velocity = 0;
+}
+
+void MotorController::run()
+{
+  std::cout << "Starting motor controller" << std::endl;
+
+  // while (1) {
+  //   data::Data& data = data:: Data::getInstance();
+  //   nav = data.getStateData();
+  //   state = data.getStateData();
+  //   switch (state.current_state) {
+  //      case Idle:
+  //        this->setUpMotors();
+  //      case Accelerating:
+  //        this->accelerateMotors();
+  //      case Decelerating:
+  //        this->decelerateMotors();
+  //      case EmergencyBraking:
+  //        this->stopMotors();
+  //      case RunComplete:
+  //        break;
+  //      case FailureStopped:
+  //        break;
+  //      case Exiting:
+  //        break;
+  //      case Finished:
+  //        break;
+  //    }
+  // }
 }
 
 /**
@@ -51,15 +78,12 @@ void MotorController::setupMotors()
   */
 void MotorController::accelerateMotors()
 {
-  // Current distance will be continuosly read from shared data structure
-  while (current_distance <= 500) {
-    // Read translational velocity from shared data structure
-    rpm = calculateAccelerationRPM(translational_velocity);
-    motor->setSpeed(rpm);
-    // Update test variables
-    current_distance += 100;
-    translational_velocity += 1000;
-  }
+  // while (1) {
+  //   // Read translational velocity from shared data structure
+  //   nav = data.getNavigationData();
+  //   rpm = calculateAccelerationRPM(nav.velocity);
+  //   motor->setSpeed(rpm);
+  // }
 }
 
 /**
@@ -67,20 +91,18 @@ void MotorController::accelerateMotors()
   */
 void MotorController::decelerateMotors()
 {
-  while (current_distance <= 1000) {
-    // Read translational velocity from shared data structure
-    rpm = calculateDecelerationRPM(translational_velocity);
-    motor->setSpeed(rpm);
-    // Update test variables
-    current_distance += 100;
-    translational_velocity -= 1000;
-  }
+  // while (1) {
+  //   // Read translational velocity from shared data structure
+  //   nav = data.getNavigationData();
+  //   rpm = calculateDecelerationRPM(nav.velocity);
+  //   motor->setSpeed(rpm);
+  // }
 }
 
 void MotorController::stopMotors()
 {
-  motor->setSpeed(0);
-  std::cout << "Motors stopped" << std::endl;
+  // motor->setSpeed(0);
+  // std::cout << "Motors stopped" << std::endl;
 }
 
 /**
@@ -91,7 +113,7 @@ void MotorController::stopMotors()
   *
   *  @return  { Acceleration RPM calculation of type int }
   */
-int MotorController::calculateAccelerationRPM(double translational_velocity)
+int32_t MotorController::calculateAccelerationRPM(uint32_t velocity)
 {
   return rpm += 1000;  // dummy calculation to increase rpm
 }
@@ -104,38 +126,9 @@ int MotorController::calculateAccelerationRPM(double translational_velocity)
   *
   *  @return  { Deceleration RPM calculation of type int }
   */
-int MotorController::calculateDecelerationRPM(double translational_velocity)
+int32_t MotorController::calculateDecelerationRPM(uint32_t velocity)
 {
   return rpm -= 1000;  // dummy calculation to decrease rpm
-}
-
-void MotorController::run()
-{
-  std::cout << "Starting motor controller" << std::endl;
-
-  while (1) {
-    // switch (state.current_state) {
-    //   case idle:
-    //     break;
-    // }
-  }
-  // data::Data& data = data:: Data::getInstance();
-  // nav = data.getStateData();
-  // state = data.getStateData();
-  // while (state.current_state != idle) {
-  //   state = data.getStateData();
-  // }
-  // this->setupMotors();
-
-  // while (state.current_state != acceleration) {
-  //   state = data.getStateData();
-  // }
-  // this->accelerateMotors();
-
-  // while (state.current_state != deceleration) {
-  //   state = data.getStateData();
-  // }
-  // this->decelerateMotors();
 }
 
 }}  // namespace hyped::motor_control

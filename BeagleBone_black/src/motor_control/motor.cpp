@@ -19,6 +19,7 @@
  */
 
 #include "motor_control/motor.hpp"
+#include <cstdint>
 #include <iostream>
 
 namespace hyped {
@@ -32,7 +33,7 @@ Motor::Motor()
 /**
   *  @brief  { Function will send RPM over CAN network to motor controllers }
   */
-void Motor::setSpeed(int rpm)
+void Motor::setSpeed(int32_t rpm)
 {
   std::cout << "RPM: " << rpm << std::endl;
 }
