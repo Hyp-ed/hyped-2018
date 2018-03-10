@@ -111,7 +111,8 @@ void turnon_routine(){ // Switches on VL6180X
 }
 
 // This function does a single blocking write operation to the I2C slave.
-enum status_code writeDirect(struct i2c_master_module* i2c_device, uint16_t slaveaddr, uint16_t datalen, uint8_t* data){
+enum status_code writeDirect(struct i2c_master_module* i2c_device,
+							 uint16_t slaveaddr, uint16_t datalen, uint8_t* data){
   struct i2c_master_packet writepacket;
   writepacket.address     = slaveaddr;
   writepacket.data_length = datalen;
@@ -122,8 +123,10 @@ enum status_code writeDirect(struct i2c_master_module* i2c_device, uint16_t slav
   return i2c_master_write_packet_wait(i2c_device, &writepacket);
 }
 
-// This function does a single blocking read operation to the I2C slave. User should never use this.
-enum status_code readDirect(struct i2c_master_module* i2c_device, uint16_t slaveaddr, uint16_t datalen, uint8_t* data){
+// This function does a single blocking read operation to the I2C slave.
+// User should never use this.
+enum status_code readDirect(struct i2c_master_module* i2c_device,
+							uint16_t slaveaddr, uint16_t datalen, uint8_t* data){
   struct i2c_master_packet readpacket;
   readpacket.address     = slaveaddr;
   readpacket.data_length = datalen;
@@ -134,8 +137,10 @@ enum status_code readDirect(struct i2c_master_module* i2c_device, uint16_t slave
   return i2c_master_read_packet_wait(i2c_device, &readpacket);
 }
 
-// This does a write to set the reading memory location and a read to get the memory. Arbitrarily long reads are permitted.
-enum status_code getDirect(struct i2c_master_module* i2c_device, uint16_t slaveaddr, uint16_t wdatalen,
+// This does a write to set the reading memory location and a read to get the memory.
+// Arbitrarily long reads are permitted.
+enum status_code getDirect(struct i2c_master_module* i2c_device,
+						   uint16_t slaveaddr, uint16_t wdatalen,
 						   uint16_t rdatalen, uint8_t* wdata, uint8_t* rdata){
   volatile enum status_code status = writeDirect(i2c_device, slaveaddr, wdatalen, wdata);
   if(status != STATUS_OK) return status; // Check if the write 
@@ -149,10 +154,12 @@ int main(void)
   turnon_routine(); // Start VL6180X
   configure_i2c(); // Initializes i2c_master_instance
 
-  volatile int correct_counter = 0; // These are made volatile so that for debugging they aren't optimized out
+  volatile int correct_counter = 0; // These are made volatile so that for
+									// debugging they aren't optimized out
   volatile int iterations = 0; 
   volatile int errorcount = 0;
-  enum status_code getstate; // This will be used so that for debugging the state of the reads may be verified
+  enum status_code getstate; // This will be used so that for debugging
+							 // the state of the reads may be verified
 
   wr_buffer[0] = 0; // Set the write buffer to contain the memory reading address of 0x00.
   wr_buffer[1] = 0;
@@ -169,7 +176,8 @@ int main(void)
 	
     // If 0 xB4value was read then the read went fine,
     // since 0xB4 is the device ID which should be found at memory location 0x00
-    if(rd_buffer[0] == ((uint8_t) 0xB4)) correct_counter += 1; // If this value was read then the read went fine
+    if(rd_buffer[0] == ((uint8_t) 0xB4)) correct_counter += 1; // If this value was read then
+															   // the read went fine
     delay_ms(10);
   }
 }
