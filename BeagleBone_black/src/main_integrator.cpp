@@ -20,11 +20,11 @@
 #include "data/data_point.hpp"
 #include "utils/math/integrator.hpp"
 
-hyped::data::DataPoint<double> a(1,1);
-hyped::data::DataPoint<double> b(2,1);
-hyped::data::DataPoint<double> c(3,1);
-hyped::data::DataPoint<double> d(4,2);
-hyped::data::DataPoint<double> e(5,5);
+hyped::data::DataPoint<double> a(1, 1);
+hyped::data::DataPoint<double> b(2, 1);
+hyped::data::DataPoint<double> c(3, 1);
+hyped::data::DataPoint<double> d(4, 2);
+hyped::data::DataPoint<double> e(5, 5);
 
 void print(hyped::data::DataPoint<double> x)
 {
