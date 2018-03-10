@@ -26,7 +26,7 @@ using hyped::motor_control::MotorController;
 
 int main()
 {
-  MotorController* controller = new MotorController();
+  MotorController* controller = new MotorController(0);
   controller->setupMotors();
   controller->accelerateMotors();
   controller->decelerateMotors();

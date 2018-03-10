@@ -19,13 +19,17 @@
  */
 
 #include "motor_control/motor.hpp"
-#include "motor_control/motor_controller.hpp"
+
 #include <iostream>
+
+#include "motor_control/motor_controller.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
 namespace motor_control {
 
-MotorController::MotorController()
+MotorController::MotorController(uint8_t id)
+    : Thread(id)
 {
   motor = new Motor();
   // Variables for testing
@@ -103,6 +107,35 @@ int MotorController::calculateAccelerationRPM(double translational_velocity)
 int MotorController::calculateDecelerationRPM(double translational_velocity)
 {
   return rpm -= 1000;  // dummy calculation to decrease rpm
+}
+
+void MotorController::run()
+{
+  std::cout << "Starting motor controller" << std::endl;
+
+  while (1) {
+    // switch (state.current_state) {
+    //   case idle:
+    //     break;
+    // }
+  }
+  // data::Data& data = data:: Data::getInstance();
+  // nav = data.getStateData();
+  // state = data.getStateData();
+  // while (state.current_state != idle) {
+  //   state = data.getStateData();
+  // }
+  // this->setupMotors();
+
+  // while (state.current_state != acceleration) {
+  //   state = data.getStateData();
+  // }
+  // this->accelerateMotors();
+
+  // while (state.current_state != deceleration) {
+  //   state = data.getStateData();
+  // }
+  // this->decelerateMotors();
 }
 
 }}  // namespace hyped::motor_control

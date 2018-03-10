@@ -22,19 +22,25 @@
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 
 #include "motor_control/motor.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
+
+using utils::concurrent::Thread;
+
 namespace motor_control {
 
-class MotorController {
+class MotorController: public Thread {
  public:
-  MotorController();
+  explicit MotorController(uint8_t id);
   void setupMotors();
   void accelerateMotors();
   void decelerateMotors();
   void stopMotors();
   int calculateAccelerationRPM(double translational_velocity);
   int calculateDecelerationRPM(double translational_velocity);
+
+  void run() override;
 
  private:
   Motor* motor;
