@@ -26,8 +26,8 @@ namespace hyped {
 namespace utils {
 namespace math {
 
-using namespace hyped::data;
-  
+using hyped::data::DataPoint;
+
 template <typename T>
 class Differentiation {
  public:
@@ -38,32 +38,27 @@ class Differentiation {
    *
    * @param[in]  point1    The point for time T_(N-2)
    * @param[in]  point2    The point for time T_(N-1)
-   *
    */
   DataPoint<T> update(DataPoint<T> point);
 
  private:
   DataPoint<T> prev_point_;
-  
 };
 
 template <typename T>
-Differentiation<T>::Differentiation()
-{
-  prev_point_ = DataPoint<T>(0,0);
-}
-  
+Differentiation<T>::Differentiation() : prev_point_(0, 0)
+{}
+
 template <typename T>
 DataPoint<T> Differentiation<T>::update(DataPoint<T> point)
 {
   T gradient = (point.value - prev_point_.value) / (point.timestamp - prev_point_.timestamp);
-  
-  prev_point_.value = point.value;
-  prev_point_.timestamp = point.timestamp;
+
+  prev_point_ = point;
 
   return DataPoint<T>(point.timestamp, gradient);
 }
 
-}}}
+}}}  // hyped::utils::math
 
 #endif  // BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATION_HPP_
