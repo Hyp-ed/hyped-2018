@@ -31,11 +31,25 @@ namespace hyped {
 using utils::concurrent::Lock;
 
 namespace data {
+
 // -----------------------------------------------------------------------------
 // State Machine
 // -----------------------------------------------------------------------------
+
+enum State {
+  kIdle,
+  kAccelerating,
+  kDecelerating,
+  kEmergencyBraking,
+  kRunComplete,
+  kFailureStopped,
+  kExiting,
+  kFinished
+};
+
 struct StateMachine {
   bool critical_failure;
+  State current_state;
 };
 
 // -----------------------------------------------------------------------------
@@ -106,7 +120,7 @@ class Data {
   /**
    * @brief      Retrieves data related to the state machine. Data has high priority.
    */
-  StateMachine getStateMachineData() const;
+  StateMachine getStateMachineData();
 
   /**
    * @brief      Should be called by state machine team to update data.
@@ -150,11 +164,10 @@ class Data {
   Sensors     sensors_;
   Motors      motors_;
 
-  // locks for data substructures
+  // Locks for data substructures
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
-
 };
 
 }}  // namespace hyped::data
