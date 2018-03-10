@@ -7,7 +7,11 @@ SRCS := \
   state_machine/machine-states.cpp \
   motor_control/motor.cpp \
   motor_control/motor_controller.cpp \
-  utils/concurrent/Thread.cpp \
+  utils/concurrent/thread.cpp \
+  utils/concurrent/lock.cpp \
+  utils/concurrent/condition_variable.cpp \
+  utils/concurrent/barrier.cpp \
+
 
 
 MAINS := \

@@ -21,8 +21,14 @@ motor_control/motor.cpp
 motor_control/motor_controller.hpp
 motor_control/motor_controller.cpp
 i2c/i2c.hpp
-utils/concurrent/Thread.hpp
-utils/concurrent/Thread.cpp
+utils/concurrent/thread.hpp
+utils/concurrent/thread.cpp
+utils/concurrent/lock.hpp
+utils/concurrent/lock.cpp
+utils/concurrent/condition_variable.hpp
+utils/concurrent/condition_variable.cpp
+utils/concurrent/barrier.hpp
+utils/concurrent/barrier.cpp
 utils/math/differentiator.hpp
 utils/math/integrator.hpp
 utils/math/kalman.hpp

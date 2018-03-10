@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 21. February 2018
+ * Date: 28. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,45 +18,31 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/Thread.hpp"
+#include "utils/concurrent/barrier.hpp"
 
-#include <thread>
-#include <iostream>
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-namespace {
-
-void thread_entry_point(Thread* this_)
-{
-  this_->run();
-}
-
-}   // namespace ::
-
-
-Thread::Thread(uint8_t id)
-    : id_(id),
-      thread_(0)
+Barrier::Barrier(uint8_t required)
+    : required_(required),
+      calls_(0)
 { /* EMPTY */ }
 
-Thread::~Thread() { /* EMPTY */ }
+Barrier::~Barrier() { /* EMPTY */ }
 
-void Thread::start()
+void Barrier::wait()
 {
-  thread_ = new std::thread(thread_entry_point, this);
-}
+  ScopedLock L(&lock_);
+  calls_++;
 
-void Thread::join()
-{
-  thread_->join();
-}
-
-void Thread::run()
-{
-  std::cout << "You are starting EMPTY thread. Terminating now.\n";
+  if (calls_ != required_) {
+    cv_.wait(&lock_);
+  } else {
+    calls_ = 0;
+    cv_.notifyAll();
+  }
 }
 
 }}}   // namespace hyped::utils::concurrent
