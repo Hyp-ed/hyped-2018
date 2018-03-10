@@ -1,21 +1,19 @@
 /*
  * Organisation: HYPED
  * Date: 18/02/2018
- * Description: Class for data exchange between sub-team threads and structures
- * for holding data produced by each of the sub-teams.
+ * Description: Class for data exchange between sub-team threads and structures for holding data
+ *              produced by each of the sub-teams.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License. You may obtain a
- * copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ *    except in compliance with the License. You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations
- * under the License.
+ *    Unless required by applicable law or agreed to in writing, software distributed under
+ *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *    either express or implied. See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 #ifndef BEAGLEBONE_BLACK_DATA_DATA_HPP_
@@ -28,13 +26,6 @@
 
 namespace hyped {
 namespace data {
-
-// -----------------------------------------------------------------------------
-// State Machine
-// -----------------------------------------------------------------------------
-struct StateMachine {
-  bool criticalFailure;
-};
 
 // -----------------------------------------------------------------------------
 // Navigation
@@ -92,17 +83,10 @@ struct Motors {
 // Common Data structure/class
 // -----------------------------------------------------------------------------
 /**
- * @brief      A singleton class managing the data exchange between sub-team
- * threads.
+ * @brief      A singleton class managing the data exchange between sub-team threads.
  */
 class Data {
  public:
-  /**
-   * @brief      Retrieves all data related to the state machine.
-   */
-  Navigation getStateMachineData() const;
-  /**
-   *
   /**
    * @brief      Always returns a reference to the only instance of `Data`.
    */
@@ -113,8 +97,7 @@ class Data {
    */
   Navigation getNavigationData() const;
   /**
-   * @brief      Should be called by navigation sub-team whenever they have new
-   * data.
+   * @brief      Should be called by navigation sub-team whenever they have new data.
    */
   void setNavigationData(const Navigation& nav_data);
 
@@ -139,13 +122,11 @@ class Data {
   void setMotorData(const Motors& motor_data);
 
  private:
-  StateMachine stateMachine_;
-  Navigation navigation_;
-  Sensors sensors_;
-  Motors motors_;
+  Navigation  navigation_;
+  Sensors     sensors_;
+  Motors      motors_;
 };
 
-}  // namespace data
-}  // namespace hyped
+}}  // namespace hyped::data
 
 #endif  // BEAGLEBONE_BLACK_DATA_DATA_HPP_
