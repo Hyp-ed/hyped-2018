@@ -26,6 +26,12 @@
 
 namespace hyped {
 namespace data {
+// -----------------------------------------------------------------------------
+// State Machine
+// -----------------------------------------------------------------------------
+struct StateMachine {
+  bool critical_failure;
+};
 
 // -----------------------------------------------------------------------------
 // Navigation
@@ -93,9 +99,20 @@ class Data {
   static Data& getInstance();
 
   /**
+   * @brief      Retrieves data related to the state machine. Data has high priority.
+   */
+  StateMachine getStateMachineData() const;
+
+  /**
+   * @brief      Should be called by state machine team to update data.
+   */
+  void setStateMachineData(const StateMachine& sm_data);
+
+  /**
    * @brief      Retrieves data produced by navigation sub-team.
    */
   Navigation getNavigationData() const;
+
   /**
    * @brief      Should be called by navigation sub-team whenever they have new data.
    */
@@ -122,9 +139,11 @@ class Data {
   void setMotorData(const Motors& motor_data);
 
  private:
+  StateMachine state_machine_;
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
+ 
 };
 
 }}  // namespace hyped::data
