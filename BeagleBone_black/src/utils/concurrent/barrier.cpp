@@ -27,7 +27,8 @@ namespace concurrent {
 
 Barrier::Barrier(uint8_t required)
     : required_(required),
-      calls_(0) { /* EMPTY */ }
+      calls_(0)
+{ /* EMPTY */ }
 
 Barrier::~Barrier() { /* EMPTY */ }
 
