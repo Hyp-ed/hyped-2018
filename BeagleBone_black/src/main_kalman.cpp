@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+
 #include "utils/math/kalman.hpp"
 #include "utils/math/vector.hpp"
 
@@ -36,7 +37,7 @@ void print(const Vector<T, dimension>& vector)
 
 int main()
 {
-  Kalman<double, 1> kalman(Vector<double, 1>(0), Vector<double, 1>(1),
+  Kalman<Vector<double, 1>> kalman(Vector<double, 1>(0), Vector<double, 1>(1),
                            Vector<double, 1>(1), Vector<double, 1>(0.01));
 
   for (int i = 0; i < 100; i++)
