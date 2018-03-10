@@ -3,21 +3,18 @@
  * Author: Branislav Pilnan,  Uday Patel
  * Organisation: HYPED
  * Date: 17 February 2018
- * Description: K-dimensional vector class that supports
- *              addition,  substraction,  scalar multiplication,
- *              scalar division.
+ * Description: K-dimensional vector class that supports addition,  substraction,  scalar
+ *              multiplication, and scalar division.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License,  Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ *    except in compliance with the License. You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing,  software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,  either express or implied.
- *    See the License for the specific language governing permissions and
+ *    Unless required by applicable law or agreed to in writing, software distributed under
+ *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *    either express or implied. See the License for the specific language governing permissions and
  *    limitations under the License.
  */
 
@@ -51,7 +48,7 @@ class Vector {
   explicit Vector(const std::initializer_list<T> elements);
 
   /**
-   * @brief    Conversion from a vector type to another.
+   * @brief    Conversion from one vector type to another.
    */
   template <typename U>
   Vector(const Vector<U, dimension>& rhs);
@@ -71,8 +68,7 @@ class Vector {
   Vector<T, dimension>& operator-=(const Vector<T, dimension>& rhs);
 
   /**
-   * @brief    Addition or subtraction of every
-   *           entry by a constant.
+   * @brief    Addition or subtraction of every element by a constant.
    */
   Vector<T, dimension>& operator+=(const T rhs);
   Vector<T, dimension>& operator-=(const T rhs);
@@ -84,7 +80,7 @@ class Vector {
   Vector<T, dimension>& operator/=(const T rhs);
 
   /**
-   * @brief    Multiplication and division of vectors.
+   * @brief    Element-wise multiplication and division of vectors.
    */
   Vector<T, dimension>& operator*=(const Vector<T, dimension>& rhs);
   Vector<T, dimension>& operator/=(const Vector<T, dimension>& rhs);
@@ -347,6 +343,6 @@ bool operator==(const Vector<T1, dimension>& lhs,  const Vector<T2, dimension>& 
   return true;
 }
 
-}}}
+}}}  // hyped::utils::math
 
 #endif  // BEAGLEBONE_BLACK_UTILS_MATH_VECTOR_HPP_
