@@ -23,8 +23,13 @@
 #include <cstdint>
 
 #include "data/data_point.hpp"
+#include "utils/concurrent/lock.hpp"
 
 namespace hyped {
+
+// imports
+using utils::concurrent::Lock;
+
 namespace data {
 // -----------------------------------------------------------------------------
 // State Machine
@@ -111,7 +116,8 @@ class Data {
   /**
    * @brief      Retrieves data produced by navigation sub-team.
    */
-  Navigation getNavigationData() const;
+
+  Navigation getNavigationData();
 
   /**
    * @brief      Should be called by navigation sub-team whenever they have new data.
@@ -121,7 +127,7 @@ class Data {
   /**
    * @brief      Retrieves data from all sensors
    */
-  Sensors getSensorsData() const;
+  Sensors getSensorsData();
 
   /**
    * @brief      Should be called to update sensor data
@@ -131,7 +137,7 @@ class Data {
   /**
    * @brief      Retrieves data produced by each of the four motors.
    */
-  Motors getMotorData() const;
+  Motors getMotorData();
 
   /**
    * @brief      Should be called to update motor data.
@@ -143,7 +149,12 @@ class Data {
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
- 
+
+  // locks for data substructures
+  Lock lock_navigation_;
+  Lock lock_sensors_;
+  Lock lock_motors_;
+
 };
 
 }}  // namespace hyped::data

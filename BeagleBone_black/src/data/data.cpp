@@ -18,6 +18,10 @@
 #include "data.hpp"
 
 namespace hyped {
+
+// imports
+using utils::concurrent::ScopedLock;
+
 namespace data {
 
 Data& Data::getInstance()
@@ -36,33 +40,39 @@ void Data::setStateMachineData(const StateMachine& sm_data)
   state_machine_ = sm_data;
 }
 
-Navigation Data::getNavigationData() const
+Navigation Data::getNavigationData()
 {
+  ScopedLock L(&lock_navigation_);
   return navigation_;
 }
 
 void Data::setNavigationData(const Navigation& nav_data)
 {
+  ScopedLock L(&lock_navigation_);
   navigation_ = nav_data;
 }
 
-Sensors Data::getSensorsData() const
+Sensors Data::getSensorsData()
 {
+  ScopedLock L(&lock_sensors_);
   return sensors_;
 }
 
 void Data::setSensorsData(const Sensors& sensors_data)
 {
+  ScopedLock L(&lock_sensors_);
   sensors_ = sensors_data;
 }
 
-Motors Data::getMotorData() const
+Motors Data::getMotorData()
 {
+  ScopedLock L(&lock_motors_);
   return motors_;
 }
 
 void Data::setMotorData(const Motors& motor_data)
 {
+  ScopedLock L(&lock_motors_);
   motors_ = motor_data;
 }
 
