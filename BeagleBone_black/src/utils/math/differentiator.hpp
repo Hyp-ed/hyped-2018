@@ -19,8 +19,8 @@
 
 #include "data/data_point.hpp"
 
-#ifndef BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATION_HPP_
-#define BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATION_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATOR_HPP_
+#define BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATOR_HPP_
 
 namespace hyped {
 namespace utils {
@@ -29,9 +29,9 @@ namespace math {
 using hyped::data::DataPoint;
 
 template <typename T>
-class Differentiation {
+class Differentiator {
  public:
-  Differentiation();
+  Differentiator();
 
   /**
    * @brief    Calculates the gradient given two points for time T_(N)
@@ -46,11 +46,11 @@ class Differentiation {
 };
 
 template <typename T>
-Differentiation<T>::Differentiation() : prev_point_(0, 0)
+Differentiator<T>::Differentiator() : prev_point_(0, 0)
 {}
 
 template <typename T>
-DataPoint<T> Differentiation<T>::update(DataPoint<T> point)
+DataPoint<T> Differentiator<T>::update(DataPoint<T> point)
 {
   T gradient = (point.value - prev_point_.value) / (point.timestamp - prev_point_.timestamp);
 
@@ -61,4 +61,4 @@ DataPoint<T> Differentiation<T>::update(DataPoint<T> point)
 
 }}}  // hyped::utils::math
 
-#endif  // BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATION_HPP_
+#endif  // BEAGLEBONE_BLACK_UTILS_MATH_DIFFERENTIATOR_HPP_

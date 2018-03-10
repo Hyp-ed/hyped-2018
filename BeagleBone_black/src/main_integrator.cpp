@@ -2,7 +2,7 @@
  * Author: Uday Patel
  * Organisation: HYPED
  * Date: 6 March 2018
- * Description: Main file to test differentiation.
+ * Description: Main file to test integration.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -18,7 +18,7 @@
 
 #include <iostream>
 #include "data/data_point.hpp"
-#include "utils/math/differentiation.hpp"
+#include "utils/math/integrator.hpp"
 
 hyped::data::DataPoint<double> a(1,1);
 hyped::data::DataPoint<double> b(2,1);
@@ -33,10 +33,10 @@ void print(hyped::data::DataPoint<double> x)
 
 int main()
 {
-  hyped::utils::math::Differentiation<double> gradient;
-  print(gradient.update(a));
-  print(gradient.update(b));
-  print(gradient.update(c));
-  print(gradient.update(d));
-  print(gradient.update(e));
+  hyped::utils::math::Integrator<double> area;
+  print(area.update(a));
+  print(area.update(b));
+  print(area.update(c));
+  print(area.update(d));
+  print(area.update(e));
 }

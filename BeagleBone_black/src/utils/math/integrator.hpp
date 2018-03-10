@@ -19,8 +19,8 @@
 
 #include "data/data_point.hpp"
 
-#ifndef BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATION_HPP_
-#define BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATION_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATOR_HPP_
+#define BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATOR_HPP_
 
 namespace hyped {
 namespace utils {
@@ -29,9 +29,9 @@ namespace math {
 using hyped::data::DataPoint;
 
 template <typename T>
-class Integration {
+class Integrator {
  public:
-  Integration();
+  Integrator();
 
   /**
    * @brief    Calculates the area given two points for time T_(N)
@@ -47,11 +47,11 @@ class Integration {
 };
 
 template <typename T>
-Integration<T>::Integration() : previous_point_(0, 0), previous_output_(0, 0)
+Integrator<T>::Integrator() : previous_point_(0, 0), previous_output_(0, 0)
 {}
 
 template <typename T>
-DataPoint<T> Integration<T>::update(DataPoint<T> point)
+DataPoint<T> Integrator<T>::update(DataPoint<T> point)
 {
   T area = (point.value + previous_point_.value)/2 * (point.timestamp - previous_point_.timestamp);
 
@@ -65,4 +65,4 @@ DataPoint<T> Integration<T>::update(DataPoint<T> point)
 
 }}}  // hyped::utils::math
 
-#endif  // BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATION_HPP_
+#endif  // BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATOR_HPP_
