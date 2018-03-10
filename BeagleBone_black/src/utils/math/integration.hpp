@@ -26,7 +26,7 @@ namespace hyped {
 namespace utils {
 namespace math {
 
-using namespace hyped::data;
+using hyped::data::DataPoint;
 
 template <typename T>
 class Integration {
@@ -38,22 +38,17 @@ class Integration {
    *
    * @param[in]  point1    The point for time T_(N-2)
    * @param[in]  point2    The point for time T_(N-1)
-   *
    */
   DataPoint<T> update(DataPoint<T> point);
 
  private:
   DataPoint<T> previous_point_;
   DataPoint<T> previous_output_;
-
 };
 
 template <typename T>
-Integration<T>::Integration()
-{
-  previous_point_ = DataPoint<T>(0,0);
-  previous_output_ = DataPoint<T>(0,0);
-}
+Integration<T>::Integration() : previous_point_(0, 0), previous_output_(0, 0)
+{}
 
 template <typename T>
 DataPoint<T> Integration<T>::update(DataPoint<T> point)
@@ -63,12 +58,11 @@ DataPoint<T> Integration<T>::update(DataPoint<T> point)
   previous_output_.value += area;
   previous_output_.timestamp = point.timestamp;
 
-  previous_point_.value = point.value;
-  previous_point_.timestamp = point.timestamp;
+  previous_point_ = point;
 
   return previous_output_;
 }
 
-}}}
+}}}  // hyped::utils::math
 
 #endif  // BEAGLEBONE_BLACK_UTILS_MATH_INTEGRATION_HPP_
