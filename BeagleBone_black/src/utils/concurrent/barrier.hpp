@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 21. February 2018
+ * Date: 28. February 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,45 +18,33 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_THREAD_HPP_
-#define BEAGLEBONE_BLACK_UTILS_CONCURRENT_THREAD_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
+#define BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
 
 #include <cstdint>
 
-// Forward declaration
-namespace std { class thread; }
+#include "utils/concurrent/lock.hpp"
+#include "utils/concurrent/condition_variable.hpp"
 
 namespace hyped {
 namespace utils {
 namespace concurrent {
 
-
-class Thread {
+class Barrier {
  public:
-  explicit Thread(uint8_t id);
-  virtual ~Thread();
+  explicit Barrier(uint8_t required);
+  ~Barrier();
 
-  /**
-   * @brief      Spawn new thread and call Run() method
-   */
-  void start();
+  void wait();
 
-  /**
-   * @brief      Wait until the thread terminates
-   */
-  void join();
-
-  /**
-   * @brief      Thread entry point
-   */
-  virtual void run();
-
-  uint8_t getId() { return id_; }
  private:
-  uint8_t id_;
-  std::thread* thread_;
+  uint8_t required_;
+  uint8_t calls_;
+
+  Lock    lock_;
+  ConditionVariable cv_;
 };
 
 }}}   // namespace hyped::utils::concurrent
 
-#endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_THREAD_HPP_
+#endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_BARRIER_HPP_
