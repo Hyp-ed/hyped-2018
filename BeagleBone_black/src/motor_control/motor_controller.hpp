@@ -25,6 +25,7 @@
 
 #include "motor_control/motor.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
 
@@ -35,6 +36,7 @@ namespace motor_control {
 class MotorController: public Thread {
  public:
   explicit MotorController(uint8_t id);
+  void run() override;
   void setupMotors();
   void accelerateMotors();
   void decelerateMotors();
@@ -42,11 +44,12 @@ class MotorController: public Thread {
   int32_t calculateAccelerationRPM(uint32_t velocity);
   int32_t calculateDecelerationRPM(uint32_t velocity);
 
-  void run() override;
-
  private:
   Motor* motor;
   int32_t rpm;
+  data::Data& data = data::Data::getInstance();
+  data::StateMachine state;
+  data::Navigation nav;
 };
 
 }}  // namespace hyped::motor_control

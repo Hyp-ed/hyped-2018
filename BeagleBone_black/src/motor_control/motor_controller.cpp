@@ -36,33 +36,36 @@ MotorController::MotorController(uint8_t id)
   rpm = 0;
 }
 
+/**
+  *  @brief  { Runs motor control thread. Switches to correct motor state
+  *            based on state machine state }
+  */
 void MotorController::run()
 {
   std::cout << "Starting motor controller" << std::endl;
 
-  // while (1) {
-  //   data::Data& data = data:: Data::getInstance();
-  //   nav = data.getStateData();
-  //   state = data.getStateData();
-  //   switch (state.current_state) {
-  //      case Idle:
-  //        this->setUpMotors();
-  //      case Accelerating:
-  //        this->accelerateMotors();
-  //      case Decelerating:
-  //        this->decelerateMotors();
-  //      case EmergencyBraking:
-  //        this->stopMotors();
-  //      case RunComplete:
-  //        break;
-  //      case FailureStopped:
-  //        break;
-  //      case Exiting:
-  //        break;
-  //      case Finished:
-  //        break;
-  //    }
-  // }
+  while (1) {
+    nav = data.getNavigationData();
+    state = data.getStateMachineData();
+    switch (state.current_state) {
+       case data::State::kIdle:
+         this->setupMotors();
+       case data::State::kAccelerating:
+         this->accelerateMotors();
+       case data::State::kDecelerating:
+         this->decelerateMotors();
+       case data::State::kEmergencyBraking:
+         this->stopMotors();
+       case data::State::kRunComplete:
+         break;
+       case data::State::kFailureStopped:
+         break;
+       case data::State::kExiting:
+         break;
+       case data::State::kFinished:
+         break;
+     }
+  }
 }
 
 /**
@@ -78,12 +81,15 @@ void MotorController::setupMotors()
   */
 void MotorController::accelerateMotors()
 {
-  // while (1) {
-  //   // Read translational velocity from shared data structure
-  //   nav = data.getNavigationData();
-  //   rpm = calculateAccelerationRPM(nav.velocity);
-  //   motor->setSpeed(rpm);
-  // }
+  while (state.current_state == data::State::kAccelerating) {
+    if (state.critical_failure) {
+      this->stopMotors();
+    }
+    state = data.getStateMachineData();
+    nav = data.getNavigationData();
+    rpm = calculateAccelerationRPM(nav.velocity);
+    motor->setSpeed(rpm);
+  }
 }
 
 /**
@@ -91,18 +97,21 @@ void MotorController::accelerateMotors()
   */
 void MotorController::decelerateMotors()
 {
-  // while (1) {
-  //   // Read translational velocity from shared data structure
-  //   nav = data.getNavigationData();
-  //   rpm = calculateDecelerationRPM(nav.velocity);
-  //   motor->setSpeed(rpm);
-  // }
+  while (state.current_state == data::State::kDecelerating) {
+    if (state.critical_failure) {
+      this->stopMotors();
+    }
+    state = data.getStateMachineData();
+    nav = data.getNavigationData();
+    rpm = calculateDecelerationRPM(nav.velocity);
+    motor->setSpeed(rpm);
+  }
 }
 
 void MotorController::stopMotors()
 {
-  // motor->setSpeed(0);
-  // std::cout << "Motors stopped" << std::endl;
+  motor->setSpeed(0);
+  std::cout << "Motors stopped" << std::endl;
 }
 
 /**
