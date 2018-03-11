@@ -33,6 +33,26 @@ using utils::concurrent::Lock;
 namespace data {
 
 // -----------------------------------------------------------------------------
+// State Machine
+// -----------------------------------------------------------------------------
+
+enum State {
+  kIdle,
+  kAccelerating,
+  kDecelerating,
+  kEmergencyBraking,
+  kRunComplete,
+  kFailureStopped,
+  kExiting,
+  kFinished
+};
+
+struct StateMachine {
+  bool critical_failure;
+  State current_state;
+};
+
+// -----------------------------------------------------------------------------
 // Navigation
 // -----------------------------------------------------------------------------
 struct Navigation {
@@ -98,9 +118,21 @@ class Data {
   static Data& getInstance();
 
   /**
+   * @brief      Retrieves data related to the state machine. Data has high priority.
+   */
+  StateMachine getStateMachineData();
+
+  /**
+   * @brief      Should be called by state machine team to update data.
+   */
+  void setStateMachineData(const StateMachine& sm_data);
+
+  /**
    * @brief      Retrieves data produced by navigation sub-team.
    */
+
   Navigation getNavigationData();
+
   /**
    * @brief      Should be called by navigation sub-team whenever they have new data.
    */
@@ -127,11 +159,12 @@ class Data {
   void setMotorData(const Motors& motor_data);
 
  private:
+  StateMachine state_machine_;
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
 
-  // locks for data substructures
+  // Locks for data substructures
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;

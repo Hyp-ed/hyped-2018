@@ -3,9 +3,14 @@ main_i2c.cpp
 main_machine.cpp
 data/data.cpp
 data/data.hpp
+main_kalman.cpp
 data/data_point.hpp
 main_motor.cpp
 main_threading.cpp
+main_differentiator.cpp
+main_integrator.cpp
+main_vector.cpp
+main_quaternion.cpp
 state_machine/event.hpp
 state_machine/hyped-machine.cpp
 state_machine/hyped-machine.hpp
@@ -24,3 +29,8 @@ utils/concurrent/condition_variable.hpp
 utils/concurrent/condition_variable.cpp
 utils/concurrent/barrier.hpp
 utils/concurrent/barrier.cpp
+utils/math/differentiator.hpp
+utils/math/integrator.hpp
+utils/math/kalman.hpp
+utils/math/quaternion.hpp
+utils/math/vector.hpp

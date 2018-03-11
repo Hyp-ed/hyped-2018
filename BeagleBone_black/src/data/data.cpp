@@ -30,6 +30,16 @@ Data& Data::getInstance()
   return d;
 }
 
+StateMachine Data::getStateMachineData()
+{
+  return state_machine_;
+}
+
+void Data::setStateMachineData(const StateMachine& sm_data)
+{
+  state_machine_ = sm_data;
+}
+
 Navigation Data::getNavigationData()
 {
   ScopedLock L(&lock_navigation_);
