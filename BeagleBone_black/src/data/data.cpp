@@ -30,7 +30,7 @@ Data& Data::getInstance()
   return d;
 }
 
-StateMachine Data::getStateMachineData() const
+StateMachine Data::getStateMachineData()
 {
   return state_machine_;
 }
