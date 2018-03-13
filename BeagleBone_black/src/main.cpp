@@ -22,7 +22,7 @@
 
 #include <iostream>
 
-#include "motor_control/motor_controller.hpp"
+#include "motor_control/main.hpp"
 #include "utils/concurrent/thread.hpp"
 
 
@@ -32,7 +32,7 @@ int main()
 {
   std::cout << "Starting BeagleBone Black..." << std::endl;
 
-  Thread* motor = new hyped::motor_control::MotorController(0);
+  Thread* motor = new hyped::motor_control::Main(0);
 
   motor->start();
 
