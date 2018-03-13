@@ -12,7 +12,6 @@ before_script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 script:
-- docker pull hyped/hyped-2018:latest
 - docker run -it hyped/hyped-2018:latest make -C BeagleBone_black -j --silent clean all
 
 notifications:
