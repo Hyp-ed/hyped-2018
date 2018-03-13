@@ -18,18 +18,19 @@
  *    limitations under the License.
  */
 
-#include "motor_control/motor.hpp"
+#include "motor_control/main.hpp"
 
 #include <cstdint>
 #include <iostream>
 
-#include "motor_control/motor_controller.hpp"
+#include "motor_control/motor.hpp"
+
 #include "data/data.hpp"
 
 namespace hyped {
 namespace motor_control {
 
-MotorController::MotorController(uint8_t id)
+Main::Main(uint8_t id)
     : Thread(id)
 {
   motor = new Motor();
@@ -40,7 +41,7 @@ MotorController::MotorController(uint8_t id)
   *  @brief  { Runs motor control thread. Switches to correct motor state
   *            based on state machine state }
   */
-void MotorController::run()
+void Main::run()
 {
   std::cout << "Starting motor controller" << std::endl;
 
@@ -71,7 +72,7 @@ void MotorController::run()
 /**
   *  @brief  { Establish CAN connections with motor controllers }
   */
-void MotorController::setupMotors()
+void Main::setupMotors()
 {
   std::cout << "CAN connections established" << std::endl;
 }
@@ -79,7 +80,7 @@ void MotorController::setupMotors()
 /**
   *  @brief  { Will accelerate motors until maximum acceleration distance is reached }
   */
-void MotorController::accelerateMotors()
+void Main::accelerateMotors()
 {
   while (state.current_state == data::State::kAccelerating) {
     if (state.critical_failure) {
@@ -95,7 +96,7 @@ void MotorController::accelerateMotors()
 /**
   *  @brief  { Will decelerate motors until total distance is reached }
   */
-void MotorController::decelerateMotors()
+void Main::decelerateMotors()
 {
   while (state.current_state == data::State::kDecelerating) {
     if (state.critical_failure) {
@@ -108,7 +109,7 @@ void MotorController::decelerateMotors()
   }
 }
 
-void MotorController::stopMotors()
+void Main::stopMotors()
 {
   motor->setSpeed(0);
   std::cout << "Motors stopped" << std::endl;
@@ -122,7 +123,7 @@ void MotorController::stopMotors()
   *
   *  @return  { Acceleration RPM calculation of type int }
   */
-int32_t MotorController::calculateAccelerationRPM(uint32_t velocity)
+int32_t Main::calculateAccelerationRPM(uint32_t velocity)
 {
   return rpm += 1000;  // dummy calculation to increase rpm
 }
@@ -135,7 +136,7 @@ int32_t MotorController::calculateAccelerationRPM(uint32_t velocity)
   *
   *  @return  { Deceleration RPM calculation of type int }
   */
-int32_t MotorController::calculateDecelerationRPM(uint32_t velocity)
+int32_t Main::calculateDecelerationRPM(uint32_t velocity)
 {
   return rpm -= 1000;  // dummy calculation to decrease rpm
 }

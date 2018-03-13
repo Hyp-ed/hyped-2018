@@ -20,13 +20,13 @@
 
 #include <iostream>
 #include "motor_control/motor.hpp"
-#include "motor_control/motor_controller.hpp"
+#include "motor_control/main.hpp"
 
-using hyped::motor_control::MotorController;
+using hyped::motor_control::Main;
 
 int main()
 {
-  MotorController* controller = new MotorController(0);
+  Main* controller = new Main(0);
   controller->setupMotors();
   controller->accelerateMotors();
   controller->decelerateMotors();

@@ -6,7 +6,7 @@ SRCS := \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
   motor_control/motor.cpp \
-  motor_control/motor_controller.cpp \
+  motor_control/main.cpp \
   utils/concurrent/thread.cpp \
   utils/concurrent/lock.cpp \
   utils/concurrent/condition_variable.cpp \
@@ -17,7 +17,6 @@ SRCS := \
 MAINS := \
   main \
   demo_data \
-  demo_i2c \
   demo_machine \
   demo_motor \
   demo_threading \

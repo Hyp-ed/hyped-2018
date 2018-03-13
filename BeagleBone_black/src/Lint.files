@@ -1,5 +1,4 @@
 main.cpp
-demo_i2c.cpp
 demo_machine.cpp
 data/data.cpp
 data/data.hpp
@@ -18,9 +17,8 @@ state_machine/machine-states.cpp
 state_machine/machine-states.hpp
 motor_control/motor.hpp
 motor_control/motor.cpp
-motor_control/motor_controller.hpp
-motor_control/motor_controller.cpp
-i2c/i2c.hpp
+motor_control/main.hpp
+motor_control/main.cpp
 utils/concurrent/thread.hpp
 utils/concurrent/thread.cpp
 utils/concurrent/lock.hpp

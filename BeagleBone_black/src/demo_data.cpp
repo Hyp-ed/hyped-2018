@@ -24,6 +24,7 @@
 using hyped::data::Data;
 using hyped::data::Navigation;
 using hyped::data::Sensors;
+using hyped::data::Motors;
 
 int main()
 {

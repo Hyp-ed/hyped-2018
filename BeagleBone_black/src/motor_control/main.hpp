@@ -33,9 +33,9 @@ using utils::concurrent::Thread;
 
 namespace motor_control {
 
-class MotorController: public Thread {
+class Main: public Thread {
  public:
-  explicit MotorController(uint8_t id);
+  explicit Main(uint8_t id);
   void run() override;
   void setupMotors();
   void accelerateMotors();
