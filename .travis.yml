@@ -13,7 +13,7 @@ before_script:
 
 script:
 - docker pull hyped/hyped-2018:latest
-- docker cp . hyped/hyped-2018:/home/
+- docker cp . hyped/hyped-2018:latest:/home/
 - docker run -it hyped/hyped-2018 make -C BeagleBone_black -j --silent clean all
 
 notifications:
