@@ -20,7 +20,6 @@
 
 #include "utils/concurrent/thread.hpp"
 
-#include <thread>
 #include <iostream>
 
 namespace hyped {
