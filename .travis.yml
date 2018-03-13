@@ -12,7 +12,7 @@ before_script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 script:
-- docker run --name travis -it hyped/hyped-2018:latest /bin/bash 
+- docker run --name travis -it hyped/hyped-2018:latest uname -a
 - docker cp . travis:/home/au/
 - docker run -it hyped/hyped-2018 make -C BeagleBone_black -j --silent clean all
 
