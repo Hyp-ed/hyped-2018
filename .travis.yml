@@ -13,7 +13,7 @@ before_script:
 
 script:
 - docker run --name travis -it hyped/hyped-2018:latest uname -a
-- docker cp . travis:/home/au/
+- docker cp . travis:/test/
 - docker run -it hyped/hyped-2018 make -C BeagleBone_black -j --silent clean all
 
 notifications:
