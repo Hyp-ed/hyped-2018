@@ -12,7 +12,7 @@ before_script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 script:
-- docker cp . hyped/hyped-2018:/home/au
+- docker cp . hyped/hyped-2018:/home/
 - docker run -it hyped/hyped-2018 make -C BeagleBone_black -j --silent clean all
 
 notifications:
