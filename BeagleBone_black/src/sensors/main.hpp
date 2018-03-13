@@ -1,10 +1,8 @@
-
 /*
- * Authors : HYPED
+ * Author: Martin Kristien
  * Organisation: HYPED
- * Date: 3. February 2018
+ * Date: 13/03/18
  * Description:
- * This is the main executable for BeagleBone pod node
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,27 +18,29 @@
  *    limitations under the License.
  */
 
-#include <iostream>
+#ifndef BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
 
-#include "motor_control/main.hpp"
-#include "sensors/main.hpp"
+#include <cstdint>
+
 #include "utils/concurrent/thread.hpp"
+#include "data/data.hpp"
 
+namespace hyped {
 
-using hyped::utils::concurrent::Thread;
+using utils::concurrent::Thread;
 
-int main()
-{
-  std::cout << "Starting BeagleBone Black..." << std::endl;
+namespace sensors {
 
-  Thread* motor     = new hyped::motor_control::Main(0);
-  Thread* sensors   = new hyped::sensors::Main(1);
-  motor->start();
-  sensors->start();
+class Main: public Thread {
+ public:
+  explicit Main(uint8_t id);
+  void run() override;
 
-  motor->join();
-  sensors->join();
-  delete sensors;
-  delete motor;
-  return 0;
-}
+ private:
+  data::Data& data_;
+};
+
+}}  // namespace hyped::sensors
+
+#endif  /* BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_ */

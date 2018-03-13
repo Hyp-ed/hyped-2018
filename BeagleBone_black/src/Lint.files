@@ -1,15 +1,15 @@
 main.cpp
 demo_machine.cpp
-data/data.cpp
-data/data.hpp
 demo_kalman.cpp
-data/data_point.hpp
 demo_motor.cpp
 demo_threading.cpp
 demo_differentiator.cpp
 demo_integrator.cpp
 demo_vector.cpp
 demo_quaternion.cpp
+data/data.cpp
+data/data.hpp
+data/data_point.hpp
 state_machine/event.hpp
 state_machine/hyped-machine.cpp
 state_machine/hyped-machine.hpp
@@ -19,6 +19,8 @@ motor_control/motor.hpp
 motor_control/motor.cpp
 motor_control/main.hpp
 motor_control/main.cpp
+sensors/main.hpp
+sensors/main.cpp
 utils/concurrent/thread.hpp
 utils/concurrent/thread.cpp
 utils/concurrent/lock.hpp
