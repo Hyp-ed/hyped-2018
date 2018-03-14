@@ -31,6 +31,22 @@ Motor::Motor()
 }
 
 /**
+  *  @brief { Function will return the readings of the 4 motor's RPM from the sensors }
+  */
+MotorsRpm Motor::getSpeed()
+{
+  // These values will be generate from the sensor readings
+  motors_rpm_.RPM_FR = 50;
+  motors_rpm_.RPM_FL = 100;
+  motors_rpm_.RPM_BL = 150;
+  motors_rpm_.RPM_BR = 200;
+  std::cout << "returned RPMs :" << motors_rpm_.RPM_FR << "," << motors_rpm_.RPM_FL << ","
+  << motors_rpm_.RPM_BR << "," << motors_rpm_.RPM_BL << std::endl;
+
+  return motors_rpm_;
+}
+
+/**
   *  @brief  { Function will send RPM over CAN network to motor controllers }
   */
 void Motor::setSpeed(int32_t rpm)
