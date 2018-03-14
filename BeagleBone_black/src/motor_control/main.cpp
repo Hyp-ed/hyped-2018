@@ -74,6 +74,8 @@ void Main::run()
   */
 void Main::setupMotors()
 {
+  data::Motors motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
+  data.setMotorData(motor_data);
   std::cout << "CAN connections established" << std::endl;
 }
 
@@ -90,6 +92,11 @@ void Main::accelerateMotors()
     nav = data.getNavigationData();
     rpm = calculateAccelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
+    MotorsRpm motors_rpm = motor->getSpeed();
+    // Updates the shared data on the motors RPM
+    data::Motors motor_data = { data::MotorState::kMotorAccelerating,
+    motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+    data.setMotorData(motor_data);
   }
 }
 
@@ -106,12 +113,36 @@ void Main::decelerateMotors()
     nav = data.getNavigationData();
     rpm = calculateDecelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
+    MotorsRpm motors_rpm = motor->getSpeed();
+    // Updates the shared data on the motors RPM
+    data::Motors motor_data = { data::MotorState::kMotorDecelerating,
+    motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+    data.setMotorData(motor_data);
   }
 }
 
 void Main::stopMotors()
 {
   motor->setSpeed(0);
+  bool isAllStop = false;
+  // Updates the shared data on the motors RPM while the motor is trying to stop
+  while (!isAllStop) {
+    std::cout << "Decelerating" << std::endl;
+    MotorsRpm motors_rpm = motor->getSpeed();
+    data::Motors motor_data = { data::MotorState::kMotorDecelerating,
+    motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+    data.setMotorData(motor_data);
+    if (motors_rpm.rpm_FL == 0 && motors_rpm.rpm_FR == 0 &&
+      motors_rpm.rpm_BL == 0 && motors_rpm.rpm_BR == 0)
+    {
+      isAllStop = true;
+    }
+  }
+  // The motor has stopped update the data structure
+  MotorsRpm motors_rpm = motor->getSpeed();
+  data::Motors motor_data = { data::MotorState::kMotorStopped,
+  motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+  data.setMotorData(motor_data);
   std::cout << "Motors stopped" << std::endl;
 }
 
