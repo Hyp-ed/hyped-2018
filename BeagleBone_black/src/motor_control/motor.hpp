@@ -27,10 +27,10 @@ namespace hyped {
 namespace motor_control {
   // Contains the RPM of each of the motors
   struct MotorsRpm {
-    int32_t RPM_FL;
-    int32_t RPM_FR;
-    int32_t RPM_BL;
-    int32_t RPM_BR;
+    int32_t rpm_FL;
+    int32_t rpm_FR;
+    int32_t rpm_BL;
+    int32_t rpm_BR;
   };
 
 
