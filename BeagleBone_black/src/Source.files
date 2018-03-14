@@ -12,6 +12,8 @@ SRCS := \
   utils/concurrent/lock.cpp \
   utils/concurrent/condition_variable.cpp \
   utils/concurrent/barrier.cpp \
+  utils/io/can.cpp \
+
 
 
 
@@ -26,3 +28,5 @@ MAINS := \
   demo_quaternion \
   demo_differentiator \
   demo_integrator \
+  demo_can \
+  
