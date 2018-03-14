@@ -18,9 +18,32 @@
  *    limitations under the License.
  */
 
+#include <unistd.h>
+
 #include "utils/io/can.hpp"
 
-int main(int argc, char ** argv)
+using hyped::utils::io::Can;
+using hyped::utils::io::CanFrame;
+
+
+inline void delay(int ms)
 {
-  return hyped::utils::io::Can::demo(argc, argv);
+  usleep(ms * 1000);
+}
+
+int main()
+{
+  CanFrame data = {14, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
+
+  Can can(0);
+  can.send(data);
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < data.len; j++) {
+      data.data[j] += 1;
+    }
+    data.id += 1;
+    can.send(data);
+  }
+
+  delay(10);
 }

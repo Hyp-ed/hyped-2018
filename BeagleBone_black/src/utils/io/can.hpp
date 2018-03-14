@@ -21,16 +21,45 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 
+#include <stdint.h>
 
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 namespace utils {
 namespace io {
 
 
-class Can {
+struct CanFrame {
+  uint32_t  id;
+  uint8_t   len;
+  uint8_t   data[8];
+};
+
+class Can : public concurrent::Thread {
  public:
   static int demo(int argc, char ** argv);
+
+  explicit Can(uint8_t id);
+  ~Can();
+
+  /**
+   * @param  frame data to be sent
+   * @return 1     iff data sent successfully
+   */
+  int send(CanFrame& frame);
+
+  /**
+   * @param  frame output pointer to data to be filled
+   * @return 1     iff data received successfully
+   */
+  int receive(CanFrame* frame);
+
+  void run() override;
+
+ private:
+  int socket_;
+  int reading;
 };
 
 }}}   // namespace hyped::utils::io
