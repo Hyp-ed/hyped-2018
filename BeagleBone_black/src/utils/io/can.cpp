@@ -34,46 +34,9 @@ namespace hyped {
 namespace utils {
 namespace io {
 
-int Can::demo(int argc, char ** argv)
-{
-  int s; /* can raw socket */
-  struct sockaddr_can addr;
-  struct can_frame frame;
 
-  frame.can_id  = 0x9;
-  frame.can_dlc = 0x4;
-  frame.data[0] = 0xDE;
-  frame.data[1] = 0xAD;
-  frame.data[2] = 0xBE;
-  frame.data[3] = 0xEF;
-
-  /* open socket */
-  if ((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
-    perror("socket");
-    return 1;
-  }
-
-  addr.can_family = AF_CAN;
-  addr.can_ifindex = 2;   // ifr.ifr_ifindex;
-
-  if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("bind");
-    return 1;
-  }
-
-  /* send frame */
-  if (write(s, &frame, CAN_MTU) != CAN_MTU) {
-    perror("write");
-    return 1;
-  }
-
-  close(s);
-
-  return 0;
-}
-
-Can::Can(uint8_t id)
-    : concurrent::Thread(id)
+Can::Can()
+    : concurrent::Thread(0)
 {
   if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
     perror("socket");
@@ -101,7 +64,7 @@ Can::~Can()
   close(socket_);
 }
 
-int Can::send(CanFrame& frame)
+int Can::send(const CanFrame& frame)
 {
   can_frame can;
 

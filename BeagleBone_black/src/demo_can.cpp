@@ -35,7 +35,7 @@ int main()
 {
   CanFrame data = {14, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
 
-  Can can(0);
+  Can& can = Can::getInstance();
   can.send(data);
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < data.len; j++) {

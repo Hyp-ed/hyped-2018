@@ -38,16 +38,20 @@ struct CanFrame {
 
 class Can : public concurrent::Thread {
  public:
-  static int demo(int argc, char ** argv);
+  static Can& getInstance()
+  {
+    static Can can;
+    return can;
+  }
 
-  explicit Can(uint8_t id);
-  ~Can();
+  explicit Can(Can const&)    = delete;
+  void operator=(Can const&)  = delete;
 
   /**
    * @param  frame data to be sent
    * @return 1     iff data sent successfully
    */
-  int send(CanFrame& frame);
+  int send(const CanFrame& frame);
 
   /**
    * @param  frame output pointer to data to be filled
@@ -56,6 +60,10 @@ class Can : public concurrent::Thread {
   int receive(CanFrame* frame);
 
   void run() override;
+
+ private:
+  Can();
+  ~Can();
 
  private:
   int socket_;
