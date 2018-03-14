@@ -108,10 +108,10 @@ enum MotorState {
 
 struct Motors {
   MotorState current_motor_state;
-  int32_t angular_velocity_FL;
-  int32_t angular_velocity_FR;
-  int32_t angular_velocity_BL;
-  int32_t angular_velocity_BR;
+  int32_t rpm_FL;
+  int32_t rpm_FR;
+  int32_t rpm_BL;
+  int32_t rpm_BR;
 };
 
 // -----------------------------------------------------------------------------
