@@ -41,3 +41,4 @@ Debug/
 .cpplint-cache
 BeagleBone_black/hyped
 BeagleBone_black/main*
+BeagleBone_black/demo_*

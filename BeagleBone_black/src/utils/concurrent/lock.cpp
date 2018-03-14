@@ -20,8 +20,6 @@
 
 #include "utils/concurrent/lock.hpp"
 
-#include <mutex>
-
 namespace hyped {
 namespace utils {
 namespace concurrent {

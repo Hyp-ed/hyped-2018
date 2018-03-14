@@ -21,27 +21,35 @@
 #ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
 
+#include <cstdint>
+
 #include "motor_control/motor.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
+
+using utils::concurrent::Thread;
+
 namespace motor_control {
 
-class MotorController {
+class Main: public Thread {
  public:
-  MotorController();
+  explicit Main(uint8_t id);
+  void run() override;
   void setupMotors();
   void accelerateMotors();
   void decelerateMotors();
   void stopMotors();
-  int calculateAccelerationRPM(double translational_velocity);
-  int calculateDecelerationRPM(double translational_velocity);
+  int32_t calculateAccelerationRPM(uint32_t velocity);
+  int32_t calculateDecelerationRPM(uint32_t velocity);
 
  private:
   Motor* motor;
-  // these are temporary variables for testing only
-  int rpm;
-  int current_distance;
-  int translational_velocity;
+  int32_t rpm;
+  data::Data& data = data::Data::getInstance();
+  data::StateMachine state;
+  data::Navigation nav;
 };
 
 }}  // namespace hyped::motor_control

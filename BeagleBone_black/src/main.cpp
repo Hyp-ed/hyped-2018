@@ -22,8 +22,25 @@
 
 #include <iostream>
 
+#include "motor_control/main.hpp"
+#include "sensors/main.hpp"
+#include "utils/concurrent/thread.hpp"
+
+
+using hyped::utils::concurrent::Thread;
+
 int main()
 {
   std::cout << "Starting BeagleBone Black..." << std::endl;
+
+  Thread* motor     = new hyped::motor_control::Main(0);
+  Thread* sensors   = new hyped::sensors::Main(1);
+  motor->start();
+  sensors->start();
+
+  motor->join();
+  sensors->join();
+  delete sensors;
+  delete motor;
   return 0;
 }

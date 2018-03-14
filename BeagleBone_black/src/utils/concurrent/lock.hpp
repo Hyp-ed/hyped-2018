@@ -21,9 +21,8 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_LOCK_HPP_
 #define BEAGLEBONE_BLACK_UTILS_CONCURRENT_LOCK_HPP_
 
-// Forward declaration
-namespace std { class mutex; }
-// #include <mutex>
+
+#include <mutex>
 // lock, try_lock, unlock in mutex, unique_lock
 
 // condition_variable[_any] -> notify_[one/all], wait

@@ -1,7 +1,7 @@
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Author: Martin Kristien
  * Organisation: HYPED
- * Date: 17/02/18
+ * Date: 13/03/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,18 +18,29 @@
  *    limitations under the License.
  */
 
-#include <iostream>
-#include "motor_control/motor.hpp"
-#include "motor_control/motor_controller.hpp"
+#ifndef BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
 
-using hyped::motor_control::MotorController;
+#include <cstdint>
 
-int main()
-{
-  MotorController* controller = new MotorController();
-  controller->setupMotors();
-  controller->accelerateMotors();
-  controller->decelerateMotors();
-  controller->stopMotors();
-  return 0;
-}
+#include "utils/concurrent/thread.hpp"
+#include "data/data.hpp"
+
+namespace hyped {
+
+using utils::concurrent::Thread;
+
+namespace sensors {
+
+class Main: public Thread {
+ public:
+  explicit Main(uint8_t id);
+  void run() override;
+
+ private:
+  data::Data& data_;
+};
+
+}}  // namespace hyped::sensors
+
+#endif  /* BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_ */

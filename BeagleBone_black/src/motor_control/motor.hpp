@@ -21,13 +21,15 @@
 #ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
 
+#include <cstdint>
+
 namespace hyped {
 namespace motor_control {
 
 class Motor {
  public:
   Motor();
-  void setSpeed(int rpm);
+  void setSpeed(int32_t rpm);
 };
 
 }}  // namespace hyped::motor_control

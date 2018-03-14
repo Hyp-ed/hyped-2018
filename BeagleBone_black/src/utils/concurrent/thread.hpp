@@ -22,9 +22,7 @@
 #define BEAGLEBONE_BLACK_UTILS_CONCURRENT_THREAD_HPP_
 
 #include <cstdint>
-
-// Forward declaration
-namespace std { class thread; }
+#include <thread>
 
 namespace hyped {
 namespace utils {

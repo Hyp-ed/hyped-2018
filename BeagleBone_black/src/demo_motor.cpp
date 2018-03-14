@@ -1,7 +1,7 @@
 /*
- * Authors: M. Kristien
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
- * Date: 21. February 2018
+ * Date: 17/02/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,50 +18,18 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/thread.hpp"
-
 #include <iostream>
+#include "motor_control/motor.hpp"
+#include "motor_control/main.hpp"
 
-namespace hyped {
-namespace utils {
-namespace concurrent {
+using hyped::motor_control::Main;
 
-namespace {
-
-void thread_entry_point(Thread* this_)
+int main()
 {
-  this_->run();
+  Main* controller = new Main(0);
+  controller->setupMotors();
+  controller->accelerateMotors();
+  controller->decelerateMotors();
+  controller->stopMotors();
+  return 0;
 }
-
-}   // namespace ::
-
-
-Thread::Thread(uint8_t id)
-    : id_(id),
-      thread_(0)
-{ /* EMPTY */ }
-
-Thread::~Thread() { /* EMPTY */ }
-
-void Thread::start()
-{
-  thread_ = new std::thread(thread_entry_point, this);
-}
-
-void Thread::join()
-{
-  thread_->join();
-}
-
-void Thread::run()
-{
-  std::cout << "You are starting EMPTY thread. Terminating now.\n";
-}
-
-void Thread::yield()
-{
-  std::this_thread::yield();
-}
-
-}}}   // namespace hyped::utils::concurrent
-

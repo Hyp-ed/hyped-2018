@@ -6,7 +6,8 @@ SRCS := \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
   motor_control/motor.cpp \
-  motor_control/motor_controller.cpp \
+  motor_control/main.cpp \
+  sensors/main.cpp \
   utils/concurrent/thread.cpp \
   utils/concurrent/lock.cpp \
   utils/concurrent/condition_variable.cpp \
@@ -16,12 +17,12 @@ SRCS := \
 
 MAINS := \
   main \
-  main_i2c \
-  main_machine \
-  main_motor \
-  main_threading \
-  main_vector \
-  main_kalman \
-  main_quaternion \
-  main_differentiator \
-  main_integrator \
+  demo_data \
+  demo_machine \
+  demo_motor \
+  demo_threading \
+  demo_vector \
+  demo_kalman \
+  demo_quaternion \
+  demo_differentiator \
+  demo_integrator \

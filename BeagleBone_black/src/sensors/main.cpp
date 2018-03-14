@@ -1,7 +1,7 @@
 /*
- * Authors: M. Kristien
+ * Author: Martin Kristien
  * Organisation: HYPED
- * Date: 21. February 2018
+ * Date: 13/03/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,50 +18,23 @@
  *    limitations under the License.
  */
 
-#include "utils/concurrent/thread.hpp"
+#include "sensors/main.hpp"
 
-#include <iostream>
+#include <stdio.h>
 
 namespace hyped {
-namespace utils {
-namespace concurrent {
+namespace sensors {
 
-namespace {
-
-void thread_entry_point(Thread* this_)
-{
-  this_->run();
-}
-
-}   // namespace ::
-
-
-Thread::Thread(uint8_t id)
-    : id_(id),
-      thread_(0)
+Main::Main(uint8_t id)
+    : Thread(id)
+    , data_(data::Data::getInstance())
 { /* EMPTY */ }
 
-Thread::~Thread() { /* EMPTY */ }
-
-void Thread::start()
+void Main::run()
 {
-  thread_ = new std::thread(thread_entry_point, this);
+  while (1) {
+    // keep updating data_ based on values read from sensors
+  }
 }
 
-void Thread::join()
-{
-  thread_->join();
-}
-
-void Thread::run()
-{
-  std::cout << "You are starting EMPTY thread. Terminating now.\n";
-}
-
-void Thread::yield()
-{
-  std::this_thread::yield();
-}
-
-}}}   // namespace hyped::utils::concurrent
-
+}}  // namespace hyped::sensors

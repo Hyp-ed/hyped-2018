@@ -57,7 +57,7 @@ endif
 clean: cleanlint
 	$(Verb) rm -rf $(OBJS_DIR)/*
 	$(Verb) rm -f $(TARGET)
-	$(Verb) rm -f main*
+	$(Verb) rm -f $(MAINS)
 
 cleanlint:
 	$(Verb) rm -f .cpplint-cache

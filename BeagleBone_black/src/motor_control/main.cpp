@@ -18,26 +18,61 @@
  *    limitations under the License.
  */
 
-#include "motor_control/motor.hpp"
-#include "motor_control/motor_controller.hpp"
+#include "motor_control/main.hpp"
+
+#include <cstdint>
 #include <iostream>
+
+#include "motor_control/motor.hpp"
+
+#include "data/data.hpp"
 
 namespace hyped {
 namespace motor_control {
 
-MotorController::MotorController()
+Main::Main(uint8_t id)
+    : Thread(id)
 {
   motor = new Motor();
-  // Variables for testing
   rpm = 0;
-  current_distance = 0;
-  translational_velocity = 0;
+}
+
+/**
+  *  @brief  { Runs motor control thread. Switches to correct motor state
+  *            based on state machine state }
+  */
+void Main::run()
+{
+  std::cout << "Starting motor controller" << std::endl;
+
+  while (1) {
+    nav = data.getNavigationData();
+    state = data.getStateMachineData();
+    switch (state.current_state) {
+       case data::State::kIdle:
+         this->setupMotors();
+       case data::State::kAccelerating:
+         this->accelerateMotors();
+       case data::State::kDecelerating:
+         this->decelerateMotors();
+       case data::State::kEmergencyBraking:
+         this->stopMotors();
+       case data::State::kRunComplete:
+         break;
+       case data::State::kFailureStopped:
+         break;
+       case data::State::kExiting:
+         break;
+       case data::State::kFinished:
+         break;
+     }
+  }
 }
 
 /**
   *  @brief  { Establish CAN connections with motor controllers }
   */
-void MotorController::setupMotors()
+void Main::setupMotors()
 {
   std::cout << "CAN connections established" << std::endl;
 }
@@ -45,35 +80,36 @@ void MotorController::setupMotors()
 /**
   *  @brief  { Will accelerate motors until maximum acceleration distance is reached }
   */
-void MotorController::accelerateMotors()
+void Main::accelerateMotors()
 {
-  // Current distance will be continuosly read from shared data structure
-  while (current_distance <= 500) {
-    // Read translational velocity from shared data structure
-    rpm = calculateAccelerationRPM(translational_velocity);
+  while (state.current_state == data::State::kAccelerating) {
+    if (state.critical_failure) {
+      this->stopMotors();
+    }
+    state = data.getStateMachineData();
+    nav = data.getNavigationData();
+    rpm = calculateAccelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
-    // Update test variables
-    current_distance += 100;
-    translational_velocity += 1000;
   }
 }
 
 /**
   *  @brief  { Will decelerate motors until total distance is reached }
   */
-void MotorController::decelerateMotors()
+void Main::decelerateMotors()
 {
-  while (current_distance <= 1000) {
-    // Read translational velocity from shared data structure
-    rpm = calculateDecelerationRPM(translational_velocity);
+  while (state.current_state == data::State::kDecelerating) {
+    if (state.critical_failure) {
+      this->stopMotors();
+    }
+    state = data.getStateMachineData();
+    nav = data.getNavigationData();
+    rpm = calculateDecelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
-    // Update test variables
-    current_distance += 100;
-    translational_velocity -= 1000;
   }
 }
 
-void MotorController::stopMotors()
+void Main::stopMotors()
 {
   motor->setSpeed(0);
   std::cout << "Motors stopped" << std::endl;
@@ -87,7 +123,7 @@ void MotorController::stopMotors()
   *
   *  @return  { Acceleration RPM calculation of type int }
   */
-int MotorController::calculateAccelerationRPM(double translational_velocity)
+int32_t Main::calculateAccelerationRPM(uint32_t velocity)
 {
   return rpm += 1000;  // dummy calculation to increase rpm
 }
@@ -100,7 +136,7 @@ int MotorController::calculateAccelerationRPM(double translational_velocity)
   *
   *  @return  { Deceleration RPM calculation of type int }
   */
-int MotorController::calculateDecelerationRPM(double translational_velocity)
+int32_t Main::calculateDecelerationRPM(uint32_t velocity)
 {
   return rpm -= 1000;  // dummy calculation to decrease rpm
 }
