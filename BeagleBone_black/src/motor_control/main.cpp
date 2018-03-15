@@ -119,7 +119,7 @@ void Main::decelerateMotors()
     motor->setSpeed(rpm);
     MotorsRpm motors_rpm = motor->getSpeed();
     // Updates the shared data on the motors RPM
-    motor_data = { 
+    motor_data = {
       data::MotorState::kMotorDecelerating,
       motors_rpm.rpm_FL,
       motors_rpm.rpm_FR,
