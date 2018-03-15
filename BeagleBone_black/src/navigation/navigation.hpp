@@ -18,8 +18,8 @@
  *    limitations under the License.
  */
 
-#ifndef HYPED_NAVIGATION_NAVIGATION_HPP_
-#define HYPED_NAVIGATION_NAVIGATION_HPP_
+#ifndef BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_
+#define BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_
 
 #include <cstdint>
 #include "utils/math/kalman.hpp"
@@ -60,4 +60,4 @@ class Navigation {
   Kalman<uint8_t> proximity_filter_;
 };
 
-#endif  // HYPED_NAVIGATION_NAVIGATION_HPP_
+#endif  // BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
