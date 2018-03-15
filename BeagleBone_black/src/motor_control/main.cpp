@@ -74,7 +74,7 @@ void Main::run()
   */
 void Main::setupMotors()
 {
-  data::Motors motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
+  motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
   data.setMotorData(motor_data);
   std::cout << "CAN connections established" << std::endl;
 }
@@ -94,8 +94,12 @@ void Main::accelerateMotors()
     motor->setSpeed(rpm);
     MotorsRpm motors_rpm = motor->getSpeed();
     // Updates the shared data on the motors RPM
-    data::Motors motor_data = { data::MotorState::kMotorAccelerating,
-    motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+    motor_data = {
+      data::MotorState::kMotorAccelerating,
+      motors_rpm.rpm_FL,
+      motors_rpm.rpm_FR,
+      motors_rpm.rpm_BL,
+      motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
   }
 }
@@ -115,8 +119,12 @@ void Main::decelerateMotors()
     motor->setSpeed(rpm);
     MotorsRpm motors_rpm = motor->getSpeed();
     // Updates the shared data on the motors RPM
-    data::Motors motor_data = { data::MotorState::kMotorDecelerating,
-    motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+    motor_data = { 
+      data::MotorState::kMotorDecelerating,
+      motors_rpm.rpm_FL,
+      motors_rpm.rpm_FR,
+      motors_rpm.rpm_BL,
+      motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
   }
 }
@@ -129,8 +137,12 @@ void Main::stopMotors()
   while (!isAllStop) {
     std::cout << "Decelerating" << std::endl;
     MotorsRpm motors_rpm = motor->getSpeed();
-    data::Motors motor_data = { data::MotorState::kMotorDecelerating,
-    motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+    data::Motors motor_data = {
+      data::MotorState::kMotorDecelerating,
+      motors_rpm.rpm_FL,
+      motors_rpm.rpm_FR,
+      motors_rpm.rpm_BL,
+      motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
     if (motors_rpm.rpm_FL == 0 && motors_rpm.rpm_FR == 0 &&
       motors_rpm.rpm_BL == 0 && motors_rpm.rpm_BR == 0)
