@@ -25,12 +25,14 @@
 #include <cstdint>
 
 #include "data/data_point.hpp"
+#include "utils/math/vector.hpp"
 #include "utils/concurrent/lock.hpp"
 
 namespace hyped {
 
 // imports
 using utils::concurrent::Lock;
+using utils::math::Vector;
 
 namespace data {
 
@@ -68,13 +70,8 @@ struct Navigation {
 // -----------------------------------------------------------------------------
 
 struct Imu {
-  uint16_t acc_x;
-  uint16_t acc_y;
-  uint16_t acc_z;
-
-  uint16_t gyr_x;
-  uint16_t gyr_y;
-  uint16_t gyr_z;
+  DataPoint<Vector<int16_t, 3> > acc;
+  DataPoint<Vector<int16_t, 3> > gyr;
 };
 
 struct Proximity {

@@ -37,7 +37,7 @@ int main()
   printf("Hello hyped, here are some shared data\n");
   printf("from Navigation: %d %d %d\n", nav.distance, nav.velocity, nav.acceleration);
   printf("from Sensors: %d %d %d at time %d\n",
-      sens.imu[0].acc_x, sens.proxy[0].val, sens.stripe_cnt.value, sens.stripe_cnt.timestamp);
+      sens.imu[0].acc.value[0], sens.proxy[0].val, sens.stripe_cnt.value, sens.stripe_cnt.timestamp);
   printf("from Motors: FL %d, FR %d, BL %d, BR %d\n", 
       mot.angular_velocity_FL, mot.angular_velocity_FR, mot.angular_velocity_BL, mot.angular_velocity_BR);
   return 0;
