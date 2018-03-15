@@ -95,11 +95,20 @@ struct Sensors {
 // -----------------------------------------------------------------------------
 // Motor data
 // -----------------------------------------------------------------------------
+
+enum MotorState {
+  kMotorIdle,
+  kMotorAccelerating,
+  kMotorDecelerating,
+  kMotorStopped
+};
+
 struct Motors {
-  int32_t angular_velocity_FL;
-  int32_t angular_velocity_FR;
-  int32_t angular_velocity_BL;
-  int32_t angular_velocity_BR;
+  MotorState current_motor_state;
+  int32_t rpm_FL;
+  int32_t rpm_FR;
+  int32_t rpm_BL;
+  int32_t rpm_BR;
 };
 
 // -----------------------------------------------------------------------------
