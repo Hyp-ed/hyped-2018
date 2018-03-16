@@ -68,12 +68,15 @@
  * Wire-up the GPIO pin to PA08, SDA to PB30, SCL to PB31, VIN to VCC, GND to GND.
  */
 #include "minimal.h"
+#include "CanAPI.h"
 #include <asf.h>
 #include <delay.h>
 #include <status_codes.h>
 
 static uint8_t wr_buffer[BUFFER_LENGTH];
 static uint8_t rd_buffer[BUFFER_LENGTH];
+
+void can_callback(uint8_t*, uint8_t);
 
 struct i2c_master_module i2c_master_instance; // This struct will 'Be' the configured I2C device
 
@@ -147,12 +150,25 @@ enum status_code getDirect(struct i2c_master_module* i2c_device,
   return readDirect(i2c_device, slaveaddr, rdatalen, rdata);
 }
 
+void can_callback(uint8_t* rx_buf, uint8_t size)
+{
+  uint8_t tx_buf[4];
+  for(int i=0; i<size; i++) {
+    // Do something with the data
+    tx_buf[i] = rx_buf[i] + 1;
+  }
+  can_send_standard_message(0x45A, tx_buf, 4);
+}
+
 int main(void)
 {
   system_init();
   delay_init(); // for delay_ms()
   turnon_routine(); // Start VL6180X
   configure_i2c(); // Initializes i2c_master_instance
+
+  configure_can();
+  can_register_callback(can_callback);
 
   volatile int correct_counter = 0; // These are made volatile so that for
 									// debugging they aren't optimized out
