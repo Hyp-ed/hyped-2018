@@ -43,7 +43,6 @@ Main::Main(uint8_t id)
 
 void Main::run()
 {
-
 std::cout << "State machine thread successfully started" << std::endl;
 
 while (1) {
@@ -51,11 +50,11 @@ while (1) {
 
   if (hasCriticalFailure()) {
          hypedMachine->handleEvent(kCriticalFailure);
-   }
+  }
   if (hasReachedMaxDistance()) {
        hypedMachine->handleEvent(kMaxDistanceReached);
-   }
   }
+ }
 }
 
  /**

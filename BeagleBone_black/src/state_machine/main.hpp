@@ -37,7 +37,7 @@ class Main: public Thread {
   void run() override;
 
  private:
- HypedMachine* hypedMachine;
+  HypedMachine* hypedMachine;
   data::Data& data = data::Data::getInstance();
   bool hasCriticalFailure();
   bool hasReachedMaxDistance();
