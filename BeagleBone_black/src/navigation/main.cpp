@@ -1,8 +1,8 @@
 /*
- * Author:
+ * Author: Brano, Adi, Uday
  * Organisation: HYPED
- * Date:
- * Description:
+ * Date: 18 March 2018
+ * Description: Main file for navigation class.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ void Main::run()
 {
   while (1) {
     // TODO(Brano,Uday,Adi): Put code.
+    
   }
 }
 

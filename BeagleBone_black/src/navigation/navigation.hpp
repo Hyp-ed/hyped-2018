@@ -1,8 +1,8 @@
 /*
- * Author:
+ * Author: Adithya Sireesh
  * Organisation: HYPED
- * Date:
- * Description:
+ * Date: 10/02/2018
+ * Description: Navigation class skeleton.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,10 +49,10 @@ class Navigation {
 
   // TODO(Uday,Brano,Adi): Change the data types of the data members
 
-  float accleration_;
-  float velocity_;
-  float displacement_;
-  float orientation_;
+  Vector<float, 3> accleration_;
+  Vector<float, 3> velocity_;
+  Vector<float, 3> displacement_;
+  Vector<float, 3> orientation_;
   int stripe_count_;
   Kalman<Vector<int16_t, 3>> acclerometer_filter_;
   Kalman<Vector<int16_t, 3>> gyro_filter_;
