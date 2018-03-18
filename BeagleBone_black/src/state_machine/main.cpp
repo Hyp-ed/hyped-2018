@@ -45,7 +45,8 @@ void Main::run()
 {
 std::cout << "State machine thread successfully started" << std::endl;
 
-while (1) {
+while (1)
+{
   data::Navigation nav_data = data.getNavigationData();
 
   if (hasCriticalFailure()) {
@@ -54,7 +55,7 @@ while (1) {
   if (hasReachedMaxDistance()) {
        hypedMachine->handleEvent(kMaxDistanceReached);
   }
- }
+}
 }
 
  /**
