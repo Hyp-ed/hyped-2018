@@ -1,5 +1,5 @@
 /*
- * Author: Adithya Sireesh
+ * Author: Adithya Sireesh, Uday Patel
  * Organisation: HYPED
  * Date: 10/02/2018
  * Description: Navigation class functionality definition.
@@ -20,38 +20,79 @@
 
 #include "navigation.hpp"
 
+#include "data/data_point.hpp"
+#include "utils/math/integrator.hpp"
+#include "utils/math/quaternion.hpp"
+#include "utils/math/vector.hpp"
+
+using hyped::data::DataPoint;
+using hyped::utils::math::Integrator;
+using hyped::utils::math::Quaternion;
+using hyped::utils::math::Vector;
 
 namespace hyped {
 namespace navigation {
 
 // Public methods
-void Navigation::update() {}
-
-float Navigation::get_accleration()
+Integrator<Vector<double, 3>> acc_to_vel;
+Integrator<Vector<double, 3>> vel_to_dis;
+void Navigation::update()
 {
-  return 0;
+  gyro_update();
+  proximity_orientation_update();
+  acclerometer_update();
+
+  DataPoint<Vector<double, 3>> velocity_1 = acc_to_vel.update(accleration_);  // Point 4
+
+  proximity_displacement_update();
+  DataPoint<Vector<double, 3>> velocity_2;
+  // TODO(Adi): Find the velocity from displacement_1. (Save to velocity_2)
+  // TODO(Uday): Set the new velocity using complementary filter.
+
+  DataPoint<Vector<double, 3>> displacement_1 = vel_to_dis.update(velocity_);  // Point 6
+  // TODO(Uday): Set the new displacement using complementary filter.
 }
 
-float Navigation::get_velocity()
+Vector<double, 3> Navigation::get_accleration()
 {
-  return 0;
+  return accleration_.value;
 }
 
-float Navigation::get_displacement()
+Vector<double, 3> Navigation::get_velocity()
 {
-  return 0;
+  return velocity_.value;
+}
+
+Vector<double, 3> Navigation::get_displacement()
+{
+  return displacement_.value;
 }
 
 // Private methods
+void Navigation::gyro_update()
+{
+  // TODO(Adi): Calculate Point 1 of the FDP.
+}
 
-void Navigation::gyro_update() {}
+void Navigation::acclerometer_update()
+{
+  // TODO(Adi): Calculate Point 3 of the FDP.
+}
 
-void Navigation::acclerometer_update() {}
+void Navigation::proximity_orientation_update()
+{
+  // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
+}
 
-void Navigation::proximity_orientation_update() {}
+void Navigation::proximity_displacement_update()
+{
+  // TODO(Adi): Calculate displacement from proximity & strip counter. (Point 7)
+  // NOTE(Adi): This method will call stripe_counter_update().
+}
 
-void Navigation::proximity_displacement_update() {}
-
-void Navigation::stripe_counter_update() {}
+void Navigation::stripe_counter_update()
+{
+  // TODO(Uday): Get data and return it.
+}
 
 }}  // namespace hyped::navigation
