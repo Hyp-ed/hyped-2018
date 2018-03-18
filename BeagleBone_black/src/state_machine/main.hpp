@@ -1,8 +1,7 @@
-
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Author: Ragnor Comerford
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 11. March 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,31 +18,33 @@
  *    limitations under the License.
  */
 
+#pragma once
+
+#include <cstdint>
+
+
+#include "utils/concurrent/thread.hpp"
 #include "state_machine/hyped-machine.hpp"
-#include <iostream>
+#include "data/data.hpp"
 
 namespace hyped {
+
+using utils::concurrent::Thread;
+
 namespace state_machine {
 
-HypedMachine::HypedMachine() : current_state(new Idle())
-{
-  std::cout << "State Machine initialised" << std::endl;
-  current_state->entry();
-}
+class Main: public Thread {
+ public:
+  explicit Main(uint8_t id);
+  void run() override;
 
-void HypedMachine::handleEvent(Event event)
-{
-  std::cout << "Raised event " << event << std::endl;
-  current_state->react(*this, event);
-}
+ private:
+ HypedMachine* hypedMachine;
+  data::Data& data = data::Data::getInstance();
+  bool hasCriticalFailure();
+  bool hasReachedMaxDistance();
+};
 
-void HypedMachine::transition(State *state)
-{
-  // State *prevState = currState;
-  current_state = state;
-  std::cout << "Transitioning..." << std::endl;
-  current_state->entry();
-  // delete prevState;
-}
+}}  // namespace hyped::motor_control
 
-}}   // namespace hyped::state_machine
+
