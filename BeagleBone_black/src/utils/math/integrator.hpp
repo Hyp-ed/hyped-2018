@@ -39,7 +39,7 @@ class Integrator {
    * @param[in]  point1    The point for time T_(N-2)
    * @param[in]  point2    The point for time T_(N-1)
    */
-  DataPoint<T> update(DataPoint<T> point);
+  DataPoint<T> update(DataPoint<T>& point);
 
  private:
   DataPoint<T> previous_point_;
@@ -47,11 +47,11 @@ class Integrator {
 };
 
 template <typename T>
-Integrator<T>::Integrator() : previous_point_(0, 0), previous_output_(0, 0)
+Integrator<T>::Integrator() : previous_point_(0, T(0)), previous_output_(0, T(0))
 {}
 
 template <typename T>
-DataPoint<T> Integrator<T>::update(DataPoint<T> point)
+DataPoint<T> Integrator<T>::update(DataPoint<T>& point)
 {
   T area = (point.value + previous_point_.value)/2 * (point.timestamp - previous_point_.timestamp);
 
