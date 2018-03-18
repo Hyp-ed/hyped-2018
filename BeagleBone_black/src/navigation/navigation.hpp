@@ -22,10 +22,14 @@
 #define BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_
 
 #include <cstdint>
+#include "data/data_point.hpp"
 #include "utils/math/kalman.hpp"
+#include "utils/math/quaternion.hpp"
 #include "utils/math/vector.hpp"
 
+using hyped::data::DataPoint;
 using hyped::utils::math::Kalman;
+using hyped::utils::math::Quaternion;
 using hyped::utils::math::Vector;
 
 namespace hyped {
@@ -33,33 +37,32 @@ namespace navigation {
 
 class Navigation {
  public:
-  // TODO(Uday,Brano,Adi): Change the return values for the private methods to vector/quaternion
+  // TODO(ALL): Change the return values for the private methods to vector/quaternion
 
   void update();
-  float get_accleration();
-  float get_velocity();
-  float get_displacement();
+  Vector<double, 3> get_accleration();
+  Vector<double, 3> get_velocity();
+  Vector<double, 3> get_displacement();
 
  private:
-  // TODO(Uday,Brano,Adi): Add the arguements for the private methods
+  // TODO(ALL): Add the arguements for the private methods
 
   void gyro_update();  // Point number 1
   void acclerometer_update();  // Point number 3, 4, 5 and 6
   void proximity_orientation_update();  // Point number 7
   void proximity_displacement_update();  // Point number 7
   void stripe_counter_update();  // Point number 7
-  // float velocity_update();  // Point number 4 and 5
+  // double velocity_update();  // Point number 4 and 5
 
-  // TODO(Uday,Brano,Adi): Change the data types of the data members
-
-  Vector<float, 3> accleration_;
-  Vector<float, 3> velocity_;
-  Vector<float, 3> displacement_;
-  Vector<float, 3> orientation_;
+  // TODO(ALL): Change the data types of the data members
+  DataPoint<Vector<double, 3>> accleration_;
+  DataPoint<Vector<double, 3>> velocity_;
+  DataPoint<Vector<double, 3>> displacement_;
+  DataPoint<Vector<double, 3>> orientation_;
   int stripe_count_;
   Kalman<Vector<int16_t, 3>> acclerometer_filter_;
   Kalman<Vector<int16_t, 3>> gyro_filter_;
-  // TODO(Uday,Brano,Adi): Decide the type
+  // TODO(ALL): Decide the type
   Kalman<uint8_t> proximity_filter_;
 };
 
