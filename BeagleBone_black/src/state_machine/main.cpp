@@ -38,7 +38,7 @@ Main::Main(uint8_t id)
 }
 
 /**
-  *  @brief  Runs state machine thread. 
+  *  @brief  Runs state machine thread.
   */
 
 void Main::run()
@@ -54,7 +54,7 @@ void Main::run()
    if (hasReachedMaxDistance()) {
        hypedMachine->handleEvent(kMaxDistanceReached);
    }
-  
+
   }
 }
 

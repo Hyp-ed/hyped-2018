@@ -37,8 +37,8 @@ int main()
   Thread* state_machine   = new hyped::state_machine::Main(0);
   Thread* motor     = new hyped::motor_control::Main(1);
   Thread* sensors   = new hyped::sensors::Main(2);
-   
-  state_machine->start(); 
+
+  state_machine->start();
   motor->start();
   sensors->start();
 

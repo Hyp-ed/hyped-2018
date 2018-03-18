@@ -18,22 +18,22 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
+#include <iostream>
 #include "state_machine/machine-states.hpp"
 #include "data/data.hpp"
-#include <iostream>
+
 
 namespace hyped {
 namespace state_machine {
 
-void Idle::entry() 
-{ 
+void Idle::entry()
+{
   data::Data& data = data::Data::getInstance();
   data::StateMachine stm_data = data.getStateMachineData();
   stm_data.current_state = data::kIdle;
   data.setStateMachineData(stm_data);
-  
-  std::cout << "Entered state 'Idle'" << std::endl; 
+
+  std::cout << "Entered state 'Idle'" << std::endl;
 }
 
 void Idle::react(HypedMachine &machine, Event event)
@@ -135,7 +135,7 @@ void RunComplete::react(HypedMachine &machine, Event event)
 }
 
 void Exiting::entry()
-{ 
+{
   data::Data& data = data::Data::getInstance();
   data::StateMachine stm_data = data.getStateMachineData();
   stm_data.current_state = data::kExiting;
@@ -153,13 +153,13 @@ void Exiting::react(HypedMachine &machine, Event event)
   }
 }
 
-void Finished::entry() 
-{ 
+void Finished::entry()
+{
   data::Data& data = data::Data::getInstance();
   data::StateMachine stm_data = data.getStateMachineData();
   stm_data.current_state = data::kFinished;
   data.setStateMachineData(stm_data);
-  std::cout << "Entered state 'Finished'" << std::endl; 
+  std::cout << "Entered state 'Finished'" << std::endl;
 }
 
 void Finished::react(HypedMachine &machine, Event event)

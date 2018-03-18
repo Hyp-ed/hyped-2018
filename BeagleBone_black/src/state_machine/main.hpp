@@ -21,8 +21,6 @@
 #pragma once
 
 #include <cstdint>
-
-
 #include "utils/concurrent/thread.hpp"
 #include "state_machine/hyped-machine.hpp"
 #include "data/data.hpp"
@@ -46,5 +44,3 @@ class Main: public Thread {
 };
 
 }}  // namespace hyped::motor_control
-
-
