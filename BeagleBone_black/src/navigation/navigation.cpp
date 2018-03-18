@@ -2,7 +2,7 @@
  * Author: Adithya Sireesh
  * Organisation: HYPED
  * Date: 10/02/2018
- * Description:
+ * Description: Navigation class functionality definition.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
