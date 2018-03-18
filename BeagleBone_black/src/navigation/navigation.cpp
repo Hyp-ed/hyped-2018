@@ -20,6 +20,10 @@
 
 #include "navigation.hpp"
 
+
+namespace hyped {
+namespace navigation {
+
 // Public methods
 void Navigation::update() {}
 
@@ -49,3 +53,5 @@ void Navigation::proximity_orientation_update() {}
 void Navigation::proximity_displacement_update() {}
 
 void Navigation::stripe_counter_update() {}
+
+}}  // namespace hyped::navigation

@@ -30,7 +30,6 @@ void Main::run()
 {
   while (1) {
     // TODO(Brano,Uday,Adi): Put code.
-    
   }
 }
 

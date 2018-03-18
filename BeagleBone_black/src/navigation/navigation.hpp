@@ -28,6 +28,9 @@
 using hyped::utils::math::Kalman;
 using hyped::utils::math::Vector;
 
+namespace hyped {
+namespace navigation {
+
 class Navigation {
  public:
   // TODO(Uday,Brano,Adi): Change the return values for the private methods to vector/quaternion
@@ -59,5 +62,7 @@ class Navigation {
   // TODO(Uday,Brano,Adi): Decide the type
   Kalman<uint8_t> proximity_filter_;
 };
+
+}}  // namespace hyped::navigation
 
 #endif  // BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
