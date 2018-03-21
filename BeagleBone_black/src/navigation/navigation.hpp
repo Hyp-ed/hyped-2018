@@ -22,6 +22,8 @@
 #define BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_
 
 #include <cstdint>
+
+#include "data/data.hpp"
 #include "data/data_point.hpp"
 #include "utils/math/kalman.hpp"
 #include "utils/math/integrator.hpp"
@@ -29,6 +31,7 @@
 #include "utils/math/vector.hpp"
 
 using hyped::data::DataPoint;
+using hyped::data::Sensors;
 using hyped::utils::math::Kalman;
 using hyped::utils::math::Integrator;
 using hyped::utils::math::Quaternion;
@@ -41,7 +44,7 @@ class Navigation {
  public:
   // TODO(ALL): Change the return values for the private methods to vector/quaternion
 
-  void update();
+  void update(const Sensors& data);
   Vector<double, 3> get_accleration();
   Vector<double, 3> get_velocity();
   Vector<double, 3> get_displacement();
