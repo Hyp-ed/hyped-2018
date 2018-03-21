@@ -20,12 +20,14 @@
 
 #include "navigation.hpp"
 
+#include "data/data.hpp"
 #include "data/data_point.hpp"
 #include "utils/math/integrator.hpp"
 #include "utils/math/quaternion.hpp"
 #include "utils/math/vector.hpp"
 
 using hyped::data::DataPoint;
+using hyped::data::Sensors;
 using hyped::utils::math::Quaternion;
 using hyped::utils::math::Vector;
 
@@ -33,8 +35,10 @@ namespace hyped {
 namespace navigation {
 
 // Public methods
-void Navigation::update()
+void Navigation::update(const Sensors& data)
 {
+  // TODO(Uday): Should we check if the data has new data here or in main for navigation?
+
   gyro_update();
   proximity_orientation_update();
   acclerometer_update();
