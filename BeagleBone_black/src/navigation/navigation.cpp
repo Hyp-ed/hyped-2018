@@ -26,7 +26,6 @@
 #include "utils/math/vector.hpp"
 
 using hyped::data::DataPoint;
-using hyped::utils::math::Integrator;
 using hyped::utils::math::Quaternion;
 using hyped::utils::math::Vector;
 
@@ -34,8 +33,6 @@ namespace hyped {
 namespace navigation {
 
 // Public methods
-Integrator<Vector<double, 3>> acc_to_vel;
-Integrator<Vector<double, 3>> vel_to_dis;
 void Navigation::update()
 {
   gyro_update();

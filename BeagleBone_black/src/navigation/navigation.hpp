@@ -24,11 +24,13 @@
 #include <cstdint>
 #include "data/data_point.hpp"
 #include "utils/math/kalman.hpp"
+#include "utils/math/integrator.hpp"
 #include "utils/math/quaternion.hpp"
 #include "utils/math/vector.hpp"
 
 using hyped::data::DataPoint;
 using hyped::utils::math::Kalman;
+using hyped::utils::math::Integrator;
 using hyped::utils::math::Quaternion;
 using hyped::utils::math::Vector;
 
@@ -64,6 +66,9 @@ class Navigation {
   Kalman<Vector<int16_t, 3>> gyro_filter_;
   // TODO(ALL): Decide the type
   Kalman<uint8_t> proximity_filter_;
+
+  Integrator<Vector<double, 3>> acc_to_vel;
+  Integrator<Vector<double, 3>> vel_to_dis;
 };
 
 }}  // namespace hyped::navigation
