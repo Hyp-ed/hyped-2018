@@ -55,7 +55,7 @@ class Navigation {
   void gyro_update();  // Point number 1
   void acclerometer_update();  // Point number 3, 4, 5 and 6
   void proximity_orientation_update();  // Point number 7
-  void proximity_displacement_update();  // Point number 7
+  DataPoint<Vector<double, 3>> proximity_displacement_update();  // Point number 7
   void stripe_counter_update();  // Point number 7
   // double velocity_update();  // Point number 4 and 5
 

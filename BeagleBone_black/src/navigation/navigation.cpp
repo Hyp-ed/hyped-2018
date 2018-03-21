@@ -42,16 +42,7 @@ void Navigation::update(const Sensors& data)
   gyro_update();
   proximity_orientation_update();
   acclerometer_update();
-
-  DataPoint<Vector<double, 3>> velocity_1 = acc_to_vel.update(accleration_);  // Point 4
-
-  proximity_displacement_update();
-  DataPoint<Vector<double, 3>> velocity_2;
-  // TODO(Adi): Find the velocity from displacement_1. (Save to velocity_2)
-  // TODO(Uday): Set the new velocity using complementary filter.
-
-  DataPoint<Vector<double, 3>> displacement_1 = vel_to_dis.update(velocity_);  // Point 6
-  // TODO(Uday): Set the new displacement using complementary filter.
+  stripe_counter_update();
 }
 
 Vector<double, 3> Navigation::get_accleration()
@@ -85,15 +76,29 @@ void Navigation::proximity_orientation_update()
   // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
 }
 
-void Navigation::proximity_displacement_update()
+DataPoint<Vector<double, 3>> Navigation::proximity_displacement_update()
 {
   // TODO(Adi): Calculate displacement from proximity & strip counter. (Point 7)
-  // NOTE(Adi): This method will call stripe_counter_update().
+  return DataPoint<Vector<double, 3>>();
 }
 
 void Navigation::stripe_counter_update()
 {
-  // TODO(Uday): Get data and return it.
+  DataPoint<Vector<double, 3>> velocity_1, velocity_2, displacement_1, displacement_2;
+  velocity_1 = acc_to_vel.update(accleration_);
+
+  // TODO(Uday): Check if data is new.
+  {
+    displacement_2 = proximity_displacement_update();
+    // TODO(Adi): Find the velocity_2 from displacement_2.
+
+    // TODO(Uday): Set the new velocity using complementary filter.
+    displacement_1 = vel_to_dis.update(velocity_);
+
+    // TODO(Uday): Set the new displacement using complementary filter.
+  }
+
+  // TODO(Uday): Deal with the case if it is not updated.
 }
 
 }}  // namespace hyped::navigation
