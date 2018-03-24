@@ -21,16 +21,62 @@
 #include "navigation/main.hpp"
 
 namespace hyped {
+
+using data::Sensors;
+
 namespace navigation {
 
-Main::Main(uint8_t id) : Thread(id), data_(data::Data::getInstance())
+Main::Main(uint8_t id) : Thread(id), data_(data::Data::getInstance()), nav_()
 {/* EMPTY */}
 
 void Main::run()
 {
+  data::Navigation nav_data;
+  Sensors last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
-    // TODO(Brano,Uday,Adi): Put code.
+    Sensors readings = data_.getSensorsData();
+
+    // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
+    if (!imuChanged(last_readings, readings))
+      continue;
+    if (proxiChanged(last_readings, readings) && stripeCntChanged(last_readings, readings))
+      nav_.update(readings.imu, readings.proxy, readings.stripe_cnt);
+    else if (proxiChanged(last_readings, readings))
+      nav_.update(readings.imu, readings.proxy);
+    else if (stripeCntChanged(last_readings, readings))
+      nav_.update(readings.imu, readings.stripe_cnt);
+    else
+      nav_.update(readings.imu);
+
+    nav_data.distance = nav_.get_displacement();
+    nav_data.velocity = nav_.get_velocity();
+    nav_data.acceleration = nav_.get_accleration();
+    // TODO(Brano): Add stripe count or remove it from data::Navigation.
+    data_.setNavigationData(nav_data);
   }
+}
+
+bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
+{
+  for (unsigned int i = 0; i < new_data.imu.size(); ++i)
+    if (new_data.imu[i].gyr.timestamp != old_data.imu[i].gyr.timestamp ||
+        new_data.imu[i].acc.timestamp != old_data.imu[i].acc.timestamp)
+      return true;
+  return false;
+}
+
+bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
+{
+  for (unsigned int i = 0; i < new_data.proxy.size(); ++i)
+    // TODO(Brano): Timestamp proxi data in data::Sensors
+    if (new_data.proxy[i].val != old_data.proxy[i].val)
+      return true;
+  return false;
+}
+
+inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
+{
+  return new_data.stripe_cnt.timestamp != old_data.stripe_cnt.timestamp;
 }
 
 }}  // namespace hyped::navigation

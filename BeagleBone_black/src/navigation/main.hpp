@@ -24,10 +24,13 @@
 
 #include <cstdint>
 
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "navigation/navigation.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
+
+using data::Sensors;
 using utils::concurrent::Thread;
 namespace navigation {
 
@@ -37,7 +40,11 @@ class Main: public Thread {
   void run() override;
 
  private:
+  bool imuChanged(const Sensors& old_data, const Sensors& new_data);
+  bool proxiChanged(const Sensors& old_data, const Sensors& new_data);
+  inline bool stripeCntChanged(const Sensors& old_data, const Sensors& new_data);
   data::Data& data_;
+  Navigation nav_;
 };
 
 }}  // namespace hyped::navigation
