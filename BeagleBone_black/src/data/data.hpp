@@ -78,6 +78,11 @@ struct Proximity {
   uint8_t val;
 };
 
+struct Battery {
+<Vector<int16_t, 10> > temperature;
+uint8_t voltage;
+};
+
 /*struct StripeCount {
   DataPoint<uint32_t> count;
 };//*/
@@ -90,6 +95,14 @@ struct Sensors {
   std::array<Imu, kNumImus> imu;
   std::array<Proximity, kNumProximities> proxy;
   StripeCount stripe_cnt;
+};
+
+struct Batteries {
+  static constexpr int kNumLPBatteries = 2;
+  static constexpr int kNumHPBatteries = 2;
+
+  std::array<Battery, kNumLPBatteries> low_power_batteries;
+  std::array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
 // -----------------------------------------------------------------------------
