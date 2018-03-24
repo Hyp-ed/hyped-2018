@@ -79,8 +79,8 @@ struct Proximity {
 };
 
 struct Battery {
-<Vector<int16_t, 10> > temperature;
-uint8_t voltage;
+  Vector<int16_t, 10> temperatures;
+  uint8_t voltage;
 };
 
 /*struct StripeCount {
@@ -168,6 +168,16 @@ class Data {
    */
   void setSensorsData(const Sensors& sensors_data);
 
+    /**
+   * @brief      Retrieves data from all sensors
+   */
+  Sensors getBatteryData();
+
+  /**
+   * @brief      Should be called to update sensor data
+   */
+  void setBatteryData(const Batteries& batteries_data);
+
   /**
    * @brief      Retrieves data produced by each of the four motors.
    */
@@ -183,12 +193,14 @@ class Data {
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
+  Batteries   batteries_;
 
   // locks for data substructures
   Lock lock_state_machine_;
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+  Lock lock_batteries_;
 };
 
 }}  // namespace data::hyped
