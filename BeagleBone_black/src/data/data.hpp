@@ -164,17 +164,17 @@ class Data {
   Sensors getSensorsData();
 
   /**
-   * @brief      Should be called to update sensor data
+   * @brief      Should be called to update sensor data.
    */
   void setSensorsData(const Sensors& sensors_data);
 
     /**
-   * @brief      Retrieves data from all sensors
+   * @brief      Retrieves data from the batteries.
    */
   Sensors getBatteryData();
 
   /**
-   * @brief      Should be called to update sensor data
+   * @brief      Should be called to update battery data
    */
   void setBatteryData(const Batteries& batteries_data);
 
