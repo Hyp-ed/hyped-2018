@@ -3,7 +3,7 @@
  * Author: Uday Patel
  * Organisation: HYPED
  * Date: 24 February 2018
- * Description:
+ * Description: This is the Kalman class used to filter the data obtained from the sensors.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -28,39 +28,37 @@ namespace hyped {
 namespace utils {
 namespace math {
 
-// TODO(Uday): Fill in the class comment.
-// TODO(Uday): Explain a little bit about Kalman filters in class comment or file comment
 /**
- * @brief
+ * @brief    This class is for filtering the data from sensors to smoothen it.
  *
- * @tparam T
+ * @param[in] T    This is the type of the data value that it should filter.
  */
 template <typename T>
 class Kalman {
  public:
-  // TODO(Uday): Fill in the method comments.
   /**
-   * @brief Construct a new Kalman object
+   * @brief    Construct a new Kalman object
    *
-   * @param input_value
-   * @param measurement_noise
-   * @param process_noise
-   * @param estimation_error
+   * @param[in] input_value    Initial value of the reading
+   * @param[in] measurement_noise    Standard deviation of the measurement
+   * @param[in] process_noise    How noisy the measurement can be (predetermined)
+   * @param[in] estimation_error    Total error that has been collected over time usually set to 0
    */
   Kalman(T input_value, T measurement_noise, T process_noise, T estimation_error = T());
 
   /**
-   * @brief
+   * @brief    Filters a value based on it's previous values
    *
-   * @param input
-   * @return T
+   * @param[in] input    Value that needs to be filtered
+   *
+   * @return    Returns the filtered value
    */
   T filter(const T& input);
 
   /**
-   * @brief Get the Filtered object
+   * @brief    Get the Filtered object
    *
-   * @return T
+   * @return    Returns the last filtered value
    */
   T getFiltered();
 
