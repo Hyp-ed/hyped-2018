@@ -39,12 +39,12 @@ class Kalman {
   /**
    * @brief    Construct a new Kalman object
    *
-   * @param[in] input_value    Initial value of the reading
+   * @param[in] input_value    Initial value of the reading usually set to 0
    * @param[in] measurement_noise    Standard deviation of the measurement
    * @param[in] process_noise    How noisy the measurement can be (predetermined)
    * @param[in] estimation_error    Total error that has been collected over time usually set to 0
    */
-  Kalman(T input_value, T measurement_noise, T process_noise, T estimation_error = T());
+  Kalman(T measurement_noise, T process_noise, T input_value = T(), T estimation_error = T());
 
   /**
    * @brief    Filters a value based on it's previous values
@@ -71,7 +71,7 @@ class Kalman {
 };
 
 template <typename T>
-Kalman<T>::Kalman(T input_value, T measurement_noise, T process_noise, T estimation_error)
+Kalman<T>::Kalman(T measurement_noise, T process_noise, T input_value, T estimation_error)
     : process_noise_(process_noise),
       measurement_noise_covariance_(measurement_noise),
       estimation_error_covariance_(estimation_error),
