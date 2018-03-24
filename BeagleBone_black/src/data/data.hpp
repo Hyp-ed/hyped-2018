@@ -112,6 +112,15 @@ struct Motors {
 };
 
 // -----------------------------------------------------------------------------
+// Communications data
+// -----------------------------------------------------------------------------
+
+struct Communications {
+  uint32_t stopCommand;
+  uint32_t killPowerCommand;
+};
+
+// -----------------------------------------------------------------------------
 // Common Data structure/class
 // -----------------------------------------------------------------------------
 /**
@@ -165,17 +174,29 @@ class Data {
    */
   void setMotorData(const Motors& motor_data);
 
+  /**
+     * @brief      Retrieves data on whether stop/kill power commands have been issued.
+     */
+    Communications getCommunicationsData();
+
+    /**
+     * @brief      Should be called to update motor data.
+     */
+    void setCommunicationsData(const Communications& communications_data);
+
  private:
   StateMachine state_machine_;
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
+  Communications      communications_;
 
   // locks for data substructures
   Lock lock_state_machine_;
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+  Lock lock_communications_;
 };
 
 }}  // namespace data::hyped
