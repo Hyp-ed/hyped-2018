@@ -78,6 +78,11 @@ struct Proximity {
   uint8_t val;
 };
 
+struct Battery {
+  Vector<int16_t, 10> temperatures;
+  uint8_t voltage;
+};
+
 /*struct StripeCount {
   DataPoint<uint32_t> count;
 };//*/
@@ -90,6 +95,14 @@ struct Sensors {
   std::array<Imu, kNumImus> imu;
   std::array<Proximity, kNumProximities> proxy;
   StripeCount stripe_cnt;
+};
+
+struct Batteries {
+  static constexpr int kNumLPBatteries = 2;
+  static constexpr int kNumHPBatteries = 2;
+
+  std::array<Battery, kNumLPBatteries> low_power_batteries;
+  std::array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
 // -----------------------------------------------------------------------------
@@ -151,9 +164,19 @@ class Data {
   Sensors getSensorsData();
 
   /**
-   * @brief      Should be called to update sensor data
+   * @brief      Should be called to update sensor data.
    */
   void setSensorsData(const Sensors& sensors_data);
+
+    /**
+   * @brief      Retrieves data from the batteries.
+   */
+  Sensors getBatteryData();
+
+  /**
+   * @brief      Should be called to update battery data
+   */
+  void setBatteryData(const Batteries& batteries_data);
 
   /**
    * @brief      Retrieves data produced by each of the four motors.
@@ -170,12 +193,14 @@ class Data {
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
+  Batteries   batteries_;
 
   // locks for data substructures
   Lock lock_state_machine_;
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+  Lock lock_batteries_;
 };
 
 }}  // namespace data::hyped
