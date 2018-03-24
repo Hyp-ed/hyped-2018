@@ -20,55 +20,77 @@
 
 #include "navigation.hpp"
 
-#include "data/data.hpp"
-#include "data/data_point.hpp"
-#include "utils/math/integrator.hpp"
-#include "utils/math/quaternion.hpp"
-#include "utils/math/vector.hpp"
-
-using hyped::data::DataPoint;
-using hyped::data::Sensors;
-using hyped::utils::math::Quaternion;
-using hyped::utils::math::Vector;
-
 namespace hyped {
 namespace navigation {
 
-// Public methods
-void Navigation::update(const Sensors& data)
-{
-  // TODO(Uday): Should we check if the data has new data here or in main for navigation?
+Navigation::Navigation()
+    : accleration_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
+      gyro_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
+      proximity_filter_(0, 0, 0)
+{}
 
-  gyro_update();
-  proximity_orientation_update();
-  acclerometer_update();
-  stripe_counter_update();
+void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
+{
+  // TODO(Brano,Adi): Gyro update. (Data format should change first.)
+  Vector<uint32_t, 3> avg(0);
+  for (const auto& imu : imus)
+    avg += imu.acc.value;
+  avg /= imus.size();
+  // TODO(Brano,Adi): Change the timestamping strategy
+  this->acclerometer_update(DataPoint<Vector<uint16_t, 3>>(imus[0].acc.timestamp, avg));
 }
 
-Vector<double, 3> Navigation::get_accleration()
+void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
+                        std::array<data::Proximity, data::Sensors::kNumProximities> proxis)
 {
-  return accleration_.value;
+  update(imus);
+  // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
 }
 
-Vector<double, 3> Navigation::get_velocity()
+void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
+                        data::StripeCount stripe_count)
 {
-  return velocity_.value;
+  update(imus);
+  // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
+  stripe_counter_update(stripe_count.value);
 }
 
-Vector<double, 3> Navigation::get_displacement()
+void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
+                        std::array<data::Proximity, data::Sensors::kNumProximities> proxis,
+                        data::StripeCount stripe_count)
 {
-  return displacement_.value;
+  update(imus, proxis);
+  stripe_counter_update(stripe_count.value);
 }
 
-// Private methods
-void Navigation::gyro_update()
+uint16_t Navigation::get_accleration()
+{
+  return accleration_[0];
+}
+
+uint16_t Navigation::get_velocity()
+{
+  return velocity_[0];
+}
+
+uint16_t Navigation::get_displacement()
+{
+  return displacement_[0];
+}
+
+
+void Navigation::gyro_update(DataPoint<Vector<uint16_t, 3>> angular_velocity)
 {
   // TODO(Adi): Calculate Point 1 of the FDP.
 }
 
-void Navigation::acclerometer_update()
+void Navigation::acclerometer_update(DataPoint<Vector<uint16_t, 3>> acceleration)
 {
-  // TODO(Adi): Calculate Point 3 of the FDP.
+  // TODO(Uday): Filter acceleration. Before or after averaging??
+  accleration_ = acceleration.value;
+  auto velocity = acceleration_integrator_.update(acceleration);
+  velocity_ = velocity.value;
+  displacement_ = velocity_integrator_.update(velocity).value;
 }
 
 void Navigation::proximity_orientation_update()
@@ -76,29 +98,12 @@ void Navigation::proximity_orientation_update()
   // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
 }
 
-DataPoint<Vector<double, 3>> Navigation::proximity_displacement_update()
+void Navigation::proximity_displacement_update()
 {
-  // TODO(Adi): Calculate displacement from proximity & strip counter. (Point 7)
-  return DataPoint<Vector<double, 3>>();
+  // TODO(Adi): Calculate displacement from proximity. (Point 7)
 }
 
-void Navigation::stripe_counter_update()
-{
-  DataPoint<Vector<double, 3>> velocity_1, velocity_2, displacement_1, displacement_2;
-  velocity_1 = acc_to_vel.update(accleration_);
-
-  // TODO(Uday): Check if data is new.
-  {
-    displacement_2 = proximity_displacement_update();
-    // TODO(Adi): Find the velocity_2 from displacement_2.
-
-    // TODO(Uday): Set the new velocity using complementary filter.
-    displacement_1 = vel_to_dis.update(velocity_);
-
-    // TODO(Uday): Set the new displacement using complementary filter.
-  }
-
-  // TODO(Uday): Deal with the case if it is not updated.
-}
+void Navigation::stripe_counter_update(uint16_t count)
+{}
 
 }}  // namespace hyped::navigation

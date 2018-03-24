@@ -21,57 +21,85 @@
 #ifndef BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_
 #define BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_
 
+#include <array>
 #include <cstdint>
 
 #include "data/data.hpp"
-#include "data/data_point.hpp"
-#include "utils/math/kalman.hpp"
 #include "utils/math/integrator.hpp"
+#include "utils/math/kalman.hpp"
 #include "utils/math/quaternion.hpp"
 #include "utils/math/vector.hpp"
 
-using hyped::data::DataPoint;
-using hyped::data::Sensors;
-using hyped::utils::math::Kalman;
-using hyped::utils::math::Integrator;
-using hyped::utils::math::Quaternion;
-using hyped::utils::math::Vector;
-
 namespace hyped {
+
+using data::DataPoint;
+using utils::math::Integrator;
+using utils::math::Kalman;
+using utils::math::Quaternion;
+using utils::math::Vector;
+
 namespace navigation {
 
 class Navigation {
  public:
-  // TODO(ALL): Change the return values for the private methods to vector/quaternion
+  Navigation();
 
-  void update(const Sensors& data);
-  Vector<double, 3> get_accleration();
-  Vector<double, 3> get_velocity();
-  Vector<double, 3> get_displacement();
+  /**
+   * @brief 
+   * 
+   * @param imus 
+   */
+  void update(std::array<data::Imu, data::Sensors::kNumImus> imus);
+  /**
+   * @brief 
+   * 
+   * @param imus 
+   */
+  void update(std::array<data::Imu, data::Sensors::kNumImus> imus,
+              std::array<data::Proximity, data::Sensors::kNumProximities> proxis);
+  /**
+   * @brief 
+   * 
+   * @param imus 
+   * @param stripe_count 
+   */
+  void update(std::array<data::Imu, data::Sensors::kNumImus> imus, data::StripeCount stripe_count);
+  /**
+   * @brief 
+   * 
+   * @param imus 
+   * @param stripe_count 
+   */
+  void update(std::array<data::Imu, data::Sensors::kNumImus> imus,
+              std::array<data::Proximity, data::Sensors::kNumProximities> proxis,
+              data::StripeCount stripe_count);
+  uint16_t get_accleration();
+  uint16_t get_velocity();
+  uint16_t get_displacement();
 
  private:
-  // TODO(ALL): Add the arguements for the private methods
+  // TODO(Uday,Brano,Adi): Add the arguments for the private methods
+  // TODO(Uday,Brano,Adi): Change the return values for the private methods to vector/quaternion
 
-  void gyro_update();  // Point number 1
-  void acclerometer_update();  // Point number 3, 4, 5 and 6
+  void gyro_update(DataPoint<Vector<uint16_t, 3>> angular_velocity);  // Point number 1
+  void acclerometer_update(DataPoint<Vector<uint16_t, 3>> acceleration);  // Points 3, 4, 5, 6
   void proximity_orientation_update();  // Point number 7
-  DataPoint<Vector<double, 3>> proximity_displacement_update();  // Point number 7
-  void stripe_counter_update();  // Point number 7
-  // double velocity_update();  // Point number 4 and 5
+  void proximity_displacement_update();  // Point number 7
+  void stripe_counter_update(uint16_t count);  // Point number 7
 
-  // TODO(ALL): Change the data types of the data members
-  DataPoint<Vector<double, 3>> accleration_;
-  DataPoint<Vector<double, 3>> velocity_;
-  DataPoint<Vector<double, 3>> displacement_;
-  DataPoint<Vector<double, 3>> orientation_;
+  // TODO(Uday,Brano,Adi): Change the data types of the data members
+
+  Vector<uint16_t, 3> accleration_;
+  Vector<uint16_t, 3> velocity_;
+  Vector<uint16_t, 3> displacement_;
+  Quaternion<uint16_t> orientation_;
   int stripe_count_;
-  Kalman<Vector<int16_t, 3>> acclerometer_filter_;
+  Kalman<Vector<int16_t, 3>> accleration_filter_;
   Kalman<Vector<int16_t, 3>> gyro_filter_;
   // TODO(ALL): Decide the type
   Kalman<uint8_t> proximity_filter_;
-
-  Integrator<Vector<double, 3>> acc_to_vel;
-  Integrator<Vector<double, 3>> vel_to_dis;
+  Integrator<Vector<uint16_t, 3>> acceleration_integrator_;
+  Integrator<Vector<uint16_t, 3>> velocity_integrator_;
 };
 
 }}  // namespace hyped::navigation
