@@ -24,6 +24,7 @@
 
 #include "state_machine/main.hpp"
 #include "motor_control/main.hpp"
+#include "navigation/main.hpp"
 #include "sensors/main.hpp"
 #include "utils/concurrent/thread.hpp"
 
@@ -37,17 +38,22 @@ int main()
   Thread* state_machine   = new hyped::state_machine::Main(0);
   Thread* motor     = new hyped::motor_control::Main(1);
   Thread* sensors   = new hyped::sensors::Main(2);
+  Thread* navigation = new hyped::navigation::Main(3);
 
   state_machine->start();
   motor->start();
   sensors->start();
+  navigation->start();
 
   state_machine->join();
   motor->join();
   sensors->join();
+  navigation->join();
 
   delete state_machine;
   delete sensors;
   delete motor;
+  delete navigation;
+
   return 0;
 }
