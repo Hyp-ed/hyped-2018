@@ -22,6 +22,7 @@
 
 #include <iostream>
 
+#include "state_machine/main.hpp"
 #include "motor_control/main.hpp"
 #include "sensors/main.hpp"
 #include "utils/concurrent/thread.hpp"
@@ -31,15 +32,21 @@ using hyped::utils::concurrent::Thread;
 
 int main()
 {
-  std::cout << "Starting BeagleBone Black..." << std::endl;
+  std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
 
-  Thread* motor     = new hyped::motor_control::Main(0);
-  Thread* sensors   = new hyped::sensors::Main(1);
+  Thread* state_machine   = new hyped::state_machine::Main(0);
+  Thread* motor     = new hyped::motor_control::Main(1);
+  Thread* sensors   = new hyped::sensors::Main(2);
+
+  state_machine->start();
   motor->start();
   sensors->start();
 
+  state_machine->join();
   motor->join();
   sensors->join();
+
+  delete state_machine;
   delete sensors;
   delete motor;
   return 0;

@@ -25,12 +25,14 @@
 #include <cstdint>
 
 #include "data/data_point.hpp"
+#include "utils/math/vector.hpp"
 #include "utils/concurrent/lock.hpp"
 
 namespace hyped {
 
 // imports
 using utils::concurrent::Lock;
+using utils::math::Vector;
 
 namespace data {
 
@@ -68,17 +70,17 @@ struct Navigation {
 // -----------------------------------------------------------------------------
 
 struct Imu {
-  uint16_t acc_x;
-  uint16_t acc_y;
-  uint16_t acc_z;
-
-  uint16_t gyr_x;
-  uint16_t gyr_y;
-  uint16_t gyr_z;
+  DataPoint<Vector<int16_t, 3> > acc;
+  DataPoint<Vector<int16_t, 3> > gyr;
 };
 
 struct Proximity {
   uint8_t val;
+};
+
+struct Battery {
+  Vector<int16_t, 10> temperatures;
+  uint8_t voltage;
 };
 
 /*struct StripeCount {
@@ -95,14 +97,31 @@ struct Sensors {
   StripeCount stripe_cnt;
 };
 
+struct Batteries {
+  static constexpr int kNumLPBatteries = 2;
+  static constexpr int kNumHPBatteries = 2;
+
+  std::array<Battery, kNumLPBatteries> low_power_batteries;
+  std::array<Battery, kNumHPBatteries> high_power_batteries;
+};
+
 // -----------------------------------------------------------------------------
 // Motor data
 // -----------------------------------------------------------------------------
+
+enum MotorState {
+  kMotorIdle,
+  kMotorAccelerating,
+  kMotorDecelerating,
+  kMotorStopped
+};
+
 struct Motors {
-  int32_t angular_velocity_FL;
-  int32_t angular_velocity_FR;
-  int32_t angular_velocity_BL;
-  int32_t angular_velocity_BR;
+  MotorState current_motor_state;
+  int32_t rpm_FL;
+  int32_t rpm_FR;
+  int32_t rpm_BL;
+  int32_t rpm_BR;
 };
 
 // -----------------------------------------------------------------------------
@@ -145,9 +164,19 @@ class Data {
   Sensors getSensorsData();
 
   /**
-   * @brief      Should be called to update sensor data
+   * @brief      Should be called to update sensor data.
    */
   void setSensorsData(const Sensors& sensors_data);
+
+    /**
+   * @brief      Retrieves data from the batteries.
+   */
+  Sensors getBatteryData();
+
+  /**
+   * @brief      Should be called to update battery data
+   */
+  void setBatteryData(const Batteries& batteries_data);
 
   /**
    * @brief      Retrieves data produced by each of the four motors.
@@ -164,12 +193,14 @@ class Data {
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
+  Batteries   batteries_;
 
   // locks for data substructures
   Lock lock_state_machine_;
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+  Lock lock_batteries_;
 };
 
 }}  // namespace data::hyped

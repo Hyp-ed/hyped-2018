@@ -48,6 +48,7 @@ class Main: public Thread {
   Motor* motor;
   int32_t rpm;
   data::Data& data = data::Data::getInstance();
+  data::Motors motor_data;
   data::StateMachine state;
   data::Navigation nav;
 };
