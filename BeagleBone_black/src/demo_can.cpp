@@ -20,6 +20,9 @@
 
 #include <unistd.h>
 
+#include <thread>
+#include <chrono>
+
 #include "utils/io/can.hpp"
 
 using hyped::utils::io::Can;
@@ -28,7 +31,8 @@ using hyped::utils::io::CanFrame;
 
 inline void delay(int ms)
 {
-  usleep(ms * 1000);
+  // usleep(ms * 1000);
+  std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
 }
 
 int main()

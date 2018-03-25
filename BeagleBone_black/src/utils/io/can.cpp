@@ -24,8 +24,32 @@
 #include <unistd.h>
 
 #include <sys/socket.h>
-#include <linux/can.h>
+// #include <linux/can.h>
 
+#define CAN_MAX_DLEN 8
+struct can_frame {
+  uint32_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t    can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+  uint8_t    __pad;   /* padding */
+  uint8_t    __res0;  /* reserved / padding */
+  uint8_t    __res1;  /* reserved / padding */
+  uint8_t    data[CAN_MAX_DLEN] __attribute__((aligned(8)));
+};
+#define AF_CAN 29
+#define PF_CAN AF_CAN
+#define CAN_RAW 1
+#define CAN_MTU (sizeof(struct can_frame))
+typedef uint16_t __kernel_sa_family_t;
+struct sockaddr_can {
+  __kernel_sa_family_t can_family;
+  int         can_ifindex;
+  union {
+    /* transport protocol class address information (e.g. ISOTP) */
+    struct { uint32_t rx_id, tx_id; } tp;
+
+    /* reserved for future CAN protocols address information */
+  } can_addr;
+};
 
 #define CANID_DELIM '#'
 #define DATA_SEPERATOR '.'
