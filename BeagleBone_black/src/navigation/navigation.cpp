@@ -32,12 +32,12 @@ Navigation::Navigation()
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
 {
   // TODO(Brano,Adi): Gyro update. (Data format should change first.)
-  Vector<uint32_t, 3> avg(0);
+  Vector<int16_t, 3> avg(0);
   for (const auto& imu : imus)
     avg += imu.acc.value;
   avg /= imus.size();
   // TODO(Brano,Adi): Change the timestamping strategy
-  this->acclerometer_update(DataPoint<Vector<uint16_t, 3>>(imus[0].acc.timestamp, avg));
+  this->acclerometer_update(DataPoint<Vector<int16_t, 3>>(imus[0].acc.timestamp, avg));
 }
 
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
@@ -63,28 +63,28 @@ void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
   stripe_counter_update(stripe_count.value);
 }
 
-uint16_t Navigation::get_accleration()
+int16_t Navigation::get_accleration()
 {
   return accleration_[0];
 }
 
-uint16_t Navigation::get_velocity()
+int16_t Navigation::get_velocity()
 {
   return velocity_[0];
 }
 
-uint16_t Navigation::get_displacement()
+int16_t Navigation::get_displacement()
 {
   return displacement_[0];
 }
 
 
-void Navigation::gyro_update(DataPoint<Vector<uint16_t, 3>> angular_velocity)
+void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
 {
   // TODO(Adi): Calculate Point 1 of the FDP.
 }
 
-void Navigation::acclerometer_update(DataPoint<Vector<uint16_t, 3>> acceleration)
+void Navigation::acclerometer_update(DataPoint<Vector<int16_t, 3>> acceleration)
 {
   // TODO(Uday): Filter acceleration. Before or after averaging??
   accleration_ = acceleration.value;
