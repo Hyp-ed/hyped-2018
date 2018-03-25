@@ -21,6 +21,10 @@ motor_control/motor.hpp
 motor_control/motor.cpp
 motor_control/main.hpp
 motor_control/main.cpp
+navigation/main.hpp
+navigation/main.cpp
+navigation/navigation.hpp
+navigation/navigation.cpp
 sensors/main.hpp
 sensors/main.cpp
 utils/concurrent/thread.hpp
