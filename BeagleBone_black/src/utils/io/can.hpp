@@ -23,7 +23,11 @@
 
 #include <stdint.h>
 
+#include <queue>
+
 #include "utils/concurrent/thread.hpp"
+#include "utils/concurrent/lock.hpp"
+
 
 namespace hyped {
 namespace utils {
@@ -36,6 +40,14 @@ struct CanFrame {
   uint8_t   data[8];
 };
 
+
+/**
+ * Can implements singleton pattern to encapsulate one can interface, namely can0.
+ * During object construction, can intereface is mapped onto socket_ member variable.
+ * Furthermore, constructor spawns reading thread which waits on incoming can messages.
+ * These messages are put into one of consuming queues based on configured id spaces.
+ * The reading itself is performed in overriden run() method.
+ */
 class Can : public concurrent::Thread {
  public:
   static Can& getInstance()
@@ -59,15 +71,34 @@ class Can : public concurrent::Thread {
    */
   int receive(CanFrame* frame);
 
-  void run() override;
+  /**
+   * Perform thread-safe reading from BMS can buffer
+   */
+  CanFrame GetBMS();
+
+  /**
+   * Perform thread-safe reading from Proxi can buffer
+   */
+  CanFrame GetProxi();
+
 
  private:
+  /**
+   * Blocking read and demultiplex messages based on configure id spaces
+   */
+  void run() override;
+
   Can();
   ~Can();
 
  private:
   int socket_;
   int reading;
+
+  concurrent::Lock bms_lock_;
+  concurrent::Lock proxi_lock_;
+  std::queue<CanFrame> bms_queue_;
+  std::queue<CanFrame> proxi_queue_;
 };
 
 }}}   // namespace hyped::utils::io
