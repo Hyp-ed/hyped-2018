@@ -5,16 +5,14 @@
  * Description: Navigation class skeleton.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ *    except in compliance with the License. You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
+ *    Unless required by applicable law or agreed to in writing, software distributed under
+ *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *    either express or implied. See the License for the specific language governing permissions and
  *    limitations under the License.
  */
 
@@ -47,14 +45,14 @@ class Navigation {
   /**
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
-   * 
+   *
    * @param[in] imus Array of IMU readings
    */
   void update(std::array<data::Imu, data::Sensors::kNumImus> imus);
   /**
    * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
    *        proxi have been updated but there is no update from stripe counter.
-   * 
+   *
    * @param[in] imus   Array of IMU readings
    * @param[in] proxis Array of proximity readings
    */
@@ -63,7 +61,7 @@ class Navigation {
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU and stripe counter have been updated but there is no update from proximity sensors.
-   * 
+   *
    * @param imus         Array of IMU readings
    * @param stripe_count Stripe counter reading
    */
@@ -71,7 +69,7 @@ class Navigation {
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
-   * 
+   *
    * @param imus         Array of IMU readings
    * @param[in] proxis   Array of proximity readings
    * @param stripe_count Stripe counter reading
@@ -81,20 +79,20 @@ class Navigation {
               data::StripeCount stripe_count);
   /**
    * @brief Get the accleration value
-   * 
+   *
    * @return uint16_t Returns the forward component of acceleration vector (negative when
    *                  decelerating)
    */
   int16_t get_accleration();
   /**
    * @brief Get the velocity value
-   * 
+   *
    * @return uint16_t Returns the forward component of velocity vector
    */
   int16_t get_velocity();
   /**
    * @brief Get the displacement value
-   * 
+   *
    * @return uint16_t Returns the forward component of displacement vector
    */
   int16_t get_displacement();
