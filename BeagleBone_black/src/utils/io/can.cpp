@@ -24,35 +24,41 @@
 #include <unistd.h>
 
 #include <sys/socket.h>
-// #include <linux/can.h>
+#include <net/if.h>
+
+#include <linux/can.h>
+#define CAN
+
+#ifndef CAN
 
 #define CAN_MAX_DLEN 8
 struct can_frame {
-  uint32_t can_id;  /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint32_t can_id;    /* 32 bit CAN_ID + EFF/RTR/ERR flags */
   uint8_t    can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
   uint8_t    __pad;   /* padding */
   uint8_t    __res0;  /* reserved / padding */
   uint8_t    __res1;  /* reserved / padding */
   uint8_t    data[CAN_MAX_DLEN] __attribute__((aligned(8)));
 };
-#define AF_CAN 29
-#define PF_CAN AF_CAN
+
+#ifndef PF_CAN
+#define PF_CAN 29
+#define AF_CAN PF_CAN
+#endif
+
 #define CAN_RAW 1
 #define CAN_MTU (sizeof(struct can_frame))
-typedef uint16_t __kernel_sa_family_t;
 struct sockaddr_can {
-  __kernel_sa_family_t can_family;
-  int         can_ifindex;
+  uint16_t can_family;
+  int      can_ifindex;
   union {
-    /* transport protocol class address information (e.g. ISOTP) */
     struct { uint32_t rx_id, tx_id; } tp;
-
-    /* reserved for future CAN protocols address information */
   } can_addr;
 };
 
 #define CANID_DELIM '#'
 #define DATA_SEPERATOR '.'
+#endif   // CAN
 
 namespace hyped {
 namespace utils {
@@ -69,7 +75,7 @@ Can::Can()
 
   sockaddr_can addr;
   addr.can_family = AF_CAN;
-  addr.can_ifindex = 2;   // ifr.ifr_ifindex;
+  addr.can_ifindex = if_nametoindex("can0");   // ifr.ifr_ifindex;
 
   if (bind(socket_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     perror("bind");
