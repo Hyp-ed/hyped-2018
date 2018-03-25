@@ -5,6 +5,7 @@ SRCS := \
   data/data.cpp \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
+  state_machine/main.cpp \
   motor_control/motor.cpp \
   motor_control/main.cpp \
   navigation/main.cpp \
