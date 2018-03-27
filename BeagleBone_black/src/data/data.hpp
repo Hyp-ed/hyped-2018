@@ -234,6 +234,7 @@ class Data {
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+
   Lock lock_communications_;
   Lock lock_batteries_;
 };
