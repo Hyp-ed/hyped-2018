@@ -222,7 +222,6 @@ class Data {
   Lock lock_motors_;
   Lock lock_communications_;
   Lock lock_batteries_;
-
 };
 
 }}  // namespace data::hyped
