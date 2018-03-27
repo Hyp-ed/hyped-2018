@@ -213,7 +213,6 @@ class Data {
   Sensors     sensors_;
   Motors      motors_;
   Batteries   batteries_;
-
   Communications      communications_;
 
   // locks for data substructures
