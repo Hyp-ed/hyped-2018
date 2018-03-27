@@ -38,7 +38,7 @@ void print(const Vector<T, dimension>& vector)
 int main()
 {
   Kalman<Vector<double, 1>> kalman(Vector<double, 1>(0), Vector<double, 1>(1),
-                           Vector<double, 1>(1), Vector<double, 1>(0.01));
+                                   Vector<double, 1>(1));
 
   for (int i = 0; i < 100; i++)
     print(kalman.filter(Vector<double, 1>(i)));

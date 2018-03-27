@@ -68,6 +68,18 @@ void Data::setSensorsData(const Sensors& sensors_data)
   sensors_ = sensors_data;
 }
 
+Sensors Data::getBatteryData()
+{
+  ScopedLock L(&lock_sensors_);
+  return sensors_;
+}
+
+void Data::setBatteryData(const Batteries& batteries_data)
+{
+  ScopedLock L(&lock_batteries_);
+  batteries_ = batteries_data;
+}
+
 Motors Data::getMotorData()
 {
   ScopedLock L(&lock_motors_);
