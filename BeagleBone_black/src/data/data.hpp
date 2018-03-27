@@ -189,6 +189,7 @@ class Data {
   Navigation  navigation_;
   Sensors     sensors_;
   Motors      motors_;
+
   Communications      communications_;
 
   // locks for data substructures
@@ -196,6 +197,7 @@ class Data {
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+
   Lock lock_communications_;
 };
 
