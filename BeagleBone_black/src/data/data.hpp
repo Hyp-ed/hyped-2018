@@ -113,6 +113,7 @@ enum MotorState {
   kMotorIdle,
   kMotorAccelerating,
   kMotorDecelerating,
+  kMotorStopping,
   kMotorStopped
 };
 

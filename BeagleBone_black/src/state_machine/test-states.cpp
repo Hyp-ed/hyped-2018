@@ -1,0 +1,61 @@
+/*
+ * Author: Sean Mullan
+ * Organisation: HYPED
+ * Date: 28. March 2018
+ * Description: Dummy state machine thread to test if motor control module reacts
+ *              appropriately to state changes
+ *
+ *    Copyright 2018 HYPED
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+#include <cstdint>
+#include <iostream>
+
+#include "state_machine/hyped-machine.hpp"
+#include "state_machine/test-states.hpp"
+
+namespace hyped {
+namespace state_machine {
+
+TestStates::TestStates(uint8_t id)
+    : Thread(id)
+{
+  hypedMachine = new HypedMachine;
+}
+
+/**
+  *  @brief  Runs test state machine thread
+  */
+void TestStates::run()
+{
+  std::cout << "State machine thread successfully started" << std::endl;
+  hypedMachine->handleEvent(kOnStart);
+  delay(10000);
+  hypedMachine->handleEvent(kMaxDistanceReached);
+  delay(10000);
+  hypedMachine->handleEvent(kEndOfRunReached);
+  delay(10000);
+  hypedMachine->handleEvent(kOnExit);
+  hypedMachine->handleEvent(kEndOfTubeReached);
+}
+
+/**
+  *  @brief  Delays thread
+  */
+void TestStates::delay(int i)
+{
+  while (i--);
+}
+
+}}
