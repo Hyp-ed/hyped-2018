@@ -129,8 +129,8 @@ struct Motors {
 // -----------------------------------------------------------------------------
 
 struct Communications {
-  uint32_t stopCommand;
-  uint32_t killPowerCommand;
+  bool stopCommand;
+  bool killPowerCommand;
 };
 
 // -----------------------------------------------------------------------------
@@ -209,11 +209,11 @@ class Data {
 
  private:
   StateMachine state_machine_;
-  Navigation  navigation_;
-  Sensors     sensors_;
-  Motors      motors_;
-  Batteries   batteries_;
-  Communications      communications_;
+  Navigation navigation_;
+  Sensors sensors_;
+  Motors motors_;
+  Batteries batteries_;
+  Communications communications_;
 
   // locks for data substructures
   Lock lock_state_machine_;
