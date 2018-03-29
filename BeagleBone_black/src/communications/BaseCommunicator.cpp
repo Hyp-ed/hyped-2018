@@ -7,37 +7,51 @@ int sockfd, portNo, n;
 struct sockaddr_in serv_addr;
 struct hostent *server;
 char buffer[256];
+char* ipAddress = (char *) "localhost";
 
 BaseCommunicator :: BaseCommunicator()
+{
+
+}
+
+BaseCommunicator :: BaseCommunicator(char* ip)
+{
+    ipAddress = ip;
+}
+
+bool BaseCommunicator :: setUp()
 {
     portNo = 5695;
     sockfd = socket(AF_INET, SOCK_STREAM, 0); // socket(int domain, int type, int protocol)
 
     if (sockfd < 0)
     {
-        printf("ERROR: CANNOT OPEN SOCKET.\n");
+        printf("ERROR: CANNOT OPEN SOCKET.");
+        return false;
     }
 
-    server = gethostbyname("localHost");
+    server = gethostbyname(ipAddress);
 
     if (server == NULL)
-	{
-		fprintf(stderr, "ERROR: INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
-		exit(0);
-	}
-
-	bzero((char *) &serv_addr, sizeof(serv_addr));
-	serv_addr.sin_family = AF_INET; // server byte order
-	bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
-	serv_addr.sin_port = htons(portNo);
-
-	if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
     {
-        printf("ERROR: CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
+        fprintf(stderr, "ERROR: INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
+        // exit(0);
+        return 0;
     }
 
-    n = read(sockfd, buffer, 255);
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET; // server byte order
+    bcopy((char *)server->h_addr, (char *)&serv_addr.sin_addr.s_addr, server->h_length);
+    serv_addr.sin_port = htons(portNo);
 
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+    {
+        printf("ERROR: CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
+        return false;
+    }
+
+    // n = read(sockfd, buffer, 255);
+    return true;
 }
 
 BaseCommunicator :: ~BaseCommunicator()
