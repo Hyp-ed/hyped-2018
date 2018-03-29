@@ -16,10 +16,12 @@ class BaseCommunicator
         int sockfd, portNo, n;
         struct sockaddr_in serv_addr;
         struct hostent *server;
-        char buffer[256];
+        char* ipAddress;
 
     public:
         BaseCommunicator();
+        BaseCommunicator(char* ip);
+        bool setUp();
         ~BaseCommunicator();
         int sendDistance(float distance); // CMD01
         int sendVelocity(float speed); // CMD02
