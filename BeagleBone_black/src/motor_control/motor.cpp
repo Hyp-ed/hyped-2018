@@ -40,8 +40,8 @@ MotorsRpm Motor::getSpeed()
   motors_rpm_.rpm_FL = 100;
   motors_rpm_.rpm_BL = 150;
   motors_rpm_.rpm_BR = 200;
-  std::cout << "returned RPMs :" << motors_rpm_.rpm_FL << "," << motors_rpm_.rpm_FR << ","
-  << motors_rpm_.rpm_BL << "," << motors_rpm_.rpm_BR << std::endl;
+  // std::cout << "returned RPMs :" << motors_rpm_.rpm_FL << "," << motors_rpm_.rpm_FR << ","
+  // << motors_rpm_.rpm_BL << "," << motors_rpm_.rpm_BR << std::endl;
 
   return motors_rpm_;
 }

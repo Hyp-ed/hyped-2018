@@ -53,6 +53,8 @@ class Thread {
 
   uint8_t getId() { return id_; }
 
+  static void sleep(uint32_t ms);
+
  private:
   uint8_t id_;
   std::thread* thread_;

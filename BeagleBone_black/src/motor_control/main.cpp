@@ -135,7 +135,7 @@ void Main::stopMotors()
   bool isAllStop = false;
   // Updates the shared data on the motors RPM while the motor is trying to stop
   while (!isAllStop) {
-    std::cout << "Decelerating" << std::endl;
+    // std::cout << "Decelerating" << std::endl;
     MotorsRpm motors_rpm = motor->getSpeed();
     data::Motors motor_data = {
       data::MotorState::kMotorDecelerating,
