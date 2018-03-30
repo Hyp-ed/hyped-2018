@@ -3,30 +3,33 @@
 #include <thread>
 using namespace std;
 
+namespace hyped {
+namespace communications {
+
 int sockfd, portNo, n;
 struct sockaddr_in serv_addr;
 struct hostent *server;
 char buffer[256];
 char* ipAddress = (char *) "localhost";
 
-BaseCommunicator :: BaseCommunicator()
+BaseCommunicator::BaseCommunicator()
 {
 
 }
 
-BaseCommunicator :: BaseCommunicator(char* ip)
+BaseCommunicator::BaseCommunicator(char* ip)
 {
     ipAddress = ip;
 }
 
-bool BaseCommunicator :: setUp()
+bool BaseCommunicator::setUp()
 {
     portNo = 5695;
     sockfd = socket(AF_INET, SOCK_STREAM, 0); // socket(int domain, int type, int protocol)
 
     if (sockfd < 0)
     {
-        printf("ERROR: CANNOT OPEN SOCKET.");
+        printf("ERROR: CANNOT OPEN SOCKET.\n");
         return false;
     }
 
@@ -36,7 +39,7 @@ bool BaseCommunicator :: setUp()
     {
         fprintf(stderr, "ERROR: INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
         // exit(0);
-        return 0;
+        return true;
     }
 
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -46,7 +49,7 @@ bool BaseCommunicator :: setUp()
 
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
     {
-        printf("ERROR: CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
+        printf("ERROR: CANNOT ESTABLISH CONNECTION TO BASE-STATION.\n");
         return false;
     }
 
@@ -158,3 +161,4 @@ void BaseCommunicator :: receiverThread()
 	}
 }
 */
+}} // namespace hyped::communcations
