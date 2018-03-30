@@ -11,11 +11,12 @@ SRCS := \
   navigation/main.cpp \
   navigation/navigation.cpp \
   sensors/main.cpp \
+  communications/BaseCommunicator.cpp \
+  communications/main.cpp \
   utils/concurrent/thread.cpp \
   utils/concurrent/lock.cpp \
   utils/concurrent/condition_variable.cpp \
   utils/concurrent/barrier.cpp \
-
 
 
 MAINS := \
@@ -23,6 +24,7 @@ MAINS := \
   demo_data \
   demo_machine \
   demo_motor \
+  demo_communications \
   demo_threading \
   demo_vector \
   demo_kalman \
