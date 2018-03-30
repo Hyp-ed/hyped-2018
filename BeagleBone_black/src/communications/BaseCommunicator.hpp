@@ -10,6 +10,9 @@
 #include <iostream>
 using namespace std;
 
+namespace hyped {
+namespace communications {
+
 class BaseCommunicator
 {
     private:
@@ -17,7 +20,7 @@ class BaseCommunicator
         struct sockaddr_in serv_addr;
         struct hostent *server;
         char buffer[256];
-        char* ipAddress;
+        // char* ipAddress;
 
     public:
         BaseCommunicator();
@@ -33,16 +36,7 @@ class BaseCommunicator
         int sendRpmBl(float rpmBl); // CMD07
         int sendRpmBr(float rpmBr); // CMD08
         int sendData(string message);
-        // int sendPosition(float position);
-        // int sendPodTemperature(float temp);
-        // int sendGroundProximity(float prox);
-        // int sendRailProximity(float prox);
-        // int batteryTemperature(float temp);
-        // int sendBatteryCurrent(float current);
-        // int sendBatteryVoltage(float volt);
-        // int sendAccum1(int status);
-        // int sendAccum2(int status);
-        // int sendPump1(int status);
-        // int sendPump2(int status);
         // void receiverThread();
 };
+
+}}
