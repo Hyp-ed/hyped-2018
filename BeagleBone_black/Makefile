@@ -12,7 +12,7 @@ CFLAGS:=-pthread -std=c++11 -O0 -Wall
 LFLAGS:=-lpthread -pthread
 
 UNAME=$(shell uname)
-ifneq (UNAME, 'Linux')
+ifneq ($(UNAME),Linux)
 	# assume Windows
 	UNAME='Windows'
 	CFLAGS:=$(CFLAGS) -DWIN
