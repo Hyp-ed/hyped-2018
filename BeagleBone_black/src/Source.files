@@ -6,7 +6,7 @@ SRCS := \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
   state_machine/main.cpp \
-  state_machine/test-states.cpp \
+  motor_control/test-states.cpp \
   motor_control/motor.cpp \
   motor_control/main.cpp \
   navigation/main.cpp \

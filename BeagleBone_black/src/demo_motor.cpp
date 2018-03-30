@@ -20,14 +20,14 @@
 
 #include <iostream>
 #include "motor_control/main.hpp"
-#include "state_machine/test-states.hpp"
+#include "motor_control/test-states.hpp"
 #include "utils/concurrent/thread.hpp"
 
 using hyped::utils::concurrent::Thread;
 
 int main()
 {
-  Thread* states = new hyped::state_machine::TestStates(0);
+  Thread* states = new hyped::motor_control::TestStates(0);
   Thread* motor  = new hyped::motor_control::Main(1);
 
   states->start();

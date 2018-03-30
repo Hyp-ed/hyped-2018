@@ -19,29 +19,30 @@
  *    limitations under the License.
  */
 
- #ifndef BEAGLEBONE_BLACK_STATE_MACHINE_TEST_STATES_HPP_
- #define BEAGLEBONE_BLACK_STATE_MACHINE_TEST_STATES_HPP_
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
 
- #include <cstdint>
- #include "utils/concurrent/thread.hpp"
- #include "state_machine/hyped-machine.hpp"
+#include <cstdint>
+#include "utils/concurrent/thread.hpp"
+#include "state_machine/hyped-machine.hpp"
 
- namespace hyped {
+namespace hyped {
 
- using utils::concurrent::Thread;
+using utils::concurrent::Thread;
+using hyped::state_machine::HypedMachine;
 
- namespace state_machine {
+namespace motor_control {
 
- class TestStates: public Thread {
-  public:
-   explicit TestStates(uint8_t id);
-   void run() override;
-   void delay(int i);
+class TestStates: public Thread {
+public:
+ explicit TestStates(uint8_t id);
+ void run() override;
+ void delay(int i);
 
-  private:
-   HypedMachine* hypedMachine;
- };
+private:
+ HypedMachine* hypedMachine;
+};
 
- }}  // namespace hyped::motor_control
+}}  // namespace hyped::motor_control
 
 #endif

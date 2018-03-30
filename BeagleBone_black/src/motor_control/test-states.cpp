@@ -23,10 +23,10 @@
 #include <iostream>
 
 #include "state_machine/hyped-machine.hpp"
-#include "state_machine/test-states.hpp"
+#include "motor_control/test-states.hpp"
 
 namespace hyped {
-namespace state_machine {
+namespace motor_control {
 
 TestStates::TestStates(uint8_t id)
     : Thread(id)
@@ -40,14 +40,18 @@ TestStates::TestStates(uint8_t id)
 void TestStates::run()
 {
   std::cout << "State machine thread successfully started" << std::endl;
-  hypedMachine->handleEvent(kOnStart);
-  delay(10000);
-  hypedMachine->handleEvent(kMaxDistanceReached);
-  delay(10000);
-  hypedMachine->handleEvent(kEndOfRunReached);
-  delay(10000);
-  hypedMachine->handleEvent(kOnExit);
-  hypedMachine->handleEvent(kEndOfTubeReached);
+  hypedMachine->handleEvent(state_machine::Event::kOnStart);
+  delay(5000);
+  hypedMachine->handleEvent(state_machine::Event::kMaxDistanceReached);
+  delay(2500);
+  hypedMachine->handleEvent(state_machine::Event::kCriticalFailure);
+  delay(500);
+  hypedMachine->handleEvent(state_machine::Event::kVelocityZeroReached);
+  delay(1000);
+  // hypedMachine->handleEvent(kEndOfRunReached);
+  // delay(10000);
+  // hypedMachine->handleEvent(kOnExit);
+  // hypedMachine->handleEvent(kEndOfTubeReached);
 }
 
 /**

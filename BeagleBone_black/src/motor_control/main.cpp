@@ -96,6 +96,7 @@ void Main::accelerateMotors()
     state = data.getStateMachineData();
     if (state.critical_failure) {
       this->stopMotors();
+      goto exit_loop;
     }
     std::cout << "Motor State: Accelerating" << std::endl;
     nav = data.getNavigationData();
@@ -111,6 +112,7 @@ void Main::accelerateMotors()
       motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
   }
+  exit_loop: ;
 }
 
 /**
@@ -122,6 +124,7 @@ void Main::decelerateMotors()
     state = data.getStateMachineData();
     if (state.critical_failure) {
       this->stopMotors();
+      goto exit_loop;
     }
     std::cout << "Motor State: Decelerating" << std::endl;
     nav = data.getNavigationData();
@@ -137,6 +140,7 @@ void Main::decelerateMotors()
       motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
   }
+  exit_loop: ;
 }
 
 void Main::stopMotors()
@@ -181,7 +185,7 @@ void Main::stopMotors()
   */
 int32_t Main::calculateAccelerationRPM(uint32_t velocity)
 {
-  return rpm += 1000;  // dummy calculation to increase rpm
+  return rpm += 100;  // dummy calculation to increase rpm
 }
 
 /**
@@ -194,7 +198,7 @@ int32_t Main::calculateAccelerationRPM(uint32_t velocity)
   */
 int32_t Main::calculateDecelerationRPM(uint32_t velocity)
 {
-  return rpm -= 1000;  // dummy calculation to decrease rpm
+  return rpm -= 100;  // dummy calculation to decrease rpm
 }
 
 }}  // namespace hyped::motor_control

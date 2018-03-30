@@ -36,10 +36,10 @@ Motor::Motor()
 MotorsRpm Motor::getSpeed()
 {
   // These values will be generate from the sensor readings
-  motors_rpm_.rpm_FR = 50;
-  motors_rpm_.rpm_FL = 100;
-  motors_rpm_.rpm_BL = 150;
-  motors_rpm_.rpm_BR = 200;
+  motors_rpm_.rpm_FR = rpm;
+  motors_rpm_.rpm_FL = rpm;
+  motors_rpm_.rpm_BL = rpm;
+  motors_rpm_.rpm_BR = rpm;
   std::cout << "Actual RPMs :" << motors_rpm_.rpm_FL << "," << motors_rpm_.rpm_FR << ","
   << motors_rpm_.rpm_BL << "," << motors_rpm_.rpm_BR << std::endl;
 
@@ -51,6 +51,7 @@ MotorsRpm Motor::getSpeed()
   */
 void Motor::setSpeed(int32_t rpm)
 {
+  this->rpm = rpm;
   std::cout << "Requested RPM: " << rpm << std::endl;
 }
 

@@ -41,6 +41,7 @@ class Motor {
 
  private:
   MotorsRpm motors_rpm_;
+  int32_t rpm;   // For testing only
 };
 
 }}  // namespace hyped::motor_control
