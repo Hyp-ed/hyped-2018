@@ -24,7 +24,6 @@
 #include <iostream>
 
 #include "motor_control/motor.hpp"
-
 #include "data/data.hpp"
 
 namespace hyped {
@@ -35,6 +34,7 @@ Main::Main(uint8_t id)
 {
   motor = new Motor();
   rpm = 0;
+  motorsSetUp = false;
 }
 
 /**
@@ -51,22 +51,27 @@ void Main::run()
     switch (state.current_state) {
        case data::State::kIdle:
          this->setupMotors();
+         break;
        case data::State::kAccelerating:
          this->accelerateMotors();
+         break;
        case data::State::kDecelerating:
          this->decelerateMotors();
+         break;
        case data::State::kEmergencyBraking:
          this->stopMotors();
+         break;
        case data::State::kRunComplete:
-         break;
+         goto exit_loop;
        case data::State::kFailureStopped:
-         break;
+         goto exit_loop;
        case data::State::kExiting:
-         break;
+         goto exit_loop;
        case data::State::kFinished:
-         break;
+         goto exit_loop;
      }
   }
+  exit_loop: ;
 }
 
 /**
@@ -74,9 +79,12 @@ void Main::run()
   */
 void Main::setupMotors()
 {
-  motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
-  data.setMotorData(motor_data);
-  std::cout << "CAN connections established" << std::endl;
+  if (!motorsSetUp) {
+    motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
+    data.setMotorData(motor_data);
+    motorsSetUp = true;
+    std::cout << "Motor State: Idle" << std::endl;
+  }
 }
 
 /**
@@ -85,10 +93,12 @@ void Main::setupMotors()
 void Main::accelerateMotors()
 {
   while (state.current_state == data::State::kAccelerating) {
+    state = data.getStateMachineData();
     if (state.critical_failure) {
       this->stopMotors();
+      goto exit_loop;
     }
-    state = data.getStateMachineData();
+    std::cout << "Motor State: Accelerating" << std::endl;
     nav = data.getNavigationData();
     rpm = calculateAccelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
@@ -102,6 +112,7 @@ void Main::accelerateMotors()
       motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
   }
+  exit_loop: ;
 }
 
 /**
@@ -110,10 +121,12 @@ void Main::accelerateMotors()
 void Main::decelerateMotors()
 {
   while (state.current_state == data::State::kDecelerating) {
+    state = data.getStateMachineData();
     if (state.critical_failure) {
       this->stopMotors();
+      goto exit_loop;
     }
-    state = data.getStateMachineData();
+    std::cout << "Motor State: Decelerating" << std::endl;
     nav = data.getNavigationData();
     rpm = calculateDecelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
@@ -127,18 +140,19 @@ void Main::decelerateMotors()
       motors_rpm.rpm_BR };
     data.setMotorData(motor_data);
   }
+  exit_loop: ;
 }
 
 void Main::stopMotors()
 {
   motor->setSpeed(0);
-  bool isAllStop = false;
+  bool allMotorsStopped = false;
   // Updates the shared data on the motors RPM while the motor is trying to stop
-  while (!isAllStop) {
-    // std::cout << "Decelerating" << std::endl;
+  while (!allMotorsStopped) {
+    std::cout << "Motor State: Stopping" << std::endl;
     MotorsRpm motors_rpm = motor->getSpeed();
     data::Motors motor_data = {
-      data::MotorState::kMotorDecelerating,
+      data::MotorState::kMotorStopping,
       motors_rpm.rpm_FL,
       motors_rpm.rpm_FR,
       motors_rpm.rpm_BL,
@@ -147,15 +161,18 @@ void Main::stopMotors()
     if (motors_rpm.rpm_FL == 0 && motors_rpm.rpm_FR == 0 &&
       motors_rpm.rpm_BL == 0 && motors_rpm.rpm_BR == 0)
     {
-      isAllStop = true;
+      allMotorsStopped = true;
     }
   }
-  // The motor has stopped update the data structure
   MotorsRpm motors_rpm = motor->getSpeed();
-  data::Motors motor_data = { data::MotorState::kMotorStopped,
-  motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
+  data::Motors motor_data = {
+    data::MotorState::kMotorStopped,
+    motors_rpm.rpm_FL,
+    motors_rpm.rpm_FR,
+    motors_rpm.rpm_BL,
+    motors_rpm.rpm_BR };
   data.setMotorData(motor_data);
-  std::cout << "Motors stopped" << std::endl;
+  std::cout << "Motor State: Stopped" << std::endl;
 }
 
 /**
@@ -168,7 +185,7 @@ void Main::stopMotors()
   */
 int32_t Main::calculateAccelerationRPM(uint32_t velocity)
 {
-  return rpm += 1000;  // dummy calculation to increase rpm
+  return rpm += 100;  // dummy calculation to increase rpm
 }
 
 /**
@@ -181,7 +198,7 @@ int32_t Main::calculateAccelerationRPM(uint32_t velocity)
   */
 int32_t Main::calculateDecelerationRPM(uint32_t velocity)
 {
-  return rpm -= 1000;  // dummy calculation to decrease rpm
+  return rpm -= 100;  // dummy calculation to decrease rpm
 }
 
 }}  // namespace hyped::motor_control

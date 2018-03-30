@@ -1,7 +1,7 @@
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Author: Sean Mullan
  * Organisation: HYPED
- * Date: 17/02/18
+ * Date: 28/03/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,17 +19,25 @@
  */
 
 #include <iostream>
-#include "motor_control/motor.hpp"
 #include "motor_control/main.hpp"
+#include "motor_control/test-states.hpp"
+#include "utils/concurrent/thread.hpp"
 
-using hyped::motor_control::Main;
+using hyped::utils::concurrent::Thread;
 
 int main()
 {
-  Main* controller = new Main(0);
-  controller->setupMotors();
-  controller->accelerateMotors();
-  controller->decelerateMotors();
-  controller->stopMotors();
+  Thread* states = new hyped::motor_control::TestStates(0);
+  Thread* motor  = new hyped::motor_control::Main(1);
+
+  states->start();
+  motor->start();
+
+  states->join();
+  motor->join();
+
+  delete states;
+  delete motor;
+
   return 0;
 }
