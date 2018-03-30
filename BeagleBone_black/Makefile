@@ -11,6 +11,13 @@ OBJS_DIR:=bin
 CFLAGS:=-pthread -std=c++11 -O0 -Wall
 LFLAGS:=-lpthread -pthread
 
+UNAME=$(shell uname)
+ifneq (UNAME, 'Linux')
+	# assume Windows
+	UNAME='Windows'
+	CFLAGS:=$(CFLAGS) -DWIN
+endif
+
 
 include $(SRCS_DIR)/Source.files
 SRCS := $(SRCS) $(MAIN)
@@ -28,6 +35,7 @@ ifndef VERBOSE
 	Verb := @
 endif
 Echo := $(Verb)echo
+
 
 
 default: $(TARGET) lint
@@ -69,8 +77,10 @@ endef
 info:
 	$(call echo_var,CC)
 	$(call echo_var,TOP)
-	$(call echo_var,SRCS)
-	$(call echo_var,OBJS)
-	$(call echo_var,MAINS)
+#	$(call echo_var,SRCS)
+#	$(call echo_var,OBJS)
+#	$(call echo_var,MAINS)
+	$(call echo_var,UNAME)
+	$(call echo_var,CFLAGS)
 
 -include $(OBJS:.o=.d)

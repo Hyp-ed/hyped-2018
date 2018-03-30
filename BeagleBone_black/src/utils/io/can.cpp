@@ -26,11 +26,9 @@
 #include <sys/socket.h>
 #include <net/if.h>
 
+#ifndef WIN
 #include <linux/can.h>
-#define CAN
-
-#ifndef CAN
-
+#else
 #define CAN_MAX_DLEN 8
 struct can_frame {
   uint32_t can_id;    /* 32 bit CAN_ID + EFF/RTR/ERR flags */
