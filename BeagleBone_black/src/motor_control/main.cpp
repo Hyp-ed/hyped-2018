@@ -21,7 +21,6 @@
 #include "motor_control/main.hpp"
 
 #include <cstdint>
-#include <iostream>
 
 #include "motor_control/motor.hpp"
 
@@ -33,7 +32,7 @@ namespace motor_control {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
 {
-  motor = new Motor();
+  motor = new Motor(log);
   rpm = 0;
 }
 
@@ -43,10 +42,11 @@ Main::Main(uint8_t id, Logger& log)
   */
 void Main::run()
 {
-  std::cout << "Starting motor controller" << std::endl;
+  // std::cout << "Starting motor controller" << std::endl;
+  log_.INFO("[MOTOR]: Starting motor controller\n");
 
   while (1) {
-    nav = data.getNavigationData();
+    // nav = data.getNavigationData();
     state = data.getStateMachineData();
     switch (state.current_state) {
        case data::State::kIdle:
@@ -76,7 +76,8 @@ void Main::setupMotors()
 {
   motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
   data.setMotorData(motor_data);
-  std::cout << "CAN connections established" << std::endl;
+  // std::cout << "CAN connections established" << std::endl;
+  log_.INFO("[MOTOR]: CAN connection established\n");
 }
 
 /**
@@ -135,7 +136,8 @@ void Main::stopMotors()
   bool isAllStop = false;
   // Updates the shared data on the motors RPM while the motor is trying to stop
   while (!isAllStop) {
-    std::cout << "Decelerating" << std::endl;
+    // std::cout << "Decelerating" << std::endl;
+    log_.DBG2("[MOTOR]: Decelerating\n");
     MotorsRpm motors_rpm = motor->getSpeed();
     data::Motors motor_data = {
       data::MotorState::kMotorDecelerating,
@@ -155,7 +157,8 @@ void Main::stopMotors()
   data::Motors motor_data = { data::MotorState::kMotorStopped,
   motors_rpm.rpm_FL, motors_rpm.rpm_FR, motors_rpm.rpm_BL, motors_rpm.rpm_BR };
   data.setMotorData(motor_data);
-  std::cout << "Motors stopped" << std::endl;
+  // std::cout << "Motors stopped" << std::endl;
+  log_.INFO("[MOTOR]: Motors stopped\n");
 }
 
 /**

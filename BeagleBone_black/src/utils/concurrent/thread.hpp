@@ -54,9 +54,12 @@ class Thread {
 
   uint8_t getId() { return id_; }
 
+
  private:
   uint8_t id_;
   std::thread* thread_;
+
+ protected:
   Logger& log_;
 };
 

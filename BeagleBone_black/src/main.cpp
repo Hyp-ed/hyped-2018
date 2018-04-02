@@ -20,7 +20,6 @@
  *    limitations under the License.
  */
 
-// #include <iostream>
 
 #include "state_machine/main.hpp"
 #include "motor_control/main.hpp"
@@ -35,7 +34,7 @@ using hyped::utils::Logger;
 
 int main()
 {
-  Logger log(true, 2);
+  Logger log(true, 1);
   // std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
   log.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
   log.DBG("[MAIN]: DBG\n");
@@ -48,15 +47,15 @@ int main()
   Thread* sensors   = new hyped::sensors::Main(2, log);
   Thread* navigation = new hyped::navigation::Main(3, log);
 
-  // state_machine->start();
-  // motor->start();
-  // sensors->start();
-  // navigation->start();
+  state_machine->start();
+  motor->start();
+  sensors->start();
+  navigation->start();
 
-  // state_machine->join();
-  // motor->join();
-  // sensors->join();
-  // navigation->join();
+  state_machine->join();
+  motor->join();
+  sensors->join();
+  navigation->join();
 
   delete state_machine;
   delete sensors;

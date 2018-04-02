@@ -21,7 +21,6 @@
 
 
 #include <cstdint>
-#include <iostream>
 
 #include "state_machine/hyped-machine.hpp"
 #include "state_machine/main.hpp"
@@ -34,7 +33,7 @@ namespace state_machine {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
 {
-  hypedMachine = new HypedMachine;
+  hypedMachine = new HypedMachine(log);
 }
 
 /**
@@ -43,19 +42,18 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
-std::cout << "State machine thread successfully started" << std::endl;
+  // std::cout << "State machine thread successfully started" << std::endl;
 
-while (1)
-{
-  data::Navigation nav_data = data.getNavigationData();
+  while (1) {
+    // data::Navigation nav_data = data.getNavigationData();
 
-  if (hasCriticalFailure()) {
-         hypedMachine->handleEvent(kCriticalFailure);
+    if (hasCriticalFailure()) {
+      hypedMachine->handleEvent(kCriticalFailure);
+    }
+    if (hasReachedMaxDistance()) {
+      hypedMachine->handleEvent(kMaxDistanceReached);
+    }
   }
-  if (hasReachedMaxDistance()) {
-       hypedMachine->handleEvent(kMaxDistanceReached);
-  }
-}
 }
 
  /**
@@ -64,13 +62,12 @@ while (1)
 
 bool Main::hasCriticalFailure()
 {
-return false;
+  return false;
 }
 
  /**
    * @brief      Computes the maxDistance and returns true if it has been reached.
    */
-
 bool Main::hasReachedMaxDistance()
 {
   return false;

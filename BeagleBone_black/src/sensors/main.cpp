@@ -20,7 +20,7 @@
 
 #include "sensors/main.hpp"
 
-#include <stdio.h>
+// #include <stdio.h>
 
 namespace hyped {
 namespace sensors {

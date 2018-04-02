@@ -20,8 +20,6 @@
 
 #include "utils/concurrent/thread.hpp"
 
-#include <iostream>
-
 namespace hyped {
 namespace utils {
 namespace concurrent {
@@ -56,7 +54,7 @@ void Thread::join()
 
 void Thread::run()
 {
-  std::cout << "You are starting EMPTY thread. Terminating now.\n";
+  log_.INFO("[THREAD]: You are starting EMPTY thread. Terminating now.\n");
 }
 
 void Thread::yield()
