@@ -40,3 +40,7 @@ utils/math/integrator.hpp
 utils/math/kalman.hpp
 utils/math/quaternion.hpp
 utils/math/vector.hpp
+communications/BaseCommunicator.cpp
+communications/BaseCommunicator.hpp
+communications/main.cpp
+communications/main.hpp

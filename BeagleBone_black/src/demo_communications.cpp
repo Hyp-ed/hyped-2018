@@ -18,7 +18,6 @@
  *    limitations under the License.
  */
 
-#include <iostream>
 #include "communications/main.hpp"
 
 using hyped::communications::Main;
