@@ -31,7 +31,6 @@ class System {
   static void parseArgs(int argc, char* argv[]);
   static System& getSystem();
 
-//  protected:
   // runtime arguments to configure the whole system
   bool verbose;
   bool verbose_motor;

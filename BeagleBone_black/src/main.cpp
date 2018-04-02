@@ -38,20 +38,23 @@ int main(int argc, char* argv[])
 {
   System::parseArgs(argc, argv);
   System sys = System::getSystem();
-  Logger log(sys.verbose, sys.debug);
-  // std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
-  log.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
-  log.DBG("[MAIN]: DBG\n");
-  log.DBG0("[MAIN]: DBG0\n");
-  log.DBG1("[MAIN]: DBG1\n");
-  log.DBG2("[MAIN]: DBG2\n");
-  log.DBG3("[MAIN]: DBG3\n");
+  Logger log_system(sys.verbose, sys.debug);
+  Logger log_motor(sys.verbose_motor, sys.debug_motor);
+  Logger log_nav(sys.verbose_nav, sys.debug_nav);
+  Logger log_sensor(sys.verbose_sensor, sys.debug_sensor);
+  Logger log_state(sys.verbose_state, sys.debug_state);
 
-  log.INFO("argc %d argv[0] %s\n", argc, argv[0]);
-  Thread* state_machine   = new hyped::state_machine::Main(0, log);
-  Thread* motor     = new hyped::motor_control::Main(1, log);
-  Thread* sensors   = new hyped::sensors::Main(2, log);
-  Thread* navigation = new hyped::navigation::Main(3, log);
+  log_system.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
+  log_system.DBG("[MAIN]: DBG\n");
+  log_system.DBG0("[MAIN]: DBG0\n");
+  log_system.DBG1("[MAIN]: DBG1\n");
+  log_system.DBG2("[MAIN]: DBG2\n");
+  log_system.DBG3("[MAIN]: DBG3\n");
+
+  Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
+  Thread* motor     = new hyped::motor_control::Main(1, log_motor);
+  Thread* sensors   = new hyped::sensors::Main(2, log_sensor);
+  Thread* navigation = new hyped::navigation::Main(3, log_nav);
 
   state_machine->start();
   motor->start();
