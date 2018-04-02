@@ -20,7 +20,7 @@
  *    limitations under the License.
  */
 
-#include <iostream>
+// #include <iostream>
 
 #include "state_machine/main.hpp"
 #include "motor_control/main.hpp"
@@ -28,27 +28,35 @@
 #include "sensors/main.hpp"
 #include "utils/concurrent/thread.hpp"
 
+#include "utils/logger.hpp"
 
 using hyped::utils::concurrent::Thread;
+using hyped::utils::Logger;
 
 int main()
 {
-  std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
-
+  Logger log(true, 2);
+  // std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
+  log.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
+  log.DBG("[MAIN]: DBG\n");
+  log.DBG0("[MAIN]: DBG0\n");
+  log.DBG1("[MAIN]: DBG1\n");
+  log.DBG2("[MAIN]: DBG2\n");
+  log.DBG3("[MAIN]: DBG3\n");
   Thread* state_machine   = new hyped::state_machine::Main(0);
   Thread* motor     = new hyped::motor_control::Main(1);
   Thread* sensors   = new hyped::sensors::Main(2);
   Thread* navigation = new hyped::navigation::Main(3);
 
-  state_machine->start();
-  motor->start();
-  sensors->start();
-  navigation->start();
+  // state_machine->start();
+  // motor->start();
+  // sensors->start();
+  // navigation->start();
 
-  state_machine->join();
-  motor->join();
-  sensors->join();
-  navigation->join();
+  // state_machine->join();
+  // motor->join();
+  // sensors->join();
+  // navigation->join();
 
   delete state_machine;
   delete sensors;
