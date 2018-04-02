@@ -36,9 +36,10 @@ void thread_entry_point(Thread* this_)
 }   // namespace ::
 
 
-Thread::Thread(uint8_t id)
-    : id_(id),
-      thread_(0)
+Thread::Thread(uint8_t id, Logger& log)
+    : id_(id)
+    , thread_(0)
+    , log_(log)
 { /* EMPTY */ }
 
 Thread::~Thread() { /* EMPTY */ }

@@ -43,10 +43,10 @@ int main()
   log.DBG1("[MAIN]: DBG1\n");
   log.DBG2("[MAIN]: DBG2\n");
   log.DBG3("[MAIN]: DBG3\n");
-  Thread* state_machine   = new hyped::state_machine::Main(0);
-  Thread* motor     = new hyped::motor_control::Main(1);
-  Thread* sensors   = new hyped::sensors::Main(2);
-  Thread* navigation = new hyped::navigation::Main(3);
+  Thread* state_machine   = new hyped::state_machine::Main(0, log);
+  Thread* motor     = new hyped::motor_control::Main(1, log);
+  Thread* sensors   = new hyped::sensors::Main(2, log);
+  Thread* navigation = new hyped::navigation::Main(3, log);
 
   // state_machine->start();
   // motor->start();

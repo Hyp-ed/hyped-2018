@@ -30,12 +30,13 @@
 namespace hyped {
 
 using utils::concurrent::Thread;
+using utils::Logger;
 
 namespace motor_control {
 
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
   void setupMotors();
   void accelerateMotors();

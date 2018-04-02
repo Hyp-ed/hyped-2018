@@ -62,11 +62,13 @@ struct sockaddr_can {
 
 namespace hyped {
 namespace utils {
+Logger log(true, 1);
+
 namespace io {
 
 
 Can::Can()
-    : concurrent::Thread(0)
+    : concurrent::Thread(0, log)
 {
   if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
     perror("socket");

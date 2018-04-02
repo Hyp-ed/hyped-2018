@@ -30,8 +30,8 @@
 namespace hyped {
 namespace motor_control {
 
-Main::Main(uint8_t id)
-    : Thread(id)
+Main::Main(uint8_t id, Logger& log)
+    : Thread(id, log)
 {
   motor = new Motor();
   rpm = 0;

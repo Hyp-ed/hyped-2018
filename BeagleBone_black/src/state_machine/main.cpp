@@ -31,8 +31,8 @@
 namespace hyped {
 namespace state_machine {
 
-Main::Main(uint8_t id)
-    : Thread(id)
+Main::Main(uint8_t id, Logger& log)
+    : Thread(id, log)
 {
   hypedMachine = new HypedMachine;
 }
