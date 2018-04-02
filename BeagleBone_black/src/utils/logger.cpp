@@ -34,7 +34,7 @@ void myPrint(_IO_FILE* file, const char* format, va_list args)
 
 }
 
-Logger::Logger(bool verbose, uint8_t debug)
+Logger::Logger(bool verbose, int8_t debug)
     : verbose_(verbose)
     , debug_(debug)
 { /* EMPTY */ }

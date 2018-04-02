@@ -28,13 +28,17 @@
 #include "utils/concurrent/thread.hpp"
 
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 
 using hyped::utils::concurrent::Thread;
 using hyped::utils::Logger;
+using hyped::utils::System;
 
-int main()
+int main(int argc, char* argv[])
 {
-  Logger log(true, 1);
+  System::parseArgs(argc, argv);
+  System sys = System::getSystem();
+  Logger log(sys.verbose, sys.debug);
   // std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
   log.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
   log.DBG("[MAIN]: DBG\n");
@@ -42,6 +46,8 @@ int main()
   log.DBG1("[MAIN]: DBG1\n");
   log.DBG2("[MAIN]: DBG2\n");
   log.DBG3("[MAIN]: DBG3\n");
+
+  log.INFO("argc %d argv[0] %s\n", argc, argv[0]);
   Thread* state_machine   = new hyped::state_machine::Main(0, log);
   Thread* motor     = new hyped::motor_control::Main(1, log);
   Thread* sensors   = new hyped::sensors::Main(2, log);

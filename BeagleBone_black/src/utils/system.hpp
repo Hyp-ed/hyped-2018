@@ -18,30 +18,39 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
-#define BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_
+#define BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_
 
 #include <cstdint>
 
 namespace hyped {
 namespace utils {
 
-class Logger {
+class System {
  public:
-  explicit Logger(bool verbose, int8_t debug);
+  static void parseArgs(int argc, char* argv[]);
+  static System& getSystem();
 
-  void INFO(const char *format, ...);
+//  protected:
+  // runtime arguments to configure the whole system
+  bool verbose;
+  bool verbose_motor;
+  bool verbose_nav;
+  bool verbose_sensor;
+  bool verbose_state;
 
-  void DBG(const char *format, ...);
-  void DBG0(const char *format, ...);
-  void DBG1(const char *format, ...);
-  void DBG2(const char *format, ...);
-  void DBG3(const char *format, ...);
+  int8_t debug;
+  int8_t debug_motor;
+  int8_t debug_nav;
+  int8_t debug_sensor;
+  int8_t debug_state;
 
  private:
-  bool verbose_;
-  int8_t debug_;
+  System() = delete;
+  System(int argc, char* argv[]);
+  static System* system_;
 };
 
 }}  // namespace hyped::utils
-#endif  // BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
+
+#endif  // BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_

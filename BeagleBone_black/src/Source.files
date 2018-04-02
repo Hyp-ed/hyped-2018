@@ -17,6 +17,7 @@ SRCS := \
   utils/concurrent/barrier.cpp \
   utils/io/can.cpp \
   utils/logger.cpp \
+  utils/system.cpp \
 
 
 
