@@ -20,10 +20,10 @@
     <OverrideVtor>false</OverrideVtor>
     <CacheFlash>true</CacheFlash>
     <ProgFlashFromRam>true</ProgFlashFromRam>
-    <RamSnippetAddress />
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
     <UncachedRange />
     <preserveEEPROM>true</preserveEEPROM>
-    <OverrideVtorValue />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
@@ -32,10 +32,11 @@
       <framework-data>
         <options>
           <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common2.services.delay" value="Add" config="systick" content-id="Atmel.ASF" />
           <option id="sam0.drivers.port" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam0.drivers.sercom.i2c.master" value="Add" config="polled" content-id="Atmel.ASF" />
           <option id="sam0.drivers.system" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common2.services.delay" value="Add" config="systick" content-id="Atmel.ASF" />
+          <option id="sam0.drivers.can" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.applications.user_application.xplained_pro2" value="Add" config="" content-id="Atmel.ASF" />
           <option id="common.utils" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam0.utils.cmsis.samc21.source.template" value="Add" config="" content-id="Atmel.ASF" />
@@ -206,6 +207,11 @@
           <file path="src/ASF/common2/services/delay/sam0/systick_counter.c" framework="" version="3.35.1" source="common2\services\delay\sam0\systick_counter.c" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/common2/services/delay/delay.h" framework="" version="3.35.1" source="common2\services\delay\delay.h" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/common2/services/delay/sam0/systick_counter.h" framework="" version="3.35.1" source="common2\services\delay\sam0\systick_counter.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam0/drivers/can/can.c" framework="" version="3.35.1" source="sam0\drivers\can\can.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam0/drivers/can/can.h" framework="" version="3.35.1" source="sam0\drivers\can\can.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam0/drivers/can/quick_start_fd/qs_can_fd.h" framework="" version="3.35.1" source="sam0\drivers\can\quick_start_fd\qs_can_fd.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam0/drivers/can/quick_start/qs_can_basic.h" framework="" version="3.35.1" source="sam0\drivers\can\quick_start\qs_can_basic.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_can.h" framework="" version="3.35.1" source="sam0\drivers\can\module_config\conf_can.h" changed="False" content-id="Atmel.ASF" />
         </files>
         <documentation help="http://asf.atmel.com/docs/3.35.1/common.applications.user_application.xplained_pro2.samc21_xplained_pro/html/index.html" />
         <offline-documentation help="" />
@@ -216,6 +222,22 @@
         <board id="board.samc21_xplained_pro" value="Add" config="" content-id="Atmel.ASF" />
       </framework-data>
     </AsfFrameworkConfig>
+    <avrtool>com.atmel.avrdbg.tool.edbg</avrtool>
+    <avrtoolserialnumber>ATML2419060200002755</avrtoolserialnumber>
+    <avrdeviceexpectedsignature>0x11010400</avrdeviceexpectedsignature>
+    <avrtoolinterface>SWD</avrtoolinterface>
+    <com_atmel_avrdbg_tool_edbg>
+      <ToolOptions>
+        <InterfaceProperties>
+          <SwdClock>2000000</SwdClock>
+        </InterfaceProperties>
+        <InterfaceName>SWD</InterfaceName>
+      </ToolOptions>
+      <ToolType>com.atmel.avrdbg.tool.edbg</ToolType>
+      <ToolNumber>ATML2419060200002755</ToolNumber>
+      <ToolName>EDBG</ToolName>
+    </com_atmel_avrdbg_tool_edbg>
+    <avrtoolinterfaceclock>2000000</avrtoolinterfaceclock>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -266,6 +288,7 @@
       <Value>../src/ASF/sam0/drivers/sercom/i2c/i2c_sam0</Value>
       <Value>../src/ASF/common2/services/delay</Value>
       <Value>../src/ASF/common2/services/delay/sam0</Value>
+      <Value>../src/ASF/sam0/drivers/can</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -318,6 +341,7 @@
       <Value>../src/ASF/sam0/drivers/sercom/i2c/i2c_sam0</Value>
       <Value>../src/ASF/common2/services/delay</Value>
       <Value>../src/ASF/common2/services/delay/sam0</Value>
+      <Value>../src/ASF/sam0/drivers/can</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.preprocessingassembler.general.AssemblerFlags>-DARM_MATH_CM0PLUS=true -DBOARD=SAMC21_XPLAINED_PRO -D__SAMC21J18A__ -DI2C_MASTER_CALLBACK_MODE=false -DSYSTICK_MODE</armgcc.preprocessingassembler.general.AssemblerFlags>
@@ -352,6 +376,7 @@
       <Value>../src/ASF/sam0/drivers/sercom/i2c/i2c_sam0</Value>
       <Value>../src/ASF/common2/services/delay</Value>
       <Value>../src/ASF/common2/services/delay/sam0</Value>
+      <Value>../src/ASF/sam0/drivers/can</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
 </ArmGcc>
@@ -406,6 +431,7 @@
       <Value>../src/ASF/sam0/drivers/sercom/i2c/i2c_sam0</Value>
       <Value>../src/ASF/common2/services/delay</Value>
       <Value>../src/ASF/common2/services/delay/sam0</Value>
+      <Value>../src/ASF/sam0/drivers/can</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -459,6 +485,7 @@
       <Value>../src/ASF/sam0/drivers/sercom/i2c/i2c_sam0</Value>
       <Value>../src/ASF/common2/services/delay</Value>
       <Value>../src/ASF/common2/services/delay/sam0</Value>
+      <Value>../src/ASF/sam0/drivers/can</Value>
     </ListValues>
   </armgcc.assembler.general.IncludePaths>
   <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
@@ -494,6 +521,7 @@
       <Value>../src/ASF/sam0/drivers/sercom/i2c/i2c_sam0</Value>
       <Value>../src/ASF/common2/services/delay</Value>
       <Value>../src/ASF/common2/services/delay/sam0</Value>
+      <Value>../src/ASF/sam0/drivers/can</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
   <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
@@ -515,6 +543,9 @@
     <Folder Include="src\ASF\sam0\boards\" />
     <Folder Include="src\ASF\sam0\boards\samc21_xplained_pro\" />
     <Folder Include="src\ASF\sam0\drivers\" />
+    <Folder Include="src\ASF\sam0\drivers\can\" />
+    <Folder Include="src\ASF\sam0\drivers\can\quick_start\" />
+    <Folder Include="src\ASF\sam0\drivers\can\quick_start_fd\" />
     <Folder Include="src\ASF\sam0\drivers\port\" />
     <Folder Include="src\ASF\sam0\drivers\port\quick_start\" />
     <Folder Include="src\ASF\sam0\drivers\sercom\" />
@@ -558,6 +589,27 @@
     <Folder Include="src\config\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\ASF\sam0\drivers\can\can.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam0\drivers\can\can.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\sam0\drivers\can\quick_start_fd\qs_can_fd.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\ASF\sam0\drivers\can\quick_start\qs_can_basic.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\CanAPI.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\CanAPI.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\config\conf_can.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\minimal.h">
       <SubType>compile</SubType>
     </Compile>
