@@ -20,20 +20,21 @@
  */
 
 #include "state_machine/hyped-machine.hpp"
-#include <iostream>
 
 namespace hyped {
 namespace state_machine {
 
-HypedMachine::HypedMachine() : current_state(new Idle())
+HypedMachine::HypedMachine(utils::Logger& log)
+    : current_state(new Idle())
+    , log_(log)
 {
-  std::cout << "State Machine initialised" << std::endl;
+  log_.INFO("[STATE]: State Machine initialised\n");
   current_state->entry();
 }
 
 void HypedMachine::handleEvent(Event event)
 {
-  std::cout << "Raised event " << event << std::endl;
+  log_.DBG1("[STATE]: Raised event %d\n", event);
   current_state->react(*this, event);
 }
 
@@ -41,7 +42,7 @@ void HypedMachine::transition(State *state)
 {
   // State *prevState = currState;
   current_state = state;
-  std::cout << "Transitioning..." << std::endl;
+  log_.DBG1("[STATE]: Transitioning...\n");
   current_state->entry();
   // delete prevState;
 }
