@@ -114,7 +114,7 @@ class Navigation {
   Vector<int16_t, 3> displacement_;
   Quaternion<int16_t> orientation_;
   int stripe_count_;
-  Kalman<Vector<int16_t, 3>> accleration_filter_;
+  Kalman<Vector<int16_t, 3>> acceleration_filter_;
   Kalman<Vector<int16_t, 3>> gyro_filter_;
   // TODO(ALL): Decide the type
   Kalman<uint8_t> proximity_filter_;
