@@ -42,11 +42,9 @@ Main::Main(uint8_t id, Logger& log)
   */
 void Main::run()
 {
-  // std::cout << "Starting motor controller" << std::endl;
   log_.INFO("[MOTOR]: Starting motor controller\n");
 
   while (1) {
-    // nav = data.getNavigationData();
     state = data.getStateMachineData();
     switch (state.current_state) {
        case data::State::kIdle:
@@ -93,17 +91,34 @@ void Main::setupMotors()
 void Main::accelerateMotors()
 {
   while (state.current_state == data::State::kAccelerating) {
+    // Check for state machine critical failure flag
     state = data.getStateMachineData();
     if (state.critical_failure) {
       this->stopMotors();
       goto exit_loop;
     }
+
+    // Check for motors critial failure flag
+    motorFailure = motor->checkStatus();
+    if (motorFailure) {
+      log_.INFO("[MOTOR]: Motor State: Motor Failure\n");
+      MotorsRpm motors_rpm = motor->getSpeed();
+      motor_data = {
+        data::MotorState::kCriticalFailure,
+        motors_rpm.rpm_FL,
+        motors_rpm.rpm_FR,
+        motors_rpm.rpm_BL,
+        motors_rpm.rpm_BR };
+      data.setMotorData(motor_data);
+      this->stopMotors();
+    }
+
+    // Step up motor RPM
     log_.INFO("[MOTOR]: Motor State: Accelerating\n");
     nav = data.getNavigationData();
     rpm = calculateAccelerationRPM(nav.velocity);
     motor->setSpeed(rpm);
     MotorsRpm motors_rpm = motor->getSpeed();
-    // Updates the shared data on the motors RPM
     motor_data = {
       data::MotorState::kMotorAccelerating,
       motors_rpm.rpm_FL,
@@ -121,11 +136,29 @@ void Main::accelerateMotors()
 void Main::decelerateMotors()
 {
   while (state.current_state == data::State::kDecelerating) {
+    // Check for state machine critical failure flag
     state = data.getStateMachineData();
     if (state.critical_failure) {
       this->stopMotors();
       goto exit_loop;
     }
+
+    // Check for motors critical failure flag
+    motorFailure = motor->checkStatus();
+    if (motorFailure) {
+      log_.INFO("[MOTOR]: Motor State: Motor Failure\n");
+      MotorsRpm motors_rpm = motor->getSpeed();
+      motor_data = {
+        data::MotorState::kCriticalFailure,
+        motors_rpm.rpm_FL,
+        motors_rpm.rpm_FR,
+        motors_rpm.rpm_BL,
+        motors_rpm.rpm_BR };
+      data.setMotorData(motor_data);
+      this->stopMotors();
+    }
+
+    // Step down motor RPM
     log_.INFO("[MOTOR]: Motor State: Decelerating\n");
     nav = data.getNavigationData();
     rpm = calculateDecelerationRPM(nav.velocity);

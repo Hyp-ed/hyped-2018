@@ -42,6 +42,7 @@ class Motor {
   explicit Motor(Logger& log);
   void setSpeed(int32_t rpm);
   MotorsRpm getSpeed();
+  bool checkStatus();
 
  private:
   MotorsRpm motors_rpm_;

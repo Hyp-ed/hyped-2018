@@ -53,6 +53,7 @@ class Main: public Thread {
   data::StateMachine state;
   data::Navigation nav;
   bool motorsSetUp;
+  bool motorFailure;
 };
 
 }}  // namespace hyped::motor_control

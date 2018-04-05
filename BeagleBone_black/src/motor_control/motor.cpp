@@ -41,7 +41,7 @@ MotorsRpm Motor::getSpeed()
   motors_rpm_.rpm_BL = rpm;
   motors_rpm_.rpm_BR = rpm;
 
-  log_.DBG2("[MOTOR]: returned RPMs: %d, %d, %d, %d\n"
+  log_.DBG2("[MOTOR]: Actual RPMs: FL %d, FR %d, BL %d, BR %d\n"
     , motors_rpm_.rpm_FL
     , motors_rpm_.rpm_FR
     , motors_rpm_.rpm_BL
@@ -56,7 +56,16 @@ MotorsRpm Motor::getSpeed()
 void Motor::setSpeed(int32_t rpm)
 {
   this->rpm = rpm;
-  log_.INFO("[MOTOR]: RPM set %d\n", rpm);
+  log_.INFO("[MOTOR]: Requested RPM %d\n", rpm);
+}
+
+/**
+  *  @brief  { Check status of motors e.g. temperature and synchronisation.
+  *            If critical failure, return True, otherwise return False }
+  */
+bool Motor::checkStatus()
+{
+  return false;
 }
 
 }}  // namespace hyped::motor_control
