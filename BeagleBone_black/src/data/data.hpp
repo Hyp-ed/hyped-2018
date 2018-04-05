@@ -110,9 +110,11 @@ struct Batteries {
 // -----------------------------------------------------------------------------
 
 enum MotorState {
+  kCriticalFailure,
   kMotorIdle,
   kMotorAccelerating,
   kMotorDecelerating,
+  kMotorStopping,
   kMotorStopped
 };
 

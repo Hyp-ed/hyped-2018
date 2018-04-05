@@ -18,8 +18,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
 
 #include <cstdint>
 
@@ -52,6 +52,8 @@ class Main: public Thread {
   data::Motors motor_data;
   data::StateMachine state;
   data::Navigation nav;
+  bool motorsSetUp;
+  bool motorFailure;
 };
 
 }}  // namespace hyped::motor_control
