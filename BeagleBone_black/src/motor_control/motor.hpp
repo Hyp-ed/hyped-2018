@@ -23,7 +23,12 @@
 
 #include <cstdint>
 
+#include "utils/logger.hpp"
+
 namespace hyped {
+
+using utils::Logger;
+
 namespace motor_control {
 // Contains the RPM of each of the motors
 struct MotorsRpm {
@@ -35,12 +40,13 @@ struct MotorsRpm {
 
 class Motor {
  public:
-  Motor();
+  explicit Motor(Logger& log);
   void setSpeed(int32_t rpm);
   MotorsRpm getSpeed();
 
  private:
   MotorsRpm motors_rpm_;
+  Logger& log_;
 };
 
 }}  // namespace hyped::motor_control

@@ -16,6 +16,9 @@ SRCS := \
   utils/concurrent/condition_variable.cpp \
   utils/concurrent/barrier.cpp \
   utils/io/i2c/i2c.cpp \
+  utils/io/can.cpp \
+  utils/logger.cpp \
+  utils/system.cpp \
 
 
 
@@ -30,4 +33,5 @@ MAINS := \
   demo_quaternion \
   demo_differentiator \
   demo_integrator \
-  demo_i2c \
+  demo_can \
+

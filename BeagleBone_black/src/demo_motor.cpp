@@ -23,10 +23,12 @@
 #include "motor_control/main.hpp"
 
 using hyped::motor_control::Main;
+using hyped::utils::Logger;
 
 int main()
 {
-  Main* controller = new Main(0);
+  Logger log(true, 1);
+  Main* controller = new Main(0, log);
   controller->setupMotors();
   controller->accelerateMotors();
   controller->decelerateMotors();

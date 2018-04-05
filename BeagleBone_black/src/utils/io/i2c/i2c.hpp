@@ -23,19 +23,14 @@
 #define BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 #endif	// BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 
-#include "utils/concurrent/thread.hpp"
-
-using hyped::utils::concurrent::Thread;
 
 namespace hyped {
 namespace utils {
 namespace io {
 
-class I2c : public Thread {
+class I2C {
  public:
- I2c(uint8_t id);
- private:
-  void run() override;
+  I2C();
 };
       
 }}} // namespace hyped::utils::io

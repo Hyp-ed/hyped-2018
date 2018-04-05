@@ -1,8 +1,7 @@
-
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 14. March 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,28 +18,36 @@
  *    limitations under the License.
  */
 
-#pragma once
+#include <unistd.h>
 
-#include "state_machine/event.hpp"
-#include "state_machine/machine-states.hpp"
+#include <thread>
+#include <chrono>
 
-#include "utils/logger.hpp"
+#include "utils/io/can.hpp"
 
-namespace hyped {
-namespace state_machine {
+using hyped::utils::io::Can;
+using hyped::utils::io::CanFrame;
 
-class State;
-class HypedMachine {
-  friend class State;
 
- public:
-  explicit HypedMachine(utils::Logger& log);
-  void handleEvent(Event event);
-  void transition(State *state);
+inline void delay(int ms)
+{
+  // usleep(ms * 1000);
+  std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
+}
 
- private:
-  State *current_state;
-  utils::Logger& log_;
-};
+int main()
+{
+  CanFrame data = {14, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
 
-}}   // namespace hyped::state_machine
+  Can& can = Can::getInstance();
+  can.send(data);
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < data.len; j++) {
+      data.data[j] += 1;
+    }
+    data.id += 1;
+    can.send(data);
+  }
+
+  delay(10);
+}

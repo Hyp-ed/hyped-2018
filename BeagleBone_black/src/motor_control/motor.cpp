@@ -20,14 +20,14 @@
 
 #include "motor_control/motor.hpp"
 #include <cstdint>
-#include <iostream>
 
 namespace hyped {
 namespace motor_control {
 
-Motor::Motor()
+Motor::Motor(Logger& log): log_(log)
 {
-  std::cout << "Motors initialised" << std::endl;
+  // std::cout << "Motors initialised" << std::endl;
+  log_.INFO("[MOTOR]: Motors initialised\n");
 }
 
 /**
@@ -40,8 +40,14 @@ MotorsRpm Motor::getSpeed()
   motors_rpm_.rpm_FL = 100;
   motors_rpm_.rpm_BL = 150;
   motors_rpm_.rpm_BR = 200;
-  std::cout << "returned RPMs :" << motors_rpm_.rpm_FL << "," << motors_rpm_.rpm_FR << ","
-  << motors_rpm_.rpm_BL << "," << motors_rpm_.rpm_BR << std::endl;
+  // std::cout << "returned RPMs :" << motors_rpm_.rpm_FL << "," << motors_rpm_.rpm_FR << ","
+  // << motors_rpm_.rpm_BL << "," << motors_rpm_.rpm_BR << std::endl;
+
+  log_.DBG2("[MOTOR]: returned RPMs: %d, %d, %d, %d\n"
+    , motors_rpm_.rpm_FL
+    , motors_rpm_.rpm_FR
+    , motors_rpm_.rpm_BL
+    , motors_rpm_.rpm_BR);
 
   return motors_rpm_;
 }
@@ -51,7 +57,8 @@ MotorsRpm Motor::getSpeed()
   */
 void Motor::setSpeed(int32_t rpm)
 {
-  std::cout << "RPM: " << rpm << std::endl;
+  // std::cout << "RPM: " << rpm << std::endl;
+  log_.INFO("[MOTOR]: RPM set %d", rpm);
 }
 
 }}  // namespace hyped::motor_control

@@ -18,17 +18,14 @@
  *    limitations under the License.
  */
 #include "i2c.hpp"
-#include <iostream>
 
 namespace hyped {
 namespace utils {
 namespace io {
 
-void hyped::utils::io::I2c::run(){
-  std::cout << "Started I2c thread" << std::endl;
-  return;
+I2C::I2C()
+{
+  // Create instance of i2c_fd here
 }
-
-I2c::I2c(uint8_t id) : concurrent::Thread(id) {}
 
 }}} // namespace hyped::utils::io

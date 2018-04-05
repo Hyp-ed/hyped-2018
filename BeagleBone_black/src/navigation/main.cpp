@@ -24,7 +24,10 @@ using data::Sensors;
 
 namespace navigation {
 
-Main::Main(uint8_t id) : Thread(id), data_(data::Data::getInstance()), nav_()
+Main::Main(uint8_t id, Logger& log)
+    : Thread(id, log)
+    , data_(data::Data::getInstance())
+    , nav_()
 {/* EMPTY */}
 
 void Main::run()

@@ -1,8 +1,7 @@
-
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 2. April 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,28 +18,30 @@
  *    limitations under the License.
  */
 
-#pragma once
+#ifndef BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
+#define BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
 
-#include "state_machine/event.hpp"
-#include "state_machine/machine-states.hpp"
-
-#include "utils/logger.hpp"
+#include <cstdint>
 
 namespace hyped {
-namespace state_machine {
+namespace utils {
 
-class State;
-class HypedMachine {
-  friend class State;
-
+class Logger {
  public:
-  explicit HypedMachine(utils::Logger& log);
-  void handleEvent(Event event);
-  void transition(State *state);
+  explicit Logger(bool verbose, int8_t debug);
+
+  void INFO(const char *format, ...);
+
+  void DBG(const char *format, ...);
+  void DBG0(const char *format, ...);
+  void DBG1(const char *format, ...);
+  void DBG2(const char *format, ...);
+  void DBG3(const char *format, ...);
 
  private:
-  State *current_state;
-  utils::Logger& log_;
+  bool verbose_;
+  int8_t debug_;
 };
 
-}}   // namespace hyped::state_machine
+}}  // namespace hyped::utils
+#endif  // BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
