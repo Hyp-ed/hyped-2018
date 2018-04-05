@@ -24,11 +24,13 @@
 #include "utils/concurrent/thread.hpp"
 
 using hyped::utils::concurrent::Thread;
+using hyped::utils::Logger;
 
 int main()
 {
-  Thread* states = new hyped::motor_control::TestStates(0);
-  Thread* motor  = new hyped::motor_control::Main(1);
+  Logger log(true, 1);
+  Thread* states = new hyped::motor_control::TestStates(0, log);
+  Thread* motor  = new hyped::motor_control::Main(1, log);
 
   states->start();
   motor->start();

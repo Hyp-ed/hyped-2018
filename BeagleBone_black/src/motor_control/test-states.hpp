@@ -29,13 +29,14 @@
 namespace hyped {
 
 using utils::concurrent::Thread;
+using utils::Logger;
 using hyped::state_machine::HypedMachine;
 
 namespace motor_control {
 
 class TestStates: public Thread {
 public:
- explicit TestStates(uint8_t id);
+ explicit TestStates(uint8_t id, Logger& log);
  void run() override;
  void delay(int i);
 

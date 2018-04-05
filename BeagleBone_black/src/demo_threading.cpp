@@ -32,9 +32,12 @@ using hyped::utils::concurrent::Lock;
 using hyped::utils::concurrent::ScopedLock;
 using hyped::utils::concurrent::ConditionVariable;
 
+using hyped::utils::Logger;
+
 ConditionVariable cv;
 Lock              global_lock;
 Lock              lock_;
+Logger            log(true, 1);
 
 int value = 0;
 
@@ -46,7 +49,7 @@ void delay(uint32_t i)
 class DemoThread: public Thread {
  public:
   explicit DemoThread(uint8_t id, bool synchronise = false)
-      : Thread(id),
+      : Thread(id, log),
         synchronise_(synchronise)
   { /* EMPTY */ }
 

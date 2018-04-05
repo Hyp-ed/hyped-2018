@@ -28,10 +28,10 @@
 namespace hyped {
 namespace motor_control {
 
-TestStates::TestStates(uint8_t id)
-    : Thread(id)
+TestStates::TestStates(uint8_t id, Logger& log)
+    : Thread(id, log)
 {
-  hypedMachine = new HypedMachine;
+  hypedMachine = new HypedMachine(log);
 }
 
 /**

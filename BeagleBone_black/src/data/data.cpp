@@ -92,4 +92,16 @@ void Data::setMotorData(const Motors& motor_data)
   motors_ = motor_data;
 }
 
+Communications Data::getCommunicationsData()
+{
+  ScopedLock L(&lock_communications_);
+  return communications_;
+}
+
+void Data::setCommunicationsData(const Communications& communications_data)
+{
+  ScopedLock L(&lock_communications_);
+  communications_ = communications_data;
+}
+
 }}  // namespace data::hyped
