@@ -49,10 +49,15 @@ void logHead(FILE* file, const char* title)
 {
   using namespace std::chrono;
   auto now_time = high_resolution_clock::now();
-  duration<double, std::milli> time_span = now_time - start_time;
-  // std::time_t t = std::time(nullptr);
-  // tm* tt = localtime(&t);
-  fprintf(file, "%f ", time_span.count());
+  duration<int, std::milli> time_span = duration_cast<std::chrono::milliseconds>
+        (now_time - start_time);
+  std::time_t t = std::time(nullptr);
+  tm* tt = localtime(&t);
+  fprintf(file, "%02d:%02d:%02d.%03d "
+    , tt->tm_hour
+    , tt->tm_min
+    , tt->tm_sec
+    , time_span.count() % 1000);
   fprintf(file, title);
 }
 
@@ -78,6 +83,8 @@ void Logger::INFO(const char* format, ...)
 void Logger::DBG(const char* format, ...)
 {
   if (debug_ >= 0) {
+    ScopedLock L(&logger_lock);
+    logHead(stderr, "DBG");
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
@@ -88,6 +95,8 @@ void Logger::DBG(const char* format, ...)
 void Logger::DBG0(const char* format, ...)
 {
   if (debug_ >= 0) {
+    ScopedLock L(&logger_lock);
+    logHead(stderr, "DBG0");
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
@@ -97,6 +106,8 @@ void Logger::DBG0(const char* format, ...)
 void Logger::DBG1(const char* format, ...)
 {
   if (debug_ >= 1) {
+    ScopedLock L(&logger_lock);
+    logHead(stderr, "DBG1");
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
@@ -106,6 +117,8 @@ void Logger::DBG1(const char* format, ...)
 void Logger::DBG2(const char* format, ...)
 {
   if (debug_ >= 2) {
+    ScopedLock L(&logger_lock);
+    logHead(stderr, "DBG2");
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
@@ -115,6 +128,8 @@ void Logger::DBG2(const char* format, ...)
 void Logger::DBG3(const char* format, ...)
 {
   if (debug_ >= 3) {
+    ScopedLock L(&logger_lock);
+    logHead(stderr, "DBG3");
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
