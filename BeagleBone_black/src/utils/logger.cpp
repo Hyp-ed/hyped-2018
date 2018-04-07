@@ -43,21 +43,26 @@ void myPrint(FILE* file, const char* format, va_list args)
   vfprintf(file, format, args);
 }
 
-static auto start_time = std::chrono::high_resolution_clock::now();
+// static auto start_time = std::chrono::high_resolution_clock::now();
 
 void logHead(FILE* file, const char* title)
 {
   using namespace std::chrono;
-  auto now_time = high_resolution_clock::now();
-  duration<int, std::milli> time_span = duration_cast<std::chrono::milliseconds>
-        (now_time - start_time);
   std::time_t t = std::time(nullptr);
   tm* tt = localtime(&t);
-  fprintf(file, "%02d:%02d:%02d.%03d "
+  fprintf(file, "%02d:%02d:%02d"
     , tt->tm_hour
     , tt->tm_min
-    , tt->tm_sec
-    , time_span.count() % 1000);
+    , tt->tm_sec);
+
+  if (true) {
+    auto now_time = -high_resolution_clock::now().time_since_epoch();
+    duration<int, std::milli> time_span = duration_cast<std::chrono::milliseconds>
+          (now_time);
+    fprintf(file, ".%03d ", time_span.count() % 1000);
+  } else {
+    fprintf(file, " ");
+  }
   fprintf(file, title);
 }
 

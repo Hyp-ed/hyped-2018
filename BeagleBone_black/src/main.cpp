@@ -44,7 +44,7 @@ using hyped::data::Data;
 int main(int argc, char* argv[])
 {
   System::parseArgs(argc, argv);
-  System sys = System::getSystem();
+  System& sys = System::getSystem();
   Logger log_system(sys.verbose, sys.debug);
   Logger log_motor(sys.verbose_motor, sys.debug_motor);
   Logger log_nav(sys.verbose_nav, sys.debug_nav);
