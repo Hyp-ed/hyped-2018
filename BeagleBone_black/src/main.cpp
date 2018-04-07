@@ -60,6 +60,9 @@ int main(int argc, char* argv[])
   motor->start();
   sensors->start();
   navigation->start();
+  log_system.INFO("[MAIN]: all module threads started\n");
+  // Thread::sleep(1000);
+  log_system.INFO("[MAIN]: After 1 sec sleep\n");
 
   state_machine->join();
   motor->join();

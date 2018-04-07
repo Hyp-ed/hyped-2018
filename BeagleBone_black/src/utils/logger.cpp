@@ -23,13 +23,37 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include <chrono>
+#include <iomanip>
+#include <ctime>
+
+#include "utils/concurrent/lock.hpp"
+
 namespace hyped {
 namespace utils {
 
+using concurrent::Lock;
+using concurrent::ScopedLock;
+
 namespace {
+Lock logger_lock;
+
 void myPrint(FILE* file, const char* format, va_list args)
 {
   vfprintf(file, format, args);
+}
+
+static auto start_time = std::chrono::high_resolution_clock::now();
+
+void logHead(FILE* file, const char* title)
+{
+  using namespace std::chrono;
+  auto now_time = high_resolution_clock::now();
+  duration<double, std::milli> time_span = now_time - start_time;
+  // std::time_t t = std::time(nullptr);
+  // tm* tt = localtime(&t);
+  fprintf(file, "%f ", time_span.count());
+  fprintf(file, title);
 }
 
 }
@@ -42,6 +66,8 @@ Logger::Logger(bool verbose, int8_t debug)
 void Logger::INFO(const char* format, ...)
 {
   if (verbose_) {
+    ScopedLock L(&logger_lock);
+    logHead(stdout, "INFO");
     va_list args;
     va_start(args, format);
     myPrint(stdout, format, args);
