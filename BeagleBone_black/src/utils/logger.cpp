@@ -27,7 +27,7 @@ namespace hyped {
 namespace utils {
 
 namespace {
-void myPrint(_IO_FILE* file, const char* format, va_list args)
+void myPrint(FILE* file, const char* format, va_list args)
 {
   vfprintf(file, format, args);
 }
