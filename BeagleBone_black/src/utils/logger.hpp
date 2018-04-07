@@ -28,8 +28,12 @@ namespace utils {
 
 class Logger {
  public:
+  Logger()
+      : verbose_(false)
+      , debug_(-1) { /* EMPTY */ }
   explicit Logger(bool verbose, int8_t debug);
 
+  void ERR(const char *format, ...);
   void INFO(const char *format, ...);
 
   void DBG(const char *format, ...);

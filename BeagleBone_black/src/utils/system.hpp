@@ -23,6 +23,8 @@
 
 #include <cstdint>
 
+#include "utils/logger.hpp"
+
 namespace hyped {
 namespace utils {
 

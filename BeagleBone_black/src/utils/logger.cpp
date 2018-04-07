@@ -68,6 +68,16 @@ Logger::Logger(bool verbose, int8_t debug)
     , debug_(debug)
 { /* EMPTY */ }
 
+void Logger::ERR(const char* format, ...)
+{
+  ScopedLock L(&logger_lock);
+  logHead(stderr, "ERR");
+  va_list args;
+  va_start(args, format);
+  myPrint(stderr, format, args);
+  va_end(args);
+}
+
 void Logger::INFO(const char* format, ...)
 {
   if (verbose_) {

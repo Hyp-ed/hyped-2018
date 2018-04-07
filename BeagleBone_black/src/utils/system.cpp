@@ -148,6 +148,9 @@ void System::parseArgs(int argc, char* argv[])
 System& System::getSystem()
 {
   if (system_) return *system_;
+  Logger log;
+  log.ERR("[SYSTEM]: somebody tried to get System"
+          " before initialisation, aborting\n");
   abort();
 }
 
