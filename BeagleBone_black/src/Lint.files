@@ -22,6 +22,12 @@ motor_control/motor.hpp
 motor_control/motor.cpp
 motor_control/main.hpp
 motor_control/main.cpp
+motor_control/test-states.hpp
+motor_control/test-states.cpp
+navigation/main.hpp
+navigation/main.cpp
+navigation/navigation.hpp
+navigation/navigation.cpp
 sensors/main.hpp
 sensors/main.cpp
 utils/concurrent/thread.hpp
@@ -39,3 +45,7 @@ utils/math/quaternion.hpp
 utils/math/vector.hpp
 utils/io/can.hpp
 utils/io/can.cpp
+utils/logger.hpp
+utils/logger.cpp
+utils/system.hpp
+utils/system.cpp

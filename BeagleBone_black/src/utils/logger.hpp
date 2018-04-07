@@ -1,7 +1,7 @@
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 17/02/18
+ * Date: 2. April 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,38 +18,30 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
+#define BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_
 
 #include <cstdint>
-#include "utils/logger.hpp"
 
 namespace hyped {
+namespace utils {
 
-using utils::Logger;
-
-namespace motor_control {
-// Contains the RPM of each of the motors
-struct MotorsRpm {
-  int32_t rpm_FL;
-  int32_t rpm_FR;
-  int32_t rpm_BL;
-  int32_t rpm_BR;
-};
-
-class Motor {
+class Logger {
  public:
-  explicit Motor(Logger& log);
-  void setSpeed(int32_t rpm);
-  MotorsRpm getSpeed();
-  bool checkStatus();
+  explicit Logger(bool verbose, int8_t debug);
+
+  void INFO(const char *format, ...);
+
+  void DBG(const char *format, ...);
+  void DBG0(const char *format, ...);
+  void DBG1(const char *format, ...);
+  void DBG2(const char *format, ...);
+  void DBG3(const char *format, ...);
 
  private:
-  MotorsRpm motors_rpm_;
-  int32_t rpm;   // For testing only
-  Logger& log_;
+  bool verbose_;
+  int8_t debug_;
 };
 
-}}  // namespace hyped::motor_control
-
-#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_ */
+}}  // namespace hyped::utils
+#endif  // BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_

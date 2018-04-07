@@ -24,6 +24,8 @@
 #include "state_machine/event.hpp"
 #include "state_machine/machine-states.hpp"
 
+#include "utils/logger.hpp"
+
 namespace hyped {
 namespace state_machine {
 
@@ -32,12 +34,13 @@ class HypedMachine {
   friend class State;
 
  public:
-  HypedMachine();
+  explicit HypedMachine(utils::Logger& log);
   void handleEvent(Event event);
   void transition(State *state);
 
  private:
   State *current_state;
+  utils::Logger& log_;
 };
 
 }}   // namespace hyped::state_machine

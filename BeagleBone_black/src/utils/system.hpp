@@ -1,7 +1,7 @@
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 17/02/18
+ * Date: 2. April 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,38 +18,38 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_
+#define BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_
 
 #include <cstdint>
-#include "utils/logger.hpp"
 
 namespace hyped {
+namespace utils {
 
-using utils::Logger;
-
-namespace motor_control {
-// Contains the RPM of each of the motors
-struct MotorsRpm {
-  int32_t rpm_FL;
-  int32_t rpm_FR;
-  int32_t rpm_BL;
-  int32_t rpm_BR;
-};
-
-class Motor {
+class System {
  public:
-  explicit Motor(Logger& log);
-  void setSpeed(int32_t rpm);
-  MotorsRpm getSpeed();
-  bool checkStatus();
+  static void parseArgs(int argc, char* argv[]);
+  static System& getSystem();
+
+  // runtime arguments to configure the whole system
+  bool verbose;
+  bool verbose_motor;
+  bool verbose_nav;
+  bool verbose_sensor;
+  bool verbose_state;
+
+  int8_t debug;
+  int8_t debug_motor;
+  int8_t debug_nav;
+  int8_t debug_sensor;
+  int8_t debug_state;
 
  private:
-  MotorsRpm motors_rpm_;
-  int32_t rpm;   // For testing only
-  Logger& log_;
+  System() = delete;
+  System(int argc, char* argv[]);
+  static System* system_;
 };
 
-}}  // namespace hyped::motor_control
+}}  // namespace hyped::utils
 
-#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_ */
+#endif  // BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_

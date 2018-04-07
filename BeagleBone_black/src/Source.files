@@ -6,14 +6,19 @@ SRCS := \
   state_machine/hyped-machine.cpp \
   state_machine/machine-states.cpp \
   state_machine/main.cpp \
+  motor_control/test-states.cpp \
   motor_control/motor.cpp \
   motor_control/main.cpp \
+  navigation/main.cpp \
+  navigation/navigation.cpp \
   sensors/main.cpp \
   utils/concurrent/thread.cpp \
   utils/concurrent/lock.cpp \
   utils/concurrent/condition_variable.cpp \
   utils/concurrent/barrier.cpp \
   utils/io/can.cpp \
+  utils/logger.cpp \
+  utils/system.cpp \
 
 
 

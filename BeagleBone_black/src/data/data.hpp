@@ -110,9 +110,11 @@ struct Batteries {
 // -----------------------------------------------------------------------------
 
 enum MotorState {
+  kCriticalFailure,
   kMotorIdle,
   kMotorAccelerating,
   kMotorDecelerating,
+  kMotorStopping,
   kMotorStopped
 };
 
@@ -122,6 +124,15 @@ struct Motors {
   int32_t rpm_FR;
   int32_t rpm_BL;
   int32_t rpm_BR;
+};
+
+// -----------------------------------------------------------------------------
+// Communications data
+// -----------------------------------------------------------------------------
+
+struct Communications {
+  bool stopCommand;
+  bool killPowerCommand;
 };
 
 // -----------------------------------------------------------------------------
@@ -188,18 +199,30 @@ class Data {
    */
   void setMotorData(const Motors& motor_data);
 
+  /**
+     * @brief      Retrieves data on whether stop/kill power commands have been issued.
+     */
+    Communications getCommunicationsData();
+
+    /**
+     * @brief      Should be called to update motor data.
+     */
+    void setCommunicationsData(const Communications& communications_data);
+
  private:
   StateMachine state_machine_;
-  Navigation  navigation_;
-  Sensors     sensors_;
-  Motors      motors_;
-  Batteries   batteries_;
+  Navigation navigation_;
+  Sensors sensors_;
+  Motors motors_;
+  Batteries batteries_;
+  Communications communications_;
 
   // locks for data substructures
   Lock lock_state_machine_;
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+  Lock lock_communications_;
   Lock lock_batteries_;
 };
 
