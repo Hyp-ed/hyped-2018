@@ -20,6 +20,9 @@
 
 #include "utils/concurrent/thread.hpp"
 
+#include <chrono>
+// #include <iostream>
+
 namespace hyped {
 namespace utils {
 namespace concurrent {
@@ -60,6 +63,11 @@ void Thread::run()
 void Thread::yield()
 {
   std::this_thread::yield();
+}
+
+void Thread::sleep(uint32_t ms)
+{
+  std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
 }
 
 }}}   // namespace hyped::utils::concurrent
