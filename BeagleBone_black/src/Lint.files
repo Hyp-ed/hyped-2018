@@ -7,6 +7,7 @@ demo_differentiator.cpp
 demo_integrator.cpp
 demo_vector.cpp
 demo_quaternion.cpp
+demo_can.cpp
 data/data.cpp
 data/data.hpp
 data/data_point.hpp
@@ -21,6 +22,8 @@ motor_control/motor.hpp
 motor_control/motor.cpp
 motor_control/main.hpp
 motor_control/main.cpp
+motor_control/test-states.hpp
+motor_control/test-states.cpp
 navigation/main.hpp
 navigation/main.cpp
 navigation/navigation.hpp
@@ -40,3 +43,9 @@ utils/math/integrator.hpp
 utils/math/kalman.hpp
 utils/math/quaternion.hpp
 utils/math/vector.hpp
+utils/io/can.hpp
+utils/io/can.cpp
+utils/logger.hpp
+utils/logger.cpp
+utils/system.hpp
+utils/system.cpp

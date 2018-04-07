@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include <thread>
+#include "utils/logger.hpp"
 
 namespace hyped {
 namespace utils {
@@ -31,7 +32,7 @@ namespace concurrent {
 
 class Thread {
  public:
-  explicit Thread(uint8_t id);
+  explicit Thread(uint8_t id, Logger& log);
   virtual ~Thread();
 
   /**
@@ -58,6 +59,9 @@ class Thread {
  private:
   uint8_t id_;
   std::thread* thread_;
+
+ protected:
+  Logger& log_;
 };
 
 }}}   // namespace hyped::utils::concurrent

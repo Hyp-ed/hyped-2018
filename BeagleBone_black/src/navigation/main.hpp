@@ -30,11 +30,13 @@ namespace hyped {
 
 using data::Sensors;
 using utils::concurrent::Thread;
+using utils::Logger;
+
 namespace navigation {
 
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
 
  private:

@@ -20,7 +20,6 @@
  *    limitations under the License.
  */
 
-#include <iostream>
 
 #include "state_machine/main.hpp"
 #include "motor_control/main.hpp"
@@ -29,21 +28,40 @@
 #include "utils/concurrent/thread.hpp"
 
 #include "data/data.hpp"
+#include "utils/logger.hpp"
+#include "utils/system.hpp"
+
 
 
 using hyped::utils::concurrent::Thread;
-using hyped::data::Data;
-using hyped::data::Sensors;
+using hyped::utils::Logger;
+using hyped::utils::System;
+
 using hyped::data::Navigation;
+using hyped::data::Sensors;
+using hyped::data::Data;
 
-int main()
+int main(int argc, char* argv[])
 {
-  std::cout << "Starting BeagleBone Black and initialising threads..." << std::endl;
+  System::parseArgs(argc, argv);
+  System sys = System::getSystem();
+  Logger log_system(sys.verbose, sys.debug);
+  Logger log_motor(sys.verbose_motor, sys.debug_motor);
+  Logger log_nav(sys.verbose_nav, sys.debug_nav);
+  Logger log_sensor(sys.verbose_sensor, sys.debug_sensor);
+  Logger log_state(sys.verbose_state, sys.debug_state);
 
-  Thread* state_machine   = new hyped::state_machine::Main(0);
-  Thread* motor     = new hyped::motor_control::Main(1);
-  Thread* sensors   = new hyped::sensors::Main(2);
-  Thread* navigation = new hyped::navigation::Main(3);
+  log_system.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
+  log_system.DBG("[MAIN]: DBG\n");
+  log_system.DBG0("[MAIN]: DBG0\n");
+  log_system.DBG1("[MAIN]: DBG1\n");
+  log_system.DBG2("[MAIN]: DBG2\n");
+  log_system.DBG3("[MAIN]: DBG3\n");
+
+  Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
+  Thread* motor     = new hyped::motor_control::Main(1, log_motor);
+  Thread* sensors   = new hyped::sensors::Main(2, log_sensor);
+  Thread* navigation = new hyped::navigation::Main(3, log_nav);
 
   state_machine->start();
   motor->start();
@@ -57,12 +75,17 @@ int main()
     // Monitoring
     sens = data.getSensorsData();
     auto& acc = sens.imu[0].acc.value;
-    std::cout << "Acceleration (" << acc[0] << ", " << acc[1] << ", "
-      << acc[2] << ")\n";
+    log_system.INFO("[TEST]: Acceleration       (%d %d %d)\n"
+      , acc[0]
+      , acc[1]
+      , acc[2]);
 
     navs = data.getNavigationData();
-    std::cout << "Distance " << navs.distance << "\n";
-    std::cout << "Velocity " << navs.velocity << "\n";
+    log_system.INFO("[TEST]: Distance, Velocity (%d, %d)\n"
+      , navs.distance
+      , navs.velocity);
+    // std::cout << "Distance " << navs.distance << "\n";
+    // std::cout << "Velocity " << navs.velocity << "\n";
     Thread::sleep(500);
   }
   state_machine->join();

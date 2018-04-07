@@ -20,7 +20,7 @@
 
 #include "sensors/main.hpp"
 
-#include <stdio.h>
+// #include <stdio.h>
 
 #include "data/data.hpp"
 
@@ -32,8 +32,8 @@ using data::Sensors;
 
 namespace sensors {
 
-Main::Main(uint8_t id)
-    : Thread(id)
+Main::Main(uint8_t id, Logger& log)
+    : Thread(id, log)
     , data_(data::Data::getInstance())
 { /* EMPTY */ }
 
@@ -45,7 +45,7 @@ void Main::run()
   while (1) {
     // keep updating data_ based on values read from sensors
     for (auto& imu : sensors.imu) {
-      imu.acc.value[0]  = !imu.acc.value[0];
+      imu.acc.value[0]  = imu.acc.value[0] ? 0 : 2;
       imu.acc.timestamp = time;
     }
 
