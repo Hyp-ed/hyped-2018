@@ -27,12 +27,19 @@
 #include "sensors/main.hpp"
 #include "utils/concurrent/thread.hpp"
 
+#include "data/data.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+
+
 
 using hyped::utils::concurrent::Thread;
 using hyped::utils::Logger;
 using hyped::utils::System;
+
+using hyped::data::Navigation;
+using hyped::data::Sensors;
+using hyped::data::Data;
 
 int main(int argc, char* argv[])
 {
@@ -64,6 +71,26 @@ int main(int argc, char* argv[])
   // Thread::sleep(1000);
   log_system.INFO("[MAIN]: After 1 sec sleep\n");
 
+  Data& data = Data::getInstance();
+  Sensors sens;
+  Navigation navs;
+  while (1) {
+    // Monitoring
+    sens = data.getSensorsData();
+    auto& acc = sens.imu[0].acc.value;
+    log_system.INFO("[TEST]: Acceleration       (%d %d %d)\n"
+      , acc[0]
+      , acc[1]
+      , acc[2]);
+
+    navs = data.getNavigationData();
+    log_system.INFO("[TEST]: Distance, Velocity (%d, %d)\n"
+      , navs.distance
+      , navs.velocity);
+    // std::cout << "Distance " << navs.distance << "\n";
+    // std::cout << "Velocity " << navs.velocity << "\n";
+    Thread::sleep(500);
+  }
   state_machine->join();
   motor->join();
   sensors->join();
