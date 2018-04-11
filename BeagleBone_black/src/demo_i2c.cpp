@@ -20,11 +20,11 @@
  *    limitations under the License.
  */
 
-#include <iostream>
-#include "utils/io/i2c/i2c.hpp"
+#include "utils/io/i2c.hpp"
 
 using hyped::utils::io::I2C;
-using namespace std;
+using hyped::utils::Logger;
+using hyped::utils::concurrent::Thread;
 
 Logger log(true,1);
 
@@ -33,6 +33,6 @@ int main(){
 
 	t1->start();
 	t1->join();
-	cout << "I2C Thread joined and executed" << endl;
+	log.INFO("DEMO", "I2C Thread joined and executed\n");
 	return 0;
 }

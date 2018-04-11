@@ -17,15 +17,15 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include "i2c.hpp"
+#include "utils/io/i2c.hpp"
 
 #define I2C_ID 17
 
 namespace hyped {
 namespace utils {
-Logger i2clog(true, 1);
-
 namespace io {
+
+Logger i2clog(true, 1);
 
 I2C::I2C() : concurrent::Thread(I2C_ID, i2clog)
 {
@@ -43,4 +43,4 @@ void I2C::run()
   return;
 }
 
-}}} // namespace hyped::utils::io
+}}}   // namespace hyped::utils::io

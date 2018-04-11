@@ -25,11 +25,11 @@
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 
-using hyped::utils::concurrent::Thread;
-using hyped::utils::Logger;
-
 namespace hyped {
 namespace utils {
+
+using concurrent::Thread;
+
 namespace io {
 
 class I2C : public concurrent::Thread {
@@ -38,7 +38,7 @@ class I2C : public concurrent::Thread {
   ~I2C();
   void run() override;
 };
-      
-}}} // namespace hyped::utils::io
 
-#endif	// BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
+}}}   // namespace hyped::utils::io
+
+#endif  // BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
