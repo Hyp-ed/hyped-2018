@@ -18,8 +18,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_UTILS_UTILS_HPP
-#define BEAGLEBONE_BLACK_UTILS_UTILS_HPP
+#ifndef BEAGLEBONE_BLACK_UTILS_UTILS_HPP_
+#define BEAGLEBONE_BLACK_UTILS_UTILS_HPP_
 
 
 namespace hyped {
@@ -33,4 +33,4 @@ namespace utils {
 }
 }
 
-#endif  // BEAGLEBONE_BLACK_UTILS_UTILS_HPP
+#endif  // BEAGLEBONE_BLACK_UTILS_UTILS_HPP_

@@ -1118,6 +1118,12 @@ def CheckForHeaderGuard(filename, lines, error):
   """
 
   cppvar = GetHeaderGuardCPPVariable(filename)
+  elements = cppvar.split('_')
+  cppvar = ''
+  for e in elements:
+    if e != "SRC":
+      cppvar += e+'_'
+  cppvar = cppvar[:-1]
 
   ifndef = None
   ifndef_linenum = 0
@@ -3817,7 +3823,7 @@ def ProcessFileData(filename, file_extension, lines, error,
 
   CheckForCopyright(filename, lines, error)
 
-  if file_extension == 'h':
+  if file_extension == 'h' or file_extension == 'hpp':
     CheckForHeaderGuard(filename, lines, error)
 
   RemoveMultiLineComments(filename, lines, error)
