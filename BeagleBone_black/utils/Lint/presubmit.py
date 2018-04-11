@@ -63,6 +63,7 @@ build/include_order
 build/printf_format
 build/storage_class
 build/include_what_you_use
+build/header_guard
 legal/copyright
 readability/boost
 readability/braces
