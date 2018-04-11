@@ -26,8 +26,13 @@
 using hyped::utils::io::I2C;
 using namespace std;
 
+Logger log(true,1);
+
 int main(){
-	I2C* i2c_singleton = new I2C();
+	Thread* t1 = new I2C();
+
+	t1->start();
+	t1->join();
 	cout << "I2C Thread joined and executed" << endl;
 	return 0;
 }

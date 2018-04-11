@@ -19,13 +19,28 @@
  */
 #include "i2c.hpp"
 
+#define I2C_ID 17
+
 namespace hyped {
 namespace utils {
+Logger i2clog(true, 1);
+
 namespace io {
 
-I2C::I2C()
+I2C::I2C() : concurrent::Thread(I2C_ID, i2clog)
 {
   // Create instance of i2c_fd here
+  return;
+}
+
+I2C::~I2C()
+{
+  return;
+}
+
+void I2C::run()
+{
+  return;
 }
 
 }}} // namespace hyped::utils::io
