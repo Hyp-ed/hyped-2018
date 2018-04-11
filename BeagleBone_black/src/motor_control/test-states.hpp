@@ -46,4 +46,4 @@ class TestStates: public Thread {
 
 }}  // namespace hyped::motor_control
 
-#endif
+#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_

@@ -19,7 +19,8 @@
  *    limitations under the License.
  */
 
-#pragma once
+#ifndef BEAGLEBONE_BLACK_STATE_MACHINE_MACHINE_STATES_HPP_
+#define BEAGLEBONE_BLACK_STATE_MACHINE_MACHINE_STATES_HPP_
 
 #include "state_machine/event.hpp"
 #include "state_machine/hyped-machine.hpp"
@@ -85,3 +86,5 @@ class Finished : public State {
 
 }  // namespace state_machine
 }  // namespace hyped
+
+#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_MACHINE_STATES_HPP_

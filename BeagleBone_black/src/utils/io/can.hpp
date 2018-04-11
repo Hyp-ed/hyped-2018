@@ -103,4 +103,4 @@ class Can : public concurrent::Thread {
 
 }}}   // namespace hyped::utils::io
 
-#endif    // BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
+#endif  // BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
