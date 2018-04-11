@@ -33,6 +33,9 @@ int main(){
 
 	t1->start();
 	t1->join();
+
+	delete t1;
+
 	log.INFO("DEMO", "I2C Thread joined and executed\n");
 	return 0;
 }
