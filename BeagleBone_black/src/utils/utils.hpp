@@ -1,7 +1,7 @@
 /*
- * Author: Sean Mullan
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 28/03/18
+ * Date: 11. April 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,28 +18,19 @@
  *    limitations under the License.
  */
 
-#include <iostream>
-#include "motor_control/main.hpp"
-#include "motor_control/test-states.hpp"
-#include "utils/concurrent/thread.hpp"
+#ifndef BEAGLEBONE_BLACK_UTILS_UTILS_HPP
+#define BEAGLEBONE_BLACK_UTILS_UTILS_HPP
 
-using hyped::utils::concurrent::Thread;
-using hyped::utils::Logger;
 
-int main()
-{
-  Logger log(true, 1);
-  Thread* states = new hyped::motor_control::TestStates(0, log);
-  Thread* motor  = new hyped::motor_control::Main(1, log);
+namespace hyped {
+namespace utils {
 
-  states->start();
-  motor->start();
+#define NO_COPY_ASSIGN(T)             \
+  T(const T&) = delete;               \
+  void operator=(const T&) = delete;
 
-  states->join();
-  motor->join();
 
-  delete states;
-  delete motor;
-
-  return 0;
 }
+}
+
+#endif  // BEAGLEBONE_BLACK_UTILS_UTILS_HPP

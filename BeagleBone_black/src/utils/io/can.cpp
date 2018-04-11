@@ -26,11 +26,9 @@
 #include <sys/socket.h>
 #include <net/if.h>
 
+#ifndef WIN
 #include <linux/can.h>
-#define CAN
-
-#ifndef CAN
-
+#else
 #define CAN_MAX_DLEN 8
 struct can_frame {
   uint32_t can_id;    /* 32 bit CAN_ID + EFF/RTR/ERR flags */
@@ -60,11 +58,14 @@ struct sockaddr_can {
 #define DATA_SEPERATOR '.'
 #endif   // CAN
 
+#include "utils/logger.hpp"
+
 namespace hyped {
 namespace utils {
 Logger log(true, 1);
 
 namespace io {
+
 
 
 Can::Can()

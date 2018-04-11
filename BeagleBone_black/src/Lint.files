@@ -22,6 +22,8 @@ motor_control/motor.hpp
 motor_control/motor.cpp
 motor_control/main.hpp
 motor_control/main.cpp
+motor_control/test-states.hpp
+motor_control/test-states.cpp
 navigation/main.hpp
 navigation/main.cpp
 navigation/navigation.hpp
@@ -47,3 +49,4 @@ utils/logger.hpp
 utils/logger.cpp
 utils/system.hpp
 utils/system.cpp
+utils/utils.hpp
