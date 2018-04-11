@@ -24,6 +24,7 @@
 #include <cstdint>
 
 #include "utils/logger.hpp"
+#include "utils/utils.hpp"
 
 namespace hyped {
 namespace utils {
@@ -53,6 +54,9 @@ class System {
   System(int argc, char* argv[]);
   ~System();
   static System* system_;
+
+  // macro to help implemet singleton
+  NO_COPY_ASSIGN(System);
 };
 
 }}  // namespace hyped::utils

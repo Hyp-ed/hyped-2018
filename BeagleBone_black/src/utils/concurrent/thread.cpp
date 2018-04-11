@@ -57,7 +57,7 @@ void Thread::join()
 
 void Thread::run()
 {
-  log_.INFO("[THREAD]: You are starting EMPTY thread. Terminating now.\n");
+  log_.INFO("THREAD", "You are starting EMPTY thread. Terminating now.\n");
 }
 
 void Thread::yield()

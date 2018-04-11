@@ -45,7 +45,7 @@ void myPrint(FILE* file, const char* format, va_list args)
 
 // static auto start_time = std::chrono::high_resolution_clock::now();
 
-void logHead(FILE* file, const char* title)
+void logHead(FILE* file, const char* title, const char* module)
 {
   using namespace std::chrono;
   std::time_t t = std::time(nullptr);
@@ -63,7 +63,7 @@ void logHead(FILE* file, const char* title)
   } else {
     fprintf(file, " ");
   }
-  fprintf(file, title);
+  fprintf(file, "%s[%s]: ", title, module);
 }
 
 }
@@ -73,21 +73,21 @@ Logger::Logger(bool verbose, int8_t debug)
     , debug_(debug)
 { /* EMPTY */ }
 
-void Logger::ERR(const char* format, ...)
+void Logger::ERR(const char* module, const char* format, ...)
 {
   ScopedLock L(&logger_lock);
-  logHead(stderr, "ERR");
+  logHead(stderr, "ERR", module);
   va_list args;
   va_start(args, format);
   myPrint(stderr, format, args);
   va_end(args);
 }
 
-void Logger::INFO(const char* format, ...)
+void Logger::INFO(const char* module, const char* format, ...)
 {
   if (verbose_) {
     ScopedLock L(&logger_lock);
-    logHead(stdout, "INFO");
+    logHead(stdout, "INFO", module);
     va_list args;
     va_start(args, format);
     myPrint(stdout, format, args);
@@ -95,11 +95,11 @@ void Logger::INFO(const char* format, ...)
   }
 }
 
-void Logger::DBG(const char* format, ...)
+void Logger::DBG(const char* module, const char* format, ...)
 {
   if (debug_ >= 0) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG");
+    logHead(stderr, "DBG", module);
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
@@ -107,44 +107,33 @@ void Logger::DBG(const char* format, ...)
   }
 }
 
-void Logger::DBG0(const char* format, ...)
-{
-  if (debug_ >= 0) {
-    ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG0");
-    va_list args;
-    va_start(args, format);
-    myPrint(stderr, format, args);
-    va_end(args);
-  }
-}
-void Logger::DBG1(const char* format, ...)
+void Logger::DBG1(const char* module, const char* format, ...)
 {
   if (debug_ >= 1) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG1");
+    logHead(stderr, "DBG1", module);
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
     va_end(args);
   }
 }
-void Logger::DBG2(const char* format, ...)
+void Logger::DBG2(const char* module, const char* format, ...)
 {
   if (debug_ >= 2) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG2");
+    logHead(stderr, "DBG2", module);
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
     va_end(args);
   }
 }
-void Logger::DBG3(const char* format, ...)
+void Logger::DBG3(const char* module, const char* format, ...)
 {
   if (debug_ >= 3) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG3");
+    logHead(stderr, "DBG3", module);
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);
