@@ -33,6 +33,10 @@ namespace concurrent {
 class Thread {
  public:
   explicit Thread(uint8_t id, Logger& log);
+  // some constructors if you do not want to specify all the details
+  explicit Thread(uint8_t id);
+  explicit Thread(Logger& log);
+  Thread();
   virtual ~Thread();
 
   /**

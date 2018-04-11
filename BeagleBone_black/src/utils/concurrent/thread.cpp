@@ -21,7 +21,8 @@
 #include "utils/concurrent/thread.hpp"
 
 #include <chrono>
-// #include <iostream>
+
+#include "utils/system.hpp"
 
 namespace hyped {
 namespace utils {
@@ -36,6 +37,23 @@ void thread_entry_point(Thread* this_)
 
 }   // namespace ::
 
+Thread::Thread(Logger& log)
+    : id_(-1)
+    , thread_(0)
+    , log_(log)
+{ /* EMPTY */ }
+
+Thread::Thread(uint8_t id)
+    : id_(id)
+    , thread_(0)
+    , log_(System::getLogger())
+{ /* EMPTY */ }
+
+Thread::Thread()
+    : id_(-1)
+    , thread_(0)
+    , log_(System::getLogger())
+{ /* EMPTY */ }
 
 Thread::Thread(uint8_t id, Logger& log)
     : id_(id)
