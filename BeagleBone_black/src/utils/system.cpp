@@ -38,6 +38,11 @@ void printUsage()
 }
 }
 
+System::~System()
+{
+  if (log_) delete log_;
+}
+
 System::System(int argc, char* argv[])
     : verbose(DEFAULT_VERBOSE)
     , verbose_motor(DEFAULT_VERBOSE)
@@ -134,6 +139,7 @@ System::System(int argc, char* argv[])
     if (debug_state == DEFAULT_DEBUG) debug_state = debug;
   }
 
+  log_ = new Logger(verbose, debug);
   system_ = this;
 }
 
@@ -148,7 +154,16 @@ void System::parseArgs(int argc, char* argv[])
 System& System::getSystem()
 {
   if (system_) return *system_;
-  abort();
+  Logger log;
+  log.ERR("SYSTEM", "somebody tried to get System"
+          " before initialisation, aborting\n");
+  exit(1);
+}
+
+Logger& System::getLogger()
+{
+  System& sys = getSystem();
+  return *sys.log_;
 }
 
 }}  // namespace hyped::utils

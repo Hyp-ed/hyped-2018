@@ -44,19 +44,18 @@ using hyped::data::Data;
 int main(int argc, char* argv[])
 {
   System::parseArgs(argc, argv);
-  System sys = System::getSystem();
+  System& sys = System::getSystem();
   Logger log_system(sys.verbose, sys.debug);
   Logger log_motor(sys.verbose_motor, sys.debug_motor);
   Logger log_nav(sys.verbose_nav, sys.debug_nav);
   Logger log_sensor(sys.verbose_sensor, sys.debug_sensor);
   Logger log_state(sys.verbose_state, sys.debug_state);
 
-  log_system.INFO("[MAIN]: Starting BBB with %d modules\n", 4);
-  log_system.DBG("[MAIN]: DBG\n");
-  log_system.DBG0("[MAIN]: DBG0\n");
-  log_system.DBG1("[MAIN]: DBG1\n");
-  log_system.DBG2("[MAIN]: DBG2\n");
-  log_system.DBG3("[MAIN]: DBG3\n");
+  log_system.INFO("MAIN", "Starting BBB with %d modules\n", 4);
+  log_system.DBG("MAIN", "DBG\n");
+  log_system.DBG1("MAIN", "DBG1\n");
+  log_system.DBG2("MAIN", "DBG2\n");
+  log_system.DBG3("MAIN", "DBG3\n");
 
   Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
   Thread* motor     = new hyped::motor_control::Main(1, log_motor);
@@ -67,6 +66,9 @@ int main(int argc, char* argv[])
   motor->start();
   sensors->start();
   navigation->start();
+  log_system.INFO("MAIN", "all module threads started\n");
+  Thread::sleep(1000);
+  log_system.INFO("MAIN", "After 1 sec sleep\n");
 
   Data& data = Data::getInstance();
   Sensors sens;
@@ -75,17 +77,15 @@ int main(int argc, char* argv[])
     // Monitoring
     sens = data.getSensorsData();
     auto& acc = sens.imu[0].acc.value;
-    log_system.INFO("[TEST]: Acceleration       (%d %d %d)\n"
+    log_system.INFO("TEST", "Acceleration       (%d %d %d)\n"
       , acc[0]
       , acc[1]
       , acc[2]);
 
     navs = data.getNavigationData();
-    log_system.INFO("[TEST]: Distance, Velocity (%d, %d)\n"
+    log_system.INFO("TEST", "Distance, Velocity (%d, %d)\n"
       , navs.distance
       , navs.velocity);
-    // std::cout << "Distance " << navs.distance << "\n";
-    // std::cout << "Velocity " << navs.velocity << "\n";
     Thread::sleep(500);
   }
   state_machine->join();
