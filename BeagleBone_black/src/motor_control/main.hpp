@@ -58,4 +58,4 @@ class Main: public Thread {
 
 }}  // namespace hyped::motor_control
 
-#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_ */
+#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_

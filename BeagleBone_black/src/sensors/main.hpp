@@ -44,4 +44,4 @@ class Main: public Thread {
 
 }}  // namespace hyped::sensors
 
-#endif  /* BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_ */
+#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_

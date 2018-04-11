@@ -124,4 +124,4 @@ class Navigation {
 
 }}  // namespace hyped::navigation
 
-#endif  // BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
+#endif  // BEAGLEBONE_BLACK_NAVIGATION_NAVIGATION_HPP_

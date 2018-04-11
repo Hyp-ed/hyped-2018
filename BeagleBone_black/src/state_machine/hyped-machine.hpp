@@ -18,8 +18,8 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-#pragma once
+#ifndef BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_
+#define BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_
 
 #include "state_machine/event.hpp"
 #include "state_machine/machine-states.hpp"
@@ -44,3 +44,5 @@ class HypedMachine {
 };
 
 }}   // namespace hyped::state_machine
+
+#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_
