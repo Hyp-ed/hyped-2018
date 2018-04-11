@@ -23,14 +23,11 @@
 #include <iostream>
 #include "utils/io/i2c/i2c.hpp"
 
-using hyped::utils::concurrent::Thread;
-using hyped::utils::io::I2c;
+using hyped::utils::io::I2C;
 using namespace std;
 
 int main(){
-	Thread* i2c_thread = new I2c(17); // 17 as I2C thread number
-	i2c_thread->run();
-	i2c_thread->join();
-	cout << "Thread joined and executed" << endl;
+	I2C* i2c_singleton = new I2C();
+	cout << "I2C Thread joined and executed" << endl;
 	return 0;
 }
