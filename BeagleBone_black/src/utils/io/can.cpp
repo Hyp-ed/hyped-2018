@@ -58,18 +58,18 @@ struct sockaddr_can {
 #define DATA_SEPERATOR '.'
 #endif   // CAN
 
-#include "utils/logger.hpp"
+// #include "utils/logger.hpp"
 
 namespace hyped {
 namespace utils {
-Logger log(true, 1);
+// Logger log(true, 1);
 
 namespace io {
 
 
 
 Can::Can()
-    : concurrent::Thread(0, log)
+    : concurrent::Thread(0)
 {
   if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
     perror("socket");
@@ -100,10 +100,14 @@ Can::~Can()
 int Can::send(const CanFrame& frame)
 {
   can_frame can;
-
+  log_.INFO("CAN", "trying to send something\n");
   // checks, id <= ID_MAX, len <= LEN_MAX
-  if (frame.len > 8)    return 0;
-  if (frame.id  > 127)  return 0;
+  if (frame.len > 8) {
+    log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
+    return 0;
+  }
+  // if (frame.id & CAN_EFF_FLAG && frame.id)
+  // if (frame.id  > 127)  return 0;
 
   can.can_id = frame.id;
   can.can_dlc = frame.len;
@@ -111,11 +115,15 @@ int Can::send(const CanFrame& frame)
     can.data[i] = frame.data[i];
   }
 
+  log_.INFO("CAN", "actually sending\n");
   if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
     perror("write");
     return 0;
   }
 
+  log_.INFO("CAN", "message with id %d sent, extended:%d\n"
+    , frame.id & ~CAN_EFF_FLAG
+    , frame.id & CAN_EFF_FLAG);
   return 1;
 }
 

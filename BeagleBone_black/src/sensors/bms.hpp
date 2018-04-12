@@ -1,7 +1,7 @@
 /*
- * Author: Martin Kristien
+ * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 13/03/18
+ * Date: 12. April 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,32 +18,32 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_BMS_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_BMS_HPP_
 
-#include <cstdint>
 
-#include "utils/concurrent/thread.hpp"
-#include "data/data.hpp"
-#include "sensors/bms.hpp"
 
 namespace hyped {
-
-using utils::concurrent::Thread;
-using utils::Logger;
+// Forward declarations
+namespace utils { class Logger; }
+namespace utils { namespace io { class Can; } }
 
 namespace sensors {
 
-class Main: public Thread {
+using utils::Logger;
+using utils::io::Can;
+
+class BMS {
  public:
-  explicit Main(uint8_t id, Logger& log);
-  void run() override;
+  BMS();
+  explicit BMS(Logger& log);
 
  private:
-  data::Data& data_;
-  BMS bms_;
+  Logger& log_;
+  Can& can_;
+  static bool exists_;
 };
 
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_BMS_HPP_

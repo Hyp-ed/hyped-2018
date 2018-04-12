@@ -31,8 +31,13 @@
 
 namespace hyped {
 namespace utils {
+
+class Logger;
+
 namespace io {
 
+// use for extended frames
+#define CAN_EFF_FLAG 0x80000000U
 
 struct CanFrame {
   uint32_t  id;
@@ -99,6 +104,8 @@ class Can : public concurrent::Thread {
   concurrent::Lock proxi_lock_;
   std::queue<CanFrame> bms_queue_;
   std::queue<CanFrame> proxi_queue_;
+
+  // Logger& log_;
 };
 
 }}}   // namespace hyped::utils::io

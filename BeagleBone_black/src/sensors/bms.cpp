@@ -1,7 +1,7 @@
 /*
  * Authors: M. Kristien
  * Organisation: HYPED
- * Date: 14. March 2018
+ * Date: 12. April 2018
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,38 +18,40 @@
  *    limitations under the License.
  */
 
-#include <unistd.h>
+#include "sensors/bms.hpp"
 
-#include <thread>
-#include <chrono>
 
-#include "utils/io/can.hpp"
+#include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include "utils/io/can.hpp"
 
-using hyped::utils::io::Can;
-using hyped::utils::io::CanFrame;
+namespace hyped {
+namespace sensors {
+
+bool BMS::exists_ = false;
 
 
-inline void delay(int ms)
+BMS::BMS(): BMS(utils::System::getLogger())
+{ /* Do nothing, delegate to the other constructor */ }
+
+BMS::BMS(Logger& log)
+    : log_(log)
+    , can_(Can::getInstance())
 {
-  // usleep(ms * 1000);
-  std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
-}
-
-int main(int argc, char* argv[])
-{
-  hyped::utils::System::parseArgs(argc, argv);
-  CanFrame data = {14, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
-
-  Can& can = Can::getInstance();
-  can.send(data);
-  for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < data.len; j++) {
-      data.data[j] += 1;
-    }
-    data.id += 1;
-    can.send(data);
+  if (exists_) {
+    log_.ERR("BMS", "BMS already exists, double module instantiation\n");
+    return;
   }
 
-  delay(10);
+  exists_ = true;
+
+  // send initialisation CanFrame
+  utils::io::CanFrame message;
+  message.id = 300 | CAN_EFF_FLAG;
+  message.len = 4;
+  can_.send(message);
+
+  log_.INFO("BMS", "init message sent\n");
 }
+
+}}  // namespace hyped::sensors
