@@ -79,7 +79,7 @@ struct Proximity {
 };
 
 struct Battery {
-  Vector<int16_t, 10> temperatures;
+  Vector<int16_t, 7> temperatures;
   uint8_t voltage;
 };
 

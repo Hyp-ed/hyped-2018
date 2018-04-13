@@ -30,6 +30,8 @@ navigation/navigation.hpp
 navigation/navigation.cpp
 sensors/main.hpp
 sensors/main.cpp
+sensors/bms.cpp
+sensors/bms.hpp
 utils/concurrent/thread.hpp
 utils/concurrent/thread.cpp
 utils/concurrent/lock.hpp
