@@ -24,7 +24,7 @@ using hyped::communications::Main;
 
 int main()
 {
-  hyped::communications::BaseCommunicator baseCommunicator; // to add parameter: baseCommunicator((char *) "127.0.0.1");
+  hyped::communications::Communications baseCommunicator; // to add parameter: baseCommunicator((char *) "127.0.0.1");
   baseCommunicator.setUp();
   baseCommunicator.sendVelocity(6546);
   baseCommunicator.sendDistance(564);

@@ -23,10 +23,10 @@
 namespace hyped {
 namespace communications {
 
-Main::Main(uint8_t id) : Thread(id)
+Main::Main(uint8_t id, Logger& log) : Thread(id, log)
 {
-  // To use IP address: BaseCommunicator((char *) "127.0.0.1");
-  baseCommunicator = new BaseCommunicator();
+  // To use IP address: Communications((char *) "127.0.0.1");
+  baseCommunicator = new Communications();
   baseCommunicator->setUp();
   // TODO(kofi): start receiverThread here
 }

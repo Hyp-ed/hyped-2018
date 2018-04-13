@@ -20,21 +20,22 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "communications/BaseCommunicator.hpp"
+#include "communications/communications.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
+using utils::Logger;
 
 namespace communications {
 
 class Main : public Thread {
     public:
-        explicit Main(uint8_t id);
+        explicit Main(uint8_t id, Logger& log);
         void run() override;
 
     private:
-        BaseCommunicator* baseCommunicator;
+        Communications* baseCommunicator;
         data::Data& data = data::Data::getInstance();
         data::Navigation nav;
         data::Motors mtr;
