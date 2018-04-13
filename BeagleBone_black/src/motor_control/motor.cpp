@@ -20,14 +20,13 @@
 
 #include "motor_control/motor.hpp"
 #include <cstdint>
-#include <iostream>
 
 namespace hyped {
 namespace motor_control {
 
-Motor::Motor()
+Motor::Motor(Logger& log): log_(log)
 {
-  std::cout << "Motors initialised" << std::endl;
+  log_.INFO("MOTOR", "Motors initialised\n");
 }
 
 /**
@@ -35,13 +34,17 @@ Motor::Motor()
   */
 MotorsRpm Motor::getSpeed()
 {
-  // These values will be generate from the sensor readings
-  motors_rpm_.rpm_FR = 50;
-  motors_rpm_.rpm_FL = 100;
-  motors_rpm_.rpm_BL = 150;
-  motors_rpm_.rpm_BR = 200;
-  std::cout << "returned RPMs :" << motors_rpm_.rpm_FL << "," << motors_rpm_.rpm_FR << ","
-  << motors_rpm_.rpm_BL << "," << motors_rpm_.rpm_BR << std::endl;
+  // Read actual motor RPM over CAN. Set dummy values for now
+  motors_rpm_.rpm_FR = rpm;
+  motors_rpm_.rpm_FL = rpm;
+  motors_rpm_.rpm_BL = rpm;
+  motors_rpm_.rpm_BR = rpm;
+
+  log_.DBG2("MOTOR", "Actual RPMs: FL %d, FR %d, BL %d, BR %d\n"
+    , motors_rpm_.rpm_FL
+    , motors_rpm_.rpm_FR
+    , motors_rpm_.rpm_BL
+    , motors_rpm_.rpm_BR);
 
   return motors_rpm_;
 }
@@ -51,7 +54,17 @@ MotorsRpm Motor::getSpeed()
   */
 void Motor::setSpeed(int32_t rpm)
 {
-  std::cout << "RPM: " << rpm << std::endl;
+  this->rpm = rpm;
+  log_.INFO("MOTOR", "Requested RPM %d\n", rpm);
+}
+
+/**
+  *  @brief  { Check status of motors e.g. temperature and synchronisation.
+  *            If critical failure, return True, otherwise return False }
+  */
+bool Motor::checkStatus()
+{
+  return false;
 }
 
 }}  // namespace hyped::motor_control

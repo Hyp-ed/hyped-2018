@@ -25,22 +25,25 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/bms.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
+using utils::Logger;
 
 namespace sensors {
 
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
 
  private:
   data::Data& data_;
+  BMS bms_;
 };
 
 }}  // namespace hyped::sensors
 
-#endif  /* BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_ */
+#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_

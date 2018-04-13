@@ -18,7 +18,8 @@
  *    limitations under the License.
  */
 
-#pragma once
+#ifndef BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_
+#define BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_
 
 #include <cstdint>
 #include "utils/concurrent/thread.hpp"
@@ -28,12 +29,13 @@
 namespace hyped {
 
 using utils::concurrent::Thread;
+using utils::Logger;
 
 namespace state_machine {
 
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
 
  private:
@@ -44,3 +46,5 @@ class Main: public Thread {
 };
 
 }}  // namespace hyped::motor_control
+
+#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_

@@ -18,11 +18,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-#pragma once
+#ifndef BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_
+#define BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_
 
 #include "state_machine/event.hpp"
 #include "state_machine/machine-states.hpp"
+
+#include "utils/logger.hpp"
 
 namespace hyped {
 namespace state_machine {
@@ -32,12 +34,15 @@ class HypedMachine {
   friend class State;
 
  public:
-  HypedMachine();
+  explicit HypedMachine(utils::Logger& log);
   void handleEvent(Event event);
   void transition(State *state);
 
  private:
   State *current_state;
+  utils::Logger& log_;
 };
 
 }}   // namespace hyped::state_machine
+
+#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_

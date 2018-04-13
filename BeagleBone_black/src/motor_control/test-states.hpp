@@ -1,8 +1,9 @@
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Author: Sean Mullan
  * Organisation: HYPED
- * Date: 17/02/18
- * Description:
+ * Date: 28. March 2018
+ * Description: Dummy state machine thread to test if motor control module reacts
+ *              appropriately to state changes
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,38 +19,31 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
 
 #include <cstdint>
-#include "utils/logger.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "state_machine/hyped-machine.hpp"
 
 namespace hyped {
 
+using utils::concurrent::Thread;
 using utils::Logger;
+using hyped::state_machine::HypedMachine;
 
 namespace motor_control {
-// Contains the RPM of each of the motors
-struct MotorsRpm {
-  int32_t rpm_FL;
-  int32_t rpm_FR;
-  int32_t rpm_BL;
-  int32_t rpm_BR;
-};
 
-class Motor {
+class TestStates: public Thread {
  public:
-  explicit Motor(Logger& log);
-  void setSpeed(int32_t rpm);
-  MotorsRpm getSpeed();
-  bool checkStatus();
+  explicit TestStates(uint8_t id, Logger& log);
+  void run() override;
+  void delay(int i);
 
  private:
-  MotorsRpm motors_rpm_;
-  int32_t rpm;   // For testing only
-  Logger& log_;
+  HypedMachine* hypedMachine;
 };
 
 }}  // namespace hyped::motor_control
 
-#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_

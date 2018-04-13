@@ -20,7 +20,9 @@
 
 #include "utils/concurrent/thread.hpp"
 
-#include <iostream>
+#include <chrono>
+
+#include "utils/system.hpp"
 
 namespace hyped {
 namespace utils {
@@ -35,10 +37,28 @@ void thread_entry_point(Thread* this_)
 
 }   // namespace ::
 
+Thread::Thread(Logger& log)
+    : id_(-1)
+    , thread_(0)
+    , log_(log)
+{ /* EMPTY */ }
 
 Thread::Thread(uint8_t id)
-    : id_(id),
-      thread_(0)
+    : id_(id)
+    , thread_(0)
+    , log_(System::getLogger())
+{ /* EMPTY */ }
+
+Thread::Thread()
+    : id_(-1)
+    , thread_(0)
+    , log_(System::getLogger())
+{ /* EMPTY */ }
+
+Thread::Thread(uint8_t id, Logger& log)
+    : id_(id)
+    , thread_(0)
+    , log_(log)
 { /* EMPTY */ }
 
 Thread::~Thread() { /* EMPTY */ }
@@ -55,12 +75,17 @@ void Thread::join()
 
 void Thread::run()
 {
-  std::cout << "You are starting EMPTY thread. Terminating now.\n";
+  log_.INFO("THREAD", "You are starting EMPTY thread. Terminating now.\n");
 }
 
 void Thread::yield()
 {
   std::this_thread::yield();
+}
+
+void Thread::sleep(uint32_t ms)
+{
+  std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
 }
 
 }}}   // namespace hyped::utils::concurrent

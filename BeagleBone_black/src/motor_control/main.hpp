@@ -18,8 +18,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
 
 #include <cstdint>
 
@@ -30,12 +30,13 @@
 namespace hyped {
 
 using utils::concurrent::Thread;
+using utils::Logger;
 
 namespace motor_control {
 
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
   void setupMotors();
   void accelerateMotors();
@@ -51,8 +52,10 @@ class Main: public Thread {
   data::Motors motor_data;
   data::StateMachine state;
   data::Navigation nav;
+  bool motorsSetUp;
+  bool motorFailure;
 };
 
 }}  // namespace hyped::motor_control
 
-#endif  /* BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_CONTROLLER_HPP_ */
+#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
