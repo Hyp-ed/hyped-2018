@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi and Isabella
+ * Authors: Kofi
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
@@ -18,8 +18,6 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
-#define BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,42 +29,35 @@
 #include <netdb.h>
 #include <string>
 #include <iostream>
-#include "data/data.hpp"
-#include "utils/logger.hpp"
-#include "data/data.hpp"
 using namespace std;
 
 namespace hyped {
-
-using data::NavigationType;
-using utils::Logger;
-
 namespace communications {
 
 class Communications
 {
- public:
-  explicit Communications(Logger& log, const char* ip, int portNo);
-  ~Communications();
-  int sendDistance(NavigationType distance);    // CMD01
-  int sendVelocity(NavigationType speed);       // CMD02
-  int sendAcceleration(NavigationType accel);   // CMD03
-  int sendStripeCount(int stripes);             // CMD04
-  int sendRpmFl(float rpmfl);                   // CMD05
-  int sendRpmFr(float rpmfr);                   // CMD06
-  int sendRpmBl(float rpmBl);                   // CMD07
-  int sendRpmBr(float rpmBr);                   // CMD08
-  int sendData(string message);
-  int receiveMessage();
-
  private:
-  int sockfd_, n_;
+  int sockfd, portNo, n;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
-  Logger& log_;
+  // char* ipAddress;
+
+ public:
+  Communications();
+  explicit Communications(char* ip);
+  bool setUp();
+  ~Communications();
+  int sendDistance(float distance);   // CMD01
+  int sendVelocity(float speed);      // CMD02
+  int sendAcceleration(float accel);  // CMD03
+  int sendStripeCount(int stripes);   // CMD04
+  int sendRpmFl(float rpmfl);         // CMD05
+  int sendRpmFr(float rpmfr);         // CMD06
+  int sendRpmBl(float rpmBl);         // CMD07
+  int sendRpmBr(float rpmBr);         // CMD08
+  int sendData(string message);
+  // void receiverThread();
 };
 
-}}  //  namespace hyped::communications
-
-#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
+}}
