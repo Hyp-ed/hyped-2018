@@ -71,10 +71,11 @@ void BMS::request()
 {
   // send request CanFrame
   utils::io::CanFrame message;
-  message.id      = 300 | CAN_EFF_FLAG;
-  message.len     = 2;
-  message.data[0] = 0;
-  message.data[1] = 0;
+  message.id        = 300;
+  message.extended  = true;
+  message.len       = 2;
+  message.data[0]   = 0;
+  message.data[1]   = 0;
 
   can_.send(message);
   log_.DBG1("BMS", "request message sent\n");
@@ -93,7 +94,30 @@ void BMS::run()
 void BMS::processNewData(utils::io::CanFrame& message)
 {
   // TODO(anybody): add message processing
-  log_.INFO("BMS", "id: %d, received CAN message with id %d\n", id_, message.id);
+  log_.DBG1("BMS", "id: %d, received CAN message with id %d\n", id_, message.id);
+  log_.DBG2("BMS", "message data[0,1] %d %d\n", message.data[0], message.data[1]);
+  uint8_t offset = message.id - (BMS_ID_BASE + (BMS_ID_INCR * id_));
+  switch (offset) {
+    case 0x1:   // cells 1-4
+      for (int i = 0; i < 4; i++) {
+        data_.voltage[i] = (message.data[2*i] << 8) | message.data[2*i + 1];
+      }
+      break;
+    case 0x2:   // cells 5-7
+      for (int i = 0; i < 3; i++) {
+        data_.voltage[4 + i] = (message.data[2*i] << 8) | message.data[2*i + 1];
+      }
+      break;
+    case 0x3:   // ignore, no cells connected
+      break;
+    case 0x4:   // temperature
+      data_.temperature = message.data[0] - BMS_TEMP_OFFSET;
+      break;
+    default:
+      log_.ERR("BMS", "received invalid message, id %d, offset %d\n"
+        , message.id
+        , offset);
+  }
 }
 
 }}  // namespace hyped::sensors

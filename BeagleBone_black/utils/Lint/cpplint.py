@@ -2557,8 +2557,10 @@ def CheckBraces(filename, clean_lines, linenum, error):
 
 
   if (Search(r'\)\s{$', line) and
+      Search(r'\(', line) and
       not Search(r'\s((if|else|switch|for|while|try|catch|case)\s)|default:', line)):
     error(filename, linenum, 'whitespace/braces', 4, '{ that opens a function definition should be at a new line')
+
 
   if Match(r'\s*{\s*$', line):
     # We allow an open brace to start a line in the case where someone

@@ -39,7 +39,7 @@ inline void delay(int ms)
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-  CanFrame data = {14, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
+  CanFrame data = {14, false, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
 
   Can& can = Can::getInstance();
   can.send(data);

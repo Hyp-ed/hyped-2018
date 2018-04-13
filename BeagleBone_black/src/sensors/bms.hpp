@@ -49,8 +49,8 @@ using utils::concurrent::Thread;
  * Bases of IDs of CAN messagese are calculated as follows:
  * BASE = BMS_ID_BASE + (BMS_ID_INCR * id_)
  */
-
-#define BMS_CELL_NUM  7
+#define BMS_TEMP_OFFSET 40  // temperature data in C + 40
+#define BMS_CELL_NUM    7
 struct BMS_Data {
   uint16_t  voltage[BMS_CELL_NUM];
   uint8_t   temperature;

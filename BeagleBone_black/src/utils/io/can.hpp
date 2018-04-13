@@ -46,6 +46,7 @@ using sensors::BMS;
 
 struct CanFrame {
   uint32_t  id;
+  bool      extended;
   uint8_t   len;
   uint8_t   data[8];
 };
@@ -90,6 +91,14 @@ class Can : public concurrent::Thread {
   int receive(CanFrame* frame);
 
   /**
+   * @brief Process received message. Check whom does it belong to.
+   * Send message to owner for processing.
+   *
+   * @param frame received CAN message
+   */
+  void processNewData(CanFrame* frame);
+
+  /**
    * Blocking read and demultiplex messages based on configure id spaces
    */
   void run() override;
@@ -100,7 +109,7 @@ class Can : public concurrent::Thread {
  private:
   int   socket_;
   bool  running_;
-  std::map<uint8_t, BMS*> bms_map_;
+  std::map<uint32_t, BMS*> bms_map_;
 };
 
 }}}   // namespace hyped::utils::io

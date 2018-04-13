@@ -62,7 +62,6 @@ struct sockaddr_can {
 
 namespace hyped {
 namespace utils {
-// Logger log(true, 1);
 
 namespace io {
 
@@ -110,6 +109,7 @@ int Can::send(const CanFrame& frame)
   // if (frame.id  > 127)  return 0;
 
   can.can_id = frame.id;
+  can.can_id |= frame.extended ? CAN_EFF_FLAG : 0;  // add extended id flag
   can.can_dlc = frame.len;
   for (int i = 0; i < frame.len; i++) {
     can.data[i] = frame.data[i];
@@ -121,8 +121,8 @@ int Can::send(const CanFrame& frame)
   }
 
   log_.DBG1("CAN", "message with id %d sent, extended:%d\n"
-    , frame.id & ~CAN_EFF_FLAG
-    , frame.id & CAN_EFF_FLAG);
+    , frame.id
+    , frame.extended);
   return 1;
 }
 
@@ -134,6 +134,7 @@ void Can::run()
   log_.INFO("CAN", "starting continuous reading\n");
   while (running_) {
     receive(&data);
+    processNewData(&data);
   }
 
   log_.INFO("CAN", "stopped continuous reading\n");
@@ -150,13 +151,37 @@ int Can::receive(CanFrame* frame)
     return 0;
   }
 
-  frame->id  = raw_data.can_id;
+  frame->id       = raw_data.can_id & ~CAN_EFF_FLAG;
+  frame->extended = raw_data.can_id & CAN_EFF_FLAG;
   frame->len = raw_data.can_dlc;
   for (int i = 0; i < frame->len; i++) {
     frame->data[i] = raw_data.data[i];
   }
-
+  log_.DBG1("CAN", "received %u %u, extended %d\n"
+    , raw_data.can_id
+    , frame->id
+    , frame->extended);
   return 1;
+}
+
+void Can::processNewData(CanFrame* message)
+{
+  uint32_t id = message->id;
+  BMS* owner = 0;
+  for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
+    uint32_t bms_id = BMS_ID_BASE + (bms.first * BMS_ID_INCR);
+    if (bms_id <= id &&
+        id < bms_id + BMS_ID_SIZE) {
+      owner = bms.second;
+      break;
+    }
+  }
+
+  if (owner) {
+    owner->processNewData(*message);
+  } else {
+    log_.ERR("CAN", "did not find owner of received CAN message with id %d\n", id);
+  }
 }
 
 void Can::registerBMS(BMS* bms)
