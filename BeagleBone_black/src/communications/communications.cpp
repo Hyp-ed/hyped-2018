@@ -35,6 +35,7 @@ char buffer[256];
 const char* defaultIP = "localhost";
 char* ipAddress = const_cast<char*>(defaultIP);
 
+// TODO(Isabella): implement logger for Communications class
 Communications::Communications()
 { /* EMPTY */ }
 
