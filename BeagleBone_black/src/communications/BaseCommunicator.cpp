@@ -18,11 +18,10 @@
  *    limitations under the License.
  */
 
-#include "BaseCommunicator.hpp"
+#include "communications.hpp"
 
 #include <sstream>
 #include <string>
-// #include <thread>
 
 using namespace std;
 
@@ -36,15 +35,15 @@ char buffer[256];
 const char* defaultIP = "localhost";
 char* ipAddress = const_cast<char*>(defaultIP);
 
-BaseCommunicator::BaseCommunicator()
+Communications::Communications()
 { /* EMPTY */ }
 
-BaseCommunicator::BaseCommunicator(char* ip)
+Communications::Communications(char* ip)
 {
   ipAddress = ip;
 }
 
-bool BaseCommunicator::setUp()
+bool Communications::setUp()
 {
   portNo = 5695;
   sockfd = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -76,14 +75,14 @@ bool BaseCommunicator::setUp()
   return true;
 }
 
-BaseCommunicator::~BaseCommunicator()
+Communications::~Communications()
 {
   // DESTRUCTOR: upon deletion of pointer to object (instance of this class)
   // socket to base will be closed.
   close(sockfd);
 }
 
-int BaseCommunicator::sendDistance(float distance)
+int Communications::sendDistance(float distance)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << distance;
@@ -91,7 +90,7 @@ int BaseCommunicator::sendDistance(float distance)
   return sendData("CMD01" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendVelocity(float speed)
+int Communications::sendVelocity(float speed)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << speed;
@@ -99,7 +98,7 @@ int BaseCommunicator::sendVelocity(float speed)
   return sendData("CMD02" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendAcceleration(float accel)
+int Communications::sendAcceleration(float accel)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << accel;
@@ -107,7 +106,7 @@ int BaseCommunicator::sendAcceleration(float accel)
   return sendData("CMD03" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendStripeCount(int stripes)
+int Communications::sendStripeCount(int stripes)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << stripes;
@@ -115,7 +114,7 @@ int BaseCommunicator::sendStripeCount(int stripes)
   return sendData("CMD04" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendRpmFl(float rpmfl)
+int Communications::sendRpmFl(float rpmfl)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << rpmfl;
@@ -123,7 +122,7 @@ int BaseCommunicator::sendRpmFl(float rpmfl)
   return sendData("CMD05" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendRpmFr(float rpmfr)
+int Communications::sendRpmFr(float rpmfr)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << rpmfr;
@@ -131,7 +130,7 @@ int BaseCommunicator::sendRpmFr(float rpmfr)
   return sendData("CMD06" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendRpmBl(float rpmbl)
+int Communications::sendRpmBl(float rpmbl)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << rpmbl;
@@ -139,7 +138,7 @@ int BaseCommunicator::sendRpmBl(float rpmbl)
   return sendData("CMD07" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendRpmBr(float rpmbr)
+int Communications::sendRpmBr(float rpmbr)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << rpmbr;
@@ -147,7 +146,7 @@ int BaseCommunicator::sendRpmBr(float rpmbr)
   return sendData("CMD08" + ss.str() + "\n");
 }
 
-int BaseCommunicator::sendData(string message)
+int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
   bzero(buffer, 256);
@@ -162,7 +161,7 @@ int BaseCommunicator::sendData(string message)
 
 /*
 // Thread must be declared and joined within calling code.
-void BaseCommunicator :: receiverThread()
+void Communications :: receiverThread()
 {
   while (true)
   {

@@ -34,7 +34,7 @@ using namespace std;
 namespace hyped {
 namespace communications {
 
-class BaseCommunicator
+class Communications
 {
  private:
   int sockfd, portNo, n;
@@ -44,10 +44,10 @@ class BaseCommunicator
   // char* ipAddress;
 
  public:
-  BaseCommunicator();
-  explicit BaseCommunicator(char* ip);
+  Communications();
+  explicit Communications(char* ip);
   bool setUp();
-  ~BaseCommunicator();
+  ~Communications();
   int sendDistance(float distance);   // CMD01
   int sendVelocity(float speed);      // CMD02
   int sendAcceleration(float accel);  // CMD03
