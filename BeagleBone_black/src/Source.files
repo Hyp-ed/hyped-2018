@@ -13,6 +13,8 @@ SRCS := \
   navigation/navigation.cpp \
   sensors/main.cpp \
   sensors/bms.cpp \
+  communications/main.cpp \
+  communications/communications.cpp \
   utils/concurrent/thread.cpp \
   utils/concurrent/lock.cpp \
   utils/concurrent/condition_variable.cpp \
