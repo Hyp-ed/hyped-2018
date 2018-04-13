@@ -18,6 +18,8 @@
  *    limitations under the License.
  */
 
+#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
+#define BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,4 +62,6 @@ class Communications
   // void receiverThread();
 };
 
-}}
+}}  //  namespace hyped::communications
+
+#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
