@@ -58,7 +58,7 @@ struct sockaddr_can {
 #define DATA_SEPERATOR '.'
 #endif   // CAN
 
-// #include "utils/logger.hpp"
+#include "sensors/bms.hpp"
 
 namespace hyped {
 namespace utils {
@@ -85,14 +85,14 @@ Can::Can()
     return;
   }
 
-  reading = 1;
+  running_ = true;
   start();    // spawn reading thread
   yield();
 }
 
 Can::~Can()
 {
-  reading = 0;
+  running_ = false;
   // join();
   close(socket_);
 }
@@ -100,7 +100,7 @@ Can::~Can()
 int Can::send(const CanFrame& frame)
 {
   can_frame can;
-  log_.INFO("CAN", "trying to send something\n");
+  log_.DBG2("CAN", "trying to send something\n");
   // checks, id <= ID_MAX, len <= LEN_MAX
   if (frame.len > 8) {
     log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
@@ -115,13 +115,12 @@ int Can::send(const CanFrame& frame)
     can.data[i] = frame.data[i];
   }
 
-  log_.INFO("CAN", "actually sending\n");
   if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
     perror("write");
     return 0;
   }
 
-  log_.INFO("CAN", "message with id %d sent, extended:%d\n"
+  log_.DBG1("CAN", "message with id %d sent, extended:%d\n"
     , frame.id & ~CAN_EFF_FLAG
     , frame.id & CAN_EFF_FLAG);
   return 1;
@@ -132,17 +131,12 @@ void Can::run()
   /* these settings are static and can be held out of the hot path */
   CanFrame data;
 
-  printf("starting continuous reading\n");
-  while (reading) {
+  log_.INFO("CAN", "starting continuous reading\n");
+  while (running_) {
     receive(&data);
-    printf("id%d len %d\ndata: ", data.id, data.len);
-    for (int i = 0; i < data.len; i++) {
-      printf("%.2x ", data.data[i]);
-    }
-    printf("\n");
   }
 
-  printf("reading was stopped\n");
+  log_.INFO("CAN", "stopped continuous reading\n");
 }
 
 int Can::receive(CanFrame* frame)
@@ -163,6 +157,14 @@ int Can::receive(CanFrame* frame)
   }
 
   return 1;
+}
+
+void Can::registerBMS(BMS* bms)
+{
+  ASSERT(bms);
+  uint8_t id = bms->id_;
+
+  bms_map_[id] = bms;
 }
 
 }}}   // namespace hyped::utils::io

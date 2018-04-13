@@ -35,12 +35,14 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
     , data_(data::Data::getInstance())
+    , bms_(0, log)
 { /* EMPTY */ }
 
 void Main::run()
 {
   Sensors sensors = {{}, {}, {0, 0}};
   Data& data = Data::getInstance();
+  // BMS_Data* bms_data = bms_.getDataPointer();
   uint32_t time = 0;
   while (1) {
     // keep updating data_ based on values read from sensors

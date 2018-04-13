@@ -20,7 +20,6 @@
 
 #include "sensors/bms.hpp"
 
-
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 #include "utils/io/can.hpp"
@@ -28,30 +27,73 @@
 namespace hyped {
 namespace sensors {
 
-bool BMS::exists_ = false;
+std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
 
 
-BMS::BMS(): BMS(utils::System::getLogger())
+BMS::BMS(uint8_t id): BMS(id, utils::System::getLogger())
 { /* Do nothing, delegate to the other constructor */ }
 
-BMS::BMS(Logger& log)
-    : log_(log)
+BMS::BMS(uint8_t id, Logger& log)
+    : Thread(log)
     , can_(Can::getInstance())
+    , id_(id)
 {
-  if (exists_) {
-    log_.ERR("BMS", "BMS already exists, double module instantiation\n");
-    return;
+  // verify the module has not been instantiated
+  for (uint8_t i : existing_ids_) {
+    if (id == i) {
+      log_.ERR("BMS", "BMS %d already exists, double module instantiation\n", id);
+      return;
+    }
   }
+  existing_ids_.push_back(id);
 
-  exists_ = true;
+  // reset module's data
+  for (auto& v : data_.voltage) {
+    v = 0;
+  }
+  data_.temperature = 0;
 
-  // send initialisation CanFrame
+  // tell CAN about yourself
+  can_.registerBMS(this);
+
+  // spawn helper thread
+  running_ = true;
+  start();
+}
+
+BMS::~BMS()
+{
+  running_ = false;
+  join();
+}
+
+void BMS::request()
+{
+  // send request CanFrame
   utils::io::CanFrame message;
-  message.id = 300 | CAN_EFF_FLAG;
-  message.len = 4;
-  can_.send(message);
+  message.id      = 300 | CAN_EFF_FLAG;
+  message.len     = 2;
+  message.data[0] = 0;
+  message.data[1] = 0;
 
-  log_.INFO("BMS", "init message sent\n");
+  can_.send(message);
+  log_.DBG1("BMS", "request message sent\n");
+}
+
+void BMS::run()
+{
+  log_.INFO("BMS", "starting BMS module %d\n", id_);
+  while (running_) {
+    request();
+    sleep(BMS_PERIOD);
+  }
+  log_.INFO("BMS", "stopped BMS module %d\n", id_);
+}
+
+void BMS::processNewData(utils::io::CanFrame& message)
+{
+  // TODO(anybody): add message processing
+  log_.INFO("BMS", "id: %d, received CAN message with id %d\n", id_, message.id);
 }
 
 }}  // namespace hyped::sensors

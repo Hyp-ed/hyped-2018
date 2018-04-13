@@ -24,17 +24,22 @@
 #include <stdint.h>
 
 #include <queue>
+#include <map>
 
 #include "utils/concurrent/thread.hpp"
 #include "utils/concurrent/lock.hpp"
-
+#include "utils/utils.hpp"
 
 namespace hyped {
+
+// Forward declaration
+namespace sensors { class BMS; }
+
 namespace utils {
-
-class Logger;
-
 namespace io {
+
+// Import
+using sensors::BMS;
 
 // use for extended frames
 #define CAN_EFF_FLAG 0x80000000U
@@ -61,8 +66,9 @@ class Can : public concurrent::Thread {
     return can;
   }
 
-  explicit Can(Can const&)    = delete;
-  void operator=(Can const&)  = delete;
+  NO_COPY_ASSIGN(Can);
+  // explicit Can(Can const&)    = delete;
+  // void operator=(Can const&)  = delete;
 
   /**
    * @param  frame data to be sent
@@ -71,23 +77,18 @@ class Can : public concurrent::Thread {
   int send(const CanFrame& frame);
 
   /**
+   * @brief BMS is registered for receiving CAN messages
+   * @param bms pointer to BMS object to be registered
+   */
+  void registerBMS(BMS* bms);
+
+ private:
+  /**
    * @param  frame output pointer to data to be filled
    * @return 1     iff data received successfully
    */
   int receive(CanFrame* frame);
 
-  /**
-   * Perform thread-safe reading from BMS can buffer
-   */
-  CanFrame GetBMS();
-
-  /**
-   * Perform thread-safe reading from Proxi can buffer
-   */
-  CanFrame GetProxi();
-
-
- private:
   /**
    * Blocking read and demultiplex messages based on configure id spaces
    */
@@ -97,15 +98,9 @@ class Can : public concurrent::Thread {
   ~Can();
 
  private:
-  int socket_;
-  int reading;
-
-  concurrent::Lock bms_lock_;
-  concurrent::Lock proxi_lock_;
-  std::queue<CanFrame> bms_queue_;
-  std::queue<CanFrame> proxi_queue_;
-
-  // Logger& log_;
+  int   socket_;
+  bool  running_;
+  std::map<uint8_t, BMS*> bms_map_;
 };
 
 }}}   // namespace hyped::utils::io
