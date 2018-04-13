@@ -18,6 +18,9 @@
  *    limitations under the License.
  */
 
+#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+#define BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "communications/communications.hpp"
@@ -41,4 +44,6 @@ class Main : public Thread {
         data::Motors mtr;
 };
 
-}}
+}}  //  namespace hyped::communications
+
+#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
