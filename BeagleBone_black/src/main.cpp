@@ -51,22 +51,26 @@ int main(int argc, char* argv[])
   Logger log_nav(sys.verbose_nav, sys.debug_nav);
   Logger log_sensor(sys.verbose_sensor, sys.debug_sensor);
   Logger log_state(sys.verbose_state, sys.debug_state);
+  Logger log_cmn(sys.verbose_cmn, sys.debug_cmn);
 
-  log_system.INFO("MAIN", "Starting BBB with %d modules\n", 4);
+  log_system.INFO("MAIN", "Starting BBB with %d modules\n", 5);
   log_system.DBG("MAIN", "DBG\n");
   log_system.DBG1("MAIN", "DBG1\n");
   log_system.DBG2("MAIN", "DBG2\n");
   log_system.DBG3("MAIN", "DBG3\n");
+  log_system.DBG3("MAIN", "DBG4\n");
 
   Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
   Thread* motor     = new hyped::motor_control::Main(1, log_motor);
   Thread* sensors   = new hyped::sensors::Main(2, log_sensor);
   Thread* navigation = new hyped::navigation::Main(3, log_nav);
+  Thread* communications = new hyped::communications::Main(4, log_cmn);
 
   state_machine->start();
   motor->start();
   sensors->start();
   navigation->start();
+  communications->start();
   log_system.INFO("MAIN", "all module threads started\n");
   Thread::sleep(1000);
   log_system.INFO("MAIN", "After 1 sec sleep\n");
