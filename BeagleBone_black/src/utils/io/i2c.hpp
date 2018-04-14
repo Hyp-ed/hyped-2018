@@ -1,10 +1,9 @@
-
 /*
- * Authors : M. Kristien, E. van Woerkom
+ * Authors: E. van Woerkom
  * Organisation: HYPED
- * Date: 3. February 2018
+ * Date: 28. March 2018
  * Description:
- * This is an example of how a main function using I2C would look like
+ * Head for main i2c thread
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,24 +17,28 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
- */
+*/
 
-#include "utils/io/i2c.hpp"
+#ifndef BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
+#define BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 
-using hyped::utils::io::I2C;
-using hyped::utils::Logger;
-using hyped::utils::concurrent::Thread;
+#include "utils/concurrent/thread.hpp"
+#include "utils/logger.hpp"
 
-Logger log(true,1);
+namespace hyped {
+namespace utils {
 
-int main(){
-	Thread* t1 = new I2C();
+using concurrent::Thread;
 
-	t1->start();
-	t1->join();
+namespace io {
 
-	delete t1;
+class I2C : public concurrent::Thread {
+ public:
+  I2C();
+  ~I2C();
+  void run() override;
+};
 
-	log.INFO("DEMO", "I2C Thread joined and executed\n");
-	return 0;
-}
+}}}   // namespace hyped::utils::io
+
+#endif  // BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_

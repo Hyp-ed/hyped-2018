@@ -47,6 +47,8 @@ utils/math/quaternion.hpp
 utils/math/vector.hpp
 utils/io/can.hpp
 utils/io/can.cpp
+utils/io/i2c.hpp
+utils/io/i2c.cpp
 utils/logger.hpp
 utils/logger.cpp
 utils/system.hpp
