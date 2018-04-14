@@ -37,6 +37,11 @@ template <typename T>
 class Kalman {
  public:
   /**
+   * @brief    Construct a new Kalman object without any configurations
+   */
+  Kalman();
+
+  /**
    * @brief    Construct a new Kalman object
    *
    * @param[in] input_value    Initial value of the reading
@@ -44,6 +49,15 @@ class Kalman {
    * @param[in] process_noise    How noisy the measurement can be (predetermined)
    */
   Kalman(T input_value, T measurement_noise, T process_noise);
+
+  /**
+   * @brief    Configures the variables in the Kalman object
+   *
+   * @param[in] input_value    Initial value of the reading
+   * @param[in] measurement_noise    Standard deviation of the measurement
+   * @param[in] process_noise    How noisy the measurement can be (predetermined)
+   */
+  void configure(T input_value, T measurement_noise, T process_noise);
 
   /**
    * @brief    Filters a value based on it's previous values
@@ -62,21 +76,38 @@ class Kalman {
   T getFiltered();
 
  private:
-  T process_noise_;
-  T measurement_noise_covariance_;
-  T estimation_error_covariance_;
   T kalman_gain_;
+  T process_noise_;
   T filtered_value_;
+  T estimation_error_covariance_;
+  T measurement_noise_covariance_;
 };
 
 template <typename T>
-Kalman<T>::Kalman(T input_value, T measurement_noise, T process_noise)
-    : process_noise_(process_noise),
-      measurement_noise_covariance_(measurement_noise),
+Kalman<T>::Kalman()
+    : kalman_gain_(),
+      process_noise_(),
+      filtered_value_(),
       estimation_error_covariance_(),
-      kalman_gain_(),
-      filtered_value_(input_value)
+      measurement_noise_covariance_()
 {}
+
+template <typename T>
+Kalman<T>::Kalman(T input_value, T measurement_noise, T process_noise)
+    : kalman_gain_(),
+      process_noise_(process_noise),
+      filtered_value_(input_value),
+      estimation_error_covariance_(),
+      measurement_noise_covariance_(measurement_noise)
+{}
+
+template <typename T>
+void Kalman<T>::configure(T input_value, T measurement_noise, T process_noise)
+{
+  filtered_value_               = input_value;
+  process_noise_                = process_noise;
+  measurement_noise_covariance_ = measurement_noise;
+}
 
 template <typename T>
 T Kalman<T>::filter(const T& input)
