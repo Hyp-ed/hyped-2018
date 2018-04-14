@@ -22,17 +22,21 @@ namespace hyped {
 namespace navigation {
 
 Navigation::Navigation()
-    : acceleration_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
-      gyro_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
-      proximity_filter_(0, 0, 0)
-{}
+  : proximity_filter_(0, 0, 0)
+{
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      acceleration_filter_[i].configure(Vector<int16_t, 3>(),
+                                        Vector<int16_t, 3>(), Vector<int16_t, 3>());
+      gyro_filter_[i].configure(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>());
+    }
+}
 
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
 {
   // TODO(Brano,Adi): Gyro update. (Data format should change first.)
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imus[i].acc.value = acceleration_filter_.filter(imus[i].acc.value);
-    imus[i].gyr.value = gyro_filter_.filter(imus[i].gyr.value);
+    imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
+    imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
   }
 
   Vector<int16_t, 3> avg(0);
