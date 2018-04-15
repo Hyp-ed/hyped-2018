@@ -43,7 +43,6 @@ class Communications
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
-  // char* ipAddress;
 
  public:
   Communications();
