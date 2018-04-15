@@ -58,8 +58,7 @@ bool Communications::setUp()
 
   if (server == NULL) {
     fprintf(stderr, "ERROR: INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
-    // exit(0);
-    return true;
+    return false;
   }
 
   bzero(&serv_addr, sizeof(serv_addr));
@@ -78,8 +77,6 @@ bool Communications::setUp()
 
 Communications::~Communications()
 {
-  // DESTRUCTOR: upon deletion of pointer to object (instance of this class)
-  // socket to base will be closed.
   close(sockfd);
 }
 
