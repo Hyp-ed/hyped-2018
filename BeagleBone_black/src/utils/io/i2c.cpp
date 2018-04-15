@@ -1,10 +1,8 @@
-
 /*
- * Authors : M. Kristien, E. van Woerkom
+ * Authors: E. van Woerkom
  * Organisation: HYPED
- * Date: 3. February 2018
+ * Date: 28. March 2018
  * Description:
- * This is an example of how a main function using I2C would look like
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,23 +17,32 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
 #include "utils/io/i2c.hpp"
 
-using hyped::utils::io::I2C;
-using hyped::utils::Logger;
-using hyped::utils::concurrent::Thread;
+#define I2C_ID 17
 
-Logger log(true,1);
+namespace hyped {
+namespace utils {
+namespace io {
 
-int main(){
-	Thread* t1 = new I2C();
+Logger i2clog(true, 1);
 
-	t1->start();
-	t1->join();
-
-	delete t1;
-
-	log.INFO("DEMO", "I2C Thread joined and executed\n");
-	return 0;
+I2C::I2C() : concurrent::Thread(I2C_ID, i2clog)
+{
+  i2clog.INFO("I2C", "Constructing\n");
+  return;
 }
+
+I2C::~I2C()
+{
+  i2clog.INFO("I2C", "Destructing\n");
+  return;
+}
+
+void I2C::run()
+{
+  i2clog.INFO("I2C", "Running\n");
+  return;
+}
+
+}}}   // namespace hyped::utils::io
