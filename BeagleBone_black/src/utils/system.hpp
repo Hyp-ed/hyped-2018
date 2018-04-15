@@ -41,12 +41,14 @@ class System {
   bool verbose_nav;
   bool verbose_sensor;
   bool verbose_state;
+  bool verbose_cmn;
 
   int8_t debug;
   int8_t debug_motor;
   int8_t debug_nav;
   int8_t debug_sensor;
   int8_t debug_state;
+  int8_t debug_cmn;
 
  private:
   Logger* log_;

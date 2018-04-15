@@ -32,6 +32,10 @@ sensors/main.hpp
 sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
+communications/main.hpp
+communications/main.cpp
+communications/communications.hpp
+communications/communications.hpp
 utils/concurrent/thread.hpp
 utils/concurrent/thread.cpp
 utils/concurrent/lock.hpp

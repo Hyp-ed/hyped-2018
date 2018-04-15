@@ -49,11 +49,13 @@ System::System(int argc, char* argv[])
     , verbose_nav(DEFAULT_VERBOSE)
     , verbose_sensor(DEFAULT_VERBOSE)
     , verbose_state(DEFAULT_VERBOSE)
+    , verbose_cmn(DEFAULT_VERBOSE)
     , debug(DEFAULT_DEBUG)
     , debug_motor(DEFAULT_DEBUG)
     , debug_nav(DEFAULT_DEBUG)
     , debug_sensor(DEFAULT_DEBUG)
     , debug_state(DEFAULT_DEBUG)
+    , debug_cmn(DEFAULT_DEBUG)
 {
   int c;
   int option_index = 0;
@@ -64,11 +66,13 @@ System::System(int argc, char* argv[])
       {"verbose_nav", no_argument, 0, 'A'},
       {"verbose_sensor", no_argument, 0, 'b'},
       {"verbose_state", no_argument, 0, 'B'},
+      {"verbose_cmn", no_argument, 0, 'c'},
       {"debug", optional_argument, 0, 'd'},
       {"debug_motor", optional_argument, 0, 'e'},
       {"debug_nav", optional_argument, 0, 'E'},
       {"debug_sensor", optional_argument, 0, 'f'},
       {"debug_state", optional_argument, 0, 'F'},
+      {"debug_cmn", optional_argument, 0, 'g'},
       {"help", no_argument, 0, 'h'},
       {0, 0, 0, 0}
     };
@@ -105,6 +109,8 @@ System::System(int argc, char* argv[])
       case 'B':   // verbose_state
         verbose_state = true;
         break;
+      case 'c':   // verbose_cmn
+        verbose_cmn = true;
       case 'e':   // debug_motor
         if (optarg) debug_motor = atoi(optarg);
         else        debug_motor = 0;
@@ -121,6 +127,10 @@ System::System(int argc, char* argv[])
         if (optarg) debug_state = atoi(optarg);
         else        debug_state = 0;
         break;
+      case 'g':   // debug_cmn
+        if (optarg) debug_cmn = atoi(optarg);
+        else        debug_cmn = 0;
+        break;
       default:
         printUsage();
         exit(1);
@@ -132,11 +142,13 @@ System::System(int argc, char* argv[])
     if (verbose_nav   == DEFAULT_VERBOSE) verbose_nav = verbose;
     if (verbose_sensor == DEFAULT_VERBOSE) verbose_sensor = verbose;
     if (verbose_state == DEFAULT_VERBOSE) verbose_state = verbose;
+    if (verbose_cmn == DEFAULT_VERBOSE) verbose_cmn = verbose;
 
     if (debug_motor == DEFAULT_DEBUG) debug_motor = debug;
     if (debug_nav   == DEFAULT_DEBUG) debug_nav = debug;
     if (debug_sensor == DEFAULT_DEBUG) debug_sensor = debug;
     if (debug_state == DEFAULT_DEBUG) debug_state = debug;
+    if (debug_cmn == DEFAULT_DEBUG) debug_cmn = debug;
   }
 
   log_ = new Logger(verbose, debug);
@@ -167,4 +179,3 @@ Logger& System::getLogger()
 }
 
 }}  // namespace hyped::utils
-
