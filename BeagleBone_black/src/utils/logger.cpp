@@ -57,10 +57,10 @@ void logHead(FILE* file, const char* title, const char* module)
 
   static const bool print_micro = true;
   if (print_micro) {
-    auto now_time = -high_resolution_clock::now().time_since_epoch();
+    auto now_time = high_resolution_clock::now().time_since_epoch();
     duration<int, std::milli> time_span = duration_cast<std::chrono::milliseconds>
           (now_time);
-    fprintf(file, ".%03d ", time_span.count() % 1000);
+    fprintf(file, ".%03d ", static_cast<uint16_t>(time_span.count()) % 1000);
   } else {
     fprintf(file, " ");
   }
