@@ -25,6 +25,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/bms.hpp"
 
 namespace hyped {
 
@@ -40,8 +41,9 @@ class Main: public Thread {
 
  private:
   data::Data& data_;
+  BMS bms_;
 };
 
 }}  // namespace hyped::sensors
 
-#endif  /* BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_ */
+#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_

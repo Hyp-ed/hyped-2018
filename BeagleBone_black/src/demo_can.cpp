@@ -24,6 +24,7 @@
 #include <chrono>
 
 #include "utils/io/can.hpp"
+#include "utils/system.hpp"
 
 using hyped::utils::io::Can;
 using hyped::utils::io::CanFrame;
@@ -35,9 +36,10 @@ inline void delay(int ms)
   std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-  CanFrame data = {14, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
+  hyped::utils::System::parseArgs(argc, argv);
+  CanFrame data = {14, false, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
 
   Can& can = Can::getInstance();
   can.send(data);
