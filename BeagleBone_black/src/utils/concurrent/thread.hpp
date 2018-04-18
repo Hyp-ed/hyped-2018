@@ -68,6 +68,13 @@ class Thread {
   Logger& log_;
 };
 
+class BusyThread : public Thread {
+ public:
+  ~BusyThread();
+  void run() override;
+  bool running_ = true;
+};
+
 }}}   // namespace hyped::utils::concurrent
 
 #endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_THREAD_HPP_
