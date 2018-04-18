@@ -29,9 +29,10 @@
 #ifndef WIN
 #include <linux/spi/spidev.h>
 #else
+#define _IOW(type, nr, size) 10   // random demo functionality
 #define SPI_IOC_MAGIC             'k'
 #define SPI_IOC_WR_MODE           _IOW(SPI_IOC_MAGIC, 1, uint8_t)
-#define SPI_IOC_WR_MAX_SPEED_HZ   _IOR(SPI_IOC_MAGIC, 4, uint32_t)
+#define SPI_IOC_WR_MAX_SPEED_HZ   _IOW(SPI_IOC_MAGIC, 4, uint32_t)
 #define SPI_IOC_WR_LSB_FIRST      _IOW(SPI_IOC_MAGIC, 2, uint8_t)
 #define SPI_IOC_WR_BITS_PER_WORD  _IOW(SPI_IOC_MAGIC, 3, uint8_t)
 struct spi_ioc_transfer {
