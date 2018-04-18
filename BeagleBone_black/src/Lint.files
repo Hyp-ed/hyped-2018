@@ -47,6 +47,8 @@ utils/math/quaternion.hpp
 utils/math/vector.hpp
 utils/io/can.hpp
 utils/io/can.cpp
+utils/io/spi.hpp
+utils/io/spi.cpp
 utils/logger.hpp
 utils/logger.cpp
 utils/system.hpp

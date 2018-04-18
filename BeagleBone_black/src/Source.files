@@ -18,6 +18,7 @@ SRCS := \
   utils/concurrent/condition_variable.cpp \
   utils/concurrent/barrier.cpp \
   utils/io/can.cpp \
+  utils/io/spi.cpp \
   utils/logger.cpp \
   utils/system.cpp \
 
