@@ -16,7 +16,6 @@
  *    limitations under the License.
  */
 
-// TODO(uday): Ifndef guard
 #ifndef BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
 #define BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
 
