@@ -21,6 +21,7 @@ SRCS := \
   utils/io/spi.cpp \
   utils/logger.cpp \
   utils/system.cpp \
+  utils/timer.cpp  \
 
 
 

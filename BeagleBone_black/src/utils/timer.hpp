@@ -18,39 +18,55 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_UTILS_IO_SPI_HPP_
-#define BEAGLEBONE_BLACK_UTILS_IO_SPI_HPP_
+#ifndef BEAGLEBONE_BLACK_UTILS_TIMER_HPP_
+#define BEAGLEBONE_BLACK_UTILS_TIMER_HPP_
 
+#include <stdint.h>
 
-#include "utils/logger.hpp"
 #include "utils/utils.hpp"
 
 namespace hyped {
 namespace utils {
-namespace io {
 
-
-class SPI {
+class Timer {
  public:
-  static SPI& getInstance();
+  static uint64_t getTimeMillis();
+  static uint64_t getTimeMicros();
 
-  void transfer(uint8_t* tx, uint8_t* rx, uint16_t len);
+  Timer();
 
-  void read(uint8_t addr, uint8_t* rx, uint16_t len);
-
-  void write(uint8_t addr, uint8_t* tx, uint16_t len);
+  void start();
+  void stop();
+  void reset();
+  double getSeconds() const;
+  double getMillis() const;
+  uint64_t getMicros() const;
 
  private:
-  explicit SPI(Logger& log);
-  ~SPI();
-  int spi_fd_;
-  Logger& log_;
-
-  NO_COPY_ASSIGN(SPI);
+  uint64_t elapsed_;
+  uint64_t start_;
+  uint64_t stop_;
+  NO_COPY_ASSIGN(Timer);
 };
 
+class ScopedTimer {
+ public:
+  explicit ScopedTimer(Timer* t)
+      : timer_(t)
+  {
+    timer_->start();
+  }
 
-}}}   // namespace hyped::utils::io
+  ~ScopedTimer()
+  {
+    timer_->stop();
+  }
 
+ private:
+  Timer* timer_;
+  NO_COPY_ASSIGN(ScopedTimer);
+};
 
-#endif  // BEAGLEBONE_BLACK_UTILS_IO_SPI_HPP_
+}}  // namespace hyped::utils
+
+#endif  // BEAGLEBONE_BLACK_UTILS_TIMER_HPP_

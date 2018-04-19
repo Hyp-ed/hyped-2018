@@ -3,6 +3,7 @@
 #include "utils/io/spi.hpp"
 #include "utils/system.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "utils/timer.hpp"
 
 #include <ctime>
 #include <ratio>
@@ -10,11 +11,12 @@
 
 using hyped::utils::io::SPI;
 using hyped::utils::System;
+using hyped::utils::Timer;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::concurrent::BusyThread;
 using namespace std::chrono;
 
-#define BUSY_NUM  5
+#define BUSY_NUM  0
 #define COUNTS    100000
 #define BYTES     7
 
@@ -33,19 +35,21 @@ int main (int argc, char* argv[]) {
 
   uint8_t tx[BYTES] = {};
   uint8_t rx[BYTES] = {};
-  log.INFO("DEMO","starting\n");
-  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  // reset clock to time 0
+  spi.write(0, tx, BYTES);
+  Timer t;
+  t.start();
   uint32_t count = 0;
   while (count < COUNTS) {
-    spi.transfer(tx, rx, BYTES);
+    // spi.transfer(tx, rx, BYTES);
+    spi.read(0, rx+1, BYTES-1);
     count++;
     // log.INFO("DEMO", "received sec, min, hours: %d:%d:%d\n"
-    //   , rx[1], rx[2], rx[3]);
+    // , rx[1], rx[2], rx[3]);
     // Thread::sleep(1000);
   }
-  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  duration<double, std::milli> time_span = t2 - t1;
-  uint32_t millis = time_span.count();
+  t.stop();
+  uint32_t millis = t.getMillis();
   log.INFO("DEMO", "transfers %d, bytes each %d, busy threads %d\n"
     , COUNTS, BYTES, BUSY_NUM);
   log.INFO("DEMO", "tranfered %d bytes in %d ms\n"

@@ -60,14 +60,15 @@ struct spi_ioc_transfer {
 #include "utils/concurrent/thread.hpp"
 
 // configure SPI
-#define SPI_CLK   20000000   // 4MHz
+#define SPI_CLK   4000000   // 4MHz
 #define SPI_MODE  3
 #define SPI_BITS  8         // each word is 1B
 #define SPI_MSBFIRST 0
 #define SPI_LSBFIRST 1
 
 // DO NOT TOUCH
-#define SPI_MAX_SIZE 4096
+#define SPI_MAX_SIZE    4096
+#define SPI_WRITE_MASK  0x80
 
 namespace hyped {
 namespace utils {
@@ -122,6 +123,44 @@ void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(1), &message) < 0) {
     log_.ERR("SPI", "could not submit TRANSFER message\n");
+  }
+}
+
+void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
+{
+  spi_ioc_transfer message[2] = {};
+
+  // send address
+  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);   // NOLINT
+  message[0].rx_buf = 0;
+  message[0].len    = 1;
+
+  // receive data
+  message[1].tx_buf = 0;
+  message[1].rx_buf = reinterpret_cast<uint64_t>(rx);    // NOLINT
+  message[1].len    = len;
+
+  if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
+    log_.ERR("SPI", "could not submit 2 TRANSFER messages\n");
+  }
+}
+
+void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
+{
+  spi_ioc_transfer message[2] = {};
+  addr |= SPI_WRITE_MASK;
+  // send address
+  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);   // NOLINT
+  message[0].rx_buf = 0;
+  message[0].len    = 1;
+
+  // receive data
+  message[1].tx_buf = reinterpret_cast<uint64_t>(tx);    // NOLINT
+  message[1].rx_buf = 0;
+  message[1].len    = len;
+
+  if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
+    log_.ERR("SPI", "could not submit 2 TRANSFER messages\n");
   }
 }
 
