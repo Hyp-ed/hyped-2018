@@ -22,13 +22,15 @@ namespace hyped {
 namespace navigation {
 
 Navigation::Navigation()
-  : proximity_filter_(0, 0, 0)
 {
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
       acceleration_filter_[i].configure(Vector<int16_t, 3>(),
                                         Vector<int16_t, 3>(), Vector<int16_t, 3>());
       gyro_filter_[i].configure(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>());
     }
+
+  for (auto filter: proximity_filter_)
+    filter.configure(0, 0, 0);
 }
 
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)

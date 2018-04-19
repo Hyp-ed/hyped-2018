@@ -118,7 +118,7 @@ class Navigation {
   // TODO(ALL): Decide the type
   std::array<Kalman<Vector<int16_t, 3>>, data::Sensors::kNumImus> acceleration_filter_;
   std::array<Kalman<Vector<int16_t, 3>>, data::Sensors::kNumImus> gyro_filter_;
-  Kalman<uint8_t> proximity_filter_;
+  std::array<Kalman<uint8_t>, data::Sensors::kNumProximities> proximity_filter_;
 
   Integrator<Vector<int16_t, 3>> acceleration_integrator_;
   Integrator<Vector<int16_t, 3>> velocity_integrator_;
