@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:

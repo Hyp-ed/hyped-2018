@@ -1,5 +1,5 @@
 /*
- * Authors: Isabella Chan
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 15/04/18
  * Description:
