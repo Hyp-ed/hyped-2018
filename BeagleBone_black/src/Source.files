@@ -21,6 +21,7 @@ SRCS := \
   utils/io/can.cpp \
   utils/logger.cpp \
   utils/system.cpp \
+  utils/io/i2c.h \
 
 
 
