@@ -84,7 +84,7 @@ int Communications::sendDistance(float distance)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << distance;
-
+  
   return sendData("CMD01" + ss.str() + "\n");
 }
 
@@ -150,32 +150,29 @@ int Communications::sendData(string message)
   bzero(buffer, 256);
   const char *data = message.c_str();
   n = write(sockfd, data, strlen(data));
-  if (n < 0) printf("ERROR: CANNOT WRITE TO SOCKET.");
+  if (n < 0) printf("ERROR: CANNOT WRITE TO SOCKET.\n");
   n = read(sockfd, buffer, 255);
-  if (n < 0) printf("ERROR: CANNOT READ FROM SOCKET.");
+  if (n < 0) printf("ERROR: CANNOT READ FROM SOCKET.\n");
 
   return atoi(buffer);
 }
 
-/*
-// Thread must be declared and joined within calling code.
-void Communications :: receiverThread()
+void Communications::receiveMessage()
 {
-  while (true)
-  {
-    n = read(sockfd, buffer, 255);
-    int command = atoi(buffer);
+  n = read(sockfd, buffer, 255);
+  int command = atoi(buffer);
 
-    switch (command)
-    {
-      case 1:
-        printf("ECHO message (1) received.\n");
-        // Do nothing, 1 represents echo message
-        break;
-      case 2:
-        printf("READY TO LAUNCH\n");
-    }
+  switch (command)
+  {
+    case 1:
+      printf("Received 1");
+      break;
+    case 2:
+      printf("Received 2");
+      break;
+    case 3:
+      printf("Received 3");
+      break;
+  }
 }
-}
-*/
 }}  // namespace hyped::communcations

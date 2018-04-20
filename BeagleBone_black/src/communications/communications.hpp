@@ -58,7 +58,7 @@ class Communications
   int sendRpmBl(float rpmBl);         // CMD07
   int sendRpmBr(float rpmBr);         // CMD08
   int sendData(string message);
-  // void receiverThread();
+  void receiveMessage();
 };
 
 }}  //  namespace hyped::communications
