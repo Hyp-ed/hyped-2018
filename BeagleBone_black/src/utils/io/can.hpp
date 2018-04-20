@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#include <queue>
+// #include <queue>
 #include <map>
 
 #include "utils/concurrent/thread.hpp"

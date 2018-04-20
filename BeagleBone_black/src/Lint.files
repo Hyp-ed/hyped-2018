@@ -51,6 +51,8 @@ utils/math/quaternion.hpp
 utils/math/vector.hpp
 utils/io/can.hpp
 utils/io/can.cpp
+utils/io/spi.hpp
+utils/io/spi.cpp
 utils/io/i2c.hpp
 utils/io/i2c.cpp
 utils/logger.hpp
@@ -58,3 +60,5 @@ utils/logger.cpp
 utils/system.hpp
 utils/system.cpp
 utils/utils.hpp
+utils/timer.hpp
+utils/timer.cpp
