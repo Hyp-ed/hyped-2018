@@ -24,6 +24,8 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "communications/communications.hpp"
+#include "communications/sender.hpp"
+#include "communications/receiver.hpp"
 
 namespace hyped {
 
