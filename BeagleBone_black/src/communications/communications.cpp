@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
@@ -84,7 +84,7 @@ int Communications::sendDistance(float distance)
 {
   stringstream ss(stringstream::in | stringstream::out);
   ss << distance;
-  
+
   return sendData("CMD01" + ss.str() + "\n");
 }
 
