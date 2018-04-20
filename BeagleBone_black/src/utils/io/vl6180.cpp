@@ -19,6 +19,8 @@
  */
 #include "utils/io/vl6180.hpp"
 #include <cstdint>
+#include <thread>
+#include <chrono>
 
 // Register addresses
 #define IDENTIFICATION__MODEL_ID              0x0000
@@ -85,7 +87,14 @@
  namespace utils {
  namespace io {
 
-   
+Vl6180::Vl6180(uint8_t id, Logger& log)
+    :Thread(id, log)
+{
+
+  log_.INFO("VL6180", "Creating a sensor with id: " + id + "\n");
+}
+
+
 
 /**
   *  @brief  { turns on sensor }
@@ -93,17 +102,24 @@
 
 void Vl6180::turn_on()
 {
+
+
   // return if already on
   if(this->on)
+    log_.DBG("VL6180", "Sensor is already on\n");
     return;
 
-  // Wait incase the sensor has just been turned off TODO need to check wait time
+  // Wait incase the sensor has just been turned off
+  // TODO need to check wait time
 
-  // Turn on pins
+  // Turn on pins TODO pin write to turn sensor on
 
   // Wait for 1.5ms (Data sheet says 1.4ms)
+  //TODO check if there is a way to do this through HYP-ED threading
+  std::this_thread::sleep_for(std::chrono::microseconds(ms*1400));
 
   this->on = true;
+  log_.DBG("VL6180", "Sensor is on\n");
 
 }
 
@@ -115,6 +131,7 @@ void Vl6180::turn_off()
 {
   // TODO do pin write to turn off vl6180
   this->on = false;
+  log_.DBG("VL6180", "Sensor is now off\n");
 }
 
 /**
@@ -124,6 +141,16 @@ void Vl6180::turn_off()
 bool Vl6180::is_on()
 {
   return this->on;
+}
+
+/**
+  *  @brief  { returns the distance from the nearest object
+              the sensor is facing }
+  */
+
+int Vl6180::get_distance()
+{
+
 }
 
 
