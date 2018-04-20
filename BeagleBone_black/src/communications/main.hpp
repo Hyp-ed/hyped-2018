@@ -42,6 +42,7 @@ class Main : public Thread {
         data::Data& data = data::Data::getInstance();
         data::Navigation nav;
         data::Motors mtr;
+        data::Sensors sensors_;
 };
 
 }}  //  namespace hyped::communications
