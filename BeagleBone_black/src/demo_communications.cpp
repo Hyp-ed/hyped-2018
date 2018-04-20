@@ -1,10 +1,8 @@
-
 /*
- * Authors : M. Kristien, E. van Woerkom
+ * Author: Isabella Chan
  * Organisation: HYPED
- * Date: 3. February 2018
- * Description:
- * This is an example of how a main function using I2C would look like
+ * Date: 30/03/18
+ * Description: Demo for communications module
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,22 +18,18 @@
  *    limitations under the License.
  */
 
-#include "utils/io/i2c.hpp"
+#include "communications/main.hpp"
 
-using hyped::utils::io::I2C;
-using hyped::utils::Logger;
-using hyped::utils::concurrent::Thread;
+using hyped::communications::Main;
 
-Logger log(true,1);
+int main()
+{
+  hyped::communications::Communications baseCommunicator; // to add parameter: baseCommunicator((char *) "127.0.0.1");
+  baseCommunicator.setUp();
+  baseCommunicator.sendVelocity(6546);
+  baseCommunicator.sendDistance(564);
+  baseCommunicator.sendAcceleration(584);
+  baseCommunicator.sendStripeCount(964);
 
-int main(){
-	Thread* t1 = new I2C();
-
-	t1->start();
-	t1->join();
-
-	delete t1;
-
-	log.INFO("DEMO", "I2C Thread joined and executed\n");
-	return 0;
+  return 0;
 }
