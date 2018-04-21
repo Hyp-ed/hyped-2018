@@ -57,7 +57,6 @@ void Main::run()
     nav_data.distance = nav_.get_displacement();
     nav_data.velocity = nav_.get_velocity();
     nav_data.acceleration = nav_.get_accleration();
-    // TODO(Brano): Add stripe count or remove it from data::Navigation.
     data_.setNavigationData(nav_data);
 
     readings.swap(last_readings);
