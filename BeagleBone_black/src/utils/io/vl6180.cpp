@@ -81,17 +81,16 @@
 #define INTERLEAVED_MODE__ENABLE              0x02A3
 
 
-
-
- namespace hyped {
- namespace utils {
- namespace io {
+namespace hyped {
+namespace utils {
+namespace io {
 
 Vl6180::Vl6180(uint8_t id, Logger& log)
-    :Thread(id, log)
+  :Thread(id, log)
 {
 
   log_.INFO("VL6180", "Creating a sensor with id: " + id + "\n");
+
 }
 
 
@@ -100,8 +99,9 @@ Vl6180::Vl6180(uint8_t id, Logger& log)
   *  @brief  { turns on sensor }
   */
 
-void Vl6180::turn_on()
+void Vl6180:: turnOn()
 {
+
   // return if already on
   if(this->on)
     log_.DBG("VL6180", "Sensor is already on\n");
@@ -113,50 +113,49 @@ void Vl6180::turn_on()
   // Turn on pins TODO pin write to turn sensor on
 
   // Wait for 1.5ms (Data sheet says 1.4ms)
-  this->wait_device_booted();
-
+  this->waitDeviceBooted();
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
-  this->write_byte(0x0207, 0x01);
-  this->write_byte(0x0208, 0x01);
-  this->write_byte(0x0096, 0x00);
-  this->write_byte(0x0097, 0xfd);
-  this->write_byte(0x00e3, 0x00);
-  this->write_byte(0x00e4, 0x04);
-  this->write_byte(0x00e5, 0x02);
-  this->write_byte(0x00e6, 0x01);
-  this->write_byte(0x00e7, 0x03);
-  this->write_byte(0x00f5, 0x02);
-  this->write_byte(0x00d9, 0x05);
-  this->write_byte(0x00db, 0xce);
-  this->write_byte(0x00dc, 0x03);
-  this->write_byte(0x00dd, 0xf8);
-  this->write_byte(0x009f, 0x00);
-  this->write_byte(0x00a3, 0x3c);
-  this->write_byte(0x00b7, 0x00);
-  this->write_byte(0x00bb, 0x3c);
-  this->write_byte(0x00b2, 0x09);
-  this->write_byte(0x00ca, 0x09);
-  this->write_byte(0x0198, 0x01);
-  this->write_byte(0x01b0, 0x17);
-  this->write_byte(0x01ad, 0x00);
-  this->write_byte(0x00ff, 0x05);
-  this->write_byte(0x0100, 0x05);
-  this->write_byte(0x0199, 0x05);
-  this->write_byte(0x01a6, 0x1b);
-  this->write_byte(0x01ac, 0x3e);
-  this->write_byte(0x01a7, 0x1f);
-  this->write_byte(0x0030, 0x00);
+  this->writeByte(0x0207, 0x01);
+  this->writeByte(0x0208, 0x01);
+  this->writeByte(0x0096, 0x00);
+  this->writeByte(0x0097, 0xfd);
+  this->writeByte(0x00e3, 0x00);
+  this->writeByte(0x00e4, 0x04);
+  this->writeByte(0x00e5, 0x02);
+  this->writeByte(0x00e6, 0x01);
+  this->writeByte(0x00e7, 0x03);
+  this->writeByte(0x00f5, 0x02);
+  this->writeByte(0x00d9, 0x05);
+  this->writeByte(0x00db, 0xce);
+  this->writeByte(0x00dc, 0x03);
+  this->writeByte(0x00dd, 0xf8);
+  this->writeByte(0x009f, 0x00);
+  this->writeByte(0x00a3, 0x3c);
+  this->writeByte(0x00b7, 0x00);
+  this->writeByte(0x00bb, 0x3c);
+  this->writeByte(0x00b2, 0x09);
+  this->writeByte(0x00ca, 0x09);
+  this->writeByte(0x0198, 0x01);
+  this->writeByte(0x01b0, 0x17);
+  this->writeByte(0x01ad, 0x00);
+  this->writeByte(0x00ff, 0x05);
+  this->writeByte(0x0100, 0x05);
+  this->writeByte(0x0199, 0x05);
+  this->writeByte(0x01a6, 0x1b);
+  this->writeByte(0x01ac, 0x3e);
+  this->writeByte(0x01a7, 0x1f);
+  this->writeByte(0x0030, 0x00);
 
   // Enables polling for New Sample ready when measurement completes
-  this->write_byte( 0x0011, 0x10);
+  this->writeByte( 0x0011, 0x10);
 
   // Set the averaging sample period (datasheet recommends 48)
-  this->write_byte(0x010a, 0x30);
+  this->writeByte(0x010a, 0x30);
 
   // Perform a single recalibration
-  this->write_byte(SYSRANGE__VHV_RECALIBRATE, 0x01);
+  this->writeByte(SYSRANGE__VHV_RECALIBRATE, 0x01);
 
   this->on = true;
   log_.DBG("VL6180", "Sensor is on\n");
@@ -168,20 +167,13 @@ void Vl6180::turn_on()
   *  @brief  { turns off sensor }
   */
 
-void Vl6180::turn_off()
+void Vl6180::turnOff()
 {
+
   // TODO do pin write to turn off vl6180
   this->on = false;
   log_.DBG("VL6180", "Sensor is now off\n");
-}
 
-/**
-  *  @brief  { checks the sensors state }
-  */
-
-bool Vl6180::is_on()
-{
-  return this->on;
 }
 
 /**
@@ -189,16 +181,13 @@ bool Vl6180::is_on()
   *            the sensor is facing }
   */
 
-int Vl6180::get_distance()
-{
-
-}
+int Vl6180::getDistance(){/*EMPTY*/}
 
 /**
   *  @brief  { loops until the device is out of reset }
   */
 
-bool Vl6180::wait_device_booted()
+bool Vl6180::waitDeviceBooted()
 {
   // Will hold the return value of the register SYSTEM__FRESH_OUT_OF_RESET
   uint8_t fresh_out_of_reset;
@@ -206,11 +195,12 @@ bool Vl6180::wait_device_booted()
 
   do
   {
-    status = this->read_byte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
+    status = this->readByte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
   }
   while(fresh_out_of_reset != 1 && status == 0);
 
   return true;
+
 }
 
 /**
@@ -218,16 +208,17 @@ bool Vl6180::wait_device_booted()
   *            is issued }
   */
 
-bool range_wait_device_ready()
+bool rangeWaitDeviceReady()
 {
   return false
+
 }
 
 /**
   *  @brief  { reads a single byte register and returns its status }
   */
 
-int read_byte(uint16_t reg_add, uint8_t *data)
+int readByte(uint16_t reg_add, uint8_t *data)
 {
   char buffer[2];
   buffer[0] = reg_add >> 8;
@@ -237,13 +228,14 @@ int read_byte(uint16_t reg_add, uint8_t *data)
   // TODO write read I2C
 
   return 1;
+
 }
 
 /**
   *  @brief  { writes a byte to the register and returns its status}
   */
 
-int write_byte(uint16_t reg_add, char data)
+int writeByte(uint16_t reg_add, char data)
 {
   char buffer[3];
   buffer[0]=reg_add>>8;
@@ -253,6 +245,7 @@ int write_byte(uint16_t reg_add, char data)
   // TODO write I2C
 
   return 1;
+
 }
 
- }}}   // namespace hyped::utils::io
+}}}   // namespace hyped::utils::io

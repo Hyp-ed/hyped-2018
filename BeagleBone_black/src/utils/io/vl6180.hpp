@@ -38,10 +38,9 @@ namespace io{
 
 class Vl6180: public Thread {
   public:
-    void turn_on();
-    void turn_off();
-    bool is_on();
-    int get_distance();
+    void turnOn();
+    void turnOff();
+    int getDistance();
 
 
 
@@ -49,10 +48,10 @@ class Vl6180: public Thread {
     Vl6180(uint8_t id, Logger& log);
     data::Data& data = data::Data::getInstance();
     data::StateMachine state;
-    bool wait_device_booted();
-    bool range_wait_device_ready();
-    int read_byte(uint16_t reg_add);
-    int write_byte(uint16_t reg_add, char data);
+    bool waitDeviceBooted();
+    bool rangeWaitDeviceReady();
+    int readByte(uint16_t reg_add, uint8_t *data);
+    int writeByte(uint16_t reg_add, char data);
     bool on;
 };
 
