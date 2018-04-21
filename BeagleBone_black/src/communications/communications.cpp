@@ -28,19 +28,17 @@ using namespace std;
 namespace hyped {
 namespace communications {
 
-int sockfd, portNo, n;
-struct sockaddr_in serv_addr;
-struct hostent *server;
-char buffer[256];
 const char* defaultIP = "localhost";
 char* ipAddress = const_cast<char*>(defaultIP);
 
-// TODO(Isabella): implement logger for Communications class
-Communications::Communications()
-{ /* EMPTY */ }
-
-Communications::Communications(char* ip)
+Communications::Communications(Logger& log): log_(log)
 {
+  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised\n");
+}
+
+Communications::Communications(Logger& log, char* ip): log_(log)
+{
+  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised\n");
   ipAddress = ip;
 }
 
@@ -50,14 +48,14 @@ bool Communications::setUp()
   sockfd = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
   if (sockfd < 0) {
-    printf("ERROR: CANNOT OPEN SOCKET.\n");
+    log_.ERR("COMMUNICATIONS", "CANNOT OPEN SOCKET.\n");
     return false;
   }
 
   server = gethostbyname(ipAddress);
 
   if (server == NULL) {
-    fprintf(stderr, "ERROR: INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
+    log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
     return false;
   }
 
@@ -67,7 +65,7 @@ bool Communications::setUp()
   serv_addr.sin_port = htons(portNo);
 
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-    printf("ERROR: CANNOT ESTABLISH CONNECTION TO BASE-STATION.\n");
+    log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.\n");
     return false;
   }
 
@@ -150,9 +148,9 @@ int Communications::sendData(string message)
   bzero(buffer, 256);
   const char *data = message.c_str();
   n = write(sockfd, data, strlen(data));
-  if (n < 0) printf("ERROR: CANNOT WRITE TO SOCKET.\n");
+  if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
   n = read(sockfd, buffer, 255);
-  if (n < 0) printf("ERROR: CANNOT READ FROM SOCKET.\n");
+  if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
 
   return atoi(buffer);
 }
@@ -162,16 +160,15 @@ void Communications::receiveMessage()
   n = read(sockfd, buffer, 255);
   int command = atoi(buffer);
 
-  switch (command)
-  {
+  switch (command) {
     case 1:
-      printf("Received 1");
+      log_.INFO("COMMUNICATIONS", "Received 1");
       break;
     case 2:
-      printf("Received 2");
+      log_.INFO("COMMUNICATIONS", "Received 2");
       break;
     case 3:
-      printf("Received 3");
+      log_.INFO("COMMUNICATIONS", "Received 3");
       break;
   }
 }
