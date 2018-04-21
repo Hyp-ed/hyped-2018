@@ -17,6 +17,7 @@
  */
 
 #include "navigation.hpp"
+#include <math.h>
 
 namespace hyped {
 namespace navigation {
@@ -24,7 +25,7 @@ namespace navigation {
 Navigation::Navigation()
     : accleration_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
       gyro_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
-      proximity_filter_(0, 0, 0)
+      proximity_filter_(0, 0, 0), prev_angular_velocity_(0, 0, 0)
 {}
 
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
@@ -80,6 +81,12 @@ int16_t Navigation::get_displacement()
 void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
 {
   // TODO(Adi): Calculate Point 1 of the FDP.
+  //Vector<int16_t, 3> angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)*(angular_velocity.value + prev_angular_velocity_.value)/2;
+  auto theta = prev_angular_velocity_.value.norm();
+  auto angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)*theta/2;
+  Quaternion<int16_t> q(cos(angle_of_rotation), (prev_angular_velocity_.value/theta)*sin(angle_of_rotation));
+  orientation_*=q;
+  prev_angular_velocity_ = angular_velocity;
 }
 
 void Navigation::acclerometer_update(DataPoint<Vector<int16_t, 3>> acceleration)
