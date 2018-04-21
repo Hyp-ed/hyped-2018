@@ -113,13 +113,56 @@ void Vl6180::turn_on()
   // Turn on pins TODO pin write to turn sensor on
 
   // Wait for 1.5ms (Data sheet says 1.4ms)
-  //TODO check if there is a way to do this through HYP-ED threading
-  std::this_thread::sleep_for(std::chrono::microseconds(ms*1400));
+  this->wait_device_booted();
+
+
+  // Initialise the sensor / register tuning
+  // Taken from ST Microelectronics API
+  this->write_byte(0x0207, 0x01);
+  this->write_byte(0x0208, 0x01);
+  this->write_byte(0x0096, 0x00);
+  this->write_byte(0x0097, 0xfd);
+  this->write_byte(0x00e3, 0x00);
+  this->write_byte(0x00e4, 0x04);
+  this->write_byte(0x00e5, 0x02);
+  this->write_byte(0x00e6, 0x01);
+  this->write_byte(0x00e7, 0x03);
+  this->write_byte(0x00f5, 0x02);
+  this->write_byte(0x00d9, 0x05);
+  this->write_byte(0x00db, 0xce);
+  this->write_byte(0x00dc, 0x03);
+  this->write_byte(0x00dd, 0xf8);
+  this->write_byte(0x009f, 0x00);
+  this->write_byte(0x00a3, 0x3c);
+  this->write_byte(0x00b7, 0x00);
+  this->write_byte(0x00bb, 0x3c);
+  this->write_byte(0x00b2, 0x09);
+  this->write_byte(0x00ca, 0x09);
+  this->write_byte(0x0198, 0x01);
+  this->write_byte(0x01b0, 0x17);
+  this->write_byte(0x01ad, 0x00);
+  this->write_byte(0x00ff, 0x05);
+  this->write_byte(0x0100, 0x05);
+  this->write_byte(0x0199, 0x05);
+  this->write_byte(0x01a6, 0x1b);
+  this->write_byte(0x01ac, 0x3e);
+  this->write_byte(0x01a7, 0x1f);
+  this->write_byte(0x0030, 0x00);
+
+  // Enables polling for New Sample ready when measurement completes
+  this->write_byte( 0x0011, 0x10);
+
+  // Set the averaging sample period (datasheet recommends 48)
+  this->write_byte(0x010a, 0x30);
+
+  // Perform a single recalibration
+  this->write_byte(SYSRANGE__VHV_RECALIBRATE, 0x01);
 
   this->on = true;
   log_.DBG("VL6180", "Sensor is on\n");
 
 }
+
 
 /**
   *  @brief  { turns off sensor }
@@ -143,7 +186,7 @@ bool Vl6180::is_on()
 
 /**
   *  @brief  { returns the distance from the nearest object
-              the sensor is facing }
+  *            the sensor is facing }
   */
 
 int Vl6180::get_distance()
@@ -152,20 +195,39 @@ int Vl6180::get_distance()
 }
 
 /**
+  *  @brief  { loops until the device is out of reset }
+  */
+
+bool Vl6180::wait_device_booted()
+{
+  // Will hold the return value of the register SYSTEM__FRESH_OUT_OF_RESET
+  uint8_t fresh_out_of_reset;
+  int status;
+
+  do
+  {
+    status = this->read_byte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
+  }
+  while(fresh_out_of_reset != 1 && status == 0);
+
+  return true;
+}
+
+/**
   *  @brief  { wait for sensor to be ready before a new ranging command
-              is issued }
+  *            is issued }
   */
 
 bool range_wait_device_ready()
 {
-  return False
+  return false
 }
 
 /**
-  *  @brief  { reads a single byte register }
+  *  @brief  { reads a single byte register and returns its status }
   */
 
-uint8_t read_byte(uint16_t reg_add)
+int read_byte(uint16_t reg_add, uint8_t *data)
 {
   char buffer[2];
   buffer[0] = reg_add >> 8;
@@ -174,23 +236,23 @@ uint8_t read_byte(uint16_t reg_add)
 
   // TODO write read I2C
 
-  return (uint8_t) 5;
+  return 1;
 }
 
 /**
-  *  @brief  { writes a byte to the register }
+  *  @brief  { writes a byte to the register and returns its status}
   */
 
-void write_byte(uint16_t reg_add, char data)
+int write_byte(uint16_t reg_add, char data)
 {
   char buffer[3];
   buffer[0]=reg_add>>8;
   buffer[1]=reg_add&0xFF;
   buffer[2]=data;
 
-  //TODO write I2C
+  // TODO write I2C
+
+  return 1;
 }
-
-
 
  }}}   // namespace hyped::utils::io
