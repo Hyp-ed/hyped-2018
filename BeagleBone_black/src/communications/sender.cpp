@@ -35,14 +35,17 @@ SenderThread::SenderThread(Communications* baseCommunicator)
 void SenderThread::run()
 {
   while (1) {
-    baseCommunicator->sendDistance(123);
-    baseCommunicator->sendVelocity(456);
-    baseCommunicator->sendAcceleration(789);
-    baseCommunicator->sendStripeCount(101112);
-    baseCommunicator->sendRpmFl(131415);
-    baseCommunicator->sendRpmFr(161718);
-    baseCommunicator->sendRpmBl(192021);
-    baseCommunicator->sendRpmBr(222324);
+    nav = data.getNavigationData();
+    mtr = data.getMotorData();
+    baseCommunicator->sendDistance(nav.distance);
+    baseCommunicator->sendVelocity(nav.velocity);
+    baseCommunicator->sendAcceleration(nav.acceleration);
+    baseCommunicator->sendStripeCount(nav.stripe_count);
+    baseCommunicator->sendRpmFl(mtr.rpm_FL);
+    baseCommunicator->sendRpmFr(mtr.rpm_FR);
+    baseCommunicator->sendRpmBl(mtr.rpm_BL);
+    baseCommunicator->sendRpmBr(mtr.rpm_BR);
   }
 }
+
 }}

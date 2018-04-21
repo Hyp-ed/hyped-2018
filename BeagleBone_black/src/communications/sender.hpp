@@ -22,6 +22,7 @@
 #define BEAGLEBONE_BLACK_COMMUNICATIONS_SENDER_HPP_
 
 #include "utils/concurrent/thread.hpp"
+#include "data/data.hpp"
 #include "communications/communications.hpp"
 
 namespace hyped {
@@ -32,12 +33,15 @@ using utils::Logger;
 namespace communications {
 
 class SenderThread : public Thread {
-  public:
-    explicit SenderThread(Communications* baseCommunicator);
-    void run() override;
+ public:
+  explicit SenderThread(Communications* baseCommunicator);
+  void run() override;
 
-  private:
-    Communications* baseCommunicator;
+ private:
+  Communications* baseCommunicator;
+  data::Data& data = data::Data::getInstance();
+  data::Navigation nav;
+  data::Motors mtr;
 };
 
 }}  //  namespace hyped::communications
