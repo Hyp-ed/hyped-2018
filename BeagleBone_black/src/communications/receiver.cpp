@@ -31,7 +31,8 @@ ReceiverThread::ReceiverThread(Communications* baseCommunicator)
 void ReceiverThread::run()
 {
   while (1) {
-      baseCommunicator->receiveMessage();
+    baseCommunicator->receiveMessage();
   }
 }
+
 }}

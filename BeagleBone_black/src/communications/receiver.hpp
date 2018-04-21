@@ -33,12 +33,12 @@ using utils::Logger;
 namespace communications {
 
 class ReceiverThread : public Thread {
-  public:
-    explicit ReceiverThread(Communications* baseCommunicator);
-    void run() override;
+ public:
+  explicit ReceiverThread(Communications* baseCommunicator);
+  void run() override;
 
-  private:
-    Communications* baseCommunicator;
+ private:
+  Communications* baseCommunicator;
 };
 
 }}  //   namespace hyped::communications

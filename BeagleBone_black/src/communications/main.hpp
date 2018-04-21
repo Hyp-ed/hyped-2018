@@ -35,15 +35,15 @@ using utils::Logger;
 namespace communications {
 
 class Main : public Thread {
-    public:
-        explicit Main(uint8_t id, Logger& log);
-        void run() override;
+ public:
+  explicit Main(uint8_t id, Logger& log);
+  void run() override;
 
-    private:
-        Communications* baseCommunicator;
-        data::Data& data = data::Data::getInstance();
-        data::Navigation nav;
-        data::Motors mtr;
+ private:
+  Communications* baseCommunicator;
+  // data::Data& data = data::Data::getInstance();
+  // data::Navigation nav;
+  // data::Motors mtr;
 };
 
 }}  //  namespace hyped::communications
