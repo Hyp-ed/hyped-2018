@@ -83,7 +83,9 @@ void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
   // TODO(Adi): Calculate Point 1 of the FDP.
   auto theta = prev_angular_velocity_.value.norm();
   auto angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)*theta/2;
-  Quaternion<int16_t> rotation_quaternion(cos(angle_of_rotation), (prev_angular_velocity_.value/theta)*sin(angle_of_rotation));
+  auto vector_part = (prev_angular_velocity_.value/theta)*sin(angle_of_rotation);
+  auto scalar_part = cos(angle_of_rotation);
+  Quaternion<int16_t> rotation_quaternion(scalar_part, vector_part);
   orientation_ *= rotation_quaternion;
   prev_angular_velocity_ = angular_velocity;
 }
