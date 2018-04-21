@@ -25,7 +25,7 @@ namespace navigation {
 Navigation::Navigation()
     : accleration_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
       gyro_filter_(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>()),
-      proximity_filter_(0, 0, 0), prev_angular_velocity_(0 ,Vector<int16_t, 3>())
+      proximity_filter_(0, 0, 0), prev_angular_velocity_(0 , Vector<int16_t, 3>())
 {}
 
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
