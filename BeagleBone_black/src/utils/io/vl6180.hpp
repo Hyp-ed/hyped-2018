@@ -44,9 +44,14 @@ class Vl6180: public Thread {
     int get_distance();
 
 
+
   private:
+    Vl6180(uint8_t id, Logger& log);
     data::Data& data = data::Data::getInstance();
     data::StateMachine state;
+    bool range_wait_device_ready();
+    uint8_t read_byte(uint16_t reg_add);
+    void write_byte(uint16_t reg_add, char data);
     bool on;
 };
 

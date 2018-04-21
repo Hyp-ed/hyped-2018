@@ -102,8 +102,6 @@ Vl6180::Vl6180(uint8_t id, Logger& log)
 
 void Vl6180::turn_on()
 {
-
-
   // return if already on
   if(this->on)
     log_.DBG("VL6180", "Sensor is already on\n");
@@ -151,6 +149,46 @@ bool Vl6180::is_on()
 int Vl6180::get_distance()
 {
 
+}
+
+/**
+  *  @brief  { wait for sensor to be ready before a new ranging command
+              is issued }
+  */
+
+bool range_wait_device_ready()
+{
+  return False
+}
+
+/**
+  *  @brief  { reads a single byte register }
+  */
+
+uint8_t read_byte(uint16_t reg_add)
+{
+  char buffer[2];
+  buffer[0] = reg_add >> 8;
+  buffer[1] = reg_add & 0xFF;
+  char recv_buffer[1];
+
+  // TODO write read I2C
+
+  return (uint8_t) 5;
+}
+
+/**
+  *  @brief  { writes a byte to the register }
+  */
+
+void write_byte(uint16_t reg_add, char data)
+{
+  char buffer[3];
+  buffer[0]=reg_add>>8;
+  buffer[1]=reg_add&0xFF;
+  buffer[2]=data;
+
+  //TODO write I2C
 }
 
 
