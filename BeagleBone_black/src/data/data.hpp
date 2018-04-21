@@ -62,7 +62,6 @@ struct Navigation {
   uint32_t distance;
   uint32_t velocity;
   int32_t acceleration;
-  uint32_t stripe_count;
 };
 
 // -----------------------------------------------------------------------------

@@ -114,10 +114,12 @@ class Navigation {
   Vector<int16_t, 3> displacement_;
   Quaternion<int16_t> orientation_;
   int stripe_count_;
-  Kalman<Vector<int16_t, 3>> accleration_filter_;
-  Kalman<Vector<int16_t, 3>> gyro_filter_;
+
   // TODO(ALL): Decide the type
-  Kalman<uint8_t> proximity_filter_;
+  std::array<Kalman<Vector<int16_t, 3>>, data::Sensors::kNumImus> acceleration_filter_;
+  std::array<Kalman<Vector<int16_t, 3>>, data::Sensors::kNumImus> gyro_filter_;
+  std::array<Kalman<uint8_t>, data::Sensors::kNumProximities> proximity_filter_;
+
   Integrator<Vector<int16_t, 3>> acceleration_integrator_;
   Integrator<Vector<int16_t, 3>> velocity_integrator_;
 };
