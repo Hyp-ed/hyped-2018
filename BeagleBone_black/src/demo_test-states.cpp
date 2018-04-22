@@ -23,10 +23,9 @@
 #include <iostream>
 
 #include "state_machine/hyped-machine.hpp"
-#include "motor_control/test-states.hpp"
+#include "demo_test-states.hpp"
 
 namespace hyped {
-namespace motor_control {
 
 TestStates::TestStates(uint8_t id, Logger& log)
     : Thread(id, log)
@@ -48,10 +47,6 @@ void TestStates::run()
   delay(500);
   hypedMachine->handleEvent(state_machine::Event::kVelocityZeroReached);
   delay(1000);
-  // hypedMachine->handleEvent(kEndOfRunReached);
-  // delay(10000);
-  // hypedMachine->handleEvent(kOnExit);
-  // hypedMachine->handleEvent(kEndOfTubeReached);
 }
 
 /**
@@ -62,4 +57,4 @@ void TestStates::delay(int i)
   while (i--);
 }
 
-}}
+}
