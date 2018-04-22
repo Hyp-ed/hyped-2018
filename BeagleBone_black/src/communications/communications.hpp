@@ -33,6 +33,7 @@
 #include <iostream>
 #include "data/data.hpp"
 #include "utils/logger.hpp"
+#include "data/data.hpp"
 using namespace std;
 
 namespace hyped {

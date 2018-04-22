@@ -20,14 +20,18 @@
 
 #include "communications.hpp"
 
+
 #include <sstream>
 #include <string>
 
 namespace hyped {
+
+using data::Communications;
+
 namespace communications {
 
-std::string defaultIP = "localhost";
-std::string ipAddress = defaultIP;
+const char* defaultIP = "localhost";
+char* ipAddress = const_cast<char*>(defaultIP); //cannot use string because getbyhostname() requires char*
 
 Communications::Communications(Logger& log): log_(log)
 {
@@ -50,16 +54,16 @@ bool Communications::setUp()
     return false;
   }
 
-  server = gethostbyname(ipAddress.c_str());
+  server = gethostbyname(ipAddress);
 
   if (server == NULL) {
     log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
     return false;
   }
 
-  bzero(&serv_addr, sizeof(serv_addr));
+  memset(&serv_addr, '\0', sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;   // server byte order
-  bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
+  memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portNo_);
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
@@ -143,9 +147,9 @@ int Communications::sendRpmBr(float rpmbr)
 int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
-  bzero(buffer, 256);
-  // std::string data_ = message;
-  n_ = write(sockfd_, buffer, strlen(buffer));
+  memset(buffer, '\0', 256);
+  const char *data_ = message.c_str(); //cannot use string because strlen requies char*
+  n_ = write(sockfd_, data_, strlen(data_));
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
   n_ = read(sockfd_, buffer, 255);
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
@@ -161,7 +165,7 @@ void Communications::receiveMessage()
   switch (command) {
     case 1:
       log_.INFO("COMMUNICATIONS", "Received 1");
-      break;
+        break;
     case 2:
       log_.INFO("COMMUNICATIONS", "Received 2");
       break;
