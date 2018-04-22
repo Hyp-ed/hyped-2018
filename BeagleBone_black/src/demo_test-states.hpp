@@ -19,8 +19,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
+#ifndef BEAGLEBONE_BLACK_DEMO_TEST_STATES_HPP_
+#define BEAGLEBONE_BLACK_DEMO_TEST_STATES_HPP_
 
 #include <cstdint>
 #include "utils/concurrent/thread.hpp"
@@ -32,8 +32,6 @@ using utils::concurrent::Thread;
 using utils::Logger;
 using hyped::state_machine::HypedMachine;
 
-namespace motor_control {
-
 class TestStates: public Thread {
  public:
   explicit TestStates(uint8_t id, Logger& log);
@@ -44,6 +42,6 @@ class TestStates: public Thread {
   HypedMachine* hypedMachine;
 };
 
-}}  // namespace hyped::motor_control
+}  // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
+#endif  // BEAGLEBONE_BLACK_DEMO_TEST_STATES_HPP_
