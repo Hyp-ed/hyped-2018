@@ -216,7 +216,7 @@ void Main::stopMotors()
   *
   *  @return  { Acceleration RPM calculation of type int }
   */
-int32_t Main::calculateAccelerationRPM(uint32_t velocity)
+int32_t Main::calculateAccelerationRPM(auto velocity)
 {
   return rpm += 100;  // dummy calculation to increase rpm
 }
@@ -229,7 +229,7 @@ int32_t Main::calculateAccelerationRPM(uint32_t velocity)
   *
   *  @return  { Deceleration RPM calculation of type int }
   */
-int32_t Main::calculateDecelerationRPM(uint32_t velocity)
+int32_t Main::calculateDecelerationRPM(auto velocity)
 {
   return rpm -= 100;  // dummy calculation to decrease rpm
 }
