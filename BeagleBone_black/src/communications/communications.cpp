@@ -23,13 +23,11 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
-
 namespace hyped {
 namespace communications {
 
-string defaultIP_ = "localhost";
-string ipAddress_ = defaultIP_;
+std::string defaultIP = "localhost";
+std::string ipAddress = defaultIP;
 
 Communications::Communications(Logger& log): log_(log)
 {
@@ -52,7 +50,7 @@ bool Communications::setUp()
     return false;
   }
 
-  server_ = gethostbyname(ipAddress_);
+  server_ = gethostbyname(ipAddress);
 
   if (server == NULL) {
     log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
@@ -78,66 +76,66 @@ Communications::~Communications()
   close(sockfd_);
 }
 
-int Communications::sendDistance(float distance_)
+int Communications::sendDistance(float distance)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << distance_;
+  ss << distance;
 
   return sendData("CMD01" + ss.str() + "\n");
 }
 
-int Communications::sendVelocity(float speed_)
+int Communications::sendVelocity(float speed)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << speed_;
+  ss << speed;
 
   return sendData("CMD02" + ss.str() + "\n");
 }
 
-int Communications::sendAcceleration(float accel_)
+int Communications::sendAcceleration(float accel)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << accel_;
+  ss << accel;
 
   return sendData("CMD03" + ss.str() + "\n");
 }
 
-int Communications::sendStripeCount(int stripes_)
+int Communications::sendStripeCount(int stripes)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << stripes_;
+  ss << stripes;
 
   return sendData("CMD04" + ss.str() + "\n");
 }
 
-int Communications::sendRpmFl(float rpmfl_)
+int Communications::sendRpmFl(float rpmfl)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmfl_;
+  ss << rpmfl;
 
   return sendData("CMD05" + ss.str() + "\n");
 }
 
-int Communications::sendRpmFr(float rpmfr_)
+int Communications::sendRpmFr(float rpmfr)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmfr_;
+  ss << rpmfr;
 
   return sendData("CMD06" + ss.str() + "\n");
 }
 
-int Communications::sendRpmBl(float rpmbl_)
+int Communications::sendRpmBl(float rpmbl)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmbl_;
+  ss << rpmbl;
 
   return sendData("CMD07" + ss.str() + "\n");
 }
 
-int Communications::sendRpmBr(float rpmbr_)
+int Communications::sendRpmBr(float rpmbr)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmbr_;
+  ss << rpmbr;
 
   return sendData("CMD08" + ss.str() + "\n");
 }
@@ -146,19 +144,11 @@ int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
   bzero(buffer, 256);
-<<<<<<< HEAD
-  const char *data = message.c_str();
-  n = write(sockfd, data, strlen(data));
-  if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.");
-  n = read(sockfd, buffer, 255);
-  if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.");
-=======
-  string data_ = message;
+  std::string data_ = message;
   n_ = write(sockfd_, data_, strlen(data_));
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
   n_ = read(sockfd_, buffer, 255);
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
->>>>>>> Add _ to end of local variables. Change c string to c
 
   return atoi(buffer);
 }
