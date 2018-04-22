@@ -1,9 +1,5 @@
 /*
-<<<<<<< HEAD
  * Authors: Kofi and Isabella
-=======
- * Authors: Kofi
->>>>>>> prototyping
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
