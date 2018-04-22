@@ -22,15 +22,26 @@
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation()
-    : prev_angular_velocity_(0 , Vector<int16_t, 3>()), accleration_filter_(Vector<int16_t, 3>(),
-      Vector<int16_t, 3>(), Vector<int16_t, 3>()), gyro_filter_(Vector<int16_t, 3>(),
-      Vector<int16_t, 3>(), Vector<int16_t, 3>()), proximity_filter_(0, 0, 0)
-{}
+Navigation::Navigation() : prev_angular_velocity_(0 , Vector<int16_t, 3>())
+{
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      acceleration_filter_[i].configure(Vector<int16_t, 3>(),
+                                        Vector<int16_t, 3>(), Vector<int16_t, 3>());
+      gyro_filter_[i].configure(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>());
+    }
+
+  for (auto filter: proximity_filter_)
+    filter.configure(0, 0, 0);
+}
 
 void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
 {
   // TODO(Brano,Adi): Gyro update. (Data format should change first.)
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
+    imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
+  }
+
   Vector<int16_t, 3> avg(0);
   for (const auto& imu : imus)
     avg += imu.acc.value;
@@ -91,7 +102,6 @@ void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
 
 void Navigation::acclerometer_update(DataPoint<Vector<int16_t, 3>> acceleration)
 {
-  // TODO(Uday): Filter acceleration. Before or after averaging??
   accleration_ = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
   velocity_ = velocity.value;

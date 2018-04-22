@@ -88,5 +88,21 @@ void Thread::sleep(uint32_t ms)
   std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
 }
 
+void BusyThread::run()
+{
+  uint64_t i;
+  while (running_) {
+    i++;
+    if (i%10000 == 0) {
+      // log_.INFO("BUSY", "output\n");
+    }
+  }
+}
+
+BusyThread::~BusyThread()
+{
+  running_ = false;
+}
+
 }}}   // namespace hyped::utils::concurrent
 

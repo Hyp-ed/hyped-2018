@@ -1,7 +1,7 @@
 /*
- * Authors: Kofi
+ * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 1. April 2018
+ * Date: 17/02/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,33 +18,43 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+ #ifndef BEAGLEBONE_BLACK_UTILS_IO_VL6180_HPP_
+ #define BEAGLEBONE_BLACK_UTILS_IO_VL6180_HPP_
 
+ // List of Includes
 #include "utils/concurrent/thread.hpp"
+#include "utils/logger.hpp"
 #include "data/data.hpp"
-#include "communications/communications.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
 
-namespace communications {
+namespace utils {
+namespace io{
 
-class Main : public Thread {
-    public:
-        explicit Main(uint8_t id, Logger& log);
-        void run() override;
 
-    private:
-        Communications* baseCommunicator;
-        data::Data& data = data::Data::getInstance();
-        data::Navigation nav;
-        data::Motors mtr;
-        data::Sensors sensors_;
+
+class Vl6180: public Thread {
+  public:
+    void turnOn();
+    void turnOff();
+    int getDistance();
+
+
+
+  private:
+    Vl6180(uint8_t id, Logger& log);
+    data::Data& data = data::Data::getInstance();
+    data::StateMachine state;
+    bool waitDeviceBooted();
+    bool rangeWaitDeviceReady();
+    int readByte(uint16_t reg_add, uint8_t *data);
+    int writeByte(uint16_t reg_add, char data);
+    bool on;
 };
 
-}}  //  namespace hyped::communications
+}}} //namespace hyped::utils::io
 
-#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+ #endif  // BEAGLEBONE_BLACK_UTILS_IO_VL6180_HPP_

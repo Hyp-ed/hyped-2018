@@ -22,6 +22,7 @@
 #define BEAGLEBONE_BLACK_UTILS_UTILS_HPP_
 
 #include <stdio.h>
+#include <stdlib.h>
 
 namespace hyped {
 namespace utils {

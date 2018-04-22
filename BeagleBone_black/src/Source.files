@@ -21,8 +21,10 @@ SRCS := \
   utils/concurrent/barrier.cpp \
   utils/io/i2c.cpp \
   utils/io/can.cpp \
+  utils/io/spi.cpp \
   utils/logger.cpp \
   utils/system.cpp \
+  utils/timer.cpp  \
 
 
 

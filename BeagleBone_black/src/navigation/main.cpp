@@ -18,6 +18,8 @@
 
 #include "navigation/main.hpp"
 
+#include <memory>
+
 namespace hyped {
 
 using data::Sensors;
@@ -33,27 +35,31 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   data::Navigation nav_data;
-  Sensors last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
+  std::unique_ptr<Sensors> last_readings(new Sensors());
+  *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
+  std::unique_ptr<Sensors> readings(new Sensors());
+  log_.INFO("NAVIGATION", "Main started");
   while (1) {
-    Sensors readings = data_.getSensorsData();
+    *readings = data_.getSensorsData();
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
-    if (!imuChanged(last_readings, readings))
+    if (!imuChanged(*last_readings, *readings))
       continue;
-    if (proxiChanged(last_readings, readings) && stripeCntChanged(last_readings, readings))
-      nav_.update(readings.imu, readings.proxy, readings.stripe_cnt);
-    else if (proxiChanged(last_readings, readings))
-      nav_.update(readings.imu, readings.proxy);
-    else if (stripeCntChanged(last_readings, readings))
-      nav_.update(readings.imu, readings.stripe_cnt);
+    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
+      nav_.update(readings->imu, readings->proxy, readings->stripe_cnt);
+    else if (proxiChanged(*last_readings, *readings))
+      nav_.update(readings->imu, readings->proxy);
+    else if (stripeCntChanged(*last_readings, *readings))
+      nav_.update(readings->imu, readings->stripe_cnt);
     else
-      nav_.update(readings.imu);
+      nav_.update(readings->imu);
 
     nav_data.distance = nav_.get_displacement();
     nav_data.velocity = nav_.get_velocity();
     nav_data.acceleration = nav_.get_accleration();
-    // TODO(Brano): Add stripe count or remove it from data::Navigation.
     data_.setNavigationData(nav_data);
+
+    readings.swap(last_readings);
   }
 }
 
