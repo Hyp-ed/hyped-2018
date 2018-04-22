@@ -41,6 +41,7 @@ void HypedMachine::handleEvent(Event event)
 void HypedMachine::transition(State *state)
 {
   // State *prevState = currState;
+  delete current_state;
   current_state = state;
   log_.DBG1("STATE", "Transitioning...");
   current_state->entry();

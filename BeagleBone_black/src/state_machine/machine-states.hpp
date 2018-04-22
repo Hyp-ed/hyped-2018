@@ -23,7 +23,9 @@
 #define BEAGLEBONE_BLACK_STATE_MACHINE_MACHINE_STATES_HPP_
 
 #include "state_machine/event.hpp"
+#include "data/data.hpp"
 #include "state_machine/hyped-machine.hpp"
+#include "utils/logger.hpp"
 
 namespace hyped {
 namespace state_machine {
@@ -32,8 +34,14 @@ class HypedMachine;
 
 class State {
  public:
+  State()
+    : log_(true, 3) {}
+  virtual ~State()
+  {}
   virtual void react(HypedMachine &machine, Event event) = 0;
   virtual void entry() = 0;
+  void updateData(data::State);
+  utils::Logger log_;  // (true, 3);
 };
 
 class Idle : public State {

@@ -27,10 +27,8 @@ namespace state_machine {
 
 void Idle::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kIdle;
-  data.setStateMachineData(stm_data);
+  updateData(data::kIdle);
+  log_.DBG1("STATE", "Entered Idle");
 
   // std::cout << "Entered state 'Idle'" << std::endl;
 }
@@ -47,11 +45,8 @@ void Idle::react(HypedMachine &machine, Event event)
 
 void Accelerating::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kAccelerating;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'Accelerating'" << std::endl;
+  updateData(data::kAccelerating);
+  log_.DBG1("STATE", "Entered Accelerating");
 }
 
 void Accelerating::react(HypedMachine &machine, Event event)
@@ -66,11 +61,8 @@ void Accelerating::react(HypedMachine &machine, Event event)
 
 void Decelerating::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kDecelerating;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'Decelerating'" << std::endl;
+  updateData(data::kDecelerating);
+  log_.DBG1("STATE", "Entered Decelerating");
 }
 
 void Decelerating::react(HypedMachine &machine, Event event)
@@ -85,11 +77,8 @@ void Decelerating::react(HypedMachine &machine, Event event)
 
 void EmergencyBraking::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kEmergencyBraking;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'EmergencyBraking'" << std::endl;
+  updateData(data::kEmergencyBraking);
+  log_.DBG1("STATE", "Entered EmergencyBraking");
 }
 
 void EmergencyBraking::react(HypedMachine &machine, Event event)
@@ -102,11 +91,8 @@ void EmergencyBraking::react(HypedMachine &machine, Event event)
 
 void FailureStopped::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kFailureStopped;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'FailureStopped'" << std::endl;
+  updateData(data::kFailureStopped);
+  log_.DBG1("STATE", "Entered FailureStopped");
 }
 
 void FailureStopped::react(HypedMachine &machine, Event event)
@@ -116,11 +102,8 @@ void FailureStopped::react(HypedMachine &machine, Event event)
 
 void RunComplete::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kRunComplete;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'RunComplete'" << std::endl;
+  updateData(data::kRunComplete);
+  log_.DBG1("STATE", "Entered RunComplete");
 }
 
 void RunComplete::react(HypedMachine &machine, Event event)
@@ -135,11 +118,8 @@ void RunComplete::react(HypedMachine &machine, Event event)
 
 void Exiting::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kExiting;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'Exiting'" << std::endl;
+  updateData(data::kExiting);
+  log_.DBG1("STATE", "Entered Exiting");
 }
 
 void Exiting::react(HypedMachine &machine, Event event)
@@ -154,11 +134,8 @@ void Exiting::react(HypedMachine &machine, Event event)
 
 void Finished::entry()
 {
-  data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = data::kFinished;
-  data.setStateMachineData(stm_data);
-  // std::cout << "Entered state 'Finished'" << std::endl;
+  updateData(data::kFinished);
+  log_.DBG1("STATE", "Entered Finished");
 }
 
 void Finished::react(HypedMachine &machine, Event event)
@@ -166,4 +143,12 @@ void Finished::react(HypedMachine &machine, Event event)
   // std::cout << "State 'Finished' is now reacting to an event" << std::endl;
 }
 
+
+void State::updateData(data::State s)
+{
+  static data::Data& data = data::Data::getInstance();
+  data::StateMachine stm_data = data.getStateMachineData();
+  stm_data.current_state = s;
+  data.setStateMachineData(stm_data);
+}
 }}   // namespace hyped::state_machine
