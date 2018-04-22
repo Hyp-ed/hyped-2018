@@ -34,7 +34,7 @@ Communications::Communications(Logger& log): log_(log)
   log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
 }
 
-Communications::Communications(Logger& log, char* ip_): log_(log)
+Communications::Communications(Logger& log, char* ip): log_(log)
 {
   log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
   ipAddress = ip;
@@ -45,12 +45,12 @@ bool Communications::setUp()
   portNo_ = 5695;
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
-  if (sockfd < 0) {
+  if (sockfd_ < 0) {
     log_.ERR("COMMUNICATIONS", "CANNOT OPEN SOCKET.");
     return false;
   }
 
-  server = gethostbyname(ipAddress);
+  server = gethostbyname(ipAddress.c_str());
 
   if (server == NULL) {
     log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
@@ -62,7 +62,7 @@ bool Communications::setUp()
   bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portNo_);
 
-  if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+  if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
     return false;
   }
@@ -144,8 +144,8 @@ int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
   bzero(buffer, 256);
-  std::string data_ = message;
-  n_ = write(sockfd_, data_, strlen(data_));
+  // std::string data_ = message;
+  n_ = write(sockfd_, buffer, strlen(buffer));
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
   n_ = read(sockfd_, buffer, 255);
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
