@@ -60,8 +60,8 @@ class Communications
 
  private:
   int sockfd_, portNo_, n_;
-  struct sockaddr_in serv_addr_;
-  struct hostent *server_;
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
   char buffer[256];
   Logger& log_;
 };
