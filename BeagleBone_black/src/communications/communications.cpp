@@ -30,8 +30,8 @@ using data::Communications;
 
 namespace communications {
 
-const char* defaultIP = "localhost";
-char* ipAddress = const_cast<char*>(defaultIP); //cannot use string because getbyhostname() requires char*
+std::string defaultIP = "localhost";
+std::string ipAddress = (defaultIP); //cannot use string because getbyhostname() requires char*
 
 Communications::Communications(Logger& log): log_(log)
 {
@@ -54,7 +54,7 @@ bool Communications::setUp()
     return false;
   }
 
-  server = gethostbyname(ipAddress);
+  server = gethostbyname(ipAddress.c_str());
 
   if (server == NULL) {
     log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
