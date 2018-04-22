@@ -26,7 +26,7 @@ namespace motor_control {
 
 Motor::Motor(Logger& log): log_(log)
 {
-  log_.INFO("MOTOR", "Motors initialised\n");
+  log_.INFO("MOTOR", "Motors initialised");
 }
 
 /**
@@ -40,7 +40,7 @@ MotorsRpm Motor::getSpeed()
   motors_rpm_.rpm_BL = rpm;
   motors_rpm_.rpm_BR = rpm;
 
-  log_.DBG2("MOTOR", "Actual RPMs: FL %d, FR %d, BL %d, BR %d\n"
+  log_.DBG2("MOTOR", "Actual RPMs: FL %d, FR %d, BL %d, BR %d"
     , motors_rpm_.rpm_FL
     , motors_rpm_.rpm_FR
     , motors_rpm_.rpm_BL
@@ -55,7 +55,7 @@ MotorsRpm Motor::getSpeed()
 void Motor::setSpeed(int32_t rpm)
 {
   this->rpm = rpm;
-  log_.INFO("MOTOR", "Requested RPM %d\n", rpm);
+  log_.INFO("MOTOR", "Requested RPM %d", rpm);
 }
 
 /**

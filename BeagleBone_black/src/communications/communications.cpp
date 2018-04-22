@@ -23,49 +23,47 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
-
 namespace hyped {
 namespace communications {
 
-const char* defaultIP = "localhost";
-char* ipAddress = const_cast<char*>(defaultIP);
+std::string defaultIP = "localhost";
+std::string ipAddress = defaultIP;
 
 Communications::Communications(Logger& log): log_(log)
 {
-  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised\n");
+  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
 }
 
-Communications::Communications(Logger& log, char* ip): log_(log)
+Communications::Communications(Logger& log, char* ip_): log_(log)
 {
-  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised\n");
+  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
   ipAddress = ip;
 }
 
 bool Communications::setUp()
 {
-  portNo = 5695;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
+  portNo_ = 5695;
+  sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
   if (sockfd < 0) {
-    log_.ERR("COMMUNICATIONS", "CANNOT OPEN SOCKET.\n");
+    log_.ERR("COMMUNICATIONS", "CANNOT OPEN SOCKET.");
     return false;
   }
 
   server = gethostbyname(ipAddress);
 
   if (server == NULL) {
-    log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
+    log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
     return false;
   }
 
   bzero(&serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;   // server byte order
   bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
-  serv_addr.sin_port = htons(portNo);
+  serv_addr.sin_port = htons(portNo_);
 
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-    log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.\n");
+    log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
     return false;
   }
 
@@ -75,7 +73,7 @@ bool Communications::setUp()
 
 Communications::~Communications()
 {
-  close(sockfd);
+  close(sockfd_);
 }
 
 int Communications::sendDistance(float distance)
@@ -146,18 +144,18 @@ int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
   bzero(buffer, 256);
-  const char *data = message.c_str();
-  n = write(sockfd, data, strlen(data));
-  if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
-  n = read(sockfd, buffer, 255);
-  if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
+  std::string data_ = message;
+  n_ = write(sockfd_, data_, strlen(data_));
+  if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
+  n_ = read(sockfd_, buffer, 255);
+  if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
 
   return atoi(buffer);
 }
 
 void Communications::receiveMessage()
 {
-  n = read(sockfd, buffer, 255);
+  n_ = read(sockfd_, buffer, 255);
   int command = atoi(buffer);
 
   switch (command) {

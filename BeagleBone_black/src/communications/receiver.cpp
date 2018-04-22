@@ -25,13 +25,13 @@ namespace communications {
 
 ReceiverThread::ReceiverThread(Communications* baseCommunicator)
     : Thread()
-    , baseCommunicator(baseCommunicator)
+    , baseCommunicator_(baseCommunicator)
 { /* Empty */ }
 
 void ReceiverThread::run()
 {
   while (1) {
-    baseCommunicator->receiveMessage();
+    baseCommunicator_->receiveMessage();
   }
 }
 

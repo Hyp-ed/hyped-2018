@@ -41,6 +41,7 @@ Lock logger_lock;
 void myPrint(FILE* file, const char* format, va_list args)
 {
   vfprintf(file, format, args);
+  fprintf(file, "\n");
 }
 
 // static auto start_time = std::chrono::high_resolution_clock::now();
@@ -100,7 +101,7 @@ void Logger::DBG(const char* module, const char* format, ...)
 {
   if (debug_ >= 0) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG", module);
+    logHead(stderr, "DBG0", module);
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);

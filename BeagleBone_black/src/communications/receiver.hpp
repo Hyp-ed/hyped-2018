@@ -38,7 +38,7 @@ class ReceiverThread : public Thread {
   void run() override;
 
  private:
-  Communications* baseCommunicator;
+  Communications* baseCommunicator_;
 };
 
 }}  //   namespace hyped::communications

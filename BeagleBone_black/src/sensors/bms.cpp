@@ -41,7 +41,7 @@ BMS::BMS(uint8_t id, Logger& log)
   // verify the module has not been instantiated
   for (uint8_t i : existing_ids_) {
     if (id == i) {
-      log_.ERR("BMS", "BMS %d already exists, double module instantiation\n", id);
+      log_.ERR("BMS", "BMS %d already exists, double module instantiation", id);
       return;
     }
   }
@@ -78,24 +78,24 @@ void BMS::request()
   message.data[1]   = 0;
 
   can_.send(message);
-  log_.DBG1("BMS", "request message sent\n");
+  log_.DBG1("BMS", "request message sent");
 }
 
 void BMS::run()
 {
-  log_.INFO("BMS", "starting BMS module %d\n", id_);
+  log_.INFO("BMS", "starting BMS module %d", id_);
   while (running_) {
     request();
     sleep(BMS_PERIOD);
   }
-  log_.INFO("BMS", "stopped BMS module %d\n", id_);
+  log_.INFO("BMS", "stopped BMS module %d", id_);
 }
 
 void BMS::processNewData(utils::io::CanFrame& message)
 {
   // TODO(anybody): add message processing
-  log_.DBG1("BMS", "id: %d, received CAN message with id %d\n", id_, message.id);
-  log_.DBG2("BMS", "message data[0,1] %d %d\n", message.data[0], message.data[1]);
+  log_.DBG1("BMS", "id: %d, received CAN message with id %d", id_, message.id);
+  log_.DBG2("BMS", "message data[0,1] %d %d", message.data[0], message.data[1]);
   uint8_t offset = message.id - (BMS_ID_BASE + (BMS_ID_INCR * id_));
   switch (offset) {
     case 0x1:   // cells 1-4
@@ -114,7 +114,7 @@ void BMS::processNewData(utils::io::CanFrame& message)
       data_.temperature = message.data[0] - BMS_TEMP_OFFSET;
       break;
     default:
-      log_.ERR("BMS", "received invalid message, id %d, offset %d\n"
+      log_.ERR("BMS", "received invalid message, id %d, offset %d"
         , message.id
         , offset);
   }

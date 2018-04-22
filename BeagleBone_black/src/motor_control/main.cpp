@@ -43,7 +43,7 @@ Main::Main(uint8_t id, Logger& log)
   */
 void Main::run()
 {
-  log_.INFO("MOTOR", "Starting motor controller\n");
+  log_.INFO("MOTOR", "Starting motor controller");
 
   while (1) {
     state = data_.getStateMachineData();
@@ -82,7 +82,7 @@ void Main::setupMotors()
     motor_data = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
     data_.setMotorData(motor_data);
     motorsSetUp = true;
-    log_.INFO("MOTOR", "Motor State: Idle\n");
+    log_.INFO("MOTOR", "Motor State: Idle");
   }
 }
 

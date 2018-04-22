@@ -29,19 +29,19 @@ Logger i2clog(true, 1);
 
 I2C::I2C() : concurrent::Thread(I2C_ID, i2clog)
 {
-  i2clog.INFO("I2C", "Constructing\n");
+  i2clog.INFO("I2C", "Constructing");
   return;
 }
 
 I2C::~I2C()
 {
-  i2clog.INFO("I2C", "Destructing\n");
+  i2clog.INFO("I2C", "Destructing");
   return;
 }
 
 void I2C::run()
 {
-  i2clog.INFO("I2C", "Running\n");
+  i2clog.INFO("I2C", "Running");
   return;
 }
 

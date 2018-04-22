@@ -53,12 +53,12 @@ int main(int argc, char* argv[])
   Logger log_state(sys.verbose_state, sys.debug_state);
   Logger log_cmn(sys.verbose_cmn, sys.debug_cmn);
 
-  log_system.INFO("MAIN", "Starting BBB with %d modules\n", 5);
-  log_system.DBG("MAIN", "DBG\n");
-  log_system.DBG1("MAIN", "DBG1\n");
-  log_system.DBG2("MAIN", "DBG2\n");
-  log_system.DBG3("MAIN", "DBG3\n");
-  log_system.DBG3("MAIN", "DBG4\n");
+  log_system.INFO("MAIN", "Starting BBB with %d modules", 5);
+  log_system.DBG("MAIN", "DBG0");
+  log_system.DBG1("MAIN", "DBG1");
+  log_system.DBG2("MAIN", "DBG2");
+  log_system.DBG3("MAIN", "DBG3");
+  log_system.DBG3("MAIN", "DBG4");
 
   Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
   Thread* motor     = new hyped::motor_control::Main(1, log_motor);
@@ -71,9 +71,9 @@ int main(int argc, char* argv[])
   sensors->start();
   navigation->start();
   communications->start();
-  log_system.INFO("MAIN", "all module threads started\n");
+  log_system.INFO("MAIN", "all module threads started");
   Thread::sleep(1000);
-  log_system.INFO("MAIN", "After 1 sec sleep\n");
+  log_system.INFO("MAIN", "After 1 sec sleep");
 
   Data& data = Data::getInstance();
   Sensors sens;
@@ -82,13 +82,13 @@ int main(int argc, char* argv[])
     // Monitoring
     sens = data.getSensorsData();
     auto& acc = sens.imu[0].acc.value;
-    log_system.INFO("TEST", "Acceleration       (%d %d %d)\n"
+    log_system.INFO("TEST", "Acceleration       (%d %d %d)"
       , acc[0]
       , acc[1]
       , acc[2]);
 
     navs = data.getNavigationData();
-    log_system.INFO("TEST", "Distance, Velocity (%d, %d)\n"
+    log_system.INFO("TEST", "Distance, Velocity (%d, %d)"
       , navs.distance
       , navs.velocity);
     Thread::sleep(500);

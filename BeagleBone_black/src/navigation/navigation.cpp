@@ -24,7 +24,7 @@ namespace navigation {
 
 Navigation::Navigation() : prev_angular_velocity_(0 , Vector<int16_t, 3>())
 {
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+  for (int i = 0; i < Sensors::kNumImus; i++) {
       acceleration_filter_[i].configure(Vector<int16_t, 3>(),
                                         Vector<int16_t, 3>(), Vector<int16_t, 3>());
       gyro_filter_[i].configure(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>());
@@ -34,7 +34,7 @@ Navigation::Navigation() : prev_angular_velocity_(0 , Vector<int16_t, 3>())
     filter.configure(0, 0, 0);
 }
 
-void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
+void Navigation::update(ImuArray imus)
 {
   // TODO(Brano,Adi): Gyro update. (Data format should change first.)
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
@@ -50,24 +50,20 @@ void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus)
   this->acclerometer_update(DataPoint<Vector<int16_t, 3>>(imus[0].acc.timestamp, avg));
 }
 
-void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
-                        std::array<data::Proximity, data::Sensors::kNumProximities> proxis)
+void Navigation::update(ImuArray imus, ProximityArray proxis)
 {
   update(imus);
   // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
 }
 
-void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
-                        data::StripeCount stripe_count)
+void Navigation::update(ImuArray imus, data::StripeCount stripe_count)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
   stripe_counter_update(stripe_count.value);
 }
 
-void Navigation::update(std::array<data::Imu, data::Sensors::kNumImus> imus,
-                        std::array<data::Proximity, data::Sensors::kNumProximities> proxis,
-                        data::StripeCount stripe_count)
+void Navigation::update(ImuArray imus, ProximityArray proxis, data::StripeCount stripe_count)
 {
   update(imus, proxis);
   stripe_counter_update(stripe_count.value);

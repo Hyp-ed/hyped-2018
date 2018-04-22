@@ -40,10 +40,10 @@ class Main : public Thread {
   void run() override;
 
  private:
-  Communications* baseCommunicator;
-  // data::Data& data = data::Data::getInstance();
-  // data::Navigation nav;
-  // data::Motors mtr;
+  Communications* baseCommunicator_;
+  data::Data& data_ = data::Data::getInstance();
+  data::Navigation nav_;
+  data::Motors mtr_;
 };
 
 }}  //  namespace hyped::communications

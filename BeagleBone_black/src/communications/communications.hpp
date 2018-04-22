@@ -59,7 +59,7 @@ class Communications
   void receiveMessage();
 
  private:
-  int sockfd, portNo, n;
+  int sockfd_, portNo_, n_;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];

@@ -28,13 +28,13 @@ HypedMachine::HypedMachine(utils::Logger& log)
     : current_state(new Idle())
     , log_(log)
 {
-  log_.INFO("STATE", "State Machine initialised\n");
+  log_.INFO("STATE", "State Machine initialised");
   current_state->entry();
 }
 
 void HypedMachine::handleEvent(Event event)
 {
-  log_.DBG1("STATE", "Raised event %d\n", event);
+  log_.DBG1("STATE", "Raised event %d", event);
   current_state->react(*this, event);
 }
 
@@ -42,7 +42,7 @@ void HypedMachine::transition(State *state)
 {
   // State *prevState = currState;
   current_state = state;
-  log_.DBG1("STATE", "Transitioning...\n");
+  log_.DBG1("STATE", "Transitioning...");
   current_state->entry();
   // delete prevState;
 }
