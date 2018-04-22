@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
       , acc[2]);
 
     navs = data.getNavigationData();
-    log_system.INFO("TEST", "Distance, Velocity (%d, %d)"
+    log_system.INFO("TEST", "Distance, Velocity (%f, %f)\n"
       , navs.distance
       , navs.velocity);
     Thread::sleep(500);
