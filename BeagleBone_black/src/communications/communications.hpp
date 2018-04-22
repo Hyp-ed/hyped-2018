@@ -31,11 +31,13 @@
 #include <netdb.h>
 #include <string>
 #include <iostream>
+#include "data/data.hpp"
 #include "utils/logger.hpp"
 using namespace std;
 
 namespace hyped {
 
+using data::NavigationType;
 using utils::Logger;
 
 namespace communications {
@@ -47,14 +49,14 @@ class Communications
   explicit Communications(Logger& log, char* ip);
   bool setUp();
   ~Communications();
-  int sendDistance(auto distance);    // CMD01
-  int sendVelocity(auto speed);       // CMD02
-  int sendAcceleration(auto accel);   // CMD03
-  int sendStripeCount(int stripes);   // CMD04
-  int sendRpmFl(float rpmfl);         // CMD05
-  int sendRpmFr(float rpmfr);         // CMD06
-  int sendRpmBl(float rpmBl);         // CMD07
-  int sendRpmBr(float rpmBr);         // CMD08
+  int sendDistance(NavigationType distance);    // CMD01
+  int sendVelocity(NavigationType speed);       // CMD02
+  int sendAcceleration(NavigationType accel);   // CMD03
+  int sendStripeCount(int stripes);             // CMD04
+  int sendRpmFl(float rpmfl);                   // CMD05
+  int sendRpmFr(float rpmfr);                   // CMD06
+  int sendRpmBl(float rpmBl);                   // CMD07
+  int sendRpmBr(float rpmBr);                   // CMD08
   int sendData(string message);
   void receiveMessage();
 
