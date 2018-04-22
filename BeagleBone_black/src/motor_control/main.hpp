@@ -39,20 +39,20 @@ class Main: public Thread {
  public:
   explicit Main(uint8_t id, Logger& log);
   void run() override;
+
+ private:
   void setupMotors();
   void accelerateMotors();
   void decelerateMotors();
   void stopMotors();
   int32_t calculateAccelerationRPM(NavigationType velocity);
   int32_t calculateDecelerationRPM(NavigationType velocity);
-
- private:
-  Motor* motor;
-  int32_t rpm;
-  data::Data& data = data::Data::getInstance();
+  data::Data& data_;
+  Motor motor_;
   data::Motors motor_data;
   data::StateMachine state;
   data::Navigation nav;
+  int32_t rpm;
   bool motorsSetUp;
   bool motorFailure;
 };
