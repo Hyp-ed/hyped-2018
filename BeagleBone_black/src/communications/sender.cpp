@@ -40,7 +40,7 @@ void SenderThread::run()
     baseCommunicator->sendDistance(nav.distance);
     baseCommunicator->sendVelocity(nav.velocity);
     baseCommunicator->sendAcceleration(nav.acceleration);
-    baseCommunicator->sendStripeCount(nav.stripe_count);
+    // baseCommunicator->sendStripeCount(nav.stripe_count);
     baseCommunicator->sendRpmFl(mtr.rpm_FL);
     baseCommunicator->sendRpmFr(mtr.rpm_FR);
     baseCommunicator->sendRpmBl(mtr.rpm_BL);
