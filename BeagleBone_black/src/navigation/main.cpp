@@ -46,11 +46,11 @@ void Main::run()
     if (!imuChanged(*last_readings, *readings))
       continue;
     if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->proxy, readings->stripe_cnt);
+      nav_.update(readings->imu, readings->proxi, readings->stripe_count);
     else if (proxiChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->proxy);
+      nav_.update(readings->imu, readings->proxi);
     else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->stripe_cnt);
+      nav_.update(readings->imu, readings->stripe_count);
     else
       nav_.update(readings->imu);
 
@@ -74,16 +74,16 @@ bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
 
 bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (unsigned int i = 0; i < new_data.proxy.size(); ++i)
+  for (unsigned int i = 0; i < new_data.proxi.size(); ++i)
     // TODO(Brano): Timestamp proxi data in data::Sensors
-    if (new_data.proxy[i].val != old_data.proxy[i].val)
+    if (new_data.proxi[i].val != old_data.proxi[i].val)
       return true;
   return false;
 }
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  return new_data.stripe_cnt.timestamp != old_data.stripe_cnt.timestamp;
+  return new_data.stripe_count.timestamp != old_data.stripe_count.timestamp;
 }
 
 }}  // namespace hyped::navigation

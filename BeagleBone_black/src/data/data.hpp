@@ -28,6 +28,8 @@
 #include "utils/math/vector.hpp"
 #include "utils/concurrent/lock.hpp"
 
+using std::array;
+
 namespace hyped {
 
 // imports
@@ -79,30 +81,26 @@ struct Proximity {
 };
 
 struct Battery {
-  Vector<int16_t, 7> temperatures;
-  uint8_t voltage;
+  uint16_t  voltage;
+  int8_t    temperature;
 };
 
-/*struct StripeCount {
-  DataPoint<uint32_t> count;
-};//*/
 typedef DataPoint<uint32_t> StripeCount;
-
 struct Sensors {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 24;
 
-  std::array<Imu, kNumImus> imu;
-  std::array<Proximity, kNumProximities> proxy;
-  StripeCount stripe_cnt;
+  array<Imu, kNumImus> imu;
+  array<Proximity, kNumProximities> proxi;
+  StripeCount stripe_count;
 };
 
 struct Batteries {
   static constexpr int kNumLPBatteries = 2;
   static constexpr int kNumHPBatteries = 2;
 
-  std::array<Battery, kNumLPBatteries> low_power_batteries;
-  std::array<Battery, kNumHPBatteries> high_power_batteries;
+  array<Battery, kNumLPBatteries> low_power_batteries;
+  array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
 // -----------------------------------------------------------------------------
@@ -178,6 +176,16 @@ class Data {
    * @brief      Should be called to update sensor data.
    */
   void setSensorsData(const Sensors& sensors_data);
+
+  /**
+   * @brief       Retrieves only StripeCount part from Sensors data
+   */
+  StripeCount getStripeCount();
+
+  /**
+   * @brief       Should be called to update StripeCount part in Sensors data
+   */
+  void setStripeCount(const StripeCount& stripe_count);
 
     /**
    * @brief      Retrieves data from the batteries.
