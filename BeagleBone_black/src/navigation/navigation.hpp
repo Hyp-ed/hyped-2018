@@ -34,6 +34,8 @@ using data::DataPoint;
 using data::Imu;
 using data::Proximity;
 using data::Sensors;
+using data::NavigationType;
+using data::NavigationVector;
 using utils::math::Integrator;
 using utils::math::Kalman;
 using utils::math::Quaternion;
@@ -86,44 +88,44 @@ class Navigation {
    * @return uint16_t Returns the forward component of acceleration vector (negative when
    *                  decelerating)
    */
-  int16_t get_accleration();
+  NavigationType get_accleration();
   /**
    * @brief Get the velocity value
    *
    * @return uint16_t Returns the forward component of velocity vector
    */
-  int16_t get_velocity();
+  NavigationType get_velocity();
   /**
    * @brief Get the displacement value
    *
    * @return uint16_t Returns the forward component of displacement vector
    */
-  int16_t get_displacement();
+  NavigationType get_displacement();
 
  private:
 
-  void gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity);  // Point number 1
-  void acclerometer_update(DataPoint<Vector<int16_t, 3>> acceleration);  // Points 3, 4, 5, 6
+  void gyro_update(DataPoint<NavigationVector> angular_velocity);  // Point number 1
+  void acclerometer_update(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximity_orientation_update();  // Point number 7
   void proximity_displacement_update();  // Point number 7
   void stripe_counter_update(uint16_t count);  // Point number 7
 
   // TODO(Uday,Brano,Adi): Change the data types of the data members
 
-  Vector<int16_t, 3> accleration_;
-  Vector<int16_t, 3> velocity_;
-  Vector<int16_t, 3> displacement_;
-  DataPoint<Vector<int16_t, 3>> prev_angular_velocity_;
+  NavigationVector accleration_;
+  NavigationVector velocity_;
+  NavigationVector displacement_;
+  DataPoint<NavigationVector> prev_angular_velocity_;
   Quaternion<int16_t> orientation_;
   int stripe_count_;
 
   // TODO(ALL): Decide the type
-  std::array<Kalman<Vector<int16_t, 3>>, Sensors::kNumImus> acceleration_filter_;
-  std::array<Kalman<Vector<int16_t, 3>>, Sensors::kNumImus> gyro_filter_;
+  std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;
+  std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;
   std::array<Kalman<uint8_t>, Sensors::kNumProximities> proximity_filter_;
 
-  Integrator<Vector<int16_t, 3>> acceleration_integrator_;
-  Integrator<Vector<int16_t, 3>> velocity_integrator_;
+  Integrator<NavigationVector> acceleration_integrator_;
+  Integrator<NavigationVector> velocity_integrator_;
 };
 
 }}  // namespace hyped::navigation

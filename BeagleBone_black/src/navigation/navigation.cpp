@@ -22,13 +22,13 @@
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation() : prev_angular_velocity_(0 , Vector<int16_t, 3>())
+Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
-      acceleration_filter_[i].configure(Vector<int16_t, 3>(),
-                                        Vector<int16_t, 3>(), Vector<int16_t, 3>());
-      gyro_filter_[i].configure(Vector<int16_t, 3>(), Vector<int16_t, 3>(), Vector<int16_t, 3>());
-    }
+      acceleration_filter_[i].configure(NavigationVector(),
+                                        NavigationVector(), NavigationVector());
+      gyro_filter_[i].configure(NavigationVector(), NavigationVector(), NavigationVector());
+  }
 
   for (auto filter: proximity_filter_)
     filter.configure(0, 0, 0);
@@ -42,12 +42,12 @@ void Navigation::update(ImuArray imus)
     imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
   }
 
-  Vector<int16_t, 3> avg(0);
+  NavigationVector avg(0);
   for (const auto& imu : imus)
     avg += imu.acc.value;
   avg /= imus.size();
   // TODO(Brano,Adi): Change the timestamping strategy
-  this->acclerometer_update(DataPoint<Vector<int16_t, 3>>(imus[0].acc.timestamp, avg));
+  this->acclerometer_update(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
 }
 
 void Navigation::update(ImuArray imus, ProximityArray proxis)
@@ -69,23 +69,23 @@ void Navigation::update(ImuArray imus, ProximityArray proxis, data::StripeCount 
   stripe_counter_update(stripe_count.value);
 }
 
-int16_t Navigation::get_accleration()
+NavigationType Navigation::get_accleration()
 {
   return accleration_[0];
 }
 
-int16_t Navigation::get_velocity()
+NavigationType Navigation::get_velocity()
 {
   return velocity_[0];
 }
 
-int16_t Navigation::get_displacement()
+NavigationType Navigation::get_displacement()
 {
   return displacement_[0];
 }
 
 
-void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
+void Navigation::gyro_update(DataPoint<NavigationVector> angular_velocity)
 {
   auto theta = prev_angular_velocity_.value.norm();
   auto angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)*theta/2;
@@ -96,7 +96,7 @@ void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
   prev_angular_velocity_ = angular_velocity;
 }
 
-void Navigation::acclerometer_update(DataPoint<Vector<int16_t, 3>> acceleration)
+void Navigation::acclerometer_update(DataPoint<NavigationVector> acceleration)
 {
   accleration_ = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
