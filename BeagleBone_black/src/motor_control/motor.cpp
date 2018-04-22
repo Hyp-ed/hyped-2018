@@ -35,16 +35,16 @@ Motor::Motor(Logger& log): log_(log)
 MotorsRpm Motor::getSpeed()
 {
   // Read actual motor RPM over CAN. Set dummy values for now
-  motors_rpm_.rpm_FR = rpm;
-  motors_rpm_.rpm_FL = rpm;
-  motors_rpm_.rpm_BL = rpm;
-  motors_rpm_.rpm_BR = rpm;
+  motors_rpm_.rpm_FR_ = rpm_;
+  motors_rpm_.rpm_FL_ = rpm_;
+  motors_rpm_.rpm_BL_ = rpm_;
+  motors_rpm_.rpm_BR_ = rpm_;
 
   log_.DBG2("MOTOR", "Actual RPMs: FL %d, FR %d, BL %d, BR %d"
-    , motors_rpm_.rpm_FL
-    , motors_rpm_.rpm_FR
-    , motors_rpm_.rpm_BL
-    , motors_rpm_.rpm_BR);
+    , motors_rpm_.rpm_FL_
+    , motors_rpm_.rpm_FR_
+    , motors_rpm_.rpm_BL_
+    , motors_rpm_.rpm_BR_);
 
   return motors_rpm_;
 }
@@ -54,7 +54,7 @@ MotorsRpm Motor::getSpeed()
   */
 void Motor::setSpeed(int32_t rpm)
 {
-  this->rpm = rpm;
+  this->rpm_ = rpm;
   log_.INFO("MOTOR", "Requested RPM %d", rpm);
 }
 

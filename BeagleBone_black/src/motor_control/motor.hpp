@@ -31,10 +31,10 @@ using utils::Logger;
 namespace motor_control {
 // Contains the RPM of each of the motors
 struct MotorsRpm {
-  int32_t rpm_FL;
-  int32_t rpm_FR;
-  int32_t rpm_BL;
-  int32_t rpm_BR;
+  int32_t rpm_FL_;
+  int32_t rpm_FR_;
+  int32_t rpm_BL_;
+  int32_t rpm_BR_;
 };
 
 class Motor {
@@ -46,7 +46,7 @@ class Motor {
 
  private:
   MotorsRpm motors_rpm_;
-  int32_t rpm;   // For testing only
+  int32_t rpm_;   // For testing only
   Logger& log_;
 };
 
