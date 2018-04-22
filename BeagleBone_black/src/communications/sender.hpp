@@ -40,8 +40,8 @@ class SenderThread : public Thread {
  private:
   Communications* baseCommunicator;
   data::Data& data = data::Data::getInstance();
-  data::Navigation nav;
-  data::Motors mtr;
+  data::Navigation nav_;
+  data::Motors mtr_;
 };
 
 }}  //  namespace hyped::communications

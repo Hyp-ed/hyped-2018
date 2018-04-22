@@ -103,7 +103,6 @@ class Navigation {
   NavigationType get_displacement();
 
  private:
-
   void gyro_update(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void acclerometer_update(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximity_orientation_update();  // Point number 7
