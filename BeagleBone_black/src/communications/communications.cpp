@@ -28,15 +28,15 @@ using namespace std;
 namespace hyped {
 namespace communications {
 
-const char* defaultIP = "localhost";
-char* ipAddress = const_cast<char*>(defaultIP);
+string defaultIP_ = "localhost";
+string ipAddress_ = defaultIP_;
 
 Communications::Communications(Logger& log): log_(log)
 {
   log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
 }
 
-Communications::Communications(Logger& log, char* ip): log_(log)
+Communications::Communications(Logger& log, char* ip_): log_(log)
 {
   log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
   ipAddress = ip;
@@ -44,25 +44,25 @@ Communications::Communications(Logger& log, char* ip): log_(log)
 
 bool Communications::setUp()
 {
-  portNo = 5695;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
+  portNo_ = 5695;
+  sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
   if (sockfd < 0) {
     log_.ERR("COMMUNICATIONS", "CANNOT OPEN SOCKET.");
     return false;
   }
 
-  server = gethostbyname(ipAddress);
+  server_ = gethostbyname(ipAddress_);
 
   if (server == NULL) {
     log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
     return false;
   }
 
-  bzero(&serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;   // server byte order
-  bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
-  serv_addr.sin_port = htons(portNo);
+  bzero(&serv_addr_, sizeof(serv_addr_));
+  serv_addr_.sin_family = AF_INET;   // server byte order
+  bcopy(server_->h_addr, &serv_addr_.sin_addr.s_addr, server_->h_length);
+  serv_addr_.sin_port = htons(portNo_);
 
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
@@ -75,69 +75,69 @@ bool Communications::setUp()
 
 Communications::~Communications()
 {
-  close(sockfd);
+  close(sockfd_);
 }
 
-int Communications::sendDistance(float distance)
+int Communications::sendDistance(float distance_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << distance;
+  ss << distance_;
 
   return sendData("CMD01" + ss.str() + "\n");
 }
 
-int Communications::sendVelocity(float speed)
+int Communications::sendVelocity(float speed_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << speed;
+  ss << speed_;
 
   return sendData("CMD02" + ss.str() + "\n");
 }
 
-int Communications::sendAcceleration(float accel)
+int Communications::sendAcceleration(float accel_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << accel;
+  ss << accel_;
 
   return sendData("CMD03" + ss.str() + "\n");
 }
 
-int Communications::sendStripeCount(int stripes)
+int Communications::sendStripeCount(int stripes_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << stripes;
+  ss << stripes_;
 
   return sendData("CMD04" + ss.str() + "\n");
 }
 
-int Communications::sendRpmFl(float rpmfl)
+int Communications::sendRpmFl(float rpmfl_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmfl;
+  ss << rpmfl_;
 
   return sendData("CMD05" + ss.str() + "\n");
 }
 
-int Communications::sendRpmFr(float rpmfr)
+int Communications::sendRpmFr(float rpmfr_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmfr;
+  ss << rpmfr_;
 
   return sendData("CMD06" + ss.str() + "\n");
 }
 
-int Communications::sendRpmBl(float rpmbl)
+int Communications::sendRpmBl(float rpmbl_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmbl;
+  ss << rpmbl_;
 
   return sendData("CMD07" + ss.str() + "\n");
 }
 
-int Communications::sendRpmBr(float rpmbr)
+int Communications::sendRpmBr(float rpmbr_)
 {
   stringstream ss(stringstream::in | stringstream::out);
-  ss << rpmbr;
+  ss << rpmbr_;
 
   return sendData("CMD08" + ss.str() + "\n");
 }
@@ -146,18 +146,26 @@ int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
   bzero(buffer, 256);
+<<<<<<< HEAD
   const char *data = message.c_str();
   n = write(sockfd, data, strlen(data));
   if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.");
   n = read(sockfd, buffer, 255);
   if (n < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.");
+=======
+  string data_ = message;
+  n_ = write(sockfd_, data_, strlen(data_));
+  if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
+  n_ = read(sockfd_, buffer, 255);
+  if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
+>>>>>>> Add _ to end of local variables. Change c string to c
 
   return atoi(buffer);
 }
 
 void Communications::receiveMessage()
 {
-  n = read(sockfd, buffer, 255);
+  n_ = read(sockfd_, buffer, 255);
   int command = atoi(buffer);
 
   switch (command) {
