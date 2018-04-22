@@ -68,10 +68,10 @@ struct Navigation {
 // -----------------------------------------------------------------------------
 // Raw Sensor data
 // -----------------------------------------------------------------------------
-
+typedef Vector<NavigationType, 3> NavigationVector;
 struct Imu {
-  DataPoint<Vector<NavigationType, 3> > acc;
-  DataPoint<Vector<NavigationType, 3> > gyr;
+  DataPoint<NavigationVector> acc;
+  DataPoint<NavigationVector> gyr;
 };
 
 struct Proximity {
