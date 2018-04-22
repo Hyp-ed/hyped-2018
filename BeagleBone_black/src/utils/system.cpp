@@ -57,7 +57,7 @@ System::~System()
 }
 
 System::System(int argc, char* argv[])
-    : verbose(DEFAULT_VERBOSE)
+    : verbose(false)
     , verbose_motor(DEFAULT_VERBOSE)
     , verbose_nav(DEFAULT_VERBOSE)
     , verbose_sensor(DEFAULT_VERBOSE)
