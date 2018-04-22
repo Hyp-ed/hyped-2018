@@ -29,6 +29,7 @@
 
 namespace hyped {
 
+using data::NavigationType;
 using utils::concurrent::Thread;
 using utils::Logger;
 
@@ -42,8 +43,8 @@ class Main: public Thread {
   void accelerateMotors();
   void decelerateMotors();
   void stopMotors();
-  int32_t calculateAccelerationRPM(uint32_t velocity);
-  int32_t calculateDecelerationRPM(uint32_t velocity);
+  int32_t calculateAccelerationRPM(NavigationType velocity);
+  int32_t calculateDecelerationRPM(NavigationType velocity);
 
  private:
   Motor* motor;

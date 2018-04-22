@@ -26,6 +26,9 @@
 #include "data/data.hpp"
 
 namespace hyped {
+
+using data::NavigationType;
+
 namespace motor_control {
 
 Main::Main(uint8_t id, Logger& log)
@@ -216,7 +219,7 @@ void Main::stopMotors()
   *
   *  @return  { Acceleration RPM calculation of type int }
   */
-int32_t Main::calculateAccelerationRPM(auto velocity)
+int32_t Main::calculateAccelerationRPM(NavigationType velocity)
 {
   return rpm += 100;  // dummy calculation to increase rpm
 }
@@ -229,7 +232,7 @@ int32_t Main::calculateAccelerationRPM(auto velocity)
   *
   *  @return  { Deceleration RPM calculation of type int }
   */
-int32_t Main::calculateDecelerationRPM(auto velocity)
+int32_t Main::calculateDecelerationRPM(NavigationType velocity)
 {
   return rpm -= 100;  // dummy calculation to decrease rpm
 }
