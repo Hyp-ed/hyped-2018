@@ -29,13 +29,10 @@ void Idle::entry()
 {
   updateData(data::kIdle);
   log_.DBG1("STATE", "Entered Idle");
-
-  // std::cout << "Entered state 'Idle'" << std::endl;
 }
 
 void Idle::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'Idle' is now reacting to an event" << std::endl;
   if (event == kOnStart) {
     machine.transition(new Accelerating());
   } else if (event == kCriticalFailure) {
@@ -51,7 +48,6 @@ void Accelerating::entry()
 
 void Accelerating::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'Accelerating' is now reacting to an event" << std::endl;
   if (event == kMaxDistanceReached) {
     machine.transition(new Decelerating());
   } else if (event == kCriticalFailure) {
@@ -67,7 +63,6 @@ void Decelerating::entry()
 
 void Decelerating::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'Decelerating' is now reacting to an event" << std::endl;
   if (event == kEndOfRunReached) {
     machine.transition(new RunComplete());
   } else if (event == kCriticalFailure) {
@@ -83,7 +78,6 @@ void EmergencyBraking::entry()
 
 void EmergencyBraking::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'EmergencyBraking' is now reacting to an event" << std::endl;
   if (event == kVelocityZeroReached) {
     machine.transition(new FailureStopped());
   }
@@ -97,7 +91,6 @@ void FailureStopped::entry()
 
 void FailureStopped::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'FailureStopped' is now reacting to an event" << std::endl;
 }
 
 void RunComplete::entry()
@@ -108,7 +101,6 @@ void RunComplete::entry()
 
 void RunComplete::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'RunComplete' is now reacting to an event" << std::endl;
   if (event == kOnExit) {
     machine.transition(new Exiting());
   } else if (event == kCriticalFailure) {
@@ -124,7 +116,6 @@ void Exiting::entry()
 
 void Exiting::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'Exiting' is now reacting to an event" << std::endl;
   if (event == kEndOfTubeReached) {
     machine.transition(new Finished());
   } else if (event == kCriticalFailure) {
@@ -140,7 +131,6 @@ void Finished::entry()
 
 void Finished::react(HypedMachine &machine, Event event)
 {
-  // std::cout << "State 'Finished' is now reacting to an event" << std::endl;
 }
 
 

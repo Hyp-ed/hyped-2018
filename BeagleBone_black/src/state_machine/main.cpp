@@ -42,7 +42,6 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
-  // std::cout << "State machine thread successfully started" << std::endl;
 
   while (1) {
     // data::Navigation nav_data = data.getNavigationData();
