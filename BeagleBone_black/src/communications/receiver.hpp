@@ -1,7 +1,7 @@
 /*
- * Authors: Kofi and Isabella
+ * Author: Kofi and Isabella
  * Organisation: HYPED
- * Date: 1. April 2018
+ * Date: 15/04/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,14 +18,12 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_RECEIVER_HPP_
+#define BEAGLEBONE_BLACK_COMMUNICATIONS_RECEIVER_HPP_
 
 #include "utils/concurrent/thread.hpp"
-#include "data/data.hpp"
 #include "communications/communications.hpp"
-#include "communications/sender.hpp"
-#include "communications/receiver.hpp"
+
 
 namespace hyped {
 
@@ -34,18 +32,15 @@ using utils::Logger;
 
 namespace communications {
 
-class Main : public Thread {
+class ReceiverThread : public Thread {
  public:
-  explicit Main(uint8_t id, Logger& log);
+  explicit ReceiverThread(Communications* baseCommunicator);
   void run() override;
 
  private:
   Communications* baseCommunicator;
-  // data::Data& data = data::Data::getInstance();
-  // data::Navigation nav;
-  // data::Motors mtr;
 };
 
-}}  //  namespace hyped::communications
+}}  //   namespace hyped::communications
 
-#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_RECEIVER_HPP_

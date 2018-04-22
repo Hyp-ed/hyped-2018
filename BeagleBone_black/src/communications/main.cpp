@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
@@ -23,29 +23,37 @@
 namespace hyped {
 namespace communications {
 
-Main::Main(uint8_t id, Logger& log) : Thread(id, log)
+Main::Main(uint8_t id, Logger& log)
+    : Thread(id, log)
 {
   // To use IP address: Communications((char *) "127.0.0.1");
-  baseCommunicator = new Communications();
+  baseCommunicator = new Communications(log);
   baseCommunicator->setUp();
-  // TODO(kofi): start receiverThread here
 }
 
 void Main::run()
 {
-  while (1) {
-    nav = data.getNavigationData();
-    mtr = data.getMotorData();
-    sensors_ = data.getSensorsData();
-    baseCommunicator->sendDistance(nav.distance);
-    baseCommunicator->sendVelocity(nav.velocity);
-    baseCommunicator->sendAcceleration(nav.acceleration);
-    baseCommunicator->sendStripeCount(sensors_.stripe_cnt.value);
-    baseCommunicator->sendRpmFl(mtr.rpm_FL);
-    baseCommunicator->sendRpmFr(mtr.rpm_FR);
-    baseCommunicator->sendRpmBl(mtr.rpm_BL);
-    baseCommunicator->sendRpmBr(mtr.rpm_BR);
-  }
+  SenderThread* senderThread = new SenderThread(baseCommunicator);
+  ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator);
+  senderThread->start();
+  receiverThread->start();
+  senderThread->join();
+  receiverThread->join();
+  delete senderThread;
+  delete receiverThread;
+
+  // while (1) {
+  //   nav = data.getNavigationData();
+  //   mtr = data.getMotorData();
+  //   baseCommunicator->sendDistance(nav.distance);
+  //   baseCommunicator->sendVelocity(nav.velocity);
+  //   baseCommunicator->sendAcceleration(nav.acceleration);
+  //   baseCommunicator->sendStripeCount(nav.stripe_count);
+  //   baseCommunicator->sendRpmFl(mtr.rpm_FL);
+  //   baseCommunicator->sendRpmFr(mtr.rpm_FR);
+  //   baseCommunicator->sendRpmBl(mtr.rpm_BL);
+  //   baseCommunicator->sendRpmBr(mtr.rpm_BR);
+  // }
 }
 
 }}

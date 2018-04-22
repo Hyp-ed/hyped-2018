@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
@@ -31,22 +31,20 @@
 #include <netdb.h>
 #include <string>
 #include <iostream>
+#include "utils/logger.hpp"
 using namespace std;
 
 namespace hyped {
+
+using utils::Logger;
+
 namespace communications {
 
 class Communications
 {
- private:
-  int sockfd, portNo, n;
-  struct sockaddr_in serv_addr;
-  struct hostent *server;
-  char buffer[256];
-
  public:
-  Communications();
-  explicit Communications(char* ip);
+  explicit Communications(Logger& log);
+  explicit Communications(Logger& log, char* ip);
   bool setUp();
   ~Communications();
   int sendDistance(float distance);   // CMD01
@@ -58,7 +56,14 @@ class Communications
   int sendRpmBl(float rpmBl);         // CMD07
   int sendRpmBr(float rpmBr);         // CMD08
   int sendData(string message);
-  // void receiverThread();
+  void receiveMessage();
+
+ private:
+  int sockfd, portNo, n;
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
+  char buffer[256];
+  Logger& log_;
 };
 
 }}  //  namespace hyped::communications
