@@ -87,20 +87,23 @@ NavigationType Navigation::get_displacement()
 
 void Navigation::gyro_update(DataPoint<NavigationVector> angular_velocity)
 {
-  auto theta = prev_angular_velocity_.value.norm();
-  auto angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)*theta/2;
+  double theta = prev_angular_velocity_.value.norm();
+  double angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)
+                             * theta/2;
+  double scalar_part = cos(angle_of_rotation);
+
   auto vector_part = (prev_angular_velocity_.value/theta)*sin(angle_of_rotation);
-  auto scalar_part = cos(angle_of_rotation);
   Quaternion<int16_t> rotation_quaternion(scalar_part, vector_part);
+
   orientation_ *= rotation_quaternion;
   prev_angular_velocity_ = angular_velocity;
 }
 
 void Navigation::acclerometer_update(DataPoint<NavigationVector> acceleration)
 {
-  accleration_ = acceleration.value;
+  accleration_  = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
-  velocity_ = velocity.value;
+  velocity_     = velocity.value;
   displacement_ = velocity_integrator_.update(velocity).value;
 }
 
