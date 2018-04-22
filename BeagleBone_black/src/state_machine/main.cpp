@@ -42,7 +42,6 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
-
   while (1) {
     // data::Navigation nav_data = data.getNavigationData();
 
