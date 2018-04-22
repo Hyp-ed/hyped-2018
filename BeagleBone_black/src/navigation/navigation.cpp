@@ -17,11 +17,12 @@
  */
 
 #include "navigation.hpp"
+#include <math.h>
 
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation()
+Navigation::Navigation() : prev_angular_velocity_(0 , Vector<int16_t, 3>())
 {
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
       acceleration_filter_[i].configure(Vector<int16_t, 3>(),
@@ -90,7 +91,13 @@ int16_t Navigation::get_displacement()
 
 void Navigation::gyro_update(DataPoint<Vector<int16_t, 3>> angular_velocity)
 {
-  // TODO(Adi): Calculate Point 1 of the FDP.
+  auto theta = prev_angular_velocity_.value.norm();
+  auto angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)*theta/2;
+  auto vector_part = (prev_angular_velocity_.value/theta)*sin(angle_of_rotation);
+  auto scalar_part = cos(angle_of_rotation);
+  Quaternion<int16_t> rotation_quaternion(scalar_part, vector_part);
+  orientation_ *= rotation_quaternion;
+  prev_angular_velocity_ = angular_velocity;
 }
 
 void Navigation::acclerometer_update(DataPoint<Vector<int16_t, 3>> acceleration)

@@ -112,6 +112,7 @@ class Navigation {
   Vector<int16_t, 3> accleration_;
   Vector<int16_t, 3> velocity_;
   Vector<int16_t, 3> displacement_;
+  DataPoint<Vector<int16_t, 3>> prev_angular_velocity_;
   Quaternion<int16_t> orientation_;
   int stripe_count_;
 
