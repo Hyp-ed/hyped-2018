@@ -99,7 +99,7 @@ Can::~Can()
 int Can::send(const CanFrame& frame)
 {
   can_frame can;
-  log_.DBG2("CAN", "trying to send something\n");
+  log_.DBG2("CAN", "trying to send something");
   // checks, id <= ID_MAX, len <= LEN_MAX
   if (frame.len > 8) {
     log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
@@ -116,11 +116,12 @@ int Can::send(const CanFrame& frame)
   }
 
   if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
-    perror("write");
+    // perror("write");
+    log_.ERR("CAN", "cannot write to socket");
     return 0;
   }
 
-  log_.DBG1("CAN", "message with id %d sent, extended:%d\n"
+  log_.DBG1("CAN", "message with id %d sent, extended:%d"
     , frame.id
     , frame.extended);
   return 1;
@@ -131,13 +132,13 @@ void Can::run()
   /* these settings are static and can be held out of the hot path */
   CanFrame data;
 
-  log_.INFO("CAN", "starting continuous reading\n");
+  log_.INFO("CAN", "starting continuous reading");
   while (running_) {
     receive(&data);
     processNewData(&data);
   }
 
-  log_.INFO("CAN", "stopped continuous reading\n");
+  log_.INFO("CAN", "stopped continuous reading");
 }
 
 int Can::receive(CanFrame* frame)
@@ -147,7 +148,8 @@ int Can::receive(CanFrame* frame)
 
   nBytes = read(socket_, &raw_data, CAN_MTU);
   if (nBytes != CAN_MTU) {
-    perror("read");
+    // perror("read");
+    log_.ERR("CAN", "cannot read from socket");
     return 0;
   }
 
@@ -157,7 +159,7 @@ int Can::receive(CanFrame* frame)
   for (int i = 0; i < frame->len; i++) {
     frame->data[i] = raw_data.data[i];
   }
-  log_.DBG1("CAN", "received %u %u, extended %d\n"
+  log_.DBG1("CAN", "received %u %u, extended %d"
     , raw_data.can_id
     , frame->id
     , frame->extended);
@@ -180,7 +182,7 @@ void Can::processNewData(CanFrame* message)
   if (owner) {
     owner->processNewData(*message);
   } else {
-    log_.ERR("CAN", "did not find owner of received CAN message with id %d\n", id);
+    log_.ERR("CAN", "did not find owner of received CAN message with id %d", id);
   }
 }
 

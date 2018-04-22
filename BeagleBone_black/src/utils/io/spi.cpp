@@ -91,25 +91,25 @@ SPI::SPI(Logger& log)
   // set clock frequency
   uint32_t clock = SPI_CLK;
   if (ioctl(spi_fd_, SPI_IOC_WR_MAX_SPEED_HZ, &clock) < 0) {
-    log_.ERR("SPI", "could not set clock frequency\n");
+    log_.ERR("SPI", "could not set clock frequency");
   }
 
   // set bits per word
   uint8_t bits = SPI_BITS;
   if (ioctl(spi_fd_, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0) {
-    log_.ERR("SPI", "could not set bits per word\n");
+    log_.ERR("SPI", "could not set bits per word");
   }
 
   // set clock mode and CS active low
   uint8_t mode = (SPI_MODE & 0x3) & ~SPI_CS_HIGH;
   if (ioctl(spi_fd_, SPI_IOC_WR_MODE, &mode) < 0) {
-    log_.ERR("SPI", "could not set mode\n");
+    log_.ERR("SPI", "could not set mode");
   }
 
   // set bit order
   uint8_t order = SPI_MSBFIRST;
   if (ioctl(spi_fd_, SPI_IOC_WR_LSB_FIRST, &order) < 0) {
-    log_.ERR("SPI", "could not set bit order\n");
+    log_.ERR("SPI", "could not set bit order");
   }
 }
 
@@ -122,7 +122,7 @@ void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
   message.len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(1), &message) < 0) {
-    log_.ERR("SPI", "could not submit TRANSFER message\n");
+    log_.ERR("SPI", "could not submit TRANSFER message");
   }
 }
 
@@ -141,7 +141,7 @@ void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
   message[1].len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
-    log_.ERR("SPI", "could not submit 2 TRANSFER messages\n");
+    log_.ERR("SPI", "could not submit 2 TRANSFER messages");
   }
 }
 
@@ -160,7 +160,7 @@ void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
   message[1].len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
-    log_.ERR("SPI", "could not submit 2 TRANSFER messages\n");
+    log_.ERR("SPI", "could not submit 2 TRANSFER messages");
   }
 }
 

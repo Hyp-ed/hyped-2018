@@ -51,7 +51,7 @@ void Main::run()
       imu.acc.timestamp = time;
     }
 
-    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d\n"
+    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d"
       , bms_data->voltage[0]
       , bms_data->voltage[1]
       , bms_data->voltage[2]
