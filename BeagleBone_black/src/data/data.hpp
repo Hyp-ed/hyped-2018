@@ -58,10 +58,11 @@ struct StateMachine {
 // -----------------------------------------------------------------------------
 // Navigation
 // -----------------------------------------------------------------------------
+typedef float NavigationType;
 struct Navigation {
-  uint32_t distance;
-  uint32_t velocity;
-  int32_t acceleration;
+  NavigationType distance;
+  NavigationType velocity;
+  NavigationType acceleration;
 };
 
 // -----------------------------------------------------------------------------
@@ -69,8 +70,8 @@ struct Navigation {
 // -----------------------------------------------------------------------------
 
 struct Imu {
-  DataPoint<Vector<int16_t, 3> > acc;
-  DataPoint<Vector<int16_t, 3> > gyr;
+  DataPoint<Vector<NavigationType, 3> > acc;
+  DataPoint<Vector<NavigationType, 3> > gyr;
 };
 
 struct Proximity {
