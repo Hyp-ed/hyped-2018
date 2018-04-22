@@ -47,9 +47,9 @@ class Communications
   explicit Communications(Logger& log, char* ip);
   bool setUp();
   ~Communications();
-  int sendDistance(float distance);   // CMD01
-  int sendVelocity(float speed);      // CMD02
-  int sendAcceleration(float accel);  // CMD03
+  int sendDistance(auto distance);    // CMD01
+  int sendVelocity(auto speed);       // CMD02
+  int sendAcceleration(auto accel);   // CMD03
   int sendStripeCount(int stripes);   // CMD04
   int sendRpmFl(float rpmfl);         // CMD05
   int sendRpmFr(float rpmfr);         // CMD06
