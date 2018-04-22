@@ -50,17 +50,17 @@ bool Communications::setUp()
     return false;
   }
 
-  server_ = gethostbyname(ipAddress);
+  server = gethostbyname(ipAddress);
 
   if (server == NULL) {
     log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
     return false;
   }
 
-  bzero(&serv_addr_, sizeof(serv_addr_));
-  serv_addr_.sin_family = AF_INET;   // server byte order
-  bcopy(server_->h_addr, &serv_addr_.sin_addr.s_addr, server_->h_length);
-  serv_addr_.sin_port = htons(portNo_);
+  bzero(&serv_addr, sizeof(serv_addr));
+  serv_addr.sin_family = AF_INET;   // server byte order
+  bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
+  serv_addr.sin_port = htons(portNo_);
 
   if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
