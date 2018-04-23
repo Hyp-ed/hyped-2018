@@ -26,12 +26,29 @@ namespace communications {
 ReceiverThread::ReceiverThread(Communications* baseCommunicator)
     : Thread()
     , baseCommunicator_(baseCommunicator)
+    , data_(data::Data::getInstance())
 { /* Empty */ }
 
 void ReceiverThread::run()
 {
+  data::Communications cmn_data;
+
+  cmn_data.stopCommand = false;
+  cmn_data.killPowerCommand = false;
+
   while (1) {
-    baseCommunicator_->receiveMessage();
+    int command = baseCommunicator_->receiveMessage();
+
+    switch (command) {
+      case 1:
+        cmn_data.stopCommand = true;
+        break;
+      case 2:
+        cmn_data.killPowerCommand = true;
+        break;
+    }
+
+    data_.setCommunicationsData(cmn_data);
   }
 }
 

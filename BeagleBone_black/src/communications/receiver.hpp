@@ -23,7 +23,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "communications/communications.hpp"
-
+#include "data/data.hpp"
 
 namespace hyped {
 
@@ -39,6 +39,7 @@ class ReceiverThread : public Thread {
 
  private:
   Communications* baseCommunicator_;
+  data::Data& data_;
 };
 
 }}  //   namespace hyped::communications

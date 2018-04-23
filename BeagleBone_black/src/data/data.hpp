@@ -187,7 +187,7 @@ class Data {
    */
   void setStripeCount(const StripeCount& stripe_count);
 
-    /**
+  /**
    * @brief      Retrieves data from the batteries.
    */
   Sensors getBatteryData();
@@ -208,14 +208,14 @@ class Data {
   void setMotorData(const Motors& motor_data);
 
   /**
-     * @brief      Retrieves data on whether stop/kill power commands have been issued.
-     */
-    Communications getCommunicationsData();
+   * @brief      Retrieves data on whether stop/kill power commands have been issued.
+   */
+  Communications getCommunicationsData();
 
-    /**
-     * @brief      Should be called to update motor data.
-     */
-    void setCommunicationsData(const Communications& communications_data);
+  /**
+   * @brief      Should be called to update communications data.
+   */
+  void setCommunicationsData(const Communications& communications_data);
 
  private:
   StateMachine state_machine_;
