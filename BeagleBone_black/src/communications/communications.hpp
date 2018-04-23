@@ -46,7 +46,7 @@ namespace communications {
 class Communications
 {
  public:
-  explicit Communications(Logger& log, const char* ip);
+  explicit Communications(Logger& log, const char* ip, int portNo);
   ~Communications();
   int sendDistance(NavigationType distance);    // CMD01
   int sendVelocity(NavigationType speed);       // CMD02
@@ -57,10 +57,10 @@ class Communications
   int sendRpmBl(float rpmBl);                   // CMD07
   int sendRpmBr(float rpmBr);                   // CMD08
   int sendData(string message);
-  void receiveMessage();
+  int receiveMessage();
 
  private:
-  int sockfd_, portNo_, n_;
+  int sockfd_, n_;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
