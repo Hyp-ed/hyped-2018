@@ -46,9 +46,7 @@ namespace communications {
 class Communications
 {
  public:
-  explicit Communications(Logger& log);
-  explicit Communications(Logger& log, char* ip);
-  bool setUp();
+  explicit Communications(Logger& log, const char* ip);
   ~Communications();
   int sendDistance(NavigationType distance);    // CMD01
   int sendVelocity(NavigationType speed);       // CMD02

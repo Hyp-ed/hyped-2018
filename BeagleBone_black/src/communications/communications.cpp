@@ -30,35 +30,21 @@ using data::Communications;
 
 namespace communications {
 
-std::string defaultIP = "localhost";
-std::string ipAddress = (defaultIP);  // cannot use string because getbyhostname() requires char*
-
-Communications::Communications(Logger& log): log_(log)
+Communications::Communications(Logger& log, const char* ip)
+    : log_(log)
 {
-  log_.INFO("CMN", "BaseCommunicator initialised");
-}
-
-Communications::Communications(Logger& log, char* ip): log_(log)
-{
-  log_.INFO("CMN", "BaseCommunicator initialised");
-  ipAddress = ip;
-}
-
-bool Communications::setUp()
-{
+  log_.INFO("CMN", "BaseCommunicator initialised.");
   portNo_ = 5695;
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
   if (sockfd_ < 0) {
     log_.ERR("CMN", "CANNOT OPEN SOCKET.");
-    return false;
   }
 
-  server = gethostbyname(ipAddress.c_str());
+  server = gethostbyname(ip);
 
   if (server == NULL) {
     log_.ERR("CMN", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
-    return false;
   }
 
   memset(&serv_addr, '\0', sizeof(serv_addr));
@@ -68,11 +54,9 @@ bool Communications::setUp()
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("CMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
-    return false;
   }
 
-  // n = read(sockfd, buffer, 255);
-  return true;
+  log_.INFO("CMN", "TCP/IP connection established.");
 }
 
 Communications::~Communications()
