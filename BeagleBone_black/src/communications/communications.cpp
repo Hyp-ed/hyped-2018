@@ -31,7 +31,7 @@ using data::Communications;
 namespace communications {
 
 std::string defaultIP = "localhost";
-std::string ipAddress = (defaultIP); //cannot use string because getbyhostname() requires char*
+std::string ipAddress = (defaultIP);  // cannot use string because getbyhostname() requires char*
 
 Communications::Communications(Logger& log): log_(log)
 {
@@ -148,7 +148,7 @@ int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
   memset(buffer, '\0', 256);
-  const char *data_ = message.c_str(); //cannot use string because strlen requies char*
+  const char *data_ = message.c_str();  // cannot use string because strlen requies char*
   n_ = write(sockfd_, data_, strlen(data_));
   if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
   n_ = read(sockfd_, buffer, 255);
