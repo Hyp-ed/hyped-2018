@@ -20,6 +20,8 @@
 
 #include "communications/main.hpp"
 
+#include <stdio.h>
+
 namespace hyped {
 namespace communications {
 
@@ -27,7 +29,8 @@ Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
 {
   const char* ipAddress = "localhost";
-  baseCommunicator_ = new Communications(log, ipAddress);
+  int portNo = 5695;
+  baseCommunicator_ = new Communications(log, ipAddress, portNo);
 }
 
 void Main::run()

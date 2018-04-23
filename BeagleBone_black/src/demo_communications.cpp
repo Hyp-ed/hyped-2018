@@ -25,9 +25,10 @@ using namespace hyped::communications;
 
 int main()
 {
+  const char* ipAddress = "localhost";
+  int portNo = 5695;
   hyped::utils::Logger log(true, 1);
-  hyped::communications::Communications baseCommunicator(log); // to add parameter: baseCommunicator((char *) "127.0.0.1");
-  baseCommunicator.setUp();
+  hyped::communications::Communications baseCommunicator(log, ipAddress, portNo);
   baseCommunicator.sendVelocity(6546);
   baseCommunicator.sendDistance(564);
   baseCommunicator.sendAcceleration(584);
