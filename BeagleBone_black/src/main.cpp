@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
   log_system.DBG1("MAIN", "DBG1");
   log_system.DBG2("MAIN", "DBG2");
   log_system.DBG3("MAIN", "DBG3");
-  log_system.DBG3("MAIN", "DBG4");
 
   Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
   Thread* motor     = new hyped::motor_control::Main(1, log_motor);

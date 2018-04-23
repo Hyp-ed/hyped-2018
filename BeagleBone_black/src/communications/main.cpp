@@ -48,8 +48,9 @@ void Main::run()
     baseCommunicator_->sendRpmBl(mtr_.rpm_BL);
     baseCommunicator_->sendRpmBr(mtr_.rpm_BR);
   }
-  // receiverThread->join();
-  // delete receiverThread;
+
+  receiverThread->join();
+  delete receiverThread;
 }
 
 }}
