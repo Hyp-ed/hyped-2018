@@ -45,7 +45,7 @@ namespace navigation {
 
 class Navigation {
  public:
-  typedef std::array<Imu, Sensors::kNumImus> ImuArray;
+  typedef std::array<Imu,       Sensors::kNumImus>        ImuArray;
   typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
 
   Navigation();
@@ -116,12 +116,12 @@ class Navigation {
   NavigationVector displacement_;
   DataPoint<NavigationVector> prev_angular_velocity_;
   Quaternion<int16_t> orientation_;
-  int stripe_count_;
+  uint32_t stripe_count_;
 
   // TODO(ALL): Decide the type
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;
-  std::array<Kalman<uint8_t>, Sensors::kNumProximities> proximity_filter_;
+  std::array<Kalman<uint8_t>, Sensors::kNumProximities>   proximity_filter_;
 
   Integrator<NavigationVector> acceleration_integrator_;
   Integrator<NavigationVector> velocity_integrator_;

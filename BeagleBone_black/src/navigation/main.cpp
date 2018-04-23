@@ -36,15 +36,19 @@ void Main::run()
 {
   data::Navigation nav_data;
   std::unique_ptr<Sensors> last_readings(new Sensors());
-  *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   std::unique_ptr<Sensors> readings(new Sensors());
   log_.INFO("NAVIGATION", "Main started");
+
+  *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
     *readings = data_.getSensorsData();
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
-    if (!imuChanged(*last_readings, *readings))
+    if (!imuChanged(*last_readings, *readings)) {
+      // let other threads run, maybe someone will update the sensors data
+      yield();
       continue;
+    }
     if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
       nav_.update(readings->imu, readings->proxi, readings->stripe_count);
     else if (proxiChanged(*last_readings, *readings))
@@ -54,8 +58,8 @@ void Main::run()
     else
       nav_.update(readings->imu);
 
-    nav_data.distance = nav_.get_displacement();
-    nav_data.velocity = nav_.get_velocity();
+    nav_data.distance     = nav_.get_displacement();
+    nav_data.velocity     = nav_.get_velocity();
     nav_data.acceleration = nav_.get_accleration();
     data_.setNavigationData(nav_data);
 
@@ -65,19 +69,21 @@ void Main::run()
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (unsigned int i = 0; i < new_data.imu.size(); ++i)
+  for (uint8_t i = 0; i < new_data.imu.size(); ++i) {
     if (new_data.imu[i].gyr.timestamp != old_data.imu[i].gyr.timestamp ||
         new_data.imu[i].acc.timestamp != old_data.imu[i].acc.timestamp)
       return true;
+  }
   return false;
 }
 
 bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (unsigned int i = 0; i < new_data.proxi.size(); ++i)
+  for (uint8_t i = 0; i < new_data.proxi.size(); ++i) {
     // TODO(Brano): Timestamp proxi data in data::Sensors
     if (new_data.proxi[i].val != old_data.proxi[i].val)
       return true;
+  }
   return false;
 }
 

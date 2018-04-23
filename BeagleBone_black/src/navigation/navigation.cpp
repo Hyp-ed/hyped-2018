@@ -26,8 +26,11 @@ Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
       acceleration_filter_[i].configure(NavigationVector(),
-                                        NavigationVector(), NavigationVector());
-      gyro_filter_[i].configure(NavigationVector(), NavigationVector(), NavigationVector());
+                                        NavigationVector(),
+                                        NavigationVector());
+      gyro_filter_[i].configure(NavigationVector(),
+                                NavigationVector(),
+                                NavigationVector());
   }
 
   for (auto filter: proximity_filter_)
@@ -43,8 +46,8 @@ void Navigation::update(ImuArray imus)
   }
 
   NavigationVector avg(0);
-  for (const auto& imu : imus)
-    avg += imu.acc.value;
+  for (const auto& imu : imus) avg += imu.acc.value;
+
   avg /= imus.size();
   // TODO(Brano,Adi): Change the timestamping strategy
   this->acclerometer_update(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
@@ -87,15 +90,14 @@ NavigationType Navigation::get_displacement()
 
 void Navigation::gyro_update(DataPoint<NavigationVector> angular_velocity)
 {
-  double theta = prev_angular_velocity_.value.norm();
+  double theta             = prev_angular_velocity_.value.norm();
   double angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)
                              * theta/2;
-  double scalar_part = cos(angle_of_rotation);
+  double scalar_part  = cos(angle_of_rotation);
+  auto   vector_part  = (prev_angular_velocity_.value/theta)*sin(angle_of_rotation);
 
-  auto vector_part = (prev_angular_velocity_.value/theta)*sin(angle_of_rotation);
   Quaternion<int16_t> rotation_quaternion(scalar_part, vector_part);
-
-  orientation_ *= rotation_quaternion;
+  orientation_          *= rotation_quaternion;
   prev_angular_velocity_ = angular_velocity;
 }
 
