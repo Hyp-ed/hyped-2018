@@ -26,9 +26,8 @@ namespace communications {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
 {
-  // To use IP address: Communications((char *) "127.0.0.1");
-  baseCommunicator_ = new Communications(log);
-  baseCommunicator_->setUp();
+  const char* ipAddress = "localhost";
+  baseCommunicator_ = new Communications(log, ipAddress);
 }
 
 void Main::run()
