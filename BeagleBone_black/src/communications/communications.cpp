@@ -35,12 +35,12 @@ std::string ipAddress = (defaultIP);  // cannot use string because getbyhostname
 
 Communications::Communications(Logger& log): log_(log)
 {
-  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
+  log_.INFO("CMN", "BaseCommunicator initialised");
 }
 
 Communications::Communications(Logger& log, char* ip): log_(log)
 {
-  log_.INFO("COMMUNICATIONS", "BaseCommunicator initialised");
+  log_.INFO("CMN", "BaseCommunicator initialised");
   ipAddress = ip;
 }
 
@@ -50,14 +50,14 @@ bool Communications::setUp()
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
   if (sockfd_ < 0) {
-    log_.ERR("COMMUNICATIONS", "CANNOT OPEN SOCKET.");
+    log_.ERR("CMN", "CANNOT OPEN SOCKET.");
     return false;
   }
 
   server = gethostbyname(ipAddress.c_str());
 
   if (server == NULL) {
-    log_.ERR("COMMUNICATIONS", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
+    log_.ERR("CMN", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
     return false;
   }
 
@@ -67,7 +67,7 @@ bool Communications::setUp()
   serv_addr.sin_port = htons(portNo_);
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-    log_.ERR("COMMUNICATIONS", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
+    log_.ERR("CMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
     return false;
   }
 
@@ -150,9 +150,9 @@ int Communications::sendData(string message)
   memset(buffer, '\0', 256);
   const char *data_ = message.c_str();  // cannot use string because strlen requies char*
   n_ = write(sockfd_, data_, strlen(data_));
-  if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT WRITE TO SOCKET.\n");
+  if (n_ < 0) log_.ERR("CMN", "CANNOT WRITE TO SOCKET.\n");
   n_ = read(sockfd_, buffer, 255);
-  if (n_ < 0) log_.ERR("COMMUNICATIONS", "CANNOT READ FROM SOCKET.\n");
+  if (n_ < 0) log_.ERR("CMN", "CANNOT READ FROM SOCKET.\n");
 
   return atoi(buffer);
 }
@@ -164,13 +164,13 @@ void Communications::receiveMessage()
 
   switch (command) {
     case 1:
-      log_.INFO("COMMUNICATIONS", "Received 1");
+      log_.INFO("CMN", "Received 1");
         break;
     case 2:
-      log_.INFO("COMMUNICATIONS", "Received 2");
+      log_.INFO("CMN", "Received 2");
       break;
     case 3:
-      log_.INFO("COMMUNICATIONS", "Received 3");
+      log_.INFO("CMN", "Received 3");
       break;
   }
 }
