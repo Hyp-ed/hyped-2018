@@ -12,6 +12,7 @@ SRCS := \
   navigation/navigation.cpp \
   sensors/main.cpp \
   sensors/bms.cpp \
+  sensors/vl6180.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/sender.cpp \

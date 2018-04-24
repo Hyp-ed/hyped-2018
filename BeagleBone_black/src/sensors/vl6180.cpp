@@ -24,62 +24,62 @@
 #include <chrono>
 
 // Register addresses
-constexpr IDENTIFICATION__MODEL_ID              0x0000
-constexpr IDENTIFICATION__MODEL_REV_MAJOR       0x0001
-constexpr IDENTIFICATION__MODEL_REV_MINOR       0x0002
-constexpr IDENTIFICATION__MODULE_REV_MAJOR      0x0003
-constexpr IDENTIFICATION__MODULE_REV_MINOR      0x0004
-constexpr IDENTIFICATION__DATE_HI               0x0006
-constexpr IDENTIFICATION__DATE_LO               0x0007
-constexpr IDENTIFICATION__TIME                  0x0008 // Could also use 0x0009
-constexpr SYSTEM__MODE_GPIO0                    0x0010
-constexpr SYSTEM__MODE_GPIO1                    0x0011
-constexpr SYSTEM__HISTORY_CTRL                  0x0012
-constexpr SYSTEM__INTERRUPT_CONFIG_GPIO         0x0014
-constexpr SYSTEM__INTERRUPT_CLEAR               0x0015
-constexpr SYSTEM__FRESH_OUT_OF_RESET            0x0016
-constexpr SYSTEM__GROUPED_PARAMETER_HOLD        0x0017
-constexpr SYSRANGE__START                       0x0018
-constexpr SYSRANGE__THRESH_HIGH                 0x0019
-constexpr SYSRANGE__THRESH_LOW                  0x001A
-constexpr SYSRANGE__INTERMEASUREMENT_PERIOD     0x001B
-constexpr SYSRANGE__MAX_CONVERGENCE_TIME        0x001C
-constexpr SYSRANGE__CROSSTALK_COMPENSATION_RATE 0x001E
-constexpr SYSRANGE__CROSSTALK_VALID_HEIGHT      0x0021
-constexpr SYSRANGE__EARLY_CONVERGENCE_ESTIMATE  0x0022
-constexpr SYSRANGE__PART_TO_PART_RANGE_OFFSET   0x0024
-constexpr SYSRANGE__RANGE_IGNORE_VALID_HEIGHT   0x0025
-constexpr SYSRANGE__RANGE_IGNORE_THRESHOLD      0x0026
-constexpr SYSRANGE__MAX_AMBIENT_LEVEL_MULT      0x002C
-constexpr SYSRANGE__RANGE_CHECK_ENABLES         0x002D
-constexpr SYSRANGE__VHV_RECALIBRATE             0x002E
-constexpr SYSRANGE__VHV_REPEAT_RATE             0x0031
-constexpr SYSALS__START                         0x0038
-constexpr SYSALS__THRESH_HIGH                   0x003A
-constexpr SYSALS__THRESH_LOW                    0x003C
-constexpr SYSALS__INTERMEASUREMENT_PERIOD       0x003E
-constexpr SYSALS__ANALOGUE_GAIN                 0x003F
-constexpr SYSALS__INTEGRATION_PERIOD            0x0040
-constexpr RESULT__RANGE_STATUS                  0x004D
-constexpr RESULT__ALS_STATUS                    0x004E
-constexpr RESULT__INTERRUPT_STATUS_GPIO         0x004F
-constexpr RESULT__ALS_VAL                       0x0050
-constexpr RESULT__HISTORY_BUFFER_x              0x0052 // range 0x0052 to 0x0060
-constexpr RESULT__RANGE_VAL                     0x0062
-constexpr RESULT__RANGE_RAW                     0x0064
-constexpr RESULT__RANGE_RETURN_RATE             0x0066
-constexpr RESULT__RANGE_REFERENCE_RATE          0x0068
-constexpr RESULT__RANGE_RETURN_SIGNAL_COUNT     0x006C
-constexpr RESULT__RANGE_REFERENCE_SIGNAL_COUNT  0x0070
-constexpr RESULT__RANGE_RETURN_AMB_COUNT        0x0074
-constexpr RESULT__RANGE_REFERENCE_AMB_COUNT     0x0078
-constexpr RESULT__RANGE_RETURN_CONV_TIME        0x007C
-constexpr RESULT__RANGE_REFERENCE_CONV_TIME     0x0080
-constexpr READOUT__AVERAGING_SAMPLE_PERIOD      0x010A
-constexpr FIRMWARE__BOOTUP                      0x0119
-constexpr FIRMWARE__RESULT_SCALER               0x0120
-constexpr I2C_SLAVE__DEVICE_ADDRESS             0x0212
-constexpr INTERLEAVED_MODE__ENABLE              0x02A3
+constexpr uint16_t IDENTIFICATION__MODEL_ID              = 0x0000;
+constexpr uint16_t IDENTIFICATION__MODEL_REV_MAJOR       = 0x0001;
+constexpr uint16_t IDENTIFICATION__MODEL_REV_MINOR       = 0x0002;
+constexpr uint16_t IDENTIFICATION__MODULE_REV_MAJOR      = 0x0003;
+constexpr uint16_t IDENTIFICATION__MODULE_REV_MINOR      = 0x0004;
+constexpr uint16_t IDENTIFICATION__DATE_HI               = 0x0006;
+constexpr uint16_t IDENTIFICATION__DATE_LO               = 0x0007;
+constexpr uint16_t IDENTIFICATION__TIME                  = 0x0008; // Could also use 0x0009
+constexpr uint16_t SYSTEM__MODE_GPIO0                    = 0x0010;
+constexpr uint16_t SYSTEM__MODE_GPIO1                    = 0x0011;
+constexpr uint16_t SYSTEM__HISTORY_CTRL                  = 0x0012;
+constexpr uint16_t SYSTEM__INTERRUPT_CONFIG_GPIO         = 0x0014;
+constexpr uint16_t SYSTEM__INTERRUPT_CLEAR               = 0x0015;
+constexpr uint16_t SYSTEM__FRESH_OUT_OF_RESET            = 0x0016;
+constexpr uint16_t SYSTEM__GROUPED_PARAMETER_HOLD        = 0x0017;
+constexpr uint16_t SYSRANGE__START                       = 0x0018;
+constexpr uint16_t SYSRANGE__THRESH_HIGH                 = 0x0019;
+constexpr uint16_t SYSRANGE__THRESH_LOW                  = 0x001A;
+constexpr uint16_t SYSRANGE__INTERMEASUREMENT_PERIOD     = 0x001B;
+constexpr uint16_t SYSRANGE__MAX_CONVERGENCE_TIME        = 0x001C;
+constexpr uint16_t SYSRANGE__CROSSTALK_COMPENSATION_RATE = 0x001E;
+constexpr uint16_t SYSRANGE__CROSSTALK_VALID_HEIGHT      = 0x0021;
+constexpr uint16_t SYSRANGE__EARLY_CONVERGENCE_ESTIMATE  = 0x0022;
+constexpr uint16_t SYSRANGE__PART_TO_PART_RANGE_OFFSET   = 0x0024;
+constexpr uint16_t SYSRANGE__RANGE_IGNORE_VALID_HEIGHT   = 0x0025;
+constexpr uint16_t SYSRANGE__RANGE_IGNORE_THRESHOLD      = 0x0026;
+constexpr uint16_t SYSRANGE__MAX_AMBIENT_LEVEL_MULT      = 0x002C;
+constexpr uint16_t SYSRANGE__RANGE_CHECK_ENABLES         = 0x002D;
+constexpr uint16_t SYSRANGE__VHV_RECALIBRATE             = 0x002E;
+constexpr uint16_t SYSRANGE__VHV_REPEAT_RATE             = 0x0031;
+constexpr uint16_t SYSALS__START                         = 0x0038;
+constexpr uint16_t SYSALS__THRESH_HIGH                   = 0x003A;
+constexpr uint16_t SYSALS__THRESH_LOW                    = 0x003C;
+constexpr uint16_t SYSALS__INTERMEASUREMENT_PERIOD       = 0x003E;
+constexpr uint16_t SYSALS__ANALOGUE_GAIN                 = 0x003F;
+constexpr uint16_t SYSALS__INTEGRATION_PERIOD            = 0x0040;
+constexpr uint16_t RESULT__RANGE_STATUS                  = 0x004D;
+constexpr uint16_t RESULT__ALS_STATUS                    = 0x004E;
+constexpr uint16_t RESULT__INTERRUPT_STATUS_GPIO         = 0x004F;
+constexpr uint16_t RESULT__ALS_VAL                       = 0x0050;
+constexpr uint16_t RESULT__HISTORY_BUFFER_x              = 0x0052; // range 0x0052 to 0x0060
+constexpr uint16_t RESULT__RANGE_VAL                     = 0x0062;
+constexpr uint16_t RESULT__RANGE_RAW                     = 0x0064;
+constexpr uint16_t RESULT__RANGE_RETURN_RATE             = 0x0066;
+constexpr uint16_t RESULT__RANGE_REFERENCE_RATE          = 0x0068;
+constexpr uint16_t RESULT__RANGE_RETURN_SIGNAL_COUNT     = 0x006C;
+constexpr uint16_t RESULT__RANGE_REFERENCE_SIGNAL_COUNT  = 0x0070;
+constexpr uint16_t RESULT__RANGE_RETURN_AMB_COUNT        = 0x0074;
+constexpr uint16_t RESULT__RANGE_REFERENCE_AMB_COUNT     = 0x0078;
+constexpr uint16_t RESULT__RANGE_RETURN_CONV_TIME        = 0x007C;
+constexpr uint16_t RESULT__RANGE_REFERENCE_CONV_TIME     = 0x0080;
+constexpr uint16_t READOUT__AVERAGING_SAMPLE_PERIOD      = 0x010A;
+constexpr uint16_t FIRMWARE__BOOTUP                      = 0x0119;
+constexpr uint16_t FIRMWARE__RESULT_SCALER               = 0x0120;
+constexpr uint16_t I2C_SLAVE__DEVICE_ADDRESS             = 0x0212;
+constexpr uint16_t INTERLEAVED_MODE__ENABLE              = 0x02A3;
 
 namespace hyped {
 namespace sensors {
@@ -87,7 +87,7 @@ namespace sensors {
 Vl6180::Vl6180(uint8_t id, Logger& log)
   :Thread(id, log)
 {
-  log_.INFO("VL6180", "Creating a sensor with id: " + id + "\n");
+  log_.INFO("VL6180", "Creating a sensor with id: %d", id);
 }
 
 void Vl6180:: turnOn()
@@ -159,7 +159,10 @@ void Vl6180::turnOff()
   log_.DBG("VL6180", "Sensor is now off\n");
 }
 
-double Vl6180::getDistance(){/*EMPTY*/}
+double Vl6180::getDistance()
+{
+  return 0;
+}
 
 bool Vl6180::waitDeviceBooted()
 {
@@ -176,12 +179,12 @@ bool Vl6180::waitDeviceBooted()
   return true;
 }
 
-bool rangeWaitDeviceReady()
+bool Vl6180::rangeWaitDeviceReady()
 {
-  return false
+  return false;
 }
 
-int readByte(uint16_t reg_add, uint8_t *data)
+int Vl6180::readByte(uint16_t reg_add, uint8_t *data)
 {
   char buffer[2];
   buffer[0] = reg_add >> 8;
@@ -193,7 +196,7 @@ int readByte(uint16_t reg_add, uint8_t *data)
   return 1;
 }
 
-int writeByte(uint16_t reg_add, char data)
+int Vl6180::writeByte(uint16_t reg_add, char data)
 {
   char buffer[3];
   buffer[0]=reg_add>>8;

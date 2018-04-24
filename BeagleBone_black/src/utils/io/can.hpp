@@ -21,9 +21,7 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 
-#include <stdint.h>
-
-// #include <queue>
+#include <cstdint>
 #include <map>
 
 #include "utils/concurrent/thread.hpp"

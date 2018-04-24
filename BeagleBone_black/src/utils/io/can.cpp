@@ -61,8 +61,10 @@ struct sockaddr_can {
 #include "sensors/bms.hpp"
 
 namespace hyped {
-namespace utils {
 
+namespace bms = sensors::bms;
+
+namespace utils {
 namespace io {
 
 
@@ -171,9 +173,9 @@ void Can::processNewData(CanFrame* message)
   uint32_t id = message->id;
   BMS* owner = 0;
   for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
-    uint32_t bms_id = BMS_ID_BASE + (bms.first * BMS_ID_INCR);
+    uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
     if (bms_id <= id &&
-        id < bms_id + BMS_ID_SIZE) {
+        id < bms_id + bms::kIdSize) {
       owner = bms.second;
       break;
     }

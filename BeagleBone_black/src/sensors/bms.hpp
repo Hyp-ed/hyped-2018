@@ -3,6 +3,10 @@
  * Organisation: HYPED
  * Date: 12. April 2018
  * Description:
+ * Battery Management System abstraction. Each object corresponds to one low-powered BMS unit.
+ * Each unit is identified by a unique ID, which is also used to infer IDs of CAN messages.
+ *
+ * Configuration and local data structure are encapsulated in namespace bms.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +25,7 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_BMS_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_BMS_HPP_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <vector>
 
 #include "utils/concurrent/thread.hpp"
@@ -39,22 +42,28 @@ using utils::Logger;
 using utils::io::Can;
 using utils::concurrent::Thread;
 
-#define BMS_FREQ     2                 // in Hz
-#define BMS_PERIOD   1000/BMS_FREQ  // in microseconds
+namespace bms {
+// how often shall request messages be sent
+constexpr uint32_t kFreq    = 2;           // in Hz
+constexpr uint32_t kPeriod  = 1000/kFreq;  // in milliseconds
 
-#define BMS_ID_BASE  300   // Base for ids of CAN messages related to BMS
-#define BMS_ID_INCR  10    // increment of base dependent on id_
-#define BMS_ID_SIZE  5     // size of id-space of BMS-CAN messages
+// what is the CAN ID space for BMS units
+constexpr uint16_t kIdBase      = 300;     // Base for ids of CAN messages related to BMS
+constexpr uint16_t kIdIncrement = 10;      // increment of base dependent on id_
+constexpr uint16_t kIdSize      = 5;       // size of id-space of BMS-CAN messages
 /**
- * Bases of IDs of CAN messagese are calculated as follows:
- * BASE = BMS_ID_BASE + (BMS_ID_INCR * id_)
+ * Bases of IDs of CAN messagese for a BMS unit are calculated as follows:
+ * base = kIdBase + (kIdIncrement * id_)
  */
-#define BMS_TEMP_OFFSET 40  // temperature data in C + 40
-#define BMS_CELL_NUM    7
-struct BMS_Data {
-  uint16_t  voltage[BMS_CELL_NUM];
+
+struct Data {
+  static constexpr uint8_t kTemperatureOffset = 40;
+  static constexpr uint8_t kCellNum           = 7;
+  uint16_t  voltage[kCellNum];
   uint8_t   temperature;
 };
+
+}   // namespace bms
 
 class BMS : public Thread {
   friend Can;
@@ -70,19 +79,19 @@ class BMS : public Thread {
    */
   void run() override;
 
-  BMS_Data getData() const
+  bms::Data getData() const
   {
     return data_;
   }
 
-  BMS_Data* getDataPointer()
+  bms::Data* getDataPointer()
   {
     return &data_;
   }
 
  private:
   /**
-   * @brief Send request CAN message to update data
+   * @brief Send request CAN message to update data periodically
    */
   void request();
 
@@ -96,7 +105,7 @@ class BMS : public Thread {
 
  private:
   Can&      can_;
-  BMS_Data  data_;
+  bms::Data data_;
   uint8_t   id_;
   bool      running_;
 
