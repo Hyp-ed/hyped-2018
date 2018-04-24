@@ -111,22 +111,22 @@ class Navigation {
   void proximity_displacement_update();  // Point number 7
   void stripe_counter_update(uint16_t count);  // Point number 7
 
-  // TODO(Uday,Brano,Adi): Change the data types of the data members
-
+  // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
   NavigationVector accleration_;
   NavigationVector velocity_;
   NavigationVector displacement_;
-  DataPoint<NavigationVector> prev_angular_velocity_;
-  Quaternion<int16_t> orientation_;
-  uint32_t stripe_count_;
 
-  // TODO(ALL): Decide the type
-  std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;
-  std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;
+  // Internal data that is not published
+  DataPoint<NavigationVector> prev_angular_velocity_;  // To calculate how much has the pod rotated
+  Quaternion<int16_t> orientation_;  // Pod's orientation is updated with every gyro reading
+
+  // Filters for reducing noise in sensor data before processing the data in any other way
+  std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
+  std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;          // One for each IMU
   std::array<Kalman<uint8_t>, Sensors::kNumProximities>   proximity_filter_;
 
-  Integrator<NavigationVector> acceleration_integrator_;
-  Integrator<NavigationVector> velocity_integrator_;
+  Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
+  Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement
 };
 
 }}  // namespace hyped::navigation
