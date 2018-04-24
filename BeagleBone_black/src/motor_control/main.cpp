@@ -48,26 +48,28 @@ void Main::run()
   while (1) {
     state_ = data_.getStateMachineData();
     switch (state_.current_state) {
-       case data::State::kIdle:
-         this->setupMotors();
-         break;
-       case data::State::kAccelerating:
-         this->accelerateMotors();
-         break;
-       case data::State::kDecelerating:
-         this->decelerateMotors();
-         break;
-       case data::State::kEmergencyBraking:
-         this->stopMotors();
-         break;
-       case data::State::kRunComplete:
-         goto exit_loop;
-       case data::State::kFailureStopped:
-         goto exit_loop;
-       case data::State::kExiting:
-         goto exit_loop;
-       case data::State::kFinished:
-         goto exit_loop;
+      case data::State::kIdle:
+        this->setupMotors();
+        break;
+      case data::State::kAccelerating:
+        this->accelerateMotors();
+        break;
+      case data::State::kDecelerating:
+        this->decelerateMotors();
+        break;
+      case data::State::kEmergencyBraking:
+        this->stopMotors();
+        break;
+      case data::State::kRunComplete:
+        goto exit_loop;
+      case data::State::kFailureStopped:
+        goto exit_loop;
+      case data::State::kExiting:
+        goto exit_loop;
+      case data::State::kFinished:
+        goto exit_loop;
+      default:
+        log_.ERR("MOTOR", "state machine detected in invalid state");
      }
   }
   exit_loop: ;

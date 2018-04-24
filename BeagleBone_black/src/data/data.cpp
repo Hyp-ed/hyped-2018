@@ -26,6 +26,18 @@ using utils::concurrent::ScopedLock;
 
 namespace data {
 
+const char* states[num_states] = {
+  "Idle",
+  "Accelerating",
+  "Decelerating",
+  "EmergencyBraking",
+  "RunComplete",
+  "FailureStopped",
+  "Exiting",
+  "Finished",
+  "Invalid"
+};
+
 Data& Data::getInstance()
 {
   static Data d;

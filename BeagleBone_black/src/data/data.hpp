@@ -49,8 +49,12 @@ enum State {
   kRunComplete,
   kFailureStopped,
   kExiting,
-  kFinished
+  kFinished,
+  kInvalid,
+  num_states
 };
+
+extern const char* states[num_states];
 
 struct StateMachine {
   bool critical_failure;

@@ -5,8 +5,8 @@ data/data_point.hpp
 state_machine/event.hpp
 state_machine/hyped-machine.cpp
 state_machine/hyped-machine.hpp
-state_machine/machine-states.cpp
-state_machine/machine-states.hpp
+state_machine/states.cpp
+state_machine/states.hpp
 state_machine/main.hpp
 state_machine/main.cpp
 motor_control/motor.hpp

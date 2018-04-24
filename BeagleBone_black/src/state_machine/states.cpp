@@ -18,75 +18,77 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include "state_machine/machine-states.hpp"
-#include "data/data.hpp"
+#include "state_machine/states.hpp"
+
+#include <stdlib.h>
+
 
 
 namespace hyped {
+
+using state = data::State;
+
 namespace state_machine {
+
+// statically allocate memory for current_state
+State* State::alloc_ = static_cast<State*>(malloc(sizeof(State)));
 
 void Idle::entry()
 {
-  updateData(data::kIdle);
-  log_.DBG1("STATE", "Entered Idle");
+  state_ = state::kIdle;
 }
 
 void Idle::react(HypedMachine &machine, Event event)
 {
-  if (event == kOnStart) {
-    machine.transition(new Accelerating());
-  } else if (event == kCriticalFailure) {
-    machine.transition(new FailureStopped());
-  }
+  if (event == kOnStart)              new(alloc_) Accelerating();
+  else if (event == kCriticalFailure) new(alloc_) FailureStopped();
+
+  machine.transition(0);
 }
 
 void Accelerating::entry()
 {
-  updateData(data::kAccelerating);
-  log_.DBG1("STATE", "Entered Accelerating");
+  state_ = state::kAccelerating;
 }
 
 void Accelerating::react(HypedMachine &machine, Event event)
 {
   if (event == kMaxDistanceReached) {
-    machine.transition(new Decelerating());
+    machine.transition(new(alloc_) Decelerating());
   } else if (event == kCriticalFailure) {
-    machine.transition(new EmergencyBraking());
+    machine.transition(new(alloc_) EmergencyBraking());
   }
 }
 
 void Decelerating::entry()
 {
-  updateData(data::kDecelerating);
-  log_.DBG1("STATE", "Entered Decelerating");
+  state_ = state::kDecelerating;
 }
 
 void Decelerating::react(HypedMachine &machine, Event event)
 {
   if (event == kEndOfRunReached) {
-    machine.transition(new RunComplete());
+    machine.transition(new(alloc_) RunComplete());
   } else if (event == kCriticalFailure) {
-    machine.transition(new EmergencyBraking());
+    machine.transition(new(alloc_) EmergencyBraking());
   }
 }
 
 void EmergencyBraking::entry()
 {
-  updateData(data::kEmergencyBraking);
-  log_.DBG1("STATE", "Entered EmergencyBraking");
+  state_ = state::kEmergencyBraking;
 }
 
 void EmergencyBraking::react(HypedMachine &machine, Event event)
 {
   if (event == kVelocityZeroReached) {
-    machine.transition(new FailureStopped());
+    machine.transition(new(alloc_) FailureStopped());
   }
 }
 
 void FailureStopped::entry()
 {
-  updateData(data::kFailureStopped);
-  log_.DBG1("STATE", "Entered FailureStopped");
+  state_ = state::kFailureStopped;
 }
 
 void FailureStopped::react(HypedMachine &machine, Event event)
@@ -95,50 +97,39 @@ void FailureStopped::react(HypedMachine &machine, Event event)
 
 void RunComplete::entry()
 {
-  updateData(data::kRunComplete);
-  log_.DBG1("STATE", "Entered RunComplete");
+  state_ = state::kRunComplete;
 }
 
 void RunComplete::react(HypedMachine &machine, Event event)
 {
   if (event == kOnExit) {
-    machine.transition(new Exiting());
+    machine.transition(new(alloc_) Exiting());
   } else if (event == kCriticalFailure) {
-    machine.transition(new FailureStopped());
+    machine.transition(new(alloc_) FailureStopped());
   }
 }
 
 void Exiting::entry()
 {
-  updateData(data::kExiting);
-  log_.DBG1("STATE", "Entered Exiting");
+  state_ = state::kExiting;
 }
 
 void Exiting::react(HypedMachine &machine, Event event)
 {
   if (event == kEndOfTubeReached) {
-    machine.transition(new Finished());
+    machine.transition(new(alloc_) Finished());
   } else if (event == kCriticalFailure) {
-    machine.transition(new EmergencyBraking());
+    machine.transition(new(alloc_) EmergencyBraking());
   }
 }
 
 void Finished::entry()
 {
-  updateData(data::kFinished);
-  log_.DBG1("STATE", "Entered Finished");
+  state_ = state::kFinished;
 }
 
 void Finished::react(HypedMachine &machine, Event event)
 {
 }
 
-
-void State::updateData(data::State s)
-{
-  static data::Data& data = data::Data::getInstance();
-  data::StateMachine stm_data = data.getStateMachineData();
-  stm_data.current_state = s;
-  data.setStateMachineData(stm_data);
-}
 }}   // namespace hyped::state_machine

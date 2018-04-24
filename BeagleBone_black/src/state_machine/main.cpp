@@ -32,9 +32,8 @@ namespace state_machine {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
-{
-  hypedMachine = new HypedMachine(log);
-}
+    , hypedMachine(log)
+{ /* EMPTY */ }
 
 /**
   *  @brief  Runs state machine thread.
@@ -46,26 +45,19 @@ void Main::run()
     // data::Navigation nav_data = data.getNavigationData();
 
     if (hasCriticalFailure()) {
-      hypedMachine->handleEvent(kCriticalFailure);
+      hypedMachine.handleEvent(kCriticalFailure);
     }
     if (hasReachedMaxDistance()) {
-      hypedMachine->handleEvent(kMaxDistanceReached);
+      hypedMachine.handleEvent(kMaxDistanceReached);
     }
   }
 }
-
- /**
-   * @brief      Checks all the system for critical failures. Returns false if all checked have passed.
-   */
 
 bool Main::hasCriticalFailure()
 {
   return false;
 }
 
- /**
-   * @brief      Computes the maxDistance and returns true if it has been reached.
-   */
 bool Main::hasReachedMaxDistance()
 {
   return false;
