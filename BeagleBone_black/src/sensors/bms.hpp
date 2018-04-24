@@ -34,7 +34,7 @@ namespace hyped {
 // Forward declarations
 namespace utils { class Logger; }
 namespace utils { namespace io { class Can; } }
-namespace utils { namespace io { class CanFrame; } }
+namespace utils { namespace io { namespace can { struct Frame; } } }
 
 namespace sensors {
 
@@ -101,7 +101,7 @@ class BMS : public Thread {
    *
    * @param message received CAN message to be processed
    */
-  void processNewData(utils::io::CanFrame& message);
+  void processNewData(utils::io::can::Frame& message);
 
  private:
   Can&      can_;

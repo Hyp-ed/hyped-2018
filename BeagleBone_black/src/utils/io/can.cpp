@@ -54,8 +54,6 @@ struct sockaddr_can {
   } can_addr;
 };
 
-#define CANID_DELIM '#'
-#define DATA_SEPERATOR '.'
 #endif   // CAN
 
 #include "sensors/bms.hpp"
@@ -67,8 +65,6 @@ namespace bms = sensors::bms;
 namespace utils {
 namespace io {
 
-
-
 Can::Can()
     : concurrent::Thread(0)
 {
@@ -78,8 +74,8 @@ Can::Can()
   }
 
   sockaddr_can addr;
-  addr.can_family = AF_CAN;
-  addr.can_ifindex = if_nametoindex("can0");   // ifr.ifr_ifindex;
+  addr.can_family   = AF_CAN;
+  addr.can_ifindex  = if_nametoindex("can0");   // ifr.ifr_ifindex;
 
   if (bind(socket_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     perror("bind");
@@ -98,7 +94,7 @@ Can::~Can()
   close(socket_);
 }
 
-int Can::send(const CanFrame& frame)
+int Can::send(const can::Frame& frame)
 {
   can_frame can;
   log_.DBG2("CAN", "trying to send something");
@@ -110,17 +106,20 @@ int Can::send(const CanFrame& frame)
   // if (frame.id & CAN_EFF_FLAG && frame.id)
   // if (frame.id  > 127)  return 0;
 
-  can.can_id = frame.id;
-  can.can_id |= frame.extended ? CAN_EFF_FLAG : 0;  // add extended id flag
+  can.can_id  = frame.id;
+  can.can_id |= frame.extended ? can::Frame::kExtendedMask : 0;  // add extended id flag
   can.can_dlc = frame.len;
   for (int i = 0; i < frame.len; i++) {
     can.data[i] = frame.data[i];
   }
 
-  if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
-    // perror("write");
-    log_.ERR("CAN", "cannot write to socket");
-    return 0;
+  {
+    concurrent::ScopedLock L(&socket_lock_);
+    if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
+      // perror("write");
+      log_.ERR("CAN", "cannot write to socket");
+      return 0;
+    }
   }
 
   log_.DBG1("CAN", "message with id %d sent, extended:%d"
@@ -132,7 +131,7 @@ int Can::send(const CanFrame& frame)
 void Can::run()
 {
   /* these settings are static and can be held out of the hot path */
-  CanFrame data;
+  can::Frame data;
 
   log_.INFO("CAN", "starting continuous reading");
   while (running_) {
@@ -143,7 +142,7 @@ void Can::run()
   log_.INFO("CAN", "stopped continuous reading");
 }
 
-int Can::receive(CanFrame* frame)
+int Can::receive(can::Frame* frame)
 {
   size_t nBytes;
   can_frame raw_data;
@@ -155,9 +154,9 @@ int Can::receive(CanFrame* frame)
     return 0;
   }
 
-  frame->id       = raw_data.can_id & ~CAN_EFF_FLAG;
-  frame->extended = raw_data.can_id & CAN_EFF_FLAG;
-  frame->len = raw_data.can_dlc;
+  frame->id       = raw_data.can_id & ~can::Frame::kExtendedMask;
+  frame->extended = raw_data.can_id & can::Frame::kExtendedMask;
+  frame->len      = raw_data.can_dlc;
   for (int i = 0; i < frame->len; i++) {
     frame->data[i] = raw_data.data[i];
   }
@@ -168,10 +167,10 @@ int Can::receive(CanFrame* frame)
   return 1;
 }
 
-void Can::processNewData(CanFrame* message)
+void Can::processNewData(can::Frame* message)
 {
-  uint32_t id = message->id;
-  BMS* owner = 0;
+  uint32_t  id    = message->id;
+  BMS*      owner = 0;
   for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
     uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
     if (bms_id <= id &&

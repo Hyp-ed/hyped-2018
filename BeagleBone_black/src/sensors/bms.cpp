@@ -70,7 +70,7 @@ BMS::~BMS()
 void BMS::request()
 {
   // send request CanFrame
-  utils::io::CanFrame message;
+  utils::io::can::Frame message;
   message.id        = bms::kIdBase + (bms::kIdIncrement * id_);
   message.extended  = true;
   message.len       = 2;
@@ -91,7 +91,7 @@ void BMS::run()
   log_.INFO("BMS", "stopped BMS module %d", id_);
 }
 
-void BMS::processNewData(utils::io::CanFrame& message)
+void BMS::processNewData(utils::io::can::Frame& message)
 {
   log_.DBG1("BMS", "id: %d, received CAN message with id %d", id_, message.id);
   log_.DBG2("BMS", "message data[0,1] %d %d", message.data[0], message.data[1]);
