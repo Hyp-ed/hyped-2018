@@ -37,6 +37,22 @@ Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
     filter.configure(0, 0, 0);
 }
 
+NavigationType Navigation::get_accleration()
+{
+  return accleration_[0];
+}
+
+NavigationType Navigation::get_velocity()
+{
+  return velocity_[0];
+}
+
+NavigationType Navigation::get_displacement()
+{
+  return displacement_[0];
+}
+
+
 void Navigation::update(ImuArray imus)
 {
   // TODO(Brano,Adi): Gyro update. (Data format should change first.)
@@ -71,22 +87,6 @@ void Navigation::update(ImuArray imus, ProximityArray proxis, data::StripeCount 
   update(imus, proxis);
   stripe_counter_update(stripe_count.value);
 }
-
-NavigationType Navigation::get_accleration()
-{
-  return accleration_[0];
-}
-
-NavigationType Navigation::get_velocity()
-{
-  return velocity_[0];
-}
-
-NavigationType Navigation::get_displacement()
-{
-  return displacement_[0];
-}
-
 
 void Navigation::gyro_update(DataPoint<NavigationVector> angular_velocity)
 {

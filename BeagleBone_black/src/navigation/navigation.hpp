@@ -47,9 +47,31 @@ class Navigation {
  public:
   typedef std::array<Imu,       Sensors::kNumImus>        ImuArray;
   typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
+  friend class Main;
 
   Navigation();
 
+  /**
+   * @brief Get the accleration value
+   *
+   * @return uint16_t Returns the forward component of acceleration vector (negative when
+   *                  decelerating)
+   */
+  NavigationType get_accleration();
+  /**
+   * @brief Get the velocity value
+   *
+   * @return uint16_t Returns the forward component of velocity vector
+   */
+  NavigationType get_velocity();
+  /**
+   * @brief Get the displacement value
+   *
+   * @return uint16_t Returns the forward component of displacement vector
+   */
+  NavigationType get_displacement();
+
+ private:
   /**
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
@@ -82,27 +104,7 @@ class Navigation {
    * @param stripe_count Stripe counter reading
    */
   void update(ImuArray imus, ProximityArray proxis, data::StripeCount stripe_count);
-  /**
-   * @brief Get the accleration value
-   *
-   * @return uint16_t Returns the forward component of acceleration vector (negative when
-   *                  decelerating)
-   */
-  NavigationType get_accleration();
-  /**
-   * @brief Get the velocity value
-   *
-   * @return uint16_t Returns the forward component of velocity vector
-   */
-  NavigationType get_velocity();
-  /**
-   * @brief Get the displacement value
-   *
-   * @return uint16_t Returns the forward component of displacement vector
-   */
-  NavigationType get_displacement();
 
- private:
   void gyro_update(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void acclerometer_update(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximity_orientation_update();  // Point number 7
