@@ -47,12 +47,10 @@ class Main: public Thread {
   int32_t calculateDecelerationRPM(NavigationType velocity);
   data::Data& data_;
   Motor motor_;
-  data::Motors motor_data_;
   data::StateMachine state_;
-  data::Navigation nav_;
   int32_t rpm_;
-  bool motorsSetUp_;
-  bool motorFailure_;
+  bool motors_set_up_;
+  bool motor_failure_;
 };
 
 }}  // namespace hyped::motor_control

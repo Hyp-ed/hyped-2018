@@ -34,7 +34,7 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance()),
       motor_(log),
       rpm_(0),
-      motorsSetUp_(false)
+      motors_set_up_(false)
 {}
 
 /**
@@ -80,10 +80,10 @@ void Main::run()
   */
 void Main::setupMotors()
 {
-  if (!motorsSetUp_) {
-    motor_data_ = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
+  if (!motors_set_up_) {
+    data::Motors motor_data_ = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
     data_.setMotorData(motor_data_);
-    motorsSetUp_ = true;
+    motors_set_up_ = true;
     log_.INFO("MOTOR", "Motor State: Idle");
   }
 }
@@ -98,39 +98,41 @@ void Main::accelerateMotors()
     state_ = data_.getStateMachineData();
     if (state_.critical_failure) {
       this->stopMotors();
-      goto exit_loop;
+      break;
     }
 
     // Check for motors critial failure flag
-    motorFailure_ = motor_.checkStatus();
-    if (motorFailure_) {
+    motor_failure_ = motor_.checkStatus();
+    if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorsRpm motors_rpm = motor_.getSpeed();
-      motor_data_ = {
-        data::MotorState::kCriticalFailure,
-        motors_rpm.rpm_FL_,
-        motors_rpm.rpm_FR_,
-        motors_rpm.rpm_BL_,
-        motors_rpm.rpm_BR_ };
+      // Write critical failure flag and RPM's to data structure
+      data::Motors motor_data_ = {
+          data::MotorState::kCriticalFailure,
+          motors_rpm.rpm_FL_,
+          motors_rpm.rpm_FR_,
+          motors_rpm.rpm_BL_,
+          motors_rpm.rpm_BR_ };
       data_.setMotorData(motor_data_);
       this->stopMotors();
+      break;
     }
 
     // Step up motor RPM
     log_.INFO("MOTOR", "Motor State: Accelerating\n");
-    nav_ = data_.getNavigationData();
+    data::Navigation nav_ = data_.getNavigationData();
     rpm_ = calculateAccelerationRPM(nav_.velocity);
     motor_.setSpeed(rpm_);
     MotorsRpm motors_rpm = motor_.getSpeed();
-    motor_data_ = {
-      data::MotorState::kMotorAccelerating,
-      motors_rpm.rpm_FL_,
-      motors_rpm.rpm_FR_,
-      motors_rpm.rpm_BL_,
-      motors_rpm.rpm_BR_ };
+    // Write current state (accelerating) and RPM's to data structure
+    data::Motors motor_data_ = {
+        data::MotorState::kMotorAccelerating,
+        motors_rpm.rpm_FL_,
+        motors_rpm.rpm_FR_,
+        motors_rpm.rpm_BL_,
+        motors_rpm.rpm_BR_ };
     data_.setMotorData(motor_data_);
   }
-  exit_loop: ;
 }
 
 /**
@@ -143,70 +145,73 @@ void Main::decelerateMotors()
     state_ = data_.getStateMachineData();
     if (state_.critical_failure) {
       this->stopMotors();
-      goto exit_loop;
+      break;
     }
 
     // Check for motors critical failure flag
-    motorFailure_ = motor_.checkStatus();
-    if (motorFailure_) {
+    motor_failure_ = motor_.checkStatus();
+    if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorsRpm motors_rpm = motor_.getSpeed();
-      motor_data_ = {
-        data::MotorState::kCriticalFailure,
-        motors_rpm.rpm_FL_,
-        motors_rpm.rpm_FR_,
-        motors_rpm.rpm_BL_,
-        motors_rpm.rpm_BR_ };
+      // Write critical failure flag and RPM's to data structure
+      data::Motors motor_data_ = {
+          data::MotorState::kCriticalFailure,
+          motors_rpm.rpm_FL_,
+          motors_rpm.rpm_FR_,
+          motors_rpm.rpm_BL_,
+          motors_rpm.rpm_BR_ };
       data_.setMotorData(motor_data_);
       this->stopMotors();
+      break;
     }
 
     // Step down motor RPM
     log_.INFO("MOTOR", "Motor State: Decelerating\n");
-    nav_ = data_.getNavigationData();
+    data::Navigation nav_ = data_.getNavigationData();
     rpm_ = calculateDecelerationRPM(nav_.velocity);
     motor_.setSpeed(rpm_);
     MotorsRpm motors_rpm = motor_.getSpeed();
-    // Updates the shared data on the motors RPM
-    motor_data_ = {
-      data::MotorState::kMotorDecelerating,
-      motors_rpm.rpm_FL_,
-      motors_rpm.rpm_FR_,
-      motors_rpm.rpm_BL_,
-      motors_rpm.rpm_BR_ };
+    // Write current state (decelerating) and RPM's to data structure
+    data::Motors motor_data_ = {
+        data::MotorState::kMotorDecelerating,
+        motors_rpm.rpm_FL_,
+        motors_rpm.rpm_FR_,
+        motors_rpm.rpm_BL_,
+        motors_rpm.rpm_BR_ };
     data_.setMotorData(motor_data_);
   }
-  exit_loop: ;
 }
 
 void Main::stopMotors()
 {
   motor_.setSpeed(0);
-  bool allMotorsStopped = false;
+  bool all_motors_stopped = false;
   // Updates the shared data on the motors RPM while the motor is trying to stop
-  while (!allMotorsStopped) {
+  while (!all_motors_stopped) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");
     MotorsRpm motors_rpm = motor_.getSpeed();
+    // Write current state (stopping) and RPM's to data structure
     data::Motors motor_data_ = {
-      data::MotorState::kMotorStopping,
+        data::MotorState::kMotorStopping,
+        motors_rpm.rpm_FL_,
+        motors_rpm.rpm_FR_,
+        motors_rpm.rpm_BL_,
+        motors_rpm.rpm_BR_ };
+    data_.setMotorData(motor_data_);
+    if (motors_rpm.rpm_FL_ == 0 && motors_rpm.rpm_FR_ == 0 &&
+        motors_rpm.rpm_BL_ == 0 && motors_rpm.rpm_BR_ == 0)
+    {
+      all_motors_stopped = true;
+    }
+  }
+  MotorsRpm motors_rpm = motor_.getSpeed();
+  // Write current state (stopped) and RPM's to data structure
+  data::Motors motor_data_ = {
+      data::MotorState::kMotorStopped,
       motors_rpm.rpm_FL_,
       motors_rpm.rpm_FR_,
       motors_rpm.rpm_BL_,
       motors_rpm.rpm_BR_ };
-    data_.setMotorData(motor_data_);
-    if (motors_rpm.rpm_FL_ == 0 && motors_rpm.rpm_FR_ == 0 &&
-      motors_rpm.rpm_BL_ == 0 && motors_rpm.rpm_BR_ == 0)
-    {
-      allMotorsStopped = true;
-    }
-  }
-  MotorsRpm motors_rpm = motor_.getSpeed();
-  data::Motors motor_data_ = {
-    data::MotorState::kMotorStopped,
-    motors_rpm.rpm_FL_,
-    motors_rpm.rpm_FR_,
-    motors_rpm.rpm_BL_,
-    motors_rpm.rpm_BR_ };
   data_.setMotorData(motor_data_);
   log_.INFO("MOTOR", "Motor State: Stopped\n");
 }
