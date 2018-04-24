@@ -2,7 +2,6 @@
  * Authors: M. Kristien
  * Organisation: HYPED
  * Date: 18. April 2018
- * Description:
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,8 +116,8 @@ void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
 {
   spi_ioc_transfer message = {};
 
-  message.tx_buf = reinterpret_cast<uint64_t>(tx);    // NOLINT
-  message.rx_buf = reinterpret_cast<uint64_t>(rx);    // NOLINT
+  message.tx_buf = reinterpret_cast<uint64_t>(tx);
+  message.rx_buf = reinterpret_cast<uint64_t>(rx);
   message.len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(1), &message) < 0) {
@@ -131,13 +130,13 @@ void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
   spi_ioc_transfer message[2] = {};
 
   // send address
-  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);   // NOLINT
+  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);
   message[0].rx_buf = 0;
   message[0].len    = 1;
 
   // receive data
   message[1].tx_buf = 0;
-  message[1].rx_buf = reinterpret_cast<uint64_t>(rx);    // NOLINT
+  message[1].rx_buf = reinterpret_cast<uint64_t>(rx);
   message[1].len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
@@ -150,12 +149,12 @@ void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
   spi_ioc_transfer message[2] = {};
   addr |= SPI_WRITE_MASK;
   // send address
-  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);   // NOLINT
+  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);
   message[0].rx_buf = 0;
   message[0].len    = 1;
 
-  // receive data
-  message[1].tx_buf = reinterpret_cast<uint64_t>(tx);    // NOLINT
+  // write data
+  message[1].tx_buf = reinterpret_cast<uint64_t>(tx);
   message[1].rx_buf = 0;
   message[1].len    = len;
 
