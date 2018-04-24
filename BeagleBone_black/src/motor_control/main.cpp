@@ -32,13 +32,12 @@ using data::NavigationType;
 namespace motor_control {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
-    , data_(data::Data::getInstance())
-    , motor_(log)
-{
-  rpm_ = 0;
-  motorsSetUp_ = false;
-}
+    : Thread(id, log),
+      data_(data::Data::getInstance()),
+      motor_(log),
+      rpm_(0),
+      motorsSetUp_(false)
+{}
 
 /**
   *  @brief  { Runs motor control thread. Switches to correct motor state
