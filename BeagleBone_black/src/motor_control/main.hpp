@@ -51,6 +51,7 @@ class Main: public Thread {
   int32_t rpm_;
   bool motors_set_up_;
   bool motor_failure_;
+  bool run_;
 };
 
 }}  // namespace hyped::motor_control

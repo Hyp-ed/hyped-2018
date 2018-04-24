@@ -34,7 +34,8 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance()),
       motor_(log),
       rpm_(0),
-      motors_set_up_(false)
+      motors_set_up_(false),
+      run_(true)
 {}
 
 /**
@@ -44,35 +45,20 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   log_.INFO("MOTOR", "Starting motor controller");
-
-  while (1) {
+  while (run_) {
     state_ = data_.getStateMachineData();
-    switch (state_.current_state) {
-      case data::State::kIdle:
-        this->setupMotors();
-        break;
-      case data::State::kAccelerating:
-        this->accelerateMotors();
-        break;
-      case data::State::kDecelerating:
-        this->decelerateMotors();
-        break;
-      case data::State::kEmergencyBraking:
-        this->stopMotors();
-        break;
-      case data::State::kRunComplete:
-        goto exit_loop;
-      case data::State::kFailureStopped:
-        goto exit_loop;
-      case data::State::kExiting:
-        goto exit_loop;
-      case data::State::kFinished:
-        goto exit_loop;
-      default:
-        log_.ERR("MOTOR", "state machine detected in invalid state");
-     }
+    if (state_.current_state == data::State::kIdle) {
+      this->setupMotors();
+    } else if (state_.current_state == data::State::kAccelerating) {
+      this->accelerateMotors();
+    } else if (state_.current_state == data::State::kDecelerating) {
+      this->decelerateMotors();
+    } else if (state_.current_state == data::State::kEmergencyBraking) {
+      this->stopMotors();
+    } else {
+      run_ = false;
+    }
   }
-  exit_loop: ;
 }
 
 /**
