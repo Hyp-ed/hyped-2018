@@ -5,16 +5,14 @@
  * Description:
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ *    except in compliance with the License. You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
+ *    Unless required by applicable law or agreed to in writing, software distributed under
+ *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *    either express or implied. See the License for the specific language governing permissions and
  *    limitations under the License.
  */
 
@@ -26,7 +24,7 @@ namespace motor_control {
 
 Motor::Motor(Logger& log): log_(log)
 {
-  log_.INFO("MOTOR", "Motors initialised\n");
+  log_.INFO("MOTOR", "Motors initialised");
 }
 
 /**
@@ -35,16 +33,16 @@ Motor::Motor(Logger& log): log_(log)
 MotorsRpm Motor::getSpeed()
 {
   // Read actual motor RPM over CAN. Set dummy values for now
-  motors_rpm_.rpm_FR = rpm;
-  motors_rpm_.rpm_FL = rpm;
-  motors_rpm_.rpm_BL = rpm;
-  motors_rpm_.rpm_BR = rpm;
+  motors_rpm_.rpm_FR_ = rpm_;
+  motors_rpm_.rpm_FL_ = rpm_;
+  motors_rpm_.rpm_BL_ = rpm_;
+  motors_rpm_.rpm_BR_ = rpm_;
 
-  log_.DBG2("MOTOR", "Actual RPMs: FL %d, FR %d, BL %d, BR %d\n"
-    , motors_rpm_.rpm_FL
-    , motors_rpm_.rpm_FR
-    , motors_rpm_.rpm_BL
-    , motors_rpm_.rpm_BR);
+  log_.DBG2("MOTOR", "Actual RPMs: FL %d, FR %d, BL %d, BR %d"
+    , motors_rpm_.rpm_FL_
+    , motors_rpm_.rpm_FR_
+    , motors_rpm_.rpm_BL_
+    , motors_rpm_.rpm_BR_);
 
   return motors_rpm_;
 }
@@ -54,8 +52,8 @@ MotorsRpm Motor::getSpeed()
   */
 void Motor::setSpeed(int32_t rpm)
 {
-  this->rpm = rpm;
-  log_.INFO("MOTOR", "Requested RPM %d\n", rpm);
+  this->rpm_ = rpm;
+  log_.INFO("MOTOR", "Requested RPM %d", rpm);
 }
 
 /**

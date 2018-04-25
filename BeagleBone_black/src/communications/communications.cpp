@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
@@ -20,64 +20,47 @@
 
 #include "communications.hpp"
 
+
 #include <sstream>
 #include <string>
 
-using namespace std;
-
 namespace hyped {
+
+using data::Communications;
+
 namespace communications {
 
-int sockfd, portNo, n;
-struct sockaddr_in serv_addr;
-struct hostent *server;
-char buffer[256];
-const char* defaultIP = "localhost";
-char* ipAddress = const_cast<char*>(defaultIP);
-
-// TODO(Isabella): implement logger for Communications class
-Communications::Communications()
-{ /* EMPTY */ }
-
-Communications::Communications(char* ip)
+Communications::Communications(Logger& log, const char* ip, int portNo)
+    : log_(log)
 {
-  ipAddress = ip;
-}
+  log_.INFO("COMN", "BaseCommunicator initialised.");
+  sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
 
-bool Communications::setUp()
-{
-  portNo = 5695;
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
-
-  if (sockfd < 0) {
-    printf("ERROR: CANNOT OPEN SOCKET.\n");
-    return false;
+  if (sockfd_ < 0) {
+    log_.ERR("COMN", "CANNOT OPEN SOCKET.");
   }
 
-  server = gethostbyname(ipAddress);
+  server = gethostbyname(ip);
 
   if (server == NULL) {
-    fprintf(stderr, "ERROR: INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.\n");
-    return false;
+    log_.ERR("COMN", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
   }
 
-  bzero(&serv_addr, sizeof(serv_addr));
+  memset(&serv_addr, '\0', sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;   // server byte order
-  bcopy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
+  memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portNo);
 
-  if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-    printf("ERROR: CANNOT ESTABLISH CONNECTION TO BASE-STATION.\n");
-    return false;
+  if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+    log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
   }
 
-  // n = read(sockfd, buffer, 255);
-  return true;
+  log_.INFO("COMN", "TCP/IP connection established.");
 }
 
 Communications::~Communications()
 {
-  close(sockfd);
+  close(sockfd_);
 }
 
 int Communications::sendDistance(float distance)
@@ -147,35 +130,33 @@ int Communications::sendRpmBr(float rpmbr)
 int Communications::sendData(string message)
 {
   // Incoming strings should be terminated by "...\n".
-  bzero(buffer, 256);
-  const char *data = message.c_str();
-  n = write(sockfd, data, strlen(data));
-  if (n < 0) printf("ERROR: CANNOT WRITE TO SOCKET.");
-  n = read(sockfd, buffer, 255);
-  if (n < 0) printf("ERROR: CANNOT READ FROM SOCKET.");
+  memset(buffer, '\0', 256);
+  const char *data_ = message.c_str();  // cannot use string because strlen requies char*
+  n_ = write(sockfd_, data_, strlen(data_));
+  if (n_ < 0) log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
+  n_ = read(sockfd_, buffer, 255);
+  if (n_ < 0) log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
 
   return atoi(buffer);
 }
 
-/*
-// Thread must be declared and joined within calling code.
-void Communications :: receiverThread()
+int Communications::receiveMessage()
 {
-  while (true)
-  {
-    n = read(sockfd, buffer, 255);
-    int command = atoi(buffer);
+  n_ = read(sockfd_, buffer, 255);
+  int command = atoi(buffer);
 
-    switch (command)
-    {
-      case 1:
-        printf("ECHO message (1) received.\n");
-        // Do nothing, 1 represents echo message
-        break;
-      case 2:
-        printf("READY TO LAUNCH\n");
-    }
+  switch (command) {
+    case 1:
+      log_.INFO("COMN", "Received 1");  // STOP
+      break;
+    case 2:
+      log_.INFO("COMN", "Received 2");  // KILL POWER
+      break;
+    case 3:
+      log_.INFO("COMN", "Received 3");  // LAUCNH
+      break;
+  }
+
+  return command;
 }
-}
-*/
 }}  // namespace hyped::communcations

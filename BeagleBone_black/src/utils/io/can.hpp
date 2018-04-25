@@ -3,6 +3,13 @@
  * Organisation: HYPED
  * Date: 14. March 2018
  * Description:
+ * CAN abstracts CANBUS networking. The type implements a Singleton design pattern.
+ * CAN_FD is not supported.
+ *
+ * To the rest of the system CAN messages are described as can::Frame structure.
+ * Sending messages is performed directly in the caller's thread.
+ * Receiving messages is performed using a dedicated thread. This thread awaits
+ * incoming messages and demultiplexes them to matching registered BMS/Motors units.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,13 +28,11 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 
-#include <stdint.h>
-
-// #include <queue>
+#include <cstdint>
 #include <map>
 
-#include "utils/concurrent/thread.hpp"
 #include "utils/concurrent/lock.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/utils.hpp"
 
 namespace hyped {
@@ -41,16 +46,17 @@ namespace io {
 // Import
 using sensors::BMS;
 
-// use for extended frames
-#define CAN_EFF_FLAG 0x80000000U
+namespace can {
 
-struct CanFrame {
+struct Frame {
+  static constexpr uint32_t kExtendedMask = 0x80000000U;
   uint32_t  id;
   bool      extended;
   uint8_t   len;
   uint8_t   data[8];
 };
 
+}   // namespace can
 
 /**
  * Can implements singleton pattern to encapsulate one can interface, namely can0.
@@ -75,7 +81,7 @@ class Can : public concurrent::Thread {
    * @param  frame data to be sent
    * @return 1     iff data sent successfully
    */
-  int send(const CanFrame& frame);
+  int send(const can::Frame& frame);
 
   /**
    * @brief BMS is registered for receiving CAN messages
@@ -88,7 +94,7 @@ class Can : public concurrent::Thread {
    * @param  frame output pointer to data to be filled
    * @return 1     iff data received successfully
    */
-  int receive(CanFrame* frame);
+  int receive(can::Frame* frame);
 
   /**
    * @brief Process received message. Check whom does it belong to.
@@ -96,7 +102,7 @@ class Can : public concurrent::Thread {
    *
    * @param frame received CAN message
    */
-  void processNewData(CanFrame* frame);
+  void processNewData(can::Frame* frame);
 
   /**
    * Blocking read and demultiplex messages based on configure id spaces
@@ -109,7 +115,8 @@ class Can : public concurrent::Thread {
  private:
   int   socket_;
   bool  running_;
-  std::map<uint32_t, BMS*> bms_map_;
+  std::map<uint32_t, BMS*>  bms_map_;
+  concurrent::Lock          socket_lock_;
 };
 
 }}}   // namespace hyped::utils::io

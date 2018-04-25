@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <getopt.h>
 
-#define DEFAULT_VERBOSE false
+#define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
 
 namespace hyped {
@@ -35,6 +35,19 @@ namespace {
 void printUsage()
 {
   printf("./hyped [args]\n");
+  printf(
+    "All arguments are optional. To provide an argument with a value, use <argument>=<value>.\n"
+    "Default value of verbose flags is 1\n"
+    "Default value of debug   flags is 0\n"
+    "\n  -v, --verbose[=<bool>]\n"
+    "    Set system-wide setting of verbosity. If enabled, prints all INFO messages\n"
+    "\n  --verbose_motor, --verbose_nav, --verbose_sensor, --verbose_state, --verbose_cmn\n"
+    "    Set module-specific setting of verbosity. If enabled, prints all INFO messages\n"
+    "\n  -d, --debug[=<level>]\n"
+    "    Set system-wide debug level. All DBG[n] where n <= level messages are printed.\n"
+    "\n  --debug_motor, --debug_nav, --debug_sensor, --debug_state, --debug_cmn\n"
+    "    Set module-specific debug level. All DBG[n] where n <= level messages are printed.\n"
+    "");
 }
 }
 
@@ -44,7 +57,7 @@ System::~System()
 }
 
 System::System(int argc, char* argv[])
-    : verbose(DEFAULT_VERBOSE)
+    : verbose(false)
     , verbose_motor(DEFAULT_VERBOSE)
     , verbose_nav(DEFAULT_VERBOSE)
     , verbose_sensor(DEFAULT_VERBOSE)
@@ -61,12 +74,12 @@ System::System(int argc, char* argv[])
   int option_index = 0;
   while (1) {
     static option long_options[] = {
-      {"verbose", no_argument, 0, 'v'},
-      {"verbose_motor", no_argument, 0, 'a'},
-      {"verbose_nav", no_argument, 0, 'A'},
-      {"verbose_sensor", no_argument, 0, 'b'},
-      {"verbose_state", no_argument, 0, 'B'},
-      {"verbose_cmn", no_argument, 0, 'c'},
+      {"verbose", optional_argument, 0, 'v'},
+      {"verbose_motor", optional_argument, 0, 'a'},
+      {"verbose_nav", optional_argument, 0, 'A'},
+      {"verbose_sensor", optional_argument, 0, 'b'},
+      {"verbose_state", optional_argument, 0, 'B'},
+      {"verbose_cmn", optional_argument, 0, 'c'},
       {"debug", optional_argument, 0, 'd'},
       {"debug_motor", optional_argument, 0, 'e'},
       {"debug_nav", optional_argument, 0, 'E'},
@@ -84,33 +97,36 @@ System::System(int argc, char* argv[])
 
     switch (c) {
       case 'v':
-        verbose = true;
+        if (optarg) verbose = atoi(optarg);
+        else        verbose = true;
         break;
       case 'h':
         printUsage();
         exit(0);
         break;
       case 'd':
-        if (optarg) {
-          debug = atoi(optarg);
-        } else {
-          debug = 0;
-        }
+        if (optarg) debug = atoi(optarg);
+        else        debug = 0;
         break;
       case 'a':   // verbose_motor
-        verbose_motor = true;
+        if (optarg) verbose_motor = atoi(optarg);
+        else        verbose_motor = true;
         break;
       case 'A':   // verbose_nav
-        verbose_nav = true;
+        if (optarg) verbose_nav = atoi(optarg);
+        else        verbose_nav = true;
         break;
       case 'b':   // verbose_sensor
-        verbose_sensor = true;
+        if (optarg) verbose_sensor = atoi(optarg);
+        else        verbose_sensor = true;
         break;
       case 'B':   // verbose_state
-        verbose_state = true;
+        if (optarg) verbose_state = atoi(optarg);
+        else        verbose_state = true;
         break;
       case 'c':   // verbose_cmn
-        verbose_cmn = true;
+        if (optarg) verbose_cmn = atoi(optarg);
+        else        verbose_cmn = true;
       case 'e':   // debug_motor
         if (optarg) debug_motor = atoi(optarg);
         else        debug_motor = 0;
@@ -136,20 +152,20 @@ System::System(int argc, char* argv[])
         exit(1);
         break;
     }
-
-    // propagate verbose and debug to modules if not set module-specific
-    if (verbose_motor == DEFAULT_VERBOSE) verbose_motor = verbose;
-    if (verbose_nav   == DEFAULT_VERBOSE) verbose_nav = verbose;
-    if (verbose_sensor == DEFAULT_VERBOSE) verbose_sensor = verbose;
-    if (verbose_state == DEFAULT_VERBOSE) verbose_state = verbose;
-    if (verbose_cmn == DEFAULT_VERBOSE) verbose_cmn = verbose;
-
-    if (debug_motor == DEFAULT_DEBUG) debug_motor = debug;
-    if (debug_nav   == DEFAULT_DEBUG) debug_nav = debug;
-    if (debug_sensor == DEFAULT_DEBUG) debug_sensor = debug;
-    if (debug_state == DEFAULT_DEBUG) debug_state = debug;
-    if (debug_cmn == DEFAULT_DEBUG) debug_cmn = debug;
   }
+
+  // propagate verbose and debug to modules if not set module-specific
+  if (verbose_motor   == DEFAULT_VERBOSE) verbose_motor   = verbose;
+  if (verbose_nav     == DEFAULT_VERBOSE) verbose_nav     = verbose;
+  if (verbose_sensor  == DEFAULT_VERBOSE) verbose_sensor  = verbose;
+  if (verbose_state   == DEFAULT_VERBOSE) verbose_state   = verbose;
+  if (verbose_cmn     == DEFAULT_VERBOSE) verbose_cmn     = verbose;
+
+  if (debug_motor   == DEFAULT_DEBUG) debug_motor   = debug;
+  if (debug_nav     == DEFAULT_DEBUG) debug_nav     = debug;
+  if (debug_sensor  == DEFAULT_DEBUG) debug_sensor  = debug;
+  if (debug_state   == DEFAULT_DEBUG) debug_state   = debug;
+  if (debug_cmn     == DEFAULT_DEBUG) debug_cmn     = debug;
 
   log_ = new Logger(verbose, debug);
   system_ = this;
@@ -168,7 +184,7 @@ System& System::getSystem()
   if (system_) return *system_;
   Logger log;
   log.ERR("SYSTEM", "somebody tried to get System"
-          " before initialisation, aborting\n");
+          " before initialisation, aborting");
   exit(1);
 }
 

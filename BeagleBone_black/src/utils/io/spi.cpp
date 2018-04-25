@@ -2,7 +2,6 @@
  * Authors: M. Kristien
  * Organisation: HYPED
  * Date: 18. April 2018
- * Description:
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,25 +90,25 @@ SPI::SPI(Logger& log)
   // set clock frequency
   uint32_t clock = SPI_CLK;
   if (ioctl(spi_fd_, SPI_IOC_WR_MAX_SPEED_HZ, &clock) < 0) {
-    log_.ERR("SPI", "could not set clock frequency\n");
+    log_.ERR("SPI", "could not set clock frequency");
   }
 
   // set bits per word
   uint8_t bits = SPI_BITS;
   if (ioctl(spi_fd_, SPI_IOC_WR_BITS_PER_WORD, &bits) < 0) {
-    log_.ERR("SPI", "could not set bits per word\n");
+    log_.ERR("SPI", "could not set bits per word");
   }
 
   // set clock mode and CS active low
   uint8_t mode = (SPI_MODE & 0x3) & ~SPI_CS_HIGH;
   if (ioctl(spi_fd_, SPI_IOC_WR_MODE, &mode) < 0) {
-    log_.ERR("SPI", "could not set mode\n");
+    log_.ERR("SPI", "could not set mode");
   }
 
   // set bit order
   uint8_t order = SPI_MSBFIRST;
   if (ioctl(spi_fd_, SPI_IOC_WR_LSB_FIRST, &order) < 0) {
-    log_.ERR("SPI", "could not set bit order\n");
+    log_.ERR("SPI", "could not set bit order");
   }
 }
 
@@ -117,12 +116,12 @@ void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
 {
   spi_ioc_transfer message = {};
 
-  message.tx_buf = reinterpret_cast<uint64_t>(tx);    // NOLINT
-  message.rx_buf = reinterpret_cast<uint64_t>(rx);    // NOLINT
+  message.tx_buf = reinterpret_cast<uint64_t>(tx);
+  message.rx_buf = reinterpret_cast<uint64_t>(rx);
   message.len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(1), &message) < 0) {
-    log_.ERR("SPI", "could not submit TRANSFER message\n");
+    log_.ERR("SPI", "could not submit TRANSFER message");
   }
 }
 
@@ -131,17 +130,17 @@ void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
   spi_ioc_transfer message[2] = {};
 
   // send address
-  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);   // NOLINT
+  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);
   message[0].rx_buf = 0;
   message[0].len    = 1;
 
   // receive data
   message[1].tx_buf = 0;
-  message[1].rx_buf = reinterpret_cast<uint64_t>(rx);    // NOLINT
+  message[1].rx_buf = reinterpret_cast<uint64_t>(rx);
   message[1].len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
-    log_.ERR("SPI", "could not submit 2 TRANSFER messages\n");
+    log_.ERR("SPI", "could not submit 2 TRANSFER messages");
   }
 }
 
@@ -150,17 +149,17 @@ void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
   spi_ioc_transfer message[2] = {};
   addr |= SPI_WRITE_MASK;
   // send address
-  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);   // NOLINT
+  message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);
   message[0].rx_buf = 0;
   message[0].len    = 1;
 
-  // receive data
-  message[1].tx_buf = reinterpret_cast<uint64_t>(tx);    // NOLINT
+  // write data
+  message[1].tx_buf = reinterpret_cast<uint64_t>(tx);
   message[1].rx_buf = 0;
   message[1].len    = len;
 
   if (ioctl(spi_fd_, SPI_IOC_MESSAGE(2), message) < 0) {
-    log_.ERR("SPI", "could not submit 2 TRANSFER messages\n");
+    log_.ERR("SPI", "could not submit 2 TRANSFER messages");
   }
 }
 

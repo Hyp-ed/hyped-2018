@@ -1,5 +1,5 @@
 /*
- * Authors: Kofi
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
  * Date: 1. April 2018
  * Description:
@@ -20,31 +20,39 @@
 
 #include "communications/main.hpp"
 
+#include <stdio.h>
+
 namespace hyped {
 namespace communications {
 
-Main::Main(uint8_t id, Logger& log) : Thread(id, log)
+Main::Main(uint8_t id, Logger& log)
+    : Thread(id, log)
 {
-  // To use IP address: Communications((char *) "127.0.0.1");
-  baseCommunicator = new Communications();
-  baseCommunicator->setUp();
-  // TODO(kofi): start receiverThread here
+  const char* ipAddress = "localhost";
+  int portNo = 5695;
+  baseCommunicator_ = new Communications(log, ipAddress, portNo);
 }
 
 void Main::run()
 {
+  ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
+  receiverThread->start();
+
   while (1) {
-    nav = data.getNavigationData();
-    mtr = data.getMotorData();
-    baseCommunicator->sendDistance(nav.distance);
-    baseCommunicator->sendVelocity(nav.velocity);
-    baseCommunicator->sendAcceleration(nav.acceleration);
-    baseCommunicator->sendStripeCount(nav.stripe_count);
-    baseCommunicator->sendRpmFl(mtr.rpm_FL);
-    baseCommunicator->sendRpmFr(mtr.rpm_FR);
-    baseCommunicator->sendRpmBl(mtr.rpm_BL);
-    baseCommunicator->sendRpmBr(mtr.rpm_BR);
+    nav_ = data_.getNavigationData();
+    mtr_ = data_.getMotorData();
+    baseCommunicator_->sendDistance(nav_.distance);
+    baseCommunicator_->sendVelocity(nav_.velocity);
+    baseCommunicator_->sendAcceleration(nav_.acceleration);
+    // baseCommunicator_->sendStripeCount(nav.stripe_count);
+    baseCommunicator_->sendRpmFl(mtr_.rpm_FL);
+    baseCommunicator_->sendRpmFr(mtr_.rpm_FR);
+    baseCommunicator_->sendRpmBl(mtr_.rpm_BL);
+    baseCommunicator_->sendRpmBr(mtr_.rpm_BR);
   }
+
+  receiverThread->join();
+  delete receiverThread;
 }
 
 }}

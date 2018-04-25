@@ -1,7 +1,7 @@
 /*
  * Authors: Kofi and Isabella
  * Organisation: HYPED
- * Date: 1. April 2018
+ * Date: 15/04/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,34 +18,38 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
-
-#include "utils/concurrent/thread.hpp"
-#include "data/data.hpp"
-#include "communications/communications.hpp"
-#include "communications/sender.hpp"
 #include "communications/receiver.hpp"
 
 namespace hyped {
-
-using utils::concurrent::Thread;
-using utils::Logger;
-
 namespace communications {
 
-class Main : public Thread {
- public:
-  explicit Main(uint8_t id, Logger& log);
-  void run() override;
+ReceiverThread::ReceiverThread(Communications* baseCommunicator)
+    : Thread()
+    , baseCommunicator_(baseCommunicator)
+    , data_(data::Data::getInstance())
+{ /* Empty */ }
 
- private:
-  Communications* baseCommunicator_;
-  data::Data& data_ = data::Data::getInstance();
-  data::Navigation nav_;
-  data::Motors mtr_;
-};
+void ReceiverThread::run()
+{
+  data::Communications cmn_data;
 
-}}  //  namespace hyped::communications
+  cmn_data.stopCommand = false;
+  cmn_data.killPowerCommand = false;
 
-#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+  while (1) {
+    int command = baseCommunicator_->receiveMessage();
+
+    switch (command) {
+      case 1:
+        cmn_data.stopCommand = true;
+        break;
+      case 2:
+        cmn_data.killPowerCommand = true;
+        break;
+    }
+
+    data_.setCommunicationsData(cmn_data);
+  }
+}
+
+}}

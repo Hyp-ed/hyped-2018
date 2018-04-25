@@ -21,7 +21,7 @@
 
 #include "state_machine/event.hpp"
 #include "state_machine/hyped-machine.hpp"
-#include "state_machine/machine-states.hpp"
+#include "state_machine/states.hpp"
 #include "utils/logger.hpp"
 
 using namespace hyped::state_machine;

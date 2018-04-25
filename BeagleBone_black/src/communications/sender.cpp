@@ -1,7 +1,7 @@
 /*
  * Authors: Kofi and Isabella
  * Organisation: HYPED
- * Date: 1. April 2018
+ * Date: 15/04/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -18,14 +18,7 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
-
-#include "utils/concurrent/thread.hpp"
-#include "data/data.hpp"
-#include "communications/communications.hpp"
 #include "communications/sender.hpp"
-#include "communications/receiver.hpp"
 
 namespace hyped {
 
@@ -34,18 +27,25 @@ using utils::Logger;
 
 namespace communications {
 
-class Main : public Thread {
- public:
-  explicit Main(uint8_t id, Logger& log);
-  void run() override;
+SenderThread::SenderThread(Communications* baseCommunicator)
+    : Thread()
+    , baseCommunicator(baseCommunicator)
+{ /* Empty */ }
 
- private:
-  Communications* baseCommunicator_;
-  data::Data& data_ = data::Data::getInstance();
-  data::Navigation nav_;
-  data::Motors mtr_;
-};
+void SenderThread::run()
+{
+  while (1) {
+    nav_ = data.getNavigationData();
+    mtr_ = data.getMotorData();
+    baseCommunicator->sendDistance(nav_.distance);
+    baseCommunicator->sendVelocity(nav_.velocity);
+    baseCommunicator->sendAcceleration(nav_.acceleration);
+    // baseCommunicator->sendStripeCount(nav.stripe_count);
+    baseCommunicator->sendRpmFl(mtr_.rpm_FL);
+    baseCommunicator->sendRpmFr(mtr_.rpm_FR);
+    baseCommunicator->sendRpmBl(mtr_.rpm_BL);
+    baseCommunicator->sendRpmBr(mtr_.rpm_BR);
+  }
+}
 
-}}  //  namespace hyped::communications
-
-#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+}}

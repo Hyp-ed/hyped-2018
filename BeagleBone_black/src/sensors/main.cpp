@@ -19,11 +19,7 @@
  */
 
 #include "sensors/main.hpp"
-
-// #include <stdio.h>
-
 #include "data/data.hpp"
-
 
 namespace hyped {
 
@@ -33,16 +29,16 @@ using data::Sensors;
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
-    , data_(data::Data::getInstance())
-    , bms_(0, log)
+    : Thread(id, log),
+      data_(data::Data::getInstance()),
+      bms_(0, log)
 { /* EMPTY */ }
 
 void Main::run()
 {
   Sensors sensors = {{}, {}, {0, 0}};
   Data& data = Data::getInstance();
-  BMS_Data* bms_data = bms_.getDataPointer();
+  bms::Data* bms_data = bms_.getDataPointer();
   uint32_t time = 0;
   while (1) {
     // keep updating data_ based on values read from sensors
@@ -51,7 +47,7 @@ void Main::run()
       imu.acc.timestamp = time;
     }
 
-    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d\n"
+    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d"
       , bms_data->voltage[0]
       , bms_data->voltage[1]
       , bms_data->voltage[2]

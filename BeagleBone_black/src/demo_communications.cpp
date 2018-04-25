@@ -19,13 +19,16 @@
  */
 
 #include "communications/main.hpp"
+#include "utils/logger.hpp"
 
-using hyped::communications::Main;
+using namespace hyped::communications;
 
 int main()
 {
-  hyped::communications::Communications baseCommunicator; // to add parameter: baseCommunicator((char *) "127.0.0.1");
-  baseCommunicator.setUp();
+  const char* ipAddress = "localhost";
+  int portNo = 5695;
+  hyped::utils::Logger log(true, 1);
+  hyped::communications::Communications baseCommunicator(log, ipAddress, portNo);
   baseCommunicator.sendVelocity(6546);
   baseCommunicator.sendDistance(564);
   baseCommunicator.sendAcceleration(584);
