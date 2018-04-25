@@ -22,6 +22,7 @@ SRCS := \
   utils/io/i2c.cpp \
   utils/io/can.cpp \
   utils/io/spi.cpp \
+  utils/io/gpio.cpp \
   utils/logger.cpp \
   utils/system.cpp \
   utils/timer.cpp  \
