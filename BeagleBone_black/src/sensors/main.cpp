@@ -19,11 +19,7 @@
  */
 
 #include "sensors/main.hpp"
-
-// #include <stdio.h>
-
 #include "data/data.hpp"
-
 
 namespace hyped {
 
@@ -33,9 +29,9 @@ using data::Sensors;
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
-    , data_(data::Data::getInstance())
-    , bms_(0, log)
+    : Thread(id, log),
+      data_(data::Data::getInstance()),
+      bms_(0, log)
 { /* EMPTY */ }
 
 void Main::run()

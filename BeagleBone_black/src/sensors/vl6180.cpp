@@ -31,7 +31,7 @@ constexpr uint16_t IDENTIFICATION__MODULE_REV_MAJOR      = 0x0003;
 constexpr uint16_t IDENTIFICATION__MODULE_REV_MINOR      = 0x0004;
 constexpr uint16_t IDENTIFICATION__DATE_HI               = 0x0006;
 constexpr uint16_t IDENTIFICATION__DATE_LO               = 0x0007;
-constexpr uint16_t IDENTIFICATION__TIME                  = 0x0008; // Could also use 0x0009
+constexpr uint16_t IDENTIFICATION__TIME                  = 0x0008;  // Could also use 0x0009
 constexpr uint16_t SYSTEM__MODE_GPIO0                    = 0x0010;
 constexpr uint16_t SYSTEM__MODE_GPIO1                    = 0x0011;
 constexpr uint16_t SYSTEM__HISTORY_CTRL                  = 0x0012;
@@ -64,7 +64,7 @@ constexpr uint16_t RESULT__RANGE_STATUS                  = 0x004D;
 constexpr uint16_t RESULT__ALS_STATUS                    = 0x004E;
 constexpr uint16_t RESULT__INTERRUPT_STATUS_GPIO         = 0x004F;
 constexpr uint16_t RESULT__ALS_VAL                       = 0x0050;
-constexpr uint16_t RESULT__HISTORY_BUFFER_x              = 0x0052; // range 0x0052 to 0x0060
+constexpr uint16_t RESULT__HISTORY_BUFFER_x              = 0x0052;  // range 0x0052 to 0x0060
 constexpr uint16_t RESULT__RANGE_VAL                     = 0x0062;
 constexpr uint16_t RESULT__RANGE_RAW                     = 0x0064;
 constexpr uint16_t RESULT__RANGE_RETURN_RATE             = 0x0066;
@@ -93,15 +93,16 @@ Vl6180::Vl6180(uint8_t id, Logger& log)
 void Vl6180:: turnOn()
 {
   // return if already on
-  if(this->on_) {
+  if (this->on_) {
     log_.DBG("VL6180", "Sensor is already on\n");
     return;
   }
 
   // Wait incase the sensor has just been turned off
-  // TODO need to check wait time
+  // TODO(Anyone) need to check wait time
 
-  // Turn on pins TODO pin write to turn sensor on
+  // Turn on pins
+  // TODO(Anyone) pin write to turn sensor on
 
   // Wait for 1.5ms (Data sheet says 1.4ms)
   this->waitDeviceBooted();
@@ -140,7 +141,7 @@ void Vl6180:: turnOn()
   this->writeByte(0x0030, 0x00);
 
   // Enables polling for New Sample ready when measurement completes
-  this->writeByte( 0x0011, 0x10);
+  this->writeByte(0x0011, 0x10);
 
   // Set the averaging sample period (datasheet recommends 48)
   this->writeByte(0x010a, 0x30);
@@ -154,7 +155,7 @@ void Vl6180:: turnOn()
 
 void Vl6180::turnOff()
 {
-  // TODO do pin write to turn off vl6180
+  // TODO(Anyone) do pin write to turn off vl6180
   this->on_ = false;
   log_.DBG("VL6180", "Sensor is now off\n");
 }
@@ -174,7 +175,7 @@ bool Vl6180::waitDeviceBooted()
   {
     status = this->readByte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
   }
-  while(fresh_out_of_reset != 1 && status == 0);
+  while (fresh_out_of_reset != 1 && status == 0);
 
   return true;
 }
@@ -186,24 +187,24 @@ bool Vl6180::rangeWaitDeviceReady()
 
 int Vl6180::readByte(uint16_t reg_add, uint8_t *data)
 {
-  char buffer[2];
+  char __attribute__((unused)) buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
-  char recv_buffer[1];
+  char __attribute__((unused)) recv_buffer[1];
 
-  // TODO write read I2C
+  // TODO(Anyone) write read I2C
 
   return 1;
 }
 
 int Vl6180::writeByte(uint16_t reg_add, char data)
 {
-  char buffer[3];
+  char __attribute__((unused)) buffer[3];
   buffer[0]=reg_add>>8;
   buffer[1]=reg_add&0xFF;
   buffer[2]=data;
 
-  // TODO write I2C
+  // TODO(Anyone) write I2C
 
   return 1;
 }

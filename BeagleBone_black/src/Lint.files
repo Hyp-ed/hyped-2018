@@ -21,6 +21,8 @@ sensors/main.hpp
 sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
+sensors/vl6180.hpp
+sensors/vl6180.cpp
 communications/main.hpp
 communications/main.cpp
 communications/communications.hpp

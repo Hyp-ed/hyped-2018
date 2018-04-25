@@ -29,14 +29,13 @@ namespace sensors {
 
 std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
 
-
 BMS::BMS(uint8_t id): BMS(id, utils::System::getLogger())
 { /* Do nothing, delegate to the other constructor */ }
 
 BMS::BMS(uint8_t id, Logger& log)
-    : Thread(log)
-    , can_(Can::getInstance())
-    , id_(id)
+    : Thread(log),
+      can_(Can::getInstance()),
+      id_(id)
 {
   // verify this BMS unit has not been instantiated
   for (uint8_t i : existing_ids_) {

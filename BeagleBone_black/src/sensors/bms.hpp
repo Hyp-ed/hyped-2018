@@ -79,15 +79,8 @@ class BMS : public Thread {
    */
   void run() override;
 
-  bms::Data getData() const
-  {
-    return data_;
-  }
-
-  bms::Data* getDataPointer()
-  {
-    return &data_;
-  }
+  bms::Data getData() const { return data_; }
+  bms::Data* getDataPointer() { return &data_; }
 
  private:
   /**

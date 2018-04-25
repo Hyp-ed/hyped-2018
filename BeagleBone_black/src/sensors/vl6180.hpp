@@ -21,7 +21,6 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 
-// List of Includes
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 
@@ -79,7 +78,7 @@ class Vl6180: public Thread {
   bool on_;
 };
 
-}} //namespace hyped::sensors
+}}  // namespace hyped::sensors
 
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
