@@ -45,8 +45,13 @@ constexpr const off_t bases[gpio::kBankNum] = {
   0x481ae000
 };
 constexpr uint32_t kMmapSize = 0x1000;
-constexpr const char* kFSDir = "/sys/class/gpio";
+// constexpr const char* kFSDir = "/sys/class/gpio";
 
+// register offsets
+constexpr uint32_t kOutputEnable  = 0x134;
+constexpr uint32_t kData          = 0x138;
+constexpr uint32_t kClear         = 0x190;
+constexpr uint32_t kSet           = 0x194;
 }  // namespace gpio
 
 bool GPIO::initialised_ = false;
@@ -108,7 +113,7 @@ void GPIO::exportGPIO()
   }
 
   char buf[100];
-  log_.INFO("GPIO", "exporting %d\n", pin_);
+  log_.INFO("GPIO", "exporting %d", pin_);
 
   // let the kernel know we are using this pin
   int      fd;
@@ -122,8 +127,8 @@ void GPIO::exportGPIO()
   len = write(fd, buf, strlen(buf) + 1);
   close(fd);
   if (len != strlen(buf) +1) {
-    log_.ERR("GPIO", "could not export GPIO $d", pin_);
-    return;
+    log_.INFO("GPIO", "could not export GPIO $d, might be already exported", pin_);
+    // return;
   }
 
   // set direction
@@ -152,6 +157,21 @@ void GPIO::exportGPIO()
 
 void GPIO::attachGPIO()
 {
+  uint8_t bank;
+  uint8_t pin_id;
+
+  bank      = pin_/32;
+  pin_id    = pin_%32;
+  pin_mask_ = 1 << pin_id;
+  log_.DBG1("GPIO", "gpio %d resolved as bank,pin %d, %d", pin_, bank, pin_id);
+
+  uint32_t base = reinterpret_cast<uint32_t>(base_mapping_[bank]);
+  if (direction_ == gpio::Direction::kIn) {
+    data_  = reinterpret_cast<volatile uint32_t*>(base + gpio::kData);
+  } else {
+    set_   = reinterpret_cast<volatile uint32_t*>(base + gpio::kSet);
+    clear_ = reinterpret_cast<volatile uint32_t*>(base + gpio::kClear);
+  }
 }
 
 void GPIO::set()
@@ -167,6 +187,7 @@ void GPIO::set()
   }
 
   *set_ = pin_mask_;
+  log_.DBG1("GPIO", "gpio %d set", pin_);
 }
 
 void GPIO::clear()
@@ -182,6 +203,7 @@ void GPIO::clear()
   }
 
   *clear_ = pin_mask_;
+  log_.DBG1("GPIO", "gpio %d cleared", pin_);
 }
 
 uint8_t GPIO::read()
@@ -196,7 +218,9 @@ uint8_t GPIO::read()
     return 0;
   }
 
-  return *data_ & pin_mask_ ? 1 : 0;
+  uint8_t val = *data_ & pin_mask_ ? 1 : 0;
+  log_.DBG1("GPIO", "gpio %d read %d", pin_, val);
+  return val;
 }
 
 }}}   // namespace hyped::utils::io
