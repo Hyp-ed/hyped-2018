@@ -23,6 +23,7 @@
 
 
 #include <cstdint>
+#include <vector>
 
 #include "utils/logger.hpp"
 
@@ -57,8 +58,10 @@ class GPIO {
    * to 4 GPIO banks/ports.
    */
   static void initialise();
+  static void uninitialise();
   static bool initialised_;
   static void* base_mapping_[gpio::kBankNum];
+  static std::vector<uint32_t> exported_pins;
 
   /**
    * @brief Tell kernel we are using this, set direction

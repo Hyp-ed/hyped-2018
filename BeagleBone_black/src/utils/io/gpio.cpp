@@ -20,15 +20,12 @@
 
 #include "utils/io/gpio.hpp"
 
-#include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/mman.h>
 #include <unistd.h>
+#include <sys/mman.h>
+
+#include <cstdlib>
+#include <cstring>
 
 #include "utils/system.hpp"
 
@@ -56,6 +53,7 @@ constexpr uint32_t kSet           = 0x194;
 
 bool GPIO::initialised_ = false;
 void* GPIO::base_mapping_[gpio::kBankNum];
+std::vector<uint32_t> GPIO::exported_pins;  // NOLINT [build/include_what_you_use]
 
 GPIO::GPIO(uint32_t pin, gpio::Direction direction)
     : GPIO(pin, direction, System::getLogger())
@@ -100,10 +98,32 @@ void GPIO::initialise()
 
     base_mapping_[i] = base;
   }
+  atexit(uninitialise);
 
   initialised_ = true;
 }
 
+void GPIO::uninitialise()
+{
+  Logger log(1, 1);
+  log.ERR("GPIO", "uninitialising");
+
+  // release exported gpios
+  int fd;
+  fd = open("/sys/class/gpio/unexport", O_WRONLY);
+  if (fd < 0) {
+    log.ERR("GPIO", "could not open unexport");
+    return;
+  }
+
+  char buf[10];
+  for (uint32_t pin : exported_pins) {
+    snprintf(buf, sizeof(buf), "%d", pin);
+    write(fd, buf, strlen(buf) + 1);
+  }
+  close(fd);
+  // unmap gpio banks
+}
 
 void GPIO::exportGPIO()
 {
@@ -130,6 +150,7 @@ void GPIO::exportGPIO()
     log_.INFO("GPIO", "could not export GPIO $d, might be already exported", pin_);
     // return;
   }
+  exported_pins.push_back(pin_);
 
   // set direction
   snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%i/direction", pin_);
