@@ -3,6 +3,12 @@
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
+ * Main manages sensor drivers, collects data from sensors and updates
+ * shared Data::Sensors structure. Main is not responsible for initialisation
+ * of supporting io drivers (i2c, spi, can). This should be done by the sensor
+ * drivers themselves.
+ * Currently supported sensors:
+ * - BMS (low powered), ids: 0
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +31,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/bms.hpp"
 
 namespace hyped {
 
@@ -40,8 +47,9 @@ class Main: public Thread {
 
  private:
   data::Data& data_;
+  BMS         bms_;
 };
 
 }}  // namespace hyped::sensors
 
-#endif  /* BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_ */
+#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_

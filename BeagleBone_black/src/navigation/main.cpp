@@ -18,6 +18,8 @@
 
 #include "navigation/main.hpp"
 
+#include <memory>
+
 namespace hyped {
 
 using data::Sensors;
@@ -33,51 +35,61 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   data::Navigation nav_data;
-  Sensors last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
+  std::unique_ptr<Sensors> last_readings(new Sensors());
+  std::unique_ptr<Sensors> readings(new Sensors());
+  log_.INFO("NAVIGATION", "Main started");
+
+  *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
-    Sensors readings = data_.getSensorsData();
+    *readings = data_.getSensorsData();
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
-    if (!imuChanged(last_readings, readings))
+    if (!imuChanged(*last_readings, *readings)) {
+      // let other threads run, maybe someone will update the sensors data
+      yield();
       continue;
-    if (proxiChanged(last_readings, readings) && stripeCntChanged(last_readings, readings))
-      nav_.update(readings.imu, readings.proxy, readings.stripe_cnt);
-    else if (proxiChanged(last_readings, readings))
-      nav_.update(readings.imu, readings.proxy);
-    else if (stripeCntChanged(last_readings, readings))
-      nav_.update(readings.imu, readings.stripe_cnt);
+    }
+    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
+      nav_.update(readings->imu, readings->proxi, readings->stripe_count);
+    else if (proxiChanged(*last_readings, *readings))
+      nav_.update(readings->imu, readings->proxi);
+    else if (stripeCntChanged(*last_readings, *readings))
+      nav_.update(readings->imu, readings->stripe_count);
     else
-      nav_.update(readings.imu);
+      nav_.update(readings->imu);
 
-    nav_data.distance = nav_.get_displacement();
-    nav_data.velocity = nav_.get_velocity();
+    nav_data.distance     = nav_.get_displacement();
+    nav_data.velocity     = nav_.get_velocity();
     nav_data.acceleration = nav_.get_accleration();
-    // TODO(Brano): Add stripe count or remove it from data::Navigation.
     data_.setNavigationData(nav_data);
+
+    readings.swap(last_readings);
   }
 }
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (unsigned int i = 0; i < new_data.imu.size(); ++i)
+  for (uint8_t i = 0; i < new_data.imu.size(); ++i) {
     if (new_data.imu[i].gyr.timestamp != old_data.imu[i].gyr.timestamp ||
         new_data.imu[i].acc.timestamp != old_data.imu[i].acc.timestamp)
       return true;
+  }
   return false;
 }
 
 bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (unsigned int i = 0; i < new_data.proxy.size(); ++i)
+  for (uint8_t i = 0; i < new_data.proxi.size(); ++i) {
     // TODO(Brano): Timestamp proxi data in data::Sensors
-    if (new_data.proxy[i].val != old_data.proxy[i].val)
+    if (new_data.proxi[i].val != old_data.proxi[i].val)
       return true;
+  }
   return false;
 }
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  return new_data.stripe_cnt.timestamp != old_data.stripe_cnt.timestamp;
+  return new_data.stripe_count.timestamp != old_data.stripe_count.timestamp;
 }
 
 }}  // namespace hyped::navigation

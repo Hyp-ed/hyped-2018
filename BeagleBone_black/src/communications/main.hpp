@@ -1,9 +1,8 @@
 /*
- * Author: Sean Mullan
+ * Authors: Kofi and Isabella
  * Organisation: HYPED
- * Date: 28. March 2018
- * Description: Dummy state machine thread to test if motor control module reacts
- *              appropriately to state changes
+ * Date: 1. April 2018
+ * Description:
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,31 +18,34 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_TEST_STATES_HPP_
+#ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
+#define BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_
 
-#include <cstdint>
 #include "utils/concurrent/thread.hpp"
-#include "state_machine/hyped-machine.hpp"
+#include "data/data.hpp"
+#include "communications/communications.hpp"
+#include "communications/sender.hpp"
+#include "communications/receiver.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
-using hyped::state_machine::HypedMachine;
 
-namespace motor_control {
+namespace communications {
 
-class TestStates: public Thread {
+class Main : public Thread {
  public:
-  explicit TestStates(uint8_t id, Logger& log);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
-  void delay(int i);
 
  private:
-  HypedMachine* hypedMachine;
+  Communications* baseCommunicator_;
+  data::Data& data_ = data::Data::getInstance();
+  data::Navigation nav_;
+  data::Motors mtr_;
 };
 
-}}  // namespace hyped::motor_control
+}}  //  namespace hyped::communications
 
-#endif
+#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_MAIN_HPP_

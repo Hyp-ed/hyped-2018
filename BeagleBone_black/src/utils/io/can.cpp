@@ -54,22 +54,19 @@ struct sockaddr_can {
   } can_addr;
 };
 
-#define CANID_DELIM '#'
-#define DATA_SEPERATOR '.'
 #endif   // CAN
 
-#include "utils/logger.hpp"
+#include "sensors/bms.hpp"
 
 namespace hyped {
-namespace utils {
-Logger log(true, 1);
 
+namespace bms = sensors::bms;
+
+namespace utils {
 namespace io {
 
-
-
 Can::Can()
-    : concurrent::Thread(0, log)
+    : concurrent::Thread(0)
 {
   if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
     perror("socket");
@@ -77,84 +74,125 @@ Can::Can()
   }
 
   sockaddr_can addr;
-  addr.can_family = AF_CAN;
-  addr.can_ifindex = if_nametoindex("can0");   // ifr.ifr_ifindex;
+  addr.can_family   = AF_CAN;
+  addr.can_ifindex  = if_nametoindex("can0");   // ifr.ifr_ifindex;
 
   if (bind(socket_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     perror("bind");
     return;
   }
 
-  reading = 1;
+  running_ = true;
   start();    // spawn reading thread
   yield();
 }
 
 Can::~Can()
 {
-  reading = 0;
+  running_ = false;
   // join();
   close(socket_);
 }
 
-int Can::send(const CanFrame& frame)
+int Can::send(const can::Frame& frame)
 {
   can_frame can;
-
+  log_.DBG2("CAN", "trying to send something");
   // checks, id <= ID_MAX, len <= LEN_MAX
-  if (frame.len > 8)    return 0;
-  if (frame.id  > 127)  return 0;
+  if (frame.len > 8) {
+    log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
+    return 0;
+  }
+  // if (frame.id & CAN_EFF_FLAG && frame.id)
+  // if (frame.id  > 127)  return 0;
 
-  can.can_id = frame.id;
+  can.can_id  = frame.id;
+  can.can_id |= frame.extended ? can::Frame::kExtendedMask : 0;  // add extended id flag
   can.can_dlc = frame.len;
   for (int i = 0; i < frame.len; i++) {
     can.data[i] = frame.data[i];
   }
 
-  if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
-    perror("write");
-    return 0;
+  {
+    concurrent::ScopedLock L(&socket_lock_);
+    if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
+      // perror("write");
+      log_.ERR("CAN", "cannot write to socket");
+      return 0;
+    }
   }
 
+  log_.DBG1("CAN", "message with id %d sent, extended:%d"
+    , frame.id
+    , frame.extended);
   return 1;
 }
 
 void Can::run()
 {
   /* these settings are static and can be held out of the hot path */
-  CanFrame data;
+  can::Frame data;
 
-  printf("starting continuous reading\n");
-  while (reading) {
+  log_.INFO("CAN", "starting continuous reading");
+  while (running_) {
     receive(&data);
-    printf("id%d len %d\ndata: ", data.id, data.len);
-    for (int i = 0; i < data.len; i++) {
-      printf("%.2x ", data.data[i]);
-    }
-    printf("\n");
+    processNewData(&data);
   }
 
-  printf("reading was stopped\n");
+  log_.INFO("CAN", "stopped continuous reading");
 }
 
-int Can::receive(CanFrame* frame)
+int Can::receive(can::Frame* frame)
 {
   size_t nBytes;
   can_frame raw_data;
 
   nBytes = read(socket_, &raw_data, CAN_MTU);
   if (nBytes != CAN_MTU) {
-    perror("read");
+    // perror("read");
+    log_.ERR("CAN", "cannot read from socket");
     return 0;
   }
 
-  frame->id  = raw_data.can_id;
-  frame->len = raw_data.can_dlc;
+  frame->id       = raw_data.can_id & ~can::Frame::kExtendedMask;
+  frame->extended = raw_data.can_id & can::Frame::kExtendedMask;
+  frame->len      = raw_data.can_dlc;
   for (int i = 0; i < frame->len; i++) {
     frame->data[i] = raw_data.data[i];
   }
-
+  log_.DBG1("CAN", "received %u %u, extended %d"
+    , raw_data.can_id
+    , frame->id
+    , frame->extended);
   return 1;
+}
+
+void Can::processNewData(can::Frame* message)
+{
+  uint32_t  id    = message->id;
+  BMS*      owner = 0;
+  for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
+    uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
+    if (bms_id <= id &&
+        id < bms_id + bms::kIdSize) {
+      owner = bms.second;
+      break;
+    }
+  }
+
+  if (owner) {
+    owner->processNewData(*message);
+  } else {
+    log_.ERR("CAN", "did not find owner of received CAN message with id %d", id);
+  }
+}
+
+void Can::registerBMS(BMS* bms)
+{
+  ASSERT(bms);
+  uint8_t id = bms->id_;
+
+  bms_map_[id] = bms;
 }
 
 }}}   // namespace hyped::utils::io

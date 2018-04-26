@@ -368,4 +368,4 @@ Vector<T, 4> Quaternion<T>::get_elements() const
 
 }}}  // hyped::utils::math
 
-#endif
+#endif  // BEAGLEBONE_BLACK_UTILS_MATH_QUATERNION_HPP_

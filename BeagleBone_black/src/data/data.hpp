@@ -28,6 +28,8 @@
 #include "utils/math/vector.hpp"
 #include "utils/concurrent/lock.hpp"
 
+using std::array;
+
 namespace hyped {
 
 // imports
@@ -47,8 +49,12 @@ enum State {
   kRunComplete,
   kFailureStopped,
   kExiting,
-  kFinished
+  kFinished,
+  kInvalid,
+  num_states
 };
+
+extern const char* states[num_states];
 
 struct StateMachine {
   bool critical_failure;
@@ -58,20 +64,20 @@ struct StateMachine {
 // -----------------------------------------------------------------------------
 // Navigation
 // -----------------------------------------------------------------------------
+typedef float NavigationType;
 struct Navigation {
-  uint32_t distance;
-  uint32_t velocity;
-  int32_t acceleration;
-  uint32_t stripe_count;
+  NavigationType distance;
+  NavigationType velocity;
+  NavigationType acceleration;
 };
 
 // -----------------------------------------------------------------------------
 // Raw Sensor data
 // -----------------------------------------------------------------------------
-
+typedef Vector<NavigationType, 3> NavigationVector;
 struct Imu {
-  DataPoint<Vector<int16_t, 3> > acc;
-  DataPoint<Vector<int16_t, 3> > gyr;
+  DataPoint<NavigationVector> acc;
+  DataPoint<NavigationVector> gyr;
 };
 
 struct Proximity {
@@ -79,30 +85,26 @@ struct Proximity {
 };
 
 struct Battery {
-  Vector<int16_t, 10> temperatures;
-  uint8_t voltage;
+  uint16_t  voltage;
+  int8_t    temperature;
 };
 
-/*struct StripeCount {
-  DataPoint<uint32_t> count;
-};//*/
 typedef DataPoint<uint32_t> StripeCount;
-
 struct Sensors {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 24;
 
-  std::array<Imu, kNumImus> imu;
-  std::array<Proximity, kNumProximities> proxy;
-  StripeCount stripe_cnt;
+  array<Imu, kNumImus> imu;
+  array<Proximity, kNumProximities> proxi;
+  StripeCount stripe_count;
 };
 
 struct Batteries {
   static constexpr int kNumLPBatteries = 2;
   static constexpr int kNumHPBatteries = 2;
 
-  std::array<Battery, kNumLPBatteries> low_power_batteries;
-  std::array<Battery, kNumHPBatteries> high_power_batteries;
+  array<Battery, kNumLPBatteries> low_power_batteries;
+  array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
 // -----------------------------------------------------------------------------
@@ -179,7 +181,17 @@ class Data {
    */
   void setSensorsData(const Sensors& sensors_data);
 
-    /**
+  /**
+   * @brief       Retrieves only StripeCount part from Sensors data
+   */
+  StripeCount getStripeCount();
+
+  /**
+   * @brief       Should be called to update StripeCount part in Sensors data
+   */
+  void setStripeCount(const StripeCount& stripe_count);
+
+  /**
    * @brief      Retrieves data from the batteries.
    */
   Sensors getBatteryData();
@@ -200,14 +212,14 @@ class Data {
   void setMotorData(const Motors& motor_data);
 
   /**
-     * @brief      Retrieves data on whether stop/kill power commands have been issued.
-     */
-    Communications getCommunicationsData();
+   * @brief      Retrieves data on whether stop/kill power commands have been issued.
+   */
+  Communications getCommunicationsData();
 
-    /**
-     * @brief      Should be called to update motor data.
-     */
-    void setCommunicationsData(const Communications& communications_data);
+  /**
+   * @brief      Should be called to update communications data.
+   */
+  void setCommunicationsData(const Communications& communications_data);
 
  private:
   StateMachine state_machine_;

@@ -36,17 +36,19 @@ class System {
   static Logger& getLogger();
 
   // runtime arguments to configure the whole system
-  bool verbose;
-  bool verbose_motor;
-  bool verbose_nav;
-  bool verbose_sensor;
-  bool verbose_state;
+  int8_t verbose;
+  int8_t verbose_motor;
+  int8_t verbose_nav;
+  int8_t verbose_sensor;
+  int8_t verbose_state;
+  int8_t verbose_cmn;
 
   int8_t debug;
   int8_t debug_motor;
   int8_t debug_nav;
   int8_t debug_sensor;
   int8_t debug_state;
+  int8_t debug_cmn;
 
  private:
   Logger* log_;

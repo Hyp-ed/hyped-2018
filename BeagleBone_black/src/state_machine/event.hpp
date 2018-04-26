@@ -18,8 +18,8 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-#pragma once
+#ifndef BEAGLEBONE_BLACK_STATE_MACHINE_EVENT_HPP_
+#define BEAGLEBONE_BLACK_STATE_MACHINE_EVENT_HPP_
 
 namespace hyped {
 namespace state_machine {
@@ -35,3 +35,5 @@ enum Event {
 };
 
 }}   // namespace hyped::state_machine
+
+#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_EVENT_HPP_

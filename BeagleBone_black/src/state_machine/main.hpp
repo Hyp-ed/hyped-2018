@@ -3,6 +3,9 @@
  * Organisation: HYPED
  * Date: 11. March 2018
  * Description:
+ * Main instantiates HypedMachine. It also monitors other data and generates Events
+ * for the HypedMachine. Note, StateMachine structure in Data is not updated here but
+ * in HypedMachine.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +21,8 @@
  *    limitations under the License.
  */
 
-#pragma once
+#ifndef BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_
+#define BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_
 
 #include <cstdint>
 #include "utils/concurrent/thread.hpp"
@@ -38,10 +42,17 @@ class Main: public Thread {
   void run() override;
 
  private:
-  HypedMachine* hypedMachine;
-  data::Data& data = data::Data::getInstance();
+  HypedMachine hypedMachine;
+  /**
+   * @brief      Checks all the system for critical failures. Returns false if all checked have passed.
+   */
   bool hasCriticalFailure();
+  /**
+   * @brief      Computes the maxDistance and returns true if it has been reached.
+   */
   bool hasReachedMaxDistance();
 };
 
 }}  // namespace hyped::motor_control
+
+#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_

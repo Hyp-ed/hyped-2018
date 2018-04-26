@@ -41,6 +41,7 @@ Lock logger_lock;
 void myPrint(FILE* file, const char* format, va_list args)
 {
   vfprintf(file, format, args);
+  fprintf(file, "\n");
 }
 
 // static auto start_time = std::chrono::high_resolution_clock::now();
@@ -57,10 +58,10 @@ void logHead(FILE* file, const char* title, const char* module)
 
   static const bool print_micro = true;
   if (print_micro) {
-    auto now_time = -high_resolution_clock::now().time_since_epoch();
+    auto now_time = high_resolution_clock::now().time_since_epoch();
     duration<int, std::milli> time_span = duration_cast<std::chrono::milliseconds>
           (now_time);
-    fprintf(file, ".%03d ", time_span.count() % 1000);
+    fprintf(file, ".%03d ", static_cast<uint16_t>(time_span.count()) % 1000);
   } else {
     fprintf(file, " ");
   }
@@ -100,7 +101,7 @@ void Logger::DBG(const char* module, const char* format, ...)
 {
   if (debug_ >= 0) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG", module);
+    logHead(stderr, "DBG0", module);
     va_list args;
     va_start(args, format);
     myPrint(stderr, format, args);

@@ -16,7 +16,6 @@
  *    limitations under the License.
  */
 
-// TODO(uday): Ifndef guard
 #ifndef BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
 #define BEAGLEBONE_BLACK_NAVIGATION_MAIN_HPP_
 
@@ -36,13 +35,14 @@ namespace navigation {
 
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id, Logger& log);
+  Main(uint8_t id, Logger& log);
   void run() override;
 
  private:
   bool imuChanged(const Sensors& old_data, const Sensors& new_data);
   bool proxiChanged(const Sensors& old_data, const Sensors& new_data);
   inline bool stripeCntChanged(const Sensors& old_data, const Sensors& new_data);
+
   data::Data& data_;
   Navigation nav_;
 };

@@ -8,7 +8,7 @@ MAIN=main.cpp
 SRCS_DIR:=src
 OBJS_DIR:=bin
 
-CFLAGS:=-pthread -std=c++11 -O0 -Wall
+CFLAGS:=-pthread -std=c++11 -O3 -Wall
 LFLAGS:=-lpthread -pthread
 
 UNAME=$(shell uname)

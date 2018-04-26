@@ -20,38 +20,22 @@
  *    limitations under the License.
  */
 
-#include <stdint.h>
-#include "i2c/i2c.hpp"
+#include "utils/io/i2c.hpp"
 
-using namespace hyped;
+using hyped::utils::io::I2C;
+using hyped::utils::Logger;
+using hyped::utils::concurrent::Thread;
 
-void initialiseSlaves(i2c::Driver* instance)
-{
-  /* What this does is slave dependent, suggested for VL6180X:
-  Turn on/off GPIO pins to boot
-  Set registers to continuous operation mode with given frequency
-  Get test values to establish working
-  */
-}
+Logger log(true,1);
 
-int main(void)
-{
-  i2c::Driver device1 = i2c::Driver();
-  /* Replace with your application code */
+int main(){
+	Thread* t1 = new I2C();
 
-  // Set up context for driver configuration:
-  i2c::Context device1_settings;  // Must be filled appropriately
+	t1->start();
+	t1->join();
 
-  device1.configure(&device1_settings);
-  initialiseSlaves(&device1);       // Will perform real I2C operations
-  i2c::Channel inputs[10];          // This should be further initialised
-  device1.configureChannels(inputs, 10);   // Requires no communications
+	delete t1;
 
-  while (1) {
-    device1.control();
-    // It is suggested that in the while loop the health
-    // of the I2C connection is monitored by checking error counters and statuses
-    // Meanwhile, Control() will be automatically running communications
-    // and calling callback functions to make aware of new results
-  }
+	log.INFO("DEMO", "I2C Thread joined and executed\n");
+	return 0;
 }

@@ -1076,7 +1076,7 @@ def CheckForCopyright(filename, lines, error):
 
   # We'll say it should occur by line 10. Don't forget there's a
   # dummy line at the front.
-  for line in xrange(1, min(len(lines), 11)):
+  for line in xrange(1, min(len(lines), 31)):
     if re.search(r'Copyright', lines[line], re.I): break
   else:                       # means no copyright line was found
     error(filename, 0, 'legal/copyright', 5,
@@ -1118,6 +1118,12 @@ def CheckForHeaderGuard(filename, lines, error):
   """
 
   cppvar = GetHeaderGuardCPPVariable(filename)
+  elements = cppvar.split('_')
+  cppvar = ''
+  for e in elements:
+    if e != "SRC":
+      cppvar += e+'_'
+  cppvar = cppvar[:-1]
 
   ifndef = None
   ifndef_linenum = 0
@@ -2551,8 +2557,10 @@ def CheckBraces(filename, clean_lines, linenum, error):
 
 
   if (Search(r'\)\s{$', line) and
+      Search(r'\(', line) and
       not Search(r'\s((if|else|switch|for|while|try|catch|case)\s)|default:', line)):
     error(filename, linenum, 'whitespace/braces', 4, '{ that opens a function definition should be at a new line')
+
 
   if Match(r'\s*{\s*$', line):
     # We allow an open brace to start a line in the case where someone
@@ -3817,7 +3825,7 @@ def ProcessFileData(filename, file_extension, lines, error,
 
   CheckForCopyright(filename, lines, error)
 
-  if file_extension == 'h':
+  if file_extension == 'h' or file_extension == 'hpp':
     CheckForHeaderGuard(filename, lines, error)
 
   RemoveMultiLineComments(filename, lines, error)
