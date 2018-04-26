@@ -50,6 +50,8 @@ utils/io/spi.hpp
 utils/io/spi.cpp
 utils/io/i2c.hpp
 utils/io/i2c.cpp
+utils/io/gpio.hpp
+utils/io/gpio.cpp
 utils/logger.hpp
 utils/logger.cpp
 utils/system.hpp

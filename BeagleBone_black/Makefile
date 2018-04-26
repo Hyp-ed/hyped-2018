@@ -17,6 +17,12 @@ ifneq ($(UNAME),Linux)
 	UNAME='Windows'
 	CFLAGS:=$(CFLAGS) -DWIN
 endif
+ARCH=$(shell arch)
+ifneq (,$(findstring 64,$(ARCH)))
+	CFLAGS:=$(CFLAGS) -DARCH_64
+else
+  CFLAGS:=$(CFLAGS) -DARCH_32
+endif
 
 
 include $(SRCS_DIR)/Source.files
