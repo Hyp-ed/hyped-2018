@@ -80,6 +80,7 @@ define echo_var
 	@echo $(1) = $($1)
 endef
 
+.PHONY: doc
 doc:
 	$(Verb) doxygen Doxyfile
 
