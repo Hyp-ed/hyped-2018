@@ -20,6 +20,8 @@
 
 #include "utils/io/gpio.hpp"
 
+#include <poll.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -48,6 +50,15 @@ constexpr uint32_t kOutputEnable  = 0x134;
 constexpr uint32_t kData          = 0x138;
 constexpr uint32_t kClear         = 0x190;
 constexpr uint32_t kSet           = 0x194;
+
+// workaround to avoid conflict with GPIO::read()
+size_t readHelper(int fd)
+{
+  char buf[2];
+  lseek(fd, 0, SEEK_SET);             // reset file pointer
+  return read(fd, buf, sizeof(buf));  // actually consume new data
+}
+
 }  // namespace gpio
 
 bool GPIO::initialised_ = false;
@@ -65,12 +76,12 @@ GPIO::GPIO(uint32_t pin, gpio::Direction direction, Logger& log)
     , set_(0)
     , clear_(0)
     , data_(0)
+    , fd_(0)
 {
   if (!initialised_)  initialise();
 
   exportGPIO();
   attachGPIO();
-  // log_.INFO("GPIO", "gpio %d initialised\n", pin_);
 }
 
 void GPIO::initialise()
@@ -194,10 +205,61 @@ void GPIO::attachGPIO()
 #endif
   if (direction_ == gpio::Direction::kIn) {
     data_  = reinterpret_cast<volatile uint32_t*>(base + gpio::kData);
+    setupWait();
   } else {
     set_   = reinterpret_cast<volatile uint32_t*>(base + gpio::kSet);
     clear_ = reinterpret_cast<volatile uint32_t*>(base + gpio::kClear);
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void GPIO::setupWait()
+{
+  int fd;
+  char buf[100];
+
+  // setup edge for triggers
+  snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/edge", pin_);
+  fd = open(buf, O_WRONLY);
+  if (fd < 0) {
+    log_.ERR("GPIO", "could not open /sys/.../edge for gpio %d", pin_);
+    return;
+  }
+  write(fd, "both", 5);
+  close(fd);
+
+  // open /sys/.../value file
+  snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%d/value", pin_);
+  fd = open(buf, O_RDONLY | O_NONBLOCK);
+  if (fd < 0) {
+    log_.ERR("GPIO", "could not open /sys/.../value for gpio %d", pin_);
+    return;
+  }
+
+  fd_ = fd;
+  log_.DBG1("GPIO", "gpio %d setup for waiting", pin_);
+}
+
+int8_t GPIO::wait()
+{
+  pollfd fdset = {};
+  fdset.fd = fd_;
+  fdset.events = POLLPRI | POLLERR;
+  int rc = poll(&fdset, 1, -1);
+  if (rc > 0) {
+    if (fdset.revents & POLLPRI) {
+      log_.DBG1("GPIO", "success Wait on gpio %d", pin_);
+      gpio::readHelper(fd_);
+      return read();    // assume register access is faster than parsing data from value file
+    }
+
+    if (fdset.revents & POLLERR) {
+      log_.ERR("GPIO", "an error on wait of gpio %d: %d", pin_, errno);
+    }
+  }
+
+  log_.ERR("GPIO", "some error on wait of gpio %d", pin_);
+  return -1;
 }
 
 void GPIO::set()
