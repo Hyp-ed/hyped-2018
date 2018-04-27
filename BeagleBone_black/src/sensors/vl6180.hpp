@@ -46,7 +46,7 @@ class Vl6180: public Thread {
  /**
    *  @brief  Sets the the ranging mode to continuous
    */
-  void setContinuousRangingMode()
+  void setContinuousRangingMode();
   /**
     *  @brief  Loops until the device is out of reset
     *
@@ -81,8 +81,7 @@ class Vl6180: public Thread {
     */
   int writeByte(uint16_t reg_add, char data);
   bool on_;
-  bool continuous_mode_
-  uint8_t id_;
+  bool continuous_mode_;
 };
 
 }}  // namespace hyped::sensors
