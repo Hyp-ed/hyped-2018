@@ -80,6 +80,9 @@ define echo_var
 	@echo $(1) = $($1)
 endef
 
+doc:
+	$(Verb) doxygen Doxyfile
+
 info:
 	$(call echo_var,CC)
 	$(call echo_var,TOP)
