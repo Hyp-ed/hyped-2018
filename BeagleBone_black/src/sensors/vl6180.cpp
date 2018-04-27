@@ -81,6 +81,8 @@ constexpr uint16_t FIRMWARE__RESULT_SCALER               = 0x0120;
 constexpr uint16_t I2C_SLAVE__DEVICE_ADDRESS             = 0x0212;
 constexpr uint16_t INTERLEAVED_MODE__ENABLE              = 0x02A3;
 constexpr uint16_t RANGE_DEVICE_READY_MASK               = 0x01;
+constexpr uint16_t MODE_START_STOP                       = 0x01;
+constexpr uint16_t MODE_CONTINUOUS                       = 0x02;
 
 namespace hyped {
 namespace sensors {
@@ -88,14 +90,13 @@ namespace sensors {
 Vl6180::Vl6180(uint8_t id, Logger& log)
   :Thread(id, log)
 {
-  this->id_ = id;
   log_.INFO("VL6180", "Creating a sensor with id: %d", id);
 }
 
 Vl6180::~Vl6180()
 {
   this->turnOff();
-  log_.INFO("VL6180", "Deconstructing sensor object with id: %d", id);
+  log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
 void Vl6180::turnOn()
@@ -184,7 +185,7 @@ void Vl6180::turnOff()
 double Vl6180::getDistance()
 {
   uint8_t data;
-  this->readByte(RESULT__RANGE_VAL, &data)
+  this->readByte(RESULT__RANGE_VAL, &data);
   return (int) data;
 }
 
@@ -222,7 +223,7 @@ bool Vl6180::rangeWaitDeviceReady()
 
   while(true) {
     this->readByte(RESULT__RANGE_STATUS, &data);
-    if(data = data & RANGE_DEVICE_READY_MASK)
+    if(data == (data & RANGE_DEVICE_READY_MASK))
       return true;
   }
   return false;
