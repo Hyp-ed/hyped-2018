@@ -48,6 +48,11 @@ class GPIO {
   void    clear();   // set low
   uint8_t read();    // read pin value
 
+  /**
+   * @brief Block caller until value of gpio pin has changed
+   * @return int8_t the new gpio value, -1 in case of an error
+   */
+  int8_t wait();
 
  private:
   GPIO() = delete;
@@ -73,14 +78,20 @@ class GPIO {
    */
   void attachGPIO();
 
+  /**
+   * @brief Configure fd_ for wait functionality in case of input GPIO
+   */
+  void setupWait();
+
   uint32_t        pin_;
   gpio::Direction direction_;
   Logger&         log_;
 
-  volatile uint32_t* set_;
-  volatile uint32_t* clear_;
-  volatile uint32_t* data_;
-  uint32_t           pin_mask_;
+  volatile uint32_t* set_;        // set register
+  volatile uint32_t* clear_;      // clear register
+  volatile uint32_t* data_;       // data register
+  uint32_t           pin_mask_;   // mask for register access to this pin
+  int                fd_;         // file pointer to /sys/class/gpio/gpioXX/value
 };
 
 }}}   // namespace hyped::utils::io
