@@ -9,15 +9,18 @@ using hyped::utils::io::GPIO;
 using hyped::utils::System;
 namespace io = hyped::utils::io;
 
+
 int main(int argc, char* argv[]) {
   System::parseArgs(argc, argv);
 
   GPIO pin_66(66, io::gpio::kOut);  // P8_7
   GPIO pin_69(69, io::gpio::kIn);   // P8_9
 
-  for (int i = 0; i < 50; i++) {
-    pin_69.read();
-    Thread::sleep(200);
+  for (int i = 0; i < 5; i++) {
+    uint8_t val = pin_69.wait();
+    printf("gpio changed to %d\n", val);
+    // pin_69.read();
+    // Thread::sleep(200);
   }
 
   pin_66.set();
