@@ -33,14 +33,8 @@ namespace sensors {
 
 class Vl6180: public Thread {
  public:
-  /**
-    *  @brief  Turns the sensor on and prepares it
-    */
-  void turnOn();
-  /**
-    *  @brief  Turns the sensor off
-    */
-  void turnOff();
+  Vl6180(uint8_t id, Logger& log);
+  ~Vl6180();
   /**
     *  @brief  Returns the distance from the nearest object the sensor is facing
     *
@@ -49,13 +43,24 @@ class Vl6180: public Thread {
   double getDistance();
 
  private:
-  Vl6180(uint8_t id, Logger& log);
+ /**
+   *  @brief  Sets the the ranging mode to continuous
+   */
+  void setContinuousRangingMode()
   /**
     *  @brief  Loops until the device is out of reset
     *
     *  @return bool Returns true after the device is fresh out of reset
     */
   bool waitDeviceBooted();
+  /**
+    *  @brief  Turns the sensor off
+    */
+  void turnOff();
+  /**
+    *  @brief  Turns the sensor on and prepares it
+    */
+  void turnOn();
   /**
     *  @brief  Wait for sensor to be ready before a new ranging command
     *            is issued
@@ -76,6 +81,8 @@ class Vl6180: public Thread {
     */
   int writeByte(uint16_t reg_add, char data);
   bool on_;
+  bool continuous_mode_
+  uint8_t id_;
 };
 
 }}  // namespace hyped::sensors
