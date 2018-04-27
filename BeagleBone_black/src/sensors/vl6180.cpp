@@ -80,6 +80,7 @@ constexpr uint16_t FIRMWARE__BOOTUP                      = 0x0119;
 constexpr uint16_t FIRMWARE__RESULT_SCALER               = 0x0120;
 constexpr uint16_t I2C_SLAVE__DEVICE_ADDRESS             = 0x0212;
 constexpr uint16_t INTERLEAVED_MODE__ENABLE              = 0x02A3;
+constexpr uint16_t RANGE_DEVICE_READY_MASK               = 0x01;
 
 namespace hyped {
 namespace sensors {
@@ -87,10 +88,17 @@ namespace sensors {
 Vl6180::Vl6180(uint8_t id, Logger& log)
   :Thread(id, log)
 {
+  this->id_ = id;
   log_.INFO("VL6180", "Creating a sensor with id: %d", id);
 }
 
-void Vl6180:: turnOn()
+Vl6180::~Vl6180()
+{
+  this->turnOff();
+  log_.INFO("VL6180", "Deconstructing sensor object with id: %d", id);
+}
+
+void Vl6180::turnOn()
 {
   // return if already on
   if (this->on_) {
@@ -140,11 +148,24 @@ void Vl6180:: turnOn()
   this->writeByte(0x01a7, 0x1f);
   this->writeByte(0x0030, 0x00);
 
+  // Might need to use these register access' trying to understand them
+  // /* Recommended : Public registers - See data sheet for more detail */
+  //   VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature calibration of the ranging sensor */
+  //   /* Optional: Public registers - See data sheet for more detail */
+  //   VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging inter-measurement period to 100ms */
+  //   VL6180x_WrByte( dev, 0x003e, 0x31); /* Set default ALS inter-measurement period to 500ms */
+  //   VL6180x_WrByte( dev, 0x0014, 0x24); /* Configures interrupt on New sample ready */
+  //   status=VL6180x_RangeSetMaxConvergenceTime(dev, 50); /*  Calculate ece value on initialization (use max conv) */
+
   // Enables polling for New Sample ready when measurement completes
   this->writeByte(0x0011, 0x10);
 
   // Set the averaging sample period (datasheet recommends 48)
   this->writeByte(0x010a, 0x30);
+
+  // Sets the Number of range measurements after which auto calibration of
+  // system is performed (currently 127)
+  this->writeByte(0x0031, 0xFF);
 
   // Perform a single recalibration
   this->writeByte(SYSRANGE__VHV_RECALIBRATE, 0x01);
@@ -162,7 +183,22 @@ void Vl6180::turnOff()
 
 double Vl6180::getDistance()
 {
-  return 0;
+  uint8_t data;
+  this->readByte(RESULT__RANGE_VAL, &data)
+  return (int) data;
+}
+
+void Vl6180::setContinuousRangingMode()
+{
+  if ( this->continuous_mode_ == true ) {
+    log_.DBG("VL6180", "Sensor already in continuous ranging mode\n");
+    return;
+  }
+
+  // Write to sensor and set to continuous ranging mode
+  this->writeByte(SYSRANGE__START, MODE_START_STOP | MODE_CONTINUOUS );
+  this->continuous_mode_ = true;
+
 }
 
 bool Vl6180::waitDeviceBooted()
@@ -182,6 +218,13 @@ bool Vl6180::waitDeviceBooted()
 
 bool Vl6180::rangeWaitDeviceReady()
 {
+  uint8_t data;
+
+  while(true) {
+    this->readByte(RESULT__RANGE_STATUS, &data);
+    if(data = data & RANGE_DEVICE_READY_MASK)
+      return true;
+  }
   return false;
 }
 
