@@ -17,7 +17,7 @@ ifneq ($(UNAME),Linux)
 	UNAME='Windows'
 	CFLAGS:=$(CFLAGS) -DWIN
 endif
-ARCH=$(shell arch)
+ARCH=$(shell uname -m)
 ifneq (,$(findstring 64,$(ARCH)))
 	CFLAGS:=$(CFLAGS) -DARCH_64
 else
