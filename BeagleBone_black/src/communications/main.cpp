@@ -20,8 +20,6 @@
 
 #include "communications/main.hpp"
 
-#include <stdio.h>
-
 namespace hyped {
 namespace communications {
 
