@@ -21,20 +21,21 @@
 #ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
 #define BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
+// #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <cstdio>
 #include <string>
-#include <iostream>
+
 #include "data/data.hpp"
 #include "utils/logger.hpp"
 #include "data/data.hpp"
-using namespace std;
+
 
 namespace hyped {
 
@@ -56,7 +57,7 @@ class Communications
   int sendRpmFr(float rpmfr);                   // CMD06
   int sendRpmBl(float rpmBl);                   // CMD07
   int sendRpmBr(float rpmBr);                   // CMD08
-  int sendData(string message);
+  int sendData(std::string message);
   int receiveMessage();
 
  private:
