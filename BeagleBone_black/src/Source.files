@@ -15,7 +15,6 @@ SRCS := \
   sensors/vl6180.cpp \
   communications/main.cpp \
   communications/communications.cpp \
-  communications/sender.cpp \
   communications/receiver.cpp \
   utils/concurrent/thread.cpp \
   utils/concurrent/lock.cpp \

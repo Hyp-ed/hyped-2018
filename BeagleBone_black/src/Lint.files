@@ -29,8 +29,6 @@ communications/communications.hpp
 communications/communications.cpp
 communications/receiver.hpp
 communications/receiver.cpp
-communications/sender.hpp
-communications/sender.cpp
 utils/concurrent/thread.hpp
 utils/concurrent/thread.cpp
 utils/concurrent/lock.hpp

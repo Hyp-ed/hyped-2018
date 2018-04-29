@@ -24,7 +24,6 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "communications/communications.hpp"
-#include "communications/sender.hpp"
 #include "communications/receiver.hpp"
 
 namespace hyped {
@@ -44,6 +43,7 @@ class Main : public Thread {
   data::Data& data_ = data::Data::getInstance();
   data::Navigation nav_;
   data::Motors mtr_;
+  data::Sensors sns_;
 };
 
 }}  //  namespace hyped::communications

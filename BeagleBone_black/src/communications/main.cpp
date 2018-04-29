@@ -39,10 +39,11 @@ void Main::run()
   while (1) {
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
+    sns_ = data_.getSensorsData();
     baseCommunicator_->sendDistance(nav_.distance);
     baseCommunicator_->sendVelocity(nav_.velocity);
     baseCommunicator_->sendAcceleration(nav_.acceleration);
-    // baseCommunicator_->sendStripeCount(nav.stripe_count);
+    baseCommunicator_->sendStripeCount(sns_.stripe_count.value);
     baseCommunicator_->sendRpmFl(mtr_.rpm_FL);
     baseCommunicator_->sendRpmFr(mtr_.rpm_FR);
     baseCommunicator_->sendRpmBl(mtr_.rpm_BL);
