@@ -143,16 +143,23 @@ int Communications::receiveMessage()
 {
   n_ = read(sockfd_, buffer, 255);
   int command = atoi(buffer);
+//  data::Communications comms_data;
 
   switch (command) {
     case 1:
       log_.INFO("COMN", "Received 1");  // STOP
+//      comms_data.stopCommand = true;
+//      data_.setCommunicationsData(comms_data);
       break;
     case 2:
       log_.INFO("COMN", "Received 2");  // KILL POWER
+//      comms_data.killPowerCommand = true;
+//      data_.setCommunicationsData(comms_data);
       break;
     case 3:
       log_.INFO("CMN", "Received 3");  // LAUCNH
+//      comms_data.launch = true;
+//      data_.setCommunicationsData(comms_data);
       break;
   }
 

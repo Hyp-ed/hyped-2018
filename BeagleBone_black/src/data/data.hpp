@@ -135,6 +135,7 @@ struct Motors {
 struct Communications {
   bool stopCommand;
   bool killPowerCommand;
+  bool launch;
 };
 
 // -----------------------------------------------------------------------------
