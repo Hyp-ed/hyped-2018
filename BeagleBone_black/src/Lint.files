@@ -9,8 +9,10 @@ state_machine/states.cpp
 state_machine/states.hpp
 state_machine/main.hpp
 state_machine/main.cpp
-motor_control/motor.hpp
-motor_control/motor.cpp
+motor_control/communicator.hpp
+motor_control/communicator.cpp
+motor_control/controller.hpp
+motor_control/controller.cpp
 motor_control/main.hpp
 motor_control/main.cpp
 navigation/main.hpp
