@@ -6,8 +6,9 @@ SRCS := \
   state_machine/hyped-machine.cpp \
   state_machine/states.cpp \
   state_machine/main.cpp \
-  motor_control/motor.cpp \
   motor_control/main.cpp \
+  motor_control/communicator.cpp \
+  motor_control/controller.cpp \
   navigation/main.cpp \
   navigation/navigation.cpp \
   sensors/main.cpp \

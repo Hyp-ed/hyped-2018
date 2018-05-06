@@ -44,10 +44,10 @@ void Main::run()
     baseCommunicator_->sendVelocity(nav_.velocity);
     baseCommunicator_->sendAcceleration(nav_.acceleration);
     baseCommunicator_->sendStripeCount(sns_.stripe_count.value);
-    baseCommunicator_->sendRpmFl(mtr_.rpm_FL);
-    baseCommunicator_->sendRpmFr(mtr_.rpm_FR);
-    baseCommunicator_->sendRpmBl(mtr_.rpm_BL);
-    baseCommunicator_->sendRpmBr(mtr_.rpm_BR);
+    baseCommunicator_->sendRpmFl(mtr_.motor_velocity_1);
+    baseCommunicator_->sendRpmFr(mtr_.motor_velocity_2);
+    baseCommunicator_->sendRpmBl(mtr_.motor_velocity_3);
+    baseCommunicator_->sendRpmBr(mtr_.motor_velocity_4);
   }
 
   receiverThread->join();

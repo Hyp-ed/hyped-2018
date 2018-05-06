@@ -20,7 +20,7 @@
 
 #include <cstdint>
 
-#include "motor_control/motor.hpp"
+#include "motor_control/communicator.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -32,8 +32,9 @@ namespace motor_control {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      motor_(log),
-      rpm_(0),
+      communicator_(log),
+      target_velocity_(0),
+      target_torque_(0),
       motors_set_up_(false),
       run_(true)
 {}
@@ -67,7 +68,8 @@ void Main::run()
 void Main::setupMotors()
 {
   if (!motors_set_up_) {
-    data::Motors motor_data_ = { data::MotorState::kMotorIdle, 0, 0, 0, 0 };
+    communicator_.registerControllers();
+    data::Motors motor_data_ = { data::MotorState::kMotorIdle, 0, 0, 0, 0, 0, 0, 0, 0 };
     data_.setMotorData(motor_data_);
     motors_set_up_ = true;
     log_.INFO("MOTOR", "Motor State: Idle");
@@ -88,35 +90,47 @@ void Main::accelerateMotors()
     }
 
     // Check for motors critial failure flag
-    motor_failure_ = motor_.checkStatus();
+    motor_failure_ = communicator_.checkStatus();
     if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
-      MotorsRpm motors_rpm = motor_.getSpeed();
-      // Write critical failure flag and RPM's to data structure
+      MotorVelocity motor_velocity = communicator_.requestActualVelocity();
+      MotorTorque motor_torque     = communicator_.requestActualTorque();
+      // Write critical failure flag and motor data to data structure
       data::Motors motor_data_ = {
           data::MotorState::kCriticalFailure,
-          motors_rpm.rpm_FL_,
-          motors_rpm.rpm_FR_,
-          motors_rpm.rpm_BL_,
-          motors_rpm.rpm_BR_ };
+          motor_velocity.motor_velocity_1,
+          motor_velocity.motor_velocity_2,
+          motor_velocity.motor_velocity_3,
+          motor_velocity.motor_velocity_4,
+          motor_torque.motor_torque_1,
+          motor_torque.motor_torque_2,
+          motor_torque.motor_torque_3,
+          motor_torque.motor_torque_4 };
       data_.setMotorData(motor_data_);
       this->stopMotors();
       break;
     }
 
-    // Step up motor RPM
+    // Step up motor velocity
     log_.INFO("MOTOR", "Motor State: Accelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
-    rpm_ = calculateAccelerationRPM(nav_.velocity);
-    motor_.setSpeed(rpm_);
-    MotorsRpm motors_rpm = motor_.getSpeed();
-    // Write current state (accelerating) and RPM's to data structure
+    target_velocity_      = accelerationVelocity(nav_.velocity);
+    target_torque_        = accelerationTorque(nav_.velocity);
+    communicator_.sendTargetVelocity(target_velocity_);
+    communicator_.sendTargetTorque(target_torque_);
+    MotorVelocity motor_velocity = communicator_.requestActualVelocity();
+    MotorTorque motor_torque     = communicator_.requestActualTorque();
+    // Write current state (accelerating) and motor data to data structure
     data::Motors motor_data_ = {
         data::MotorState::kMotorAccelerating,
-        motors_rpm.rpm_FL_,
-        motors_rpm.rpm_FR_,
-        motors_rpm.rpm_BL_,
-        motors_rpm.rpm_BR_ };
+        motor_velocity.motor_velocity_1,
+        motor_velocity.motor_velocity_2,
+        motor_velocity.motor_velocity_3,
+        motor_velocity.motor_velocity_4,
+        motor_torque.motor_torque_1,
+        motor_torque.motor_torque_2,
+        motor_torque.motor_torque_3,
+        motor_torque.motor_torque_4 };
     data_.setMotorData(motor_data_);
   }
 }
@@ -135,97 +149,147 @@ void Main::decelerateMotors()
     }
 
     // Check for motors critical failure flag
-    motor_failure_ = motor_.checkStatus();
+    motor_failure_ = communicator_.checkStatus();
     if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
-      MotorsRpm motors_rpm = motor_.getSpeed();
-      // Write critical failure flag and RPM's to data structure
+      MotorVelocity motor_velocity = communicator_.requestActualVelocity();
+      MotorTorque motor_torque     = communicator_.requestActualTorque();
+      // Write critical failure flag and motor data to data structure
       data::Motors motor_data_ = {
           data::MotorState::kCriticalFailure,
-          motors_rpm.rpm_FL_,
-          motors_rpm.rpm_FR_,
-          motors_rpm.rpm_BL_,
-          motors_rpm.rpm_BR_ };
+          motor_velocity.motor_velocity_1,
+          motor_velocity.motor_velocity_2,
+          motor_velocity.motor_velocity_3,
+          motor_velocity.motor_velocity_4,
+          motor_torque.motor_torque_1,
+          motor_torque.motor_torque_2,
+          motor_torque.motor_torque_3,
+          motor_torque.motor_torque_4 };
       data_.setMotorData(motor_data_);
       this->stopMotors();
       break;
     }
 
     // Step down motor RPM
-    log_.INFO("MOTOR", "Motor State: Decelerating\n");
+    log_.INFO("MOTOR", "Motor State: Deccelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
-    rpm_ = calculateDecelerationRPM(nav_.velocity);
-    motor_.setSpeed(rpm_);
-    MotorsRpm motors_rpm = motor_.getSpeed();
-    // Write current state (decelerating) and RPM's to data structure
+    target_velocity_      = decelerationVelocity(nav_.velocity);
+    target_torque_        = decelerationTorque(nav_.velocity);
+    communicator_.sendTargetVelocity(target_velocity_);
+    communicator_.sendTargetTorque(target_torque_);
+    MotorVelocity motor_velocity = communicator_.requestActualVelocity();
+    MotorTorque motor_torque     = communicator_.requestActualTorque();
+    // Write current state (decelerating) and motor data to data structure
     data::Motors motor_data_ = {
         data::MotorState::kMotorDecelerating,
-        motors_rpm.rpm_FL_,
-        motors_rpm.rpm_FR_,
-        motors_rpm.rpm_BL_,
-        motors_rpm.rpm_BR_ };
+        motor_velocity.motor_velocity_1,
+        motor_velocity.motor_velocity_2,
+        motor_velocity.motor_velocity_3,
+        motor_velocity.motor_velocity_4,
+        motor_torque.motor_torque_1,
+        motor_torque.motor_torque_2,
+        motor_torque.motor_torque_3,
+        motor_torque.motor_torque_4 };
     data_.setMotorData(motor_data_);
   }
 }
 
 void Main::stopMotors()
 {
-  motor_.setSpeed(0);
+  communicator_.sendTargetVelocity(0);
   bool all_motors_stopped = false;
-  // Updates the shared data on the motors RPM while the motor is trying to stop
+  // Updates the motor data while motors are stopping
   while (!all_motors_stopped) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");
-    MotorsRpm motors_rpm = motor_.getSpeed();
-    // Write current state (stopping) and RPM's to data structure
+    MotorVelocity motor_velocity = communicator_.requestActualVelocity();
+    MotorTorque motor_torque     = communicator_.requestActualTorque();
+    // Write current state (stopping) and motor data to data structure
     data::Motors motor_data_ = {
         data::MotorState::kMotorStopping,
-        motors_rpm.rpm_FL_,
-        motors_rpm.rpm_FR_,
-        motors_rpm.rpm_BL_,
-        motors_rpm.rpm_BR_ };
+        motor_velocity.motor_velocity_1,
+        motor_velocity.motor_velocity_2,
+        motor_velocity.motor_velocity_3,
+        motor_velocity.motor_velocity_4,
+        motor_torque.motor_torque_1,
+        motor_torque.motor_torque_2,
+        motor_torque.motor_torque_3,
+        motor_torque.motor_torque_4 };
     data_.setMotorData(motor_data_);
-    if (motors_rpm.rpm_FL_ == 0 && motors_rpm.rpm_FR_ == 0 &&
-        motors_rpm.rpm_BL_ == 0 && motors_rpm.rpm_BR_ == 0)
+
+    if (motor_velocity.motor_velocity_1 == 0 && motor_velocity.motor_velocity_2 == 0 &&
+        motor_velocity.motor_velocity_3 == 0 && motor_velocity.motor_velocity_4 == 0)
     {
       all_motors_stopped = true;
     }
   }
-  MotorsRpm motors_rpm = motor_.getSpeed();
-  // Write current state (stopped) and RPM's to data structure
+
+  MotorVelocity motor_velocity = communicator_.requestActualVelocity();
+  MotorTorque motor_torque     = communicator_.requestActualTorque();
+  // Write current state (stopped) and motor data to data structure
   data::Motors motor_data_ = {
       data::MotorState::kMotorStopped,
-      motors_rpm.rpm_FL_,
-      motors_rpm.rpm_FR_,
-      motors_rpm.rpm_BL_,
-      motors_rpm.rpm_BR_ };
+      motor_velocity.motor_velocity_1,
+      motor_velocity.motor_velocity_2,
+      motor_velocity.motor_velocity_3,
+      motor_velocity.motor_velocity_4,
+      motor_torque.motor_torque_1,
+      motor_torque.motor_torque_2,
+      motor_torque.motor_torque_3,
+      motor_torque.motor_torque_4 };
   data_.setMotorData(motor_data_);
   log_.INFO("MOTOR", "Motor State: Stopped\n");
 }
 
 /**
   *  @brief  { This function will run through slip ratio algorithm to calculate
-  *            the desired acceleration RPM }
+  *            the desired acceleration velocity}
   *
   *  @param[in]  translational_velocity  { Value read from shared data structure }
   *
-  *  @return  { Acceleration RPM calculation of type int }
+  *  @return  { Acceleration velocity calculation of type int }
   */
-int32_t Main::calculateAccelerationRPM(NavigationType velocity)
+int32_t Main::accelerationVelocity(NavigationType velocity)
 {
-  return rpm_ += 100;  // dummy calculation to increase rpm
+  return target_velocity_ += 100;  // dummy calculation to increase rpm
 }
 
 /**
   *  @brief  { This function will run through slip ratio algorithm to calculate
-  *            the desired deceleration RPM }
+  *            the desired deceleration velocity }
   *
   *  @param[in]  translational_velocity  { Value read from shared data structure }
   *
-  *  @return  { Deceleration RPM calculation of type int }
+  *  @return  { Deceleration velocity calculation of type int }
   */
-int32_t Main::calculateDecelerationRPM(NavigationType velocity)
+int32_t Main::decelerationVelocity(NavigationType velocity)
 {
-  return rpm_ -= 100;  // dummy calculation to decrease rpm
+  return target_velocity_ -= 100;  // dummy calculation to decrease rpm
+}
+
+/**
+  *  @brief  { This function will calculate desired torque based on current
+  *            translational velocity }
+  *
+  *  @param[in]  translational_velocity  { Value read from shared data structure }
+  *
+  *  @return  { 16 bit integer - target torque }
+  */
+int16_t Main::accelerationTorque(NavigationType velocity)
+{
+  return 0;
+}
+
+/**
+  *  @brief  { This function will calculate desired torque based on current
+  *            translational velocity }
+  *
+  *  @param[in]  translational_velocity  { Value read from shared data structure }
+  *
+  *  @return  { 16 bit integer - target torque }
+  */
+int16_t Main::decelerationTorque(NavigationType velocity)
+{
+  return 0;
 }
 
 }}  // namespace hyped::motor_control
