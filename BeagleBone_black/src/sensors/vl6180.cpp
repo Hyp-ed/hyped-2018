@@ -149,8 +149,10 @@ void Vl6180::turnOn()
 
   // Might need to use these register access' trying to understand them
   // Recommended : Public registers - See data sheet for more detail
-  // VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature calibration of the ranging sensor */
-  // VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging inter-measurement period to 100ms */
+  // VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature
+  // calibration of the ranging sensor */
+  // VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging
+  // inter-measurement period to 100ms */
   // VL6180x_WrByte( dev, 0x0014, 0x24); /* Configures interrupt on New sample ready */
 
   // Enables polling for New Sample ready when measurement completes
@@ -176,7 +178,7 @@ void Vl6180::turnOn()
 
 void Vl6180::setMaxCovergenceTime(uint8_t time_ms)
 {
-  this->writeByte(SYSRANGE__MAX_CONVERGENCE_TIME, time_ms );
+  this->writeByte(SYSRANGE__MAX_CONVERGENCE_TIME, time_ms);
 }
 
 void Vl6180::turnOff()
@@ -190,20 +192,18 @@ double Vl6180::getDistance()
 {
   uint8_t data;
   this->readByte(RESULT__RANGE_VAL, &data);
-  return (int) data;
+  return static_cast<int>(data);
 }
 
 void Vl6180::setContinuousRangingMode()
 {
-  if ( this->continuous_mode_ == true ) {
+  if (this->continuous_mode_ == true) {
     log_.DBG("VL6180", "Sensor already in continuous ranging mode\n");
     return;
   }
-
   // Write to sensor and set to continuous ranging mode
-  this->writeByte(SYSRANGE__START, MODE_START_STOP | MODE_CONTINUOUS );
+  this->writeByte(SYSRANGE__START, MODE_START_STOP | MODE_CONTINUOUS);
   this->continuous_mode_ = true;
-
 }
 
 bool Vl6180::waitDeviceBooted()
@@ -225,9 +225,9 @@ bool Vl6180::rangeWaitDeviceReady()
 {
   uint8_t data;
 
-  while(true) {
+  while (true) {
     this->readByte(RESULT__RANGE_STATUS, &data);
-    if(data == (data & RANGE_DEVICE_READY_MASK))
+    if (data == (data & RANGE_DEVICE_READY_MASK))
       return true;
   }
   return false;
