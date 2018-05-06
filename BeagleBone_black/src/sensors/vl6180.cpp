@@ -110,10 +110,8 @@ void Vl6180::turnOn()
   // Wait incase the sensor has just been turned off
   // TODO(Anyone) need to check wait time
 
-  // Turn on pins
-  // TODO(Anyone) pin write to turn sensor on
-
   // Wait for 1.5ms (Data sheet says 1.4ms)
+  // This waits for the device to be fresh out of reset (same thing as above)
   this->waitDeviceBooted();
 
   // Initialise the sensor / register tuning
@@ -150,13 +148,10 @@ void Vl6180::turnOn()
   this->writeByte(0x0030, 0x00);
 
   // Might need to use these register access' trying to understand them
-  // /* Recommended : Public registers - See data sheet for more detail */
-  //   VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature calibration of the ranging sensor */
-  //   /* Optional: Public registers - See data sheet for more detail */
-  //   VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging inter-measurement period to 100ms */
-  //   VL6180x_WrByte( dev, 0x003e, 0x31); /* Set default ALS inter-measurement period to 500ms */
-  //   VL6180x_WrByte( dev, 0x0014, 0x24); /* Configures interrupt on New sample ready */
-  //   status=VL6180x_RangeSetMaxConvergenceTime(dev, 50); /*  Calculate ece value on initialization (use max conv) */
+  // Recommended : Public registers - See data sheet for more detail
+  // VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature calibration of the ranging sensor */
+  // VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging inter-measurement period to 100ms */
+  // VL6180x_WrByte( dev, 0x0014, 0x24); /* Configures interrupt on New sample ready */
 
   // Enables polling for New Sample ready when measurement completes
   this->writeByte(0x0011, 0x10);
@@ -165,14 +160,23 @@ void Vl6180::turnOn()
   this->writeByte(0x010a, 0x30);
 
   // Sets the Number of range measurements after which auto calibration of
-  // system is performed (currently 127)
+  // system is performed (currently 255)
   this->writeByte(0x0031, 0xFF);
 
   // Perform a single recalibration
   this->writeByte(SYSRANGE__VHV_RECALIBRATE, 0x01);
 
+  // Set max convergence time (Recommended default 50ms)
+  uint8_t time_ms = 50;
+  this->setMaxCovergenceTime(time_ms);
+
   this->on_ = true;
   log_.DBG("VL6180", "Sensor is on\n");
+}
+
+void Vl6180::setMaxCovergenceTime(uint8_t time_ms)
+{
+  this->writeByte(SYSRANGE__MAX_CONVERGENCE_TIME, time_ms );
 }
 
 void Vl6180::turnOff()

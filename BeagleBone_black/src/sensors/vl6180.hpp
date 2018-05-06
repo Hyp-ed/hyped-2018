@@ -62,6 +62,10 @@ class Vl6180: public Thread {
     */
   void turnOn();
   /**
+    *  @brief  Sets the maximum convergence time in ms
+    */
+  void setMaxCovergenceTime(uint8_t time);
+  /**
     *  @brief  Wait for sensor to be ready before a new ranging command
     *            is issued
     *
