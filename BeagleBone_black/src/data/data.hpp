@@ -122,10 +122,14 @@ enum MotorState {
 
 struct Motors {
   MotorState current_motor_state;
-  int32_t rpm_FL;
-  int32_t rpm_FR;
-  int32_t rpm_BL;
-  int32_t rpm_BR;
+  int32_t motor_velocity_1;
+  int32_t motor_velocity_2;
+  int32_t motor_velocity_3;
+  int32_t motor_velocity_4;
+  int16_t motor_torque_1;
+  int16_t motor_torque_2;
+  int16_t motor_torque_3;
+  int16_t motor_torque_4;
 };
 
 // -----------------------------------------------------------------------------
@@ -135,6 +139,7 @@ struct Motors {
 struct Communications {
   bool stopCommand;
   bool killPowerCommand;
+  bool launch;
 };
 
 // -----------------------------------------------------------------------------
@@ -234,6 +239,7 @@ class Data {
   Lock lock_navigation_;
   Lock lock_sensors_;
   Lock lock_motors_;
+
   Lock lock_communications_;
   Lock lock_batteries_;
 };

@@ -24,7 +24,6 @@
 using hyped::data::Data;
 using hyped::data::Navigation;
 using hyped::data::Sensors;
-using hyped::data::Motors;
 
 int main()
 {
@@ -32,13 +31,10 @@ int main()
 
   Navigation  nav   = data.getNavigationData();
   Sensors     sens  = data.getSensorsData();
-  Motors      mot   = data.getMotorData();
 
   printf("Hello hyped, here are some shared data\n");
   printf("from Navigation: %f %f %f\n", nav.distance, nav.velocity, nav.acceleration);
   printf("from Sensors: %f %d %d at time %d\n",
       sens.imu[0].acc.value[0], sens.proxi[0].val, sens.stripe_count.value, sens.stripe_count.timestamp);
-  printf("from Motors: FL %d, FR %d, BL %d, BR %d\n",
-      mot.rpm_FL, mot.rpm_FR, mot.rpm_BL, mot.rpm_BR);
   return 0;
 }

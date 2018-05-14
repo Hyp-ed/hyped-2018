@@ -1,8 +1,10 @@
 /*
- * Author: Sean Mullan and Jack Horsburgh
+ * Author: Sean Mullan
  * Organisation: HYPED
- * Date: 17/02/18
+ * Date: 5/05/18
  * Description:
+ * A controller object represents one motor controller. Object is used to request data specific to
+ * the controller.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -16,38 +18,35 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
-#define BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#ifndef BEAGLEBONE_BLACK_MOTOR_CONTROL_CONTROLLER_HPP_
+#define BEAGLEBONE_BLACK_MOTOR_CONTROL_CONTROLLER_HPP_
 
 #include <cstdint>
-#include "utils/logger.hpp"
 
 namespace hyped {
-
-using utils::Logger;
+// Forward declarations
+namespace utils { class Logger; }
+namespace utils { namespace io { class Can; } }
+namespace utils { namespace io { namespace can { struct Frame; } } }
 
 namespace motor_control {
-// Contains the RPM of each of the motors
-struct MotorsRpm {
-  int32_t rpm_FL_;
-  int32_t rpm_FR_;
-  int32_t rpm_BL_;
-  int32_t rpm_BR_;
-};
 
-class Motor {
+using utils::Logger;
+using utils::io::Can;
+
+class Controller {
+  friend Can;
+
  public:
-  explicit Motor(Logger& log);
-  void setSpeed(int32_t rpm);
-  MotorsRpm getSpeed();
-  bool checkStatus();
+  explicit Controller(Logger& log);
+  int32_t requestActualVelocity(int32_t target_velocity);
+  int16_t requestActualTorque();
 
  private:
-  MotorsRpm motors_rpm_;
-  int32_t rpm_;   // For testing only
   Logger& log_;
+  Can&    can_;
 };
 
 }}  // namespace hyped::motor_control
 
-#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_MOTOR_HPP_
+#endif  // BEAGLEBONE_BLACK_MOTOR_CONTROL_CONTROLLER_HPP_

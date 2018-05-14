@@ -20,7 +20,6 @@
 
 #include "communications.hpp"
 
-
 #include <sstream>
 #include <string>
 
@@ -65,7 +64,7 @@ Communications::~Communications()
 
 int Communications::sendDistance(float distance)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << distance;
 
   return sendData("CMD01" + ss.str() + "\n");
@@ -73,7 +72,7 @@ int Communications::sendDistance(float distance)
 
 int Communications::sendVelocity(float speed)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << speed;
 
   return sendData("CMD02" + ss.str() + "\n");
@@ -81,7 +80,7 @@ int Communications::sendVelocity(float speed)
 
 int Communications::sendAcceleration(float accel)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << accel;
 
   return sendData("CMD03" + ss.str() + "\n");
@@ -89,7 +88,7 @@ int Communications::sendAcceleration(float accel)
 
 int Communications::sendStripeCount(int stripes)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << stripes;
 
   return sendData("CMD04" + ss.str() + "\n");
@@ -97,7 +96,7 @@ int Communications::sendStripeCount(int stripes)
 
 int Communications::sendRpmFl(float rpmfl)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << rpmfl;
 
   return sendData("CMD05" + ss.str() + "\n");
@@ -105,7 +104,7 @@ int Communications::sendRpmFl(float rpmfl)
 
 int Communications::sendRpmFr(float rpmfr)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << rpmfr;
 
   return sendData("CMD06" + ss.str() + "\n");
@@ -113,7 +112,7 @@ int Communications::sendRpmFr(float rpmfr)
 
 int Communications::sendRpmBl(float rpmbl)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << rpmbl;
 
   return sendData("CMD07" + ss.str() + "\n");
@@ -121,13 +120,13 @@ int Communications::sendRpmBl(float rpmbl)
 
 int Communications::sendRpmBr(float rpmbr)
 {
-  stringstream ss(stringstream::in | stringstream::out);
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
   ss << rpmbr;
 
   return sendData("CMD08" + ss.str() + "\n");
 }
 
-int Communications::sendData(string message)
+int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
   memset(buffer, '\0', 256);
@@ -144,16 +143,23 @@ int Communications::receiveMessage()
 {
   n_ = read(sockfd_, buffer, 255);
   int command = atoi(buffer);
+//  data::Communications comms_data;
 
   switch (command) {
     case 1:
       log_.INFO("COMN", "Received 1");  // STOP
+//      comms_data.stopCommand = true;
+//      data_.setCommunicationsData(comms_data);
       break;
     case 2:
       log_.INFO("COMN", "Received 2");  // KILL POWER
+//      comms_data.killPowerCommand = true;
+//      data_.setCommunicationsData(comms_data);
       break;
     case 3:
-      log_.INFO("COMN", "Received 3");  // LAUCNH
+      log_.INFO("CMN", "Received 3");  // LAUCNH
+//      comms_data.launch = true;
+//      data_.setCommunicationsData(comms_data);
       break;
   }
 

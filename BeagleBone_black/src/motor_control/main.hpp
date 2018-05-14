@@ -21,7 +21,7 @@
 
 #include <cstdint>
 
-#include "motor_control/motor.hpp"
+#include "motor_control/communicator.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 
@@ -43,12 +43,15 @@ class Main: public Thread {
   void accelerateMotors();
   void decelerateMotors();
   void stopMotors();
-  int32_t calculateAccelerationRPM(NavigationType velocity);
-  int32_t calculateDecelerationRPM(NavigationType velocity);
+  int32_t accelerationVelocity(NavigationType velocity);
+  int32_t decelerationVelocity(NavigationType velocity);
+  int16_t accelerationTorque(NavigationType velocity);
+  int16_t decelerationTorque(NavigationType velocity);
   data::Data& data_;
-  Motor motor_;
   data::StateMachine state_;
-  int32_t rpm_;
+  Communicator communicator_;
+  int32_t target_velocity_;
+  int16_t target_torque_;
   bool motors_set_up_;
   bool motor_failure_;
   bool run_;

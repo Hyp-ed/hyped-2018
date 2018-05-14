@@ -17,6 +17,12 @@ ifneq ($(UNAME),Linux)
 	UNAME='Windows'
 	CFLAGS:=$(CFLAGS) -DWIN
 endif
+ARCH=$(shell uname -m)
+ifneq (,$(findstring 64,$(ARCH)))
+	CFLAGS:=$(CFLAGS) -DARCH_64
+else
+  CFLAGS:=$(CFLAGS) -DARCH_32
+endif
 
 
 include $(SRCS_DIR)/Source.files
@@ -73,6 +79,10 @@ cleanlint:
 define echo_var
 	@echo $(1) = $($1)
 endef
+
+.PHONY: doc
+doc:
+	$(Verb) doxygen Doxyfile
 
 info:
 	$(call echo_var,CC)
