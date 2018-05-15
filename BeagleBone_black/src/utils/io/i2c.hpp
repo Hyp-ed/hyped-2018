@@ -22,21 +22,50 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 
-#include "utils/concurrent/thread.hpp"
-#include "utils/logger.hpp"
+
+#include <cstdint>
+
+#include "utils/utils.hpp"
 
 namespace hyped {
 namespace utils {
 
-using concurrent::Thread;
+// Forward Declarations
+class Logger;
 
 namespace io {
 
-class I2C : public concurrent::Thread {
+class I2C {
  public:
-  I2C();
+  static I2C& getInstance();
+
+  /**
+   * @brief Get data from sensor.
+   * @param addr  - sensor address
+   * @param rx    - pointer to head of read buffer
+   * @param len   - number of BYTES to be read, i.e. size of the read buffer
+   */
+  void read(uint32_t addr, uint8_t* rx, uint16_t len);
+
+  /**
+   * @brief Write data to sensor.
+   * @param addr  - sensor address
+   * @param rx    - pointer to head of write buffer
+   * @param len   - number of BYTES to be written, i.e. size of the write buffer
+   */
+  void write(uint32_t addr, uint8_t* tx, uint16_t len);
+
+ private:
+  explicit I2C(Logger& log);
   ~I2C();
-  void run() override;
+  void setSensorAddress(uint32_t addr);
+
+ private:
+  Logger&   log_;
+  int       fd_;
+  uint32_t  sensor_addr_;
+
+  NO_COPY_ASSIGN(I2C);
 };
 
 }}}   // namespace hyped::utils::io
