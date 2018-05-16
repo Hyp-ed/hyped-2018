@@ -2,7 +2,7 @@
  * Author: Jack Horsburgh
  * Organisation: HYPED
  * Date: 18/04/18
- * Description: Main file for Vl6180
+ * Description: Main file for VL6180
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,18 +23,23 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
+#include "utils/io/i2c.hpp"
+#include <string>
+
+constexpr uint8_t DEFAULT_I2C_SLAVE_ADDR = 0x29;
 
 namespace hyped {
 
 using utils::concurrent::Thread;
+using hyped::utils::io::I2C;
 using utils::Logger;
 
 namespace sensors {
 
-class Vl6180: public Thread {
+class VL6180: public Thread {
  public:
-  Vl6180(uint8_t id, Logger& log);
-  ~Vl6180();
+  VL6180(uint8_t i2c_addr, uint8_t id, Logger& log);
+  ~VL6180();
   /**
     *  @brief  Returns the distance from the nearest object the sensor is facing
     *
@@ -86,6 +91,9 @@ class Vl6180: public Thread {
   int writeByte(uint16_t reg_add, char data);
   bool on_;
   bool continuous_mode_;
+  uint8_t i2c_addr_ = DEFAULT_I2C_SLAVE_ADDR;
+  I2C& i2c_ = I2C::getInstance();
+  std::string log_sensor_addr_;
 };
 
 }}  // namespace hyped::sensors

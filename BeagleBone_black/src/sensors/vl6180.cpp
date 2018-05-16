@@ -2,7 +2,7 @@
  * Author: Jack Horsburgh
  * Organisation: HYPED
  * Date: 18/04/18
- * Description: Main file for Vl6180
+ * Description: Main file for VL6180
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,11 @@
  */
 
 #include "sensors/vl6180.hpp"
+
+#include <chrono>
 #include <cstdint>
 #include <thread>
-#include <chrono>
+
 
 // Register addresses
 constexpr uint16_t IDENTIFICATION__MODEL_ID              = 0x0000;
@@ -87,23 +89,28 @@ constexpr uint16_t MODE_CONTINUOUS                       = 0x02;
 namespace hyped {
 namespace sensors {
 
-Vl6180::Vl6180(uint8_t id, Logger& log)
-  :Thread(id, log)
+VL6180::VL6180(uint8_t i2c_addr, uint8_t id, Logger& log):Thread(id, log)
 {
-  log_.INFO("VL6180", "Creating a sensor with id: %d", id);
+  //Create I2C instance get register address
+  this->i2c_addr_ = i2c_addr;
+  this->log_sensor_addr_ = "VL6180-" + std::to_string(i2c_addr);
+
+  this->turnOn();
+
+  log_.INFO("log_sensor_addr_", "Creating a sensor with id: %d", id);
 }
 
-Vl6180::~Vl6180()
+VL6180::~VL6180()
 {
   this->turnOff();
-  log_.INFO("VL6180", "Deconstructing sensor object");
+  log_.INFO("log_sensor_addr_", "Deconstructing sensor object");
 }
 
-void Vl6180::turnOn()
+void VL6180::turnOn()
 {
   // return if already on
   if (this->on_) {
-    log_.DBG("VL6180", "Sensor is already on\n");
+    log_.DBG("log_sensor_addr_", "Sensor is already on\n");
     return;
   }
 
@@ -173,32 +180,32 @@ void Vl6180::turnOn()
   this->setMaxCovergenceTime(time_ms);
 
   this->on_ = true;
-  log_.DBG("VL6180", "Sensor is on\n");
+  log_.DBG("log_sensor_addr_", "Sensor is on\n");
 }
 
-void Vl6180::setMaxCovergenceTime(uint8_t time_ms)
+void VL6180::setMaxCovergenceTime(uint8_t time_ms)
 {
   this->writeByte(SYSRANGE__MAX_CONVERGENCE_TIME, time_ms);
 }
 
-void Vl6180::turnOff()
+void VL6180::turnOff()
 {
   // TODO(Anyone) do pin write to turn off vl6180
   this->on_ = false;
-  log_.DBG("VL6180", "Sensor is now off\n");
+  log_.DBG("log_sensor_addr_", "Sensor is now off\n");
 }
 
-double Vl6180::getDistance()
+double VL6180::getDistance()
 {
   uint8_t data;
   this->readByte(RESULT__RANGE_VAL, &data);
   return static_cast<int>(data);
 }
 
-void Vl6180::setContinuousRangingMode()
+void VL6180::setContinuousRangingMode()
 {
   if (this->continuous_mode_ == true) {
-    log_.DBG("VL6180", "Sensor already in continuous ranging mode\n");
+    log_.DBG("log_sensor_addr_", "Sensor already in continuous ranging mode\n");
     return;
   }
   // Write to sensor and set to continuous ranging mode
@@ -206,7 +213,7 @@ void Vl6180::setContinuousRangingMode()
   this->continuous_mode_ = true;
 }
 
-bool Vl6180::waitDeviceBooted()
+bool VL6180::waitDeviceBooted()
 {
   // Will hold the return value of the register SYSTEM__FRESH_OUT_OF_RESET
   uint8_t fresh_out_of_reset;
@@ -221,7 +228,7 @@ bool Vl6180::waitDeviceBooted()
   return true;
 }
 
-bool Vl6180::rangeWaitDeviceReady()
+bool VL6180::rangeWaitDeviceReady()
 {
   uint8_t data;
 
@@ -233,26 +240,29 @@ bool Vl6180::rangeWaitDeviceReady()
   return false;
 }
 
-int Vl6180::readByte(uint16_t reg_add, uint8_t *data)
+int VL6180::readByte(uint16_t reg_add, uint8_t *data)
 {
-  char __attribute__((unused)) buffer[2];
+  uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
-  char __attribute__((unused)) recv_buffer[1];
+  // char __attribute__((unused)) recv_buffer[1];
 
-  // TODO(Anyone) write read I2C
+  // TODO(Anyone) look back here unsure about this
+  i2c_.read(this->i2c_addr_, buffer, 2);
 
   return 1;
 }
 
-int Vl6180::writeByte(uint16_t reg_add, char data)
+int VL6180::writeByte(uint16_t reg_add, char data)
 {
-  char __attribute__((unused)) buffer[3];
+  uint8_t buffer[3];
   buffer[0]=reg_add>>8;
   buffer[1]=reg_add&0xFF;
   buffer[2]=data;
 
-  // TODO(Anyone) write I2C
+  // TODO(Anyone) look back here unsure about this
+  i2c_.write(this->i2c_addr_, buffer, 3);
+
 
   return 1;
 }
