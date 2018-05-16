@@ -20,7 +20,7 @@
 
 #include "utils/io/spi.hpp"
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
