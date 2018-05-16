@@ -38,17 +38,17 @@ using utils::Logger;
 using utils::io::Can;
 
 struct MotorVelocity {
-  int32_t motor_velocity_1;
-  int32_t motor_velocity_2;
-  int32_t motor_velocity_3;
-  int32_t motor_velocity_4;
+  int32_t velocity_1;
+  int32_t velocity_2;
+  int32_t velocity_3;
+  int32_t velocity_4;
 };
 
 struct MotorTorque {
-  int16_t motor_torque_1;
-  int16_t motor_torque_2;
-  int16_t motor_torque_3;
-  int16_t motor_torque_4;
+  int16_t torque_1;
+  int16_t torque_2;
+  int16_t torque_3;
+  int16_t torque_4;
 };
 
 class Communicator {
