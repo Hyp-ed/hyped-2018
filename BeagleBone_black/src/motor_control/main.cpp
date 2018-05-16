@@ -40,10 +40,6 @@ Main::Main(uint8_t id, Logger& log)
       all_motors_stopped_(false)
 {}
 
-/**
-  *  @brief  { Runs motor control thread. Switches to correct motor state
-  *            based on state machine state }
-  */
 void Main::run()
 {
   log_.INFO("MOTOR", "Starting motor controller");
@@ -63,9 +59,6 @@ void Main::run()
   }
 }
 
-/**
-  *  @brief  { Establish CAN connections with motor controllers }
-  */
 void Main::setupMotors()
 {
   if (!motors_set_up_) {
@@ -77,9 +70,6 @@ void Main::setupMotors()
   }
 }
 
-/**
-  *  @brief  { Will accelerate motors until maximum acceleration distance is reached }
-  */
 void Main::accelerateMotors()
 {
   log_.INFO("MOTOR", "Motor State: Accelerating\n");
@@ -92,7 +82,7 @@ void Main::accelerateMotors()
     }
 
     // Check for motors critial failure flag
-    motor_failure_ = communicator_.checkStatus();
+    motor_failure_ = communicator_.checkFailure();
     if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorVelocity motor_velocity = communicator_.requestActualVelocity();
@@ -137,9 +127,6 @@ void Main::accelerateMotors()
   }
 }
 
-/**
-  *  @brief  { Will decelerate motors until total distance is reached }
-  */
 void Main::decelerateMotors()
 {
   log_.INFO("MOTOR", "Motor State: Deccelerating\n");
@@ -152,7 +139,7 @@ void Main::decelerateMotors()
     }
 
     // Check for motors critical failure flag
-    motor_failure_ = communicator_.checkStatus();
+    motor_failure_ = communicator_.checkFailure();
     if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorVelocity motor_velocity = communicator_.requestActualVelocity();
@@ -243,53 +230,21 @@ void Main::stopMotors()
   log_.DBG2("MOTOR", "Motor State: Stopped\n");
 }
 
-/**
-  *  @brief  { This function will run through slip ratio algorithm to calculate
-  *            the desired acceleration velocity}
-  *
-  *  @param[in]  translational_velocity  { Value read from shared data structure }
-  *
-  *  @return  { Acceleration velocity calculation of type int }
-  */
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
   return target_velocity_ += 100;  // dummy calculation to increase rpm
 }
 
-/**
-  *  @brief  { This function will run through slip ratio algorithm to calculate
-  *            the desired deceleration velocity }
-  *
-  *  @param[in]  translational_velocity  { Value read from shared data structure }
-  *
-  *  @return  { Deceleration velocity calculation of type int }
-  */
 int32_t Main::decelerationVelocity(NavigationType velocity)
 {
   return target_velocity_ -= 100;  // dummy calculation to decrease rpm
 }
 
-/**
-  *  @brief  { This function will calculate desired torque based on current
-  *            translational velocity }
-  *
-  *  @param[in]  translational_velocity  { Value read from shared data structure }
-  *
-  *  @return  { 16 bit integer - target torque }
-  */
 int16_t Main::accelerationTorque(NavigationType velocity)
 {
   return 0;
 }
 
-/**
-  *  @brief  { This function will calculate desired torque based on current
-  *            translational velocity }
-  *
-  *  @param[in]  translational_velocity  { Value read from shared data structure }
-  *
-  *  @return  { 16 bit integer - target torque }
-  */
 int16_t Main::decelerationTorque(NavigationType velocity)
 {
   return 0;

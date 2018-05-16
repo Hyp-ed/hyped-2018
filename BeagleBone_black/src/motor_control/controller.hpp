@@ -39,7 +39,13 @@ class Controller {
 
  public:
   explicit Controller(Logger& log);
+  /**
+    *  @brief  { Read actual velocity from controller }
+    */
   int32_t requestActualVelocity(int32_t target_velocity);
+  /**
+    *  @brief  { Read actual velocity from controller }
+    */
   int16_t requestActualTorque();
 
  private:
