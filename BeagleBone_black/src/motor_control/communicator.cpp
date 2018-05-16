@@ -37,7 +37,7 @@ Communicator::Communicator(Logger& log)
     controller3_(log),
     controller4_(log)
 {
-  log_.INFO("MOTOR", "Controllers initialised");
+  log_.INFO("MOTOR", "Controllers initialised\n");
 }
 
 /**
@@ -69,16 +69,16 @@ void Communicator::sendTargetTorque(int16_t target_torque)
   */
 MotorVelocity Communicator::requestActualVelocity()
 {
-  motor_velocity_.motor_velocity_1 = controller1_.requestActualVelocity(target_velocity_);
-  motor_velocity_.motor_velocity_2 = controller2_.requestActualVelocity(target_velocity_);
-  motor_velocity_.motor_velocity_3 = controller3_.requestActualVelocity(target_velocity_);
-  motor_velocity_.motor_velocity_4 = controller4_.requestActualVelocity(target_velocity_);
+  motor_velocity_.velocity_1 = controller1_.requestActualVelocity(target_velocity_);
+  motor_velocity_.velocity_2 = controller2_.requestActualVelocity(target_velocity_);
+  motor_velocity_.velocity_3 = controller3_.requestActualVelocity(target_velocity_);
+  motor_velocity_.velocity_4 = controller4_.requestActualVelocity(target_velocity_);
 
   log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
-    , motor_velocity_.motor_velocity_1
-    , motor_velocity_.motor_velocity_2
-    , motor_velocity_.motor_velocity_3
-    , motor_velocity_.motor_velocity_4);
+    , motor_velocity_.velocity_1
+    , motor_velocity_.velocity_2
+    , motor_velocity_.velocity_3
+    , motor_velocity_.velocity_4);
 
   return motor_velocity_;
 }
@@ -88,16 +88,16 @@ MotorVelocity Communicator::requestActualVelocity()
   */
 MotorTorque Communicator::requestActualTorque()
 {
-  motor_torque_.motor_torque_1 = controller1_.requestActualTorque();
-  motor_torque_.motor_torque_2 = controller2_.requestActualTorque();
-  motor_torque_.motor_torque_3 = controller3_.requestActualTorque();
-  motor_torque_.motor_torque_4 = controller4_.requestActualTorque();
+  motor_torque_.torque_1 = controller1_.requestActualTorque();
+  motor_torque_.torque_2 = controller2_.requestActualTorque();
+  motor_torque_.torque_3 = controller3_.requestActualTorque();
+  motor_torque_.torque_4 = controller4_.requestActualTorque();
 
   log_.DBG2("MOTOR", "Actual Torque: 1: %d, 2: %d, 3: %d, 4: %d"
-    , motor_torque_.motor_torque_1
-    , motor_torque_.motor_torque_2
-    , motor_torque_.motor_torque_3
-    , motor_torque_.motor_torque_4);
+    , motor_torque_.torque_1
+    , motor_torque_.torque_2
+    , motor_torque_.torque_3
+    , motor_torque_.torque_4);
 
   return motor_torque_;
 }
