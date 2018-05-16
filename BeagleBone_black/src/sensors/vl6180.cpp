@@ -17,12 +17,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-#include "sensors/vl6180.hpp"
-
 #include <chrono>
 #include <cstdint>
-#include <thread>
+
+#include "sensors/vl6180.hpp"
+#include "utils/logger.hpp"
+
 
 
 // Register addresses
@@ -89,14 +89,15 @@ constexpr uint16_t MODE_CONTINUOUS                       = 0x02;
 namespace hyped {
 namespace sensors {
 
-VL6180::VL6180(uint8_t i2c_addr, uint8_t id, Logger& log):Thread(id, log)
+VL6180::VL6180(uint8_t i2c_addr, Logger& log)
+    : log_(log)
 {
   // Create I2C instance get register address
   this->i2c_addr_ = i2c_addr;
 
   this->turnOn();
 
-  log_.INFO("VL6180", "Creating a sensor with id: %d", id);
+  log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
 
 VL6180::~VL6180()
