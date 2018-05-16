@@ -24,7 +24,6 @@
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/i2c.hpp"
-#include <string>
 
 constexpr uint8_t DEFAULT_I2C_SLAVE_ADDR = 0x29;
 
@@ -93,7 +92,6 @@ class VL6180: public Thread {
   bool continuous_mode_;
   uint8_t i2c_addr_ = DEFAULT_I2C_SLAVE_ADDR;
   I2C& i2c_ = I2C::getInstance();
-  std::string log_sensor_addr_;
 };
 
 }}  // namespace hyped::sensors

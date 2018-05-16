@@ -18,7 +18,7 @@
  *    limitations under the License.
  */
 
-#include <string>
+
 #include "sensors/vl6180.hpp"
 #include "utils/logger.hpp"
 
@@ -35,9 +35,10 @@ int main()
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
 
   Thread::sleep(5000);
-  
-  std::string distance = std::to_string(vl6180.getDistance());
 
-  log.INFO("TEST-vl6180", "Distance: " + distance);
+  double distance = vl6180.getDistance();
+
+  log.INFO("TEST-vl6180", "Distance: %f", distance);
+  
  	return 0;
 }

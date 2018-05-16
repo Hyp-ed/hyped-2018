@@ -91,26 +91,25 @@ namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, uint8_t id, Logger& log):Thread(id, log)
 {
-  //Create I2C instance get register address
+  // Create I2C instance get register address
   this->i2c_addr_ = i2c_addr;
-  this->log_sensor_addr_ = "VL6180-" + std::to_string(i2c_addr);
 
   this->turnOn();
 
-  log_.INFO("log_sensor_addr_", "Creating a sensor with id: %d", id);
+  log_.INFO("VL6180", "Creating a sensor with id: %d", id);
 }
 
 VL6180::~VL6180()
 {
   this->turnOff();
-  log_.INFO("log_sensor_addr_", "Deconstructing sensor object");
+  log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
 void VL6180::turnOn()
 {
   // return if already on
   if (this->on_) {
-    log_.DBG("log_sensor_addr_", "Sensor is already on\n");
+    log_.DBG("VL6180", "Sensor is already on\n");
     return;
   }
 
@@ -180,7 +179,7 @@ void VL6180::turnOn()
   this->setMaxCovergenceTime(time_ms);
 
   this->on_ = true;
-  log_.DBG("log_sensor_addr_", "Sensor is on\n");
+  log_.DBG("VL6180", "Sensor is on\n");
 }
 
 void VL6180::setMaxCovergenceTime(uint8_t time_ms)
@@ -192,7 +191,7 @@ void VL6180::turnOff()
 {
   // TODO(Anyone) do pin write to turn off vl6180
   this->on_ = false;
-  log_.DBG("log_sensor_addr_", "Sensor is now off\n");
+  log_.DBG("VL6180", "Sensor is now off\n");
 }
 
 double VL6180::getDistance()
@@ -205,7 +204,7 @@ double VL6180::getDistance()
 void VL6180::setContinuousRangingMode()
 {
   if (this->continuous_mode_ == true) {
-    log_.DBG("log_sensor_addr_", "Sensor already in continuous ranging mode\n");
+    log_.DBG("VL6180", "Sensor already in continuous ranging mode\n");
     return;
   }
   // Write to sensor and set to continuous ranging mode
