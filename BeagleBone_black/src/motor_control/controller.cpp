@@ -33,17 +33,11 @@ Controller::Controller(Logger& log)
     can_(Can::getInstance())
 {}
 
-/**
-  *  @brief  { Read actual velocity from controller }
-  */
 int32_t Controller::requestActualVelocity(int32_t target_velocity)
 {
   return target_velocity;
 }
 
-/**
-  *  @brief  { Read actual velocity from controller }
-  */
 int16_t Controller::requestActualTorque()
 {
   return 0;

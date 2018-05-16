@@ -56,12 +56,32 @@ class Communicator {
 
  public:
   explicit Communicator(Logger& log);
+  /**
+    *  @brief  { Register controllers to receive messages on CAN bus }
+    */
   void registerControllers();
+  /**
+    *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
+    *            controllers by setting Node-ID = 0 }
+    */
   void sendTargetVelocity(int32_t target_velocity);
+  /**
+    *  @brief  { Send 'broadcast' CAN message containing target torque to all four
+    *            controllers by setting Node-ID = 0 }
+    */
   void sendTargetTorque(int16_t target_torque);
+  /**
+    *  @brief  { Read actual velocity from each controller and return motor velocity struct }
+    */
   MotorVelocity requestActualVelocity();
+  /**
+    *  @brief  { Read actual torque from each controller and return motor velocity struct }
+    */
   MotorTorque requestActualTorque();
-  bool checkStatus();
+  /**
+    *  @brief  { Read error address from each controller to check for error. Return false if no error }
+    */
+  bool checkFailure();
 
  private:
   Logger& log_;

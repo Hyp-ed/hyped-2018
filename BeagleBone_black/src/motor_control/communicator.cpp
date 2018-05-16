@@ -40,33 +40,19 @@ Communicator::Communicator(Logger& log)
   log_.INFO("MOTOR", "Controllers initialised\n");
 }
 
-/**
-  *  @brief  { Register controllers to receive messages on CAN bus }
-  */
 void Communicator::registerControllers()
 {}
 
-/**
-  *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
-  *            controllers by setting Node-ID = 0 }
-  */
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
   this->target_velocity_ = target_velocity;
 }
 
-/**
-  *  @brief  { Send 'broadcast' CAN message containing target torque to all four
-  *            controllers by setting Node-ID = 0 }
-  */
 void Communicator::sendTargetTorque(int16_t target_torque)
 {
   this->target_torque_ = target_torque;
 }
 
-/**
-  *  @brief  { Read actual velocity from each controller and return motor velocity struct }
-  */
 MotorVelocity Communicator::requestActualVelocity()
 {
   motor_velocity_.velocity_1 = controller1_.requestActualVelocity(target_velocity_);
@@ -83,9 +69,6 @@ MotorVelocity Communicator::requestActualVelocity()
   return motor_velocity_;
 }
 
-/**
-  *  @brief  { Read actual torque from each controller and return motor velocity struct }
-  */
 MotorTorque Communicator::requestActualTorque()
 {
   motor_torque_.torque_1 = controller1_.requestActualTorque();
@@ -102,10 +85,7 @@ MotorTorque Communicator::requestActualTorque()
   return motor_torque_;
 }
 
-/**
-  *  @brief  { Read error address from each controller to check for error. Return false if no error }
-  */
-bool Communicator::checkStatus()
+bool Communicator::checkFailure()
 {
   return false;
 }
