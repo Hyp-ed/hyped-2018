@@ -91,11 +91,14 @@ namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, Logger& log)
     : log_(log)
+    , on_(false)
+    , continuous_mode_(false)
 {
   // Create I2C instance get register address
   this->i2c_addr_ = i2c_addr;
 
   this->turnOn();
+  // setContinuousRangingMode();
 
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
@@ -198,7 +201,9 @@ void VL6180::turnOff()
 double VL6180::getDistance()
 {
   uint8_t data;
-  this->readByte(RESULT__RANGE_VAL, &data);
+  data = 1;
+  writeByte(SYSRANGE__START, data);     // tell the sensor to sample
+  readByte(RESULT__RANGE_VAL, &data);   // read the sampled data
   return static_cast<int>(data);
 }
 
@@ -247,8 +252,9 @@ int VL6180::readByte(uint16_t reg_add, uint8_t *data)
   buffer[1] = reg_add & 0xFF;
   // char __attribute__((unused)) recv_buffer[1];
 
-  // TODO(Anyone) look back here unsure about this
-  i2c_.read(this->i2c_addr_, buffer, 2);
+
+  i2c_.write(this->i2c_addr_, buffer, 2);
+  i2c_.read(i2c_addr_, data, 1);
 
   return 1;
 }

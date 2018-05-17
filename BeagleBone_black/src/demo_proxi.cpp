@@ -22,9 +22,11 @@
 #include "sensors/vl6180.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include "utils/concurrent/thread.hpp"
 
 using hyped::sensors::VL6180;
 using hyped::utils::Logger;
+using hyped::utils::concurrent::Thread;
 
 Logger log(true, 1);
 
@@ -36,9 +38,11 @@ int main(int argc, char* argv[])
 
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
 
-  double distance = vl6180.getDistance();
-
-  log.INFO("TEST-vl6180", "Distance: %f", distance);
+  for (int i=0; i< 100; i++) {
+    double distance = vl6180.getDistance();
+    log.INFO("TEST-vl6180", "Distance: %f", distance);
+    Thread::sleep(50);
+  }
 
  	return 0;
 }

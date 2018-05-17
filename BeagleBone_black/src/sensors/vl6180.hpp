@@ -87,8 +87,8 @@ class VL6180 {
     *  @return int Returns 0 if successful
     */
   int writeByte(uint16_t reg_add, char data);
-  bool on_;
   Logger& log_;
+  bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_ = DEFAULT_I2C_SLAVE_ADDR;
   I2C& i2c_ = I2C::getInstance();
