@@ -20,7 +20,6 @@
 
 #include "communications.hpp"
 
-#include <sstream>
 #include <string>
 
 namespace hyped {
@@ -60,70 +59,6 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 Communications::~Communications()
 {
   close(sockfd_);
-}
-
-int Communications::sendDistance(float distance)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << distance;
-
-  return sendData("CMD01" + ss.str() + "\n");
-}
-
-int Communications::sendVelocity(float speed)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << speed;
-
-  return sendData("CMD02" + ss.str() + "\n");
-}
-
-int Communications::sendAcceleration(float accel)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << accel;
-
-  return sendData("CMD03" + ss.str() + "\n");
-}
-
-int Communications::sendStripeCount(int stripes)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << stripes;
-
-  return sendData("CMD04" + ss.str() + "\n");
-}
-
-int Communications::sendRpmFl(float rpmfl)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmfl;
-
-  return sendData("CMD05" + ss.str() + "\n");
-}
-
-int Communications::sendRpmFr(float rpmfr)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmfr;
-
-  return sendData("CMD06" + ss.str() + "\n");
-}
-
-int Communications::sendRpmBl(float rpmbl)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmbl;
-
-  return sendData("CMD07" + ss.str() + "\n");
-}
-
-int Communications::sendRpmBr(float rpmbr)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmbr;
-
-  return sendData("CMD08" + ss.str() + "\n");
 }
 
 int Communications::sendData(std::string message)

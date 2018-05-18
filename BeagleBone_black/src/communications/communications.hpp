@@ -48,14 +48,6 @@ class Communications
  public:
   explicit Communications(Logger& log, const char* ip, int portNo);
   ~Communications();
-  int sendDistance(NavigationType distance);    // CMD01
-  int sendVelocity(NavigationType speed);       // CMD02
-  int sendAcceleration(NavigationType accel);   // CMD03
-  int sendStripeCount(int stripes);             // CMD04
-  int sendRpmFl(float rpmfl);                   // CMD05
-  int sendRpmFr(float rpmfr);                   // CMD06
-  int sendRpmBl(float rpmBl);                   // CMD07
-  int sendRpmBr(float rpmBr);                   // CMD08
   int sendData(std::string message);
   int receiveMessage();
 

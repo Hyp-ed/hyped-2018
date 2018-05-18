@@ -37,6 +37,14 @@ class Main : public Thread {
  public:
   explicit Main(uint8_t id, Logger& log);
   void run() override;
+  int sendDistance(NavigationType distance);    // CMD01
+  int sendVelocity(NavigationType speed);       // CMD02
+  int sendAcceleration(NavigationType accel);   // CMD03
+  int sendStripeCount(int stripes);             // CMD04
+  int sendRpmFl(float rpmfl);                   // CMD05
+  int sendRpmFr(float rpmfr);                   // CMD06
+  int sendRpmBl(float rpmBl);                   // CMD07
+  int sendRpmBr(float rpmBr);                   // CMD08
 
  private:
   Communications* baseCommunicator_;
