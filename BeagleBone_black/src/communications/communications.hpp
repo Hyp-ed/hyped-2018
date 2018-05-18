@@ -60,12 +60,11 @@ class Communications
   int receiveMessage();
 
  private:
-  int sockfd_, n_;
+  int sockfd_, n_, command_;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
   Logger& log_;
-//  data::Data& data_;
 };
 
 }}  //  namespace hyped::communications
