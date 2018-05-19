@@ -88,6 +88,7 @@ constexpr uint16_t MODE_CONTINUOUS                       = 0x02;
 constexpr uint16_t MODE_SINGLESHOT                       = 0x00;
 constexpr uint16_t RESULT_INTERRUPT_STATUS_GPIO          = 0x4F;
 constexpr uint16_t INTERRUPT_CLEAR_RANGING               = 0x01;
+constexpr uint16_t RES_INT_RANGE_MASK                    = 0x07;
 
 namespace hyped {
 namespace sensors {
@@ -257,9 +258,7 @@ double VL6180::singleRangeDistance()
     // TODO(Anyone) Poll for new sample until ready then break
     // TODO(Anyone) Not sure about this need to check
     readByte(RESULT_INTERRUPT_STATUS_GPIO, &status);
-    if (status)
-      break;
-  }while(1);
+  }while((status & RES_INT_RANGE_MASK) !=4);
 
   // Clear interrupt again
   writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
@@ -299,11 +298,12 @@ int VL6180::readByte(uint16_t reg_add, uint8_t *data)
   uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
-  // char __attribute__((unused)) recv_buffer[1];
+  uint8_t recv_buffer[1];
 
 
   i2c_.write(this->i2c_addr_, buffer, 2);
   i2c_.read(i2c_addr_, data, 1);
+
 
   return 1;
 }
