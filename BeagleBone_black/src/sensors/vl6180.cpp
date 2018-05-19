@@ -85,6 +85,9 @@ constexpr uint16_t INTERLEAVED_MODE__ENABLE              = 0x02A3;
 constexpr uint16_t RANGE_DEVICE_READY_MASK               = 0x01;
 constexpr uint16_t MODE_START_STOP                       = 0x01;
 constexpr uint16_t MODE_CONTINUOUS                       = 0x02;
+constexpr uint16_t MODE_SINGLESHOT                       = 0x00;
+constexpr uint16_t RESULT_INTERRUPT_STATUS_GPIO          = 0x4F;
+constexpr uint16_t INTERRUPT_CLEAR_RANGING               = 0x01;
 
 namespace hyped {
 namespace sensors {
@@ -98,7 +101,6 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
   this->i2c_addr_ = i2c_addr;
 
   this->turnOn();
-  // setContinuousRangingMode();
 
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
@@ -200,6 +202,16 @@ void VL6180::turnOff()
 
 double VL6180::getDistance()
 {
+  if (continuous_mode_) {
+    return continuousRangeDistance();
+  } else {
+    return singleRangeDistance();
+  }
+
+}
+
+double VL6180::continuousRangeDistance()
+{
   uint8_t data;
   data = 1;
   writeByte(SYSRANGE__START, data);     // tell the sensor to sample
@@ -218,17 +230,55 @@ void VL6180::setContinuousRangingMode()
   this->continuous_mode_ = true;
 }
 
+void VL6180::setSingleShotMode()
+{
+  if (this->continuous_mode_ == false) {
+    log_.DBG("VL6180", "Sensor already in single shot mode\n");
+    return;
+  } else {
+    // Write to sensor and set to single shot ranging mode
+    writeByte(SYSRANGE__START, MODE_START_STOP | MODE_SINGLESHOT);
+    this->continuous_mode_ = false;
+  }
+}
+
+double VL6180::singleRangeDistance()
+{
+  uint8_t data;
+  data = 1;
+  uint8_t status;
+  status = 1;
+  // Make sure in single shot ranging mode
+  writeByte(SYSRANGE__START, MODE_START_STOP | MODE_SINGLESHOT);
+  // Clear the interrupt
+  writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
+
+  // Wait until the sample is ready
+  do {
+    // TODO(Anyone) Poll for new sample until ready then break
+    // TODO(Anyone) Not sure about this need to check
+    readByte(RESULT_INTERRUPT_STATUS_GPIO, &status);
+    if (status)
+      break;
+  }while(1);
+
+  // Clear interrupt again
+  writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
+  // Get the distance from the register
+  readByte(RESULT__RANGE_VAL, &data);
+  return static_cast<int>(data);
+}
+
 bool VL6180::waitDeviceBooted()
 {
   // Will hold the return value of the register SYSTEM__FRESH_OUT_OF_RESET
   uint8_t fresh_out_of_reset;
-  int status;
 
   do
   {
-    status = this->readByte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
+    this->readByte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
   }
-  while (fresh_out_of_reset != 1 && status == 0);
+  while (fresh_out_of_reset != 1);
 
   return true;
 }

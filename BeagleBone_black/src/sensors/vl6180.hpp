@@ -44,12 +44,28 @@ class VL6180 {
     *  @return double Returns the distance to the nearest object
     */
   double getDistance();
+  /**
+    *  @brief  Sets the the ranging mode to continuous
+    */
+  void setContinuousRangingMode();
+  /**
+    *  @brief  Sets the the ranging mode to single shot
+    */
+  void setSingleShotMode();
 
  private:
- /**
-   *  @brief  Sets the the ranging mode to continuous
-   */
-  void setContinuousRangingMode();
+  /**
+    *  @brief called from getDistance() for single shot ranging
+    *
+    *  @return double Returns the distance to the nearest object
+    */
+  double singleRangeDistance();
+  /**
+    *  @brief called from getDistance() for continuous ranging
+    *
+    *  @return double Returns the distance to the nearest object
+    */
+   double continuousRangeDistance();
   /**
     *  @brief  Loops until the device is out of reset
     *
