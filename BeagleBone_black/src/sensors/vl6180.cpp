@@ -247,7 +247,7 @@ double VL6180::singleRangeDistance()
   uint8_t data;
   data = 1;
   uint8_t status;
-  status = 1;
+  status = 0;
   // Make sure in single shot ranging mode
   writeByte(SYSRANGE__START, MODE_START_STOP | MODE_SINGLESHOT);
   // Clear the interrupt
@@ -258,11 +258,12 @@ double VL6180::singleRangeDistance()
     // TODO(Anyone) Poll for new sample until ready then break
     // TODO(Anyone) Not sure about this need to check
     readByte(RESULT_INTERRUPT_STATUS_GPIO, &status);
-  }while((status & RES_INT_RANGE_MASK) !=4);
+  }while(status);
 
   // Clear interrupt again
   writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
   // Get the distance from the register
+  writeByte(SYSRANGE__START, data);
   readByte(RESULT__RANGE_VAL, &data);
   return static_cast<int>(data);
 }
