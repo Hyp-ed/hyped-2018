@@ -65,7 +65,7 @@ class VL6180 {
     *
     *  @return double Returns the distance to the nearest object
     */
-   double continuousRangeDistance();
+  double continuousRangeDistance();
   /**
     *  @brief  Loops until the device is out of reset
     *

@@ -207,7 +207,6 @@ double VL6180::getDistance()
   } else {
     return singleRangeDistance();
   }
-
 }
 
 double VL6180::continuousRangeDistance()
