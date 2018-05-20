@@ -82,13 +82,13 @@ int Communications::receiveMessage()
 
   switch (command_) {
     case 1:
-      log_.INFO("COMN", "Received 1");  // STOP
+      log_.INFO("COMN", "Received 1 (STOP)");  // STOP
       break;
     case 2:
-      log_.INFO("COMN", "Received 2");  // KILL POWER
+      log_.INFO("COMN", "Received 2 (KILL POWER)");  // KILL POWER
       break;
     case 3:
-      log_.INFO("CMN", "Received 3");  // LAUCNH
+      log_.INFO("CMN", "Received 3 (LAUNCH)");  // LAUNCH
       break;
   }
 

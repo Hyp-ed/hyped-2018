@@ -48,7 +48,17 @@ class Communications
  public:
   explicit Communications(Logger& log, const char* ip, int portNo);
   ~Communications();
+  /**
+   * @brief Sends data to server.
+   *
+   * @pararm[in] message which contains with a command code, a value and a newline
+   */
   int sendData(std::string message);
+  /**
+   * @brief Reads data from server.
+   *
+   * @return int Returns command code (1 = STOP, 2 = KILL POWER, 3 = LAUNCH)
+   */
   int receiveMessage();
 
  private:
