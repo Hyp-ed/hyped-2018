@@ -20,6 +20,8 @@
 
 #include "communications/main.hpp"
 
+#include <sstream>
+
 namespace hyped {
 namespace communications {
 
@@ -31,6 +33,70 @@ Main::Main(uint8_t id, Logger& log)
   baseCommunicator_ = new Communications(log, ipAddress, portNo);
 }
 
+int Main::sendDistance(NavigationType distance)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << distance;
+
+  return baseCommunicator_->sendData("CMD01" + ss.str() + "\n");
+}
+
+int Main::sendVelocity(NavigationType speed)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << speed;
+
+  return baseCommunicator_->sendData("CMD02" + ss.str() + "\n");
+}
+
+int Main::sendAcceleration(NavigationType accel)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << accel;
+
+  return baseCommunicator_->sendData("CMD03" + ss.str() + "\n");
+}
+
+int Main::sendStripeCount(int stripes)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << stripes;
+
+  return baseCommunicator_->sendData("CMD04" + ss.str() + "\n");
+}
+
+int Main::sendRpmFl(float rpmfl)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << rpmfl;
+
+  return baseCommunicator_->sendData("CMD05" + ss.str() + "\n");
+}
+
+int Main::sendRpmFr(float rpmfr)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << rpmfr;
+
+  return baseCommunicator_->sendData("CMD06" + ss.str() + "\n");
+}
+
+int Main::sendRpmBl(float rpmbl)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << rpmbl;
+
+  return baseCommunicator_->sendData("CMD07" + ss.str() + "\n");
+}
+
+int Main::sendRpmBr(float rpmbr)
+{
+  std::stringstream ss(std::stringstream::in | std::stringstream::out);
+  ss << rpmbr;
+
+  return baseCommunicator_->sendData("CMD08" + ss.str() + "\n");
+}
+
 void Main::run()
 {
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
@@ -40,14 +106,14 @@ void Main::run()
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
     sns_ = data_.getSensorsData();
-    baseCommunicator_->sendDistance(nav_.distance);
-    baseCommunicator_->sendVelocity(nav_.velocity);
-    baseCommunicator_->sendAcceleration(nav_.acceleration);
-    baseCommunicator_->sendStripeCount(sns_.stripe_count.value);
-    baseCommunicator_->sendRpmFl(mtr_.motor_velocity_1);
-    baseCommunicator_->sendRpmFr(mtr_.motor_velocity_2);
-    baseCommunicator_->sendRpmBl(mtr_.motor_velocity_3);
-    baseCommunicator_->sendRpmBr(mtr_.motor_velocity_4);
+    sendDistance(nav_.distance);
+    sendVelocity(nav_.velocity);
+    sendAcceleration(nav_.acceleration);
+    sendStripeCount(sns_.stripe_count.value);
+    sendRpmFl(mtr_.motor_velocity_1);
+    sendRpmFr(mtr_.motor_velocity_2);
+    sendRpmBl(mtr_.motor_velocity_3);
+    sendRpmBr(mtr_.motor_velocity_4);
   }
 
   receiverThread->join();

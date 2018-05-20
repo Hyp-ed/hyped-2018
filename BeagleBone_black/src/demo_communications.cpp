@@ -29,10 +29,7 @@ int main()
   int portNo = 5695;
   hyped::utils::Logger log(true, 1);
   hyped::communications::Communications baseCommunicator(log, ipAddress, portNo);
-  baseCommunicator.sendVelocity(6546);
-  baseCommunicator.sendDistance(564);
-  baseCommunicator.sendAcceleration(584);
-  baseCommunicator.sendStripeCount(964);
+  baseCommunicator.sendData("CMD01987654321\n");
 
   return 0;
 }
