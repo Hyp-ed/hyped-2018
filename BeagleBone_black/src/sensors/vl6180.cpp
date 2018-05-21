@@ -160,13 +160,8 @@ void VL6180::turnOn()
   this->writeByte(0x01a7, 0x1f);
   this->writeByte(0x0030, 0x00);
 
-  // Might need to use these register access' trying to understand them
-  // Recommended : Public registers - See data sheet for more detail
-  // VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature
-  // calibration of the ranging sensor */
-  // VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging
-  // inter-measurement period to 100ms */
-  // VL6180x_WrByte( dev, 0x0014, 0x24); /* Configures interrupt on New sample ready */
+  // Perform a single temperature calibration of the ranging sensor
+  writeByte(0x002e, 0x01);
 
   // Enables polling for New Sample ready when measurement completes
   this->writeByte(0x0011, 0x10);
@@ -182,7 +177,7 @@ void VL6180::turnOn()
   this->writeByte(SYSRANGE__VHV_RECALIBRATE, 0x01);
 
   // Set max convergence time (Recommended default 50ms)
-  uint8_t time_ms = 50;
+  uint8_t time_ms = 50;  // changes here
   this->setMaxCovergenceTime(time_ms);
 
   this->on_ = true;
@@ -210,14 +205,6 @@ double VL6180::getDistance()
   }
 }
 
-double VL6180::continuousRangeDistance()
-{
-  uint8_t data;
-  data = 1;
-  writeByte(SYSRANGE__START, data);     // tell the sensor to sample
-  readByte(RESULT__RANGE_VAL, &data);   // read the sampled data
-  return static_cast<int>(data);
-}
 
 void VL6180::setContinuousRangingMode()
 {
@@ -227,7 +214,19 @@ void VL6180::setContinuousRangingMode()
   }
   // Write to sensor and set to continuous ranging mode
   this->writeByte(SYSRANGE__START, MODE_START_STOP | MODE_CONTINUOUS);
+  // CHANGED
+  uint8_t inter_measurement_time = 1;
+  writeByte(SYSRANGE__INTERMEASUREMENT_PERIOD, inter_measurement_time);
+
   this->continuous_mode_ = true;
+}
+
+double VL6180::continuousRangeDistance()
+{
+  uint8_t data;
+  data = 1;
+  readByte(RESULT__RANGE_VAL, &data);   // read the sampled data
+  return static_cast<int>(data);
 }
 
 void VL6180::setSingleShotMode()
@@ -247,23 +246,24 @@ double VL6180::singleRangeDistance()
   uint8_t data;
   data = 1;
   uint8_t status;
-  status = 0;
+  status = 1;
+
   // Make sure in single shot ranging mode
   writeByte(SYSRANGE__START, MODE_START_STOP | MODE_SINGLESHOT);
+
   // Clear the interrupt
   writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
 
   // Wait until the sample is ready
   do {
-    // TODO(Anyone) Poll for new sample until ready then break
-    // TODO(Anyone) Not sure about this need to check
+    // Loops until device is ready
+    rangeWaitDeviceReady();
     readByte(RESULT_INTERRUPT_STATUS_GPIO, &status);
   }while(status);
 
   // Clear interrupt again
   writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
-  // Get the distance from the register
-  writeByte(SYSRANGE__START, data);
+
   readByte(RESULT__RANGE_VAL, &data);
   return static_cast<int>(data);
 }
@@ -285,10 +285,10 @@ bool VL6180::waitDeviceBooted()
 bool VL6180::rangeWaitDeviceReady()
 {
   uint8_t data;
-
   while (true) {
-    this->readByte(RESULT__RANGE_STATUS, &data);
-    if (data == (data & RANGE_DEVICE_READY_MASK))
+    readByte(RESULT__RANGE_STATUS, &data);
+    data= data & RANGE_DEVICE_READY_MASK;
+    if (data)
       return true;
   }
   return false;
@@ -299,8 +299,6 @@ int VL6180::readByte(uint16_t reg_add, uint8_t *data)
   uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
-  uint8_t recv_buffer[1];
-
 
   i2c_.write(this->i2c_addr_, buffer, 2);
   i2c_.read(i2c_addr_, data, 1);
@@ -318,8 +316,6 @@ int VL6180::writeByte(uint16_t reg_add, char data)
 
   // TODO(Anyone) look back here unsure about this
   i2c_.write(this->i2c_addr_, buffer, 3);
-
-
   return 1;
 }
 
