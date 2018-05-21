@@ -33,9 +33,6 @@ void ReceiverThread::run()
 {
   data::Communications cmn_data;
 
-  cmn_data.stopCommand = false;
-  cmn_data.killPowerCommand = false;
-
   while (1) {
     int command = baseCommunicator_->receiveMessage();
 
@@ -45,6 +42,9 @@ void ReceiverThread::run()
         break;
       case 2:
         cmn_data.killPowerCommand = true;
+        break;
+      case 3:
+        cmn_data.launchCommand = true;
         break;
     }
 
