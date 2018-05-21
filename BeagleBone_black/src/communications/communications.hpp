@@ -48,24 +48,25 @@ class Communications
  public:
   explicit Communications(Logger& log, const char* ip, int portNo);
   ~Communications();
-  int sendDistance(NavigationType distance);    // CMD01
-  int sendVelocity(NavigationType speed);       // CMD02
-  int sendAcceleration(NavigationType accel);   // CMD03
-  int sendStripeCount(int stripes);             // CMD04
-  int sendRpmFl(float rpmfl);                   // CMD05
-  int sendRpmFr(float rpmfr);                   // CMD06
-  int sendRpmBl(float rpmBl);                   // CMD07
-  int sendRpmBr(float rpmBr);                   // CMD08
+  /**
+   * @brief Sends data to server.
+   *
+   * @pararm[in] message which contains with a command code, a value and a newline
+   */
   int sendData(std::string message);
+  /**
+   * @brief Reads data from server.
+   *
+   * @return int Returns command code (1 = STOP, 2 = KILL POWER, 3 = LAUNCH)
+   */
   int receiveMessage();
 
  private:
-  int sockfd_, n_;
+  int sockfd_, n_, command_;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
   Logger& log_;
-//  data::Data& data_;
 };
 
 }}  //  namespace hyped::communications
