@@ -23,6 +23,8 @@ sensors/main.hpp
 sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
+sensors/mpu9250.hpp
+sensors/mpu9250.cpp
 sensors/vl6180.hpp
 sensors/vl6180.cpp
 communications/main.hpp

@@ -14,6 +14,7 @@ SRCS := \
   sensors/main.cpp \
   sensors/bms.cpp \
   sensors/vl6180.cpp \
+  sensors/mpu9250.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
