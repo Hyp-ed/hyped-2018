@@ -38,11 +38,20 @@ int main(int argc, char* argv[])
 
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
 
+  vl6180.setContinuousRangingMode();
+  for (int i=0; i< 500; i++) {
+    double distance = vl6180.getDistance();
+    log.INFO("TEST-vl6180", "Continuous Distance: %f", distance);
+    Thread::sleep(20);
+  }
+
+  vl6180.setSingleShotMode();
   for (int i=0; i< 100; i++) {
     double distance = vl6180.getDistance();
-    log.INFO("TEST-vl6180", "Distance: %f", distance);
-    Thread::sleep(50);
+    log.INFO("TEST-vl6180", "Single-shot Distance: %f", distance);
+    Thread::sleep(7);
   }
+
 
  	return 0;
 }
