@@ -26,6 +26,40 @@
 #include "utils/system.hpp"
 #include "utils/io/can.hpp"
 
+using hyped::utils::io::can::Frame
+
+// Common CAN messages for all motor Controllers
+
+// struct Frame {
+//   static constexpr uint32_t kExtendedMask = 0x80000000U;
+//   uint32_t  id;
+//   bool      extended;
+//   uint8_t   len;
+//   uint8_t   data[8];
+// };
+
+// Device Control Command messages for all controllers
+// pg49 CANOpen_Motion_Control.pdf
+constexpr Frame SHUTDOWN            = {0, false, 2, {0,6,0,0,0,0,0,0}};
+constexpr Frame SWITCH_ON_NO_ENABLE = {0, false, 2, {0,7,0,0,0,0,0,0}};
+constexpr Frame SWITCH_ON_ENABLE    = {0, false, 2, {0,15,0,0,0,0,0,0}};
+constexpr Frame DISABLE_VOLTAGE     = {0, false, 2, {0,0,0,0,0,0,0,0}};
+constexpr Frame QUICK_STOP          = {0, false, 2, {0,2,0,0,0,0,0,0}};
+constexpr Frame DISABLE_OPERATION   = {0, false, 2, {0,7,0,0,0,0,0,0}};
+constexpr Frame ENABLE_OPERATION    = {0, false, 2, {0,15,0,0,0,0,0,0}};
+
+// Status masks, used to mask the return result of a CAN message
+// pg51 CANOpen_Motion_Control.pdf
+constexpr uint16_t NOT_READY_TO_SWITCH_ON_MASK    = 0x0000;
+constexpr uint16_t SWITCH_ON_DISABLED_MASK        = 0x0040;
+constexpr uint16_t READY_TO_SWITCH_ON_MASK        = 0x0021;
+constexpr uint16_t SWITCHED_ON_MASK               = 0x0023;
+constexpr uint16_t OPERATION_ENABLED_MASK         = 0x0027;
+constexpr uint16_t QUICK_STOP_ACTIVE_MASK         = 0x0007;
+constexpr uint16_t FAULT_REACTION_ACTIVE_MASK     = 0x0008;
+constexpr uint16_t FAULT_MASK                     = 0x0008;
+
+
 namespace hyped {
 namespace motor_control {
 
