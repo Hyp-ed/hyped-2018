@@ -22,11 +22,11 @@
 #define BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 
 #include "utils/logger.hpp"
-#include "utils/io/i2c.hpp"
+#include "utils/io/spi.hpp"
 
 namespace hyped {
 
-using hyped::utils::io::I2C;
+using hyped::utils::io::SPI;
 using utils::Logger;
 
 namespace sensors {
@@ -36,9 +36,48 @@ class MPU9250 {
   // TODO(Jack)
   explicit MPU9250(Logger& log);
   ~MPU9250();
+  /*
+   *  @brief Calibrates the accelerometer
+   */
+  void calibrateAccl();
+  /*
+   *  @brief Sets the range for the gyroscope
+   */
+  void setGyroScale(int scale);
+  /*
+   *  @brief Sets the range for the accelerometer
+   */
+  void setAcclScale(int scale);
+  /*
+   *  @brief Returns the most recent Accelerometer readings
+   *
+   *  @return 3Dvector Returns accelerometer readings
+   */
+  double getAcclData();
+  /*
+   *  @brief Returns the most recent gyroscope readings
+   *
+   *  @return 3Dvector Returns gyroscope readings
+   */
+  double getGyroData();
+  /*
+   *  @brief Returns the most recent gyroscope & accelerometer readings
+   *
+   *  @return 3Dvector Returns gyroscope & accelerometer readings
+   */
+  double getAllSensorData();
+
 
  private:
   // TODO(Jack)
+  // Call this function at startup
+  void init();
+  // Write to a register
+  bool writeReg(uint8_t write_reg, uint8_t write_data);
+  // Read from a register
+  bool readReg(uint8_t read_reg, uint8_t *read_data);
+  double accl_scale_;
+  double gyro_scale_;
   Logger& log_;
   I2C& i2c_ = I2C::getInstance();
 };
