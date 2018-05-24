@@ -79,7 +79,6 @@ class MPU9250 {
   double accl_scale_;
   double gyro_scale_;
   Logger& log_;
-  I2C& i2c_ = I2C::getInstance();
 };
 
 }}  // namespace hyped::sensors
