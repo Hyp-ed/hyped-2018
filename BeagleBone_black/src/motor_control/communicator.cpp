@@ -26,7 +26,7 @@
 #include "utils/system.hpp"
 #include "utils/io/can.hpp"
 
-using hyped::utils::io::can::Frame
+using hyped::utils::io::can::Frame;
 
 // Common CAN messages for all motor Controllers
 
