@@ -22,39 +22,64 @@
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_CONTROLLER_HPP_
 
 #include <cstdint>
+#include "utils/io/can.hpp"
 
 namespace hyped {
 // Forward declarations
 namespace utils { class Logger; }
 namespace utils { namespace io { class Can; } }
+namespace utils { namespace io { class CanProccesor; } }
 namespace utils { namespace io { namespace can { struct Frame; } } }
 
 namespace motor_control {
 
 using utils::Logger;
 using utils::io::Can;
+using utils::io::CanProccesor;
 
-class Controller {
+class Controller : public CanProccesor {
   friend Can;
 
  public:
   Controller(Logger& log, uint8_t id);
-  void registerControllers();
-  void sendTargetVelocity();
   /**
-    *  @brief  { Read actual velocity from controller }
+    *  @brief  { Register controllers to receive messages on CAN bus }
     */
-  int32_t requestActualVelocity(int32_t target_velocity);
+  void registerController();
   /**
-    *  @brief  { Read actual velocity from controller }
+    *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
+    *            controllers by setting Node-ID = 0 }
+    */
+  void sendTargetVelocity(int32_t target_velocity);
+  /**
+    *  @brief  { Send 'broadcast' CAN message containing target torque to all four
+    *            controllers by setting Node-ID = 0 }
+    */
+  void sendTargetTorque(int32_t target_torque);
+  /**
+    *  @brief  { Read actual velocity from each controller and return motor velocity struct }
+    */
+  int32_t requestActualVelocity();
+  /**
+    *  @brief  { Read actual torque from each controller and return motor velocity struct }
     */
   int16_t requestActualTorque();
+  /**
+   * @brief To be called by CAN receive side. Controller processes received CAN
+   * message and updates its local data
+   *
+   * @param message received CAN message to be processed
+   */
+  void processNewData(utils::io::can::Frame& message) override;
+  int getFailure();
+
 
  private:
   Logger&  log_;
   Can&     can_;
   uint16_t node_id_;
   uint16_t sdo_receive;
+  int failure_;
 };
 
 }}  // namespace hyped::motor_control

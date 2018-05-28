@@ -55,10 +55,10 @@ void Communicator::sendTargetTorque(int16_t target_torque)
 
 MotorVelocity Communicator::requestActualVelocity()
 {
-  motor_velocity_.velocity_1 = controller1_.requestActualVelocity(target_velocity_);
-  motor_velocity_.velocity_2 = controller2_.requestActualVelocity(target_velocity_);
-  motor_velocity_.velocity_3 = controller3_.requestActualVelocity(target_velocity_);
-  motor_velocity_.velocity_4 = controller4_.requestActualVelocity(target_velocity_);
+  motor_velocity_.velocity_1 = controller1_.requestActualVelocity();
+  motor_velocity_.velocity_2 = controller2_.requestActualVelocity();
+  motor_velocity_.velocity_3 = controller3_.requestActualVelocity();
+  motor_velocity_.velocity_4 = controller4_.requestActualVelocity();
 
   log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
     , motor_velocity_.velocity_1
@@ -85,9 +85,14 @@ MotorTorque Communicator::requestActualTorque()
   return motor_torque_;
 }
 
-bool Communicator::checkFailure()
+int Communicator::checkFailure()
 {
-  return false;
+  int f1, f2, f3, f4;
+  f1 = controller1_.getFailure();
+  f2 = controller2_.getFailure();
+  f3 = controller3_.getFailure();
+  f4 = controller4_.getFailure();
+  return f1 || f2 || f3 || f4;
 }
 
 }}  // namespace hyped::motor_control

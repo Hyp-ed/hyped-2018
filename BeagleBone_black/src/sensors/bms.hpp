@@ -97,7 +97,7 @@ class BMS : public Thread, public CanProccesor {
    *
    * @param message received CAN message to be processed
    */
-  void processNewData(utils::io::can::Frame& message);
+  void processNewData(utils::io::can::Frame& message) override;
 
  private:
   Can&      can_;
