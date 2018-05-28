@@ -65,9 +65,6 @@ class Communicator {
 
  public:
   explicit Communicator(Logger& log);
-  /**
-    *  @brief  { Register controllers to receive messages on CAN bus }
-    */
   void registerControllers();
   /**
     *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
@@ -87,10 +84,7 @@ class Communicator {
     *  @brief  { Read actual torque from each controller and return motor velocity struct }
     */
   MotorTorque requestActualTorque();
-  /**
-    *  @brief  { Read error address from each controller to check for error. Return false if no error }
-    */
-  bool checkFailure();
+  int checkFailure();
 
  private:
   Logger& log_;
