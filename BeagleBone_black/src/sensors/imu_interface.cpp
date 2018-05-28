@@ -18,6 +18,7 @@
  *    limitations under the License.
  */
 
+#include <string>
 #include "sensors/imu_interface.hpp"
 #include "data/data.hpp"
 
@@ -29,10 +30,22 @@ namespace sensors {
 
 class FakeImu : public ImuInterface {
  public:
-  void getData(Imu& imu);
+  void getData(Imu* imu);
+  void addNoiseToData(Imu* imu);
+  void readDataFromFile(std::string file_path);
 };
 
-void FakeImu::getData(Imu& imu)
+void FakeImu::getData(Imu* imu)
+{
+  // TODO(Uday): Create method
+}
+
+void FakeImu::addNoiseToData(Imu* imu)
+{
+  // TODO(Uday): Create method
+}
+
+void FakeImu::readDataFromFile(std::string file_path)
 {
   // TODO(Uday): Create method
 }
