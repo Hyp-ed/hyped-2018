@@ -21,6 +21,7 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 
+#include "sensors/imu_interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
 
@@ -31,11 +32,15 @@ using utils::Logger;
 
 namespace sensors {
 
-class MPU9250 {
+class MPU9250: ImuInterface {
  public:
   // TODO(Jack)
   explicit MPU9250(Logger& log);
   ~MPU9250();
+
+  void getData(Imu* imu) override;
+
+ private:
   /*
    *  @brief Calibrates the accelerometer
    */
@@ -67,8 +72,8 @@ class MPU9250 {
    */
   double getAllSensorData();
 
-
  private:
+  static const uint64_t time_start;
   // TODO(Jack)
   // Call this function at startup
   void init();
