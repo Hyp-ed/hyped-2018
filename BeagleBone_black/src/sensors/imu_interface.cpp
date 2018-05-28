@@ -18,10 +18,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_IMU_INTERFACE_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_IMU_INTERFACE_HPP_
-
 #include <string>
+#include "sensors/imu_interface.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -30,14 +28,26 @@ using data::Imu;
 
 namespace sensors {
 
-class ImuInterface {
+class FakeImu : public ImuInterface {
  public:
-  virtual void getData(Imu* imu) = 0;
-  virtual void addNoiseToData(Imu* imu) = 0;
-  virtual void readDataFromFile(std::string file_path) = 0;
+  void getData(Imu* imu);
+  void addNoiseToData(Imu* imu);
+  void readDataFromFile(std::string file_path);
 };
 
+void FakeImu::getData(Imu* imu)
+{
+  // TODO(Uday): Create method
+}
+
+void FakeImu::addNoiseToData(Imu* imu)
+{
+  // TODO(Uday): Create method
+}
+
+void FakeImu::readDataFromFile(std::string file_path)
+{
+  // TODO(Uday): Create method
+}
+
 }}  // namespace hyped::sensors
-
-
-#endif  // BEAGLEBONE_BLACK_SENSORS_IMU_INTERFACE_HPP_
