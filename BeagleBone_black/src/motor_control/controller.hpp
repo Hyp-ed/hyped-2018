@@ -39,6 +39,8 @@ class Controller {
 
  public:
   Controller(Logger& log, uint8_t id);
+  void registerControllers();
+  void sendTargetVelocity();
   /**
     *  @brief  { Read actual velocity from controller }
     */
