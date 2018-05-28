@@ -34,21 +34,21 @@ constexpr uint16_t sdo_receive = 0x600;
 
 // Status masks, used to mask the return result of a CAN message
 // pg51 CANOpen_Motion_Control.pdf
-constexpr uint16_t kNotReadyToSwitchMask       = 0x0000;
-constexpr uint16_t kSwitchOnDisabledMask       = 0x0040;
-constexpr uint16_t kReadyToSwitchOnMask        = 0x0021;
-constexpr uint16_t kSwitchedOnMask             = 0x0023;
-constexpr uint16_t kOperationEnabledMask       = 0x0027;
-constexpr uint16_t kQuickStopActiveMask        = 0x0007;
-constexpr uint16_t kFaultReactionActiveMask    = 0x0008;
+constexpr uint16_t kNotReadyToSwitch       = 0x0000;
+constexpr uint16_t kSwitchOnDisabled       = 0x0040;
+constexpr uint16_t kReadyToSwitchOn        = 0x0021;
+constexpr uint16_t kSwitchedOn             = 0x0023;
+constexpr uint16_t kOperationEnabled       = 0x0027;
+constexpr uint16_t kQuickStopActive        = 0x0007;
+constexpr uint16_t kFaultReactionActive    = 0x0008;
 // Unsure about this check datasheet TODO(anyone)
-constexpr uint16_t kFaultMask                  = 0x0008;
+constexpr uint16_t kFault                  = 0x0008;
 
 // Masks for profile velocity status
 // pg123 'CANOpen_Motion_Control.pdf
-constexpr uint16_t kTargetReachedMask          = 0x0400;
-constexpr uint16_t kSpeedEqualToZeroMask       = 0x1000;
-constexpr uint16_t kMaxSlippageReachedMask     = 0x2000;
+constexpr uint16_t kTargetReached          = 0x0400;
+constexpr uint16_t kSpeedEqualToZero       = 0x1000;
+constexpr uint16_t kMaxSlippageReached     = 0x2000;
 
 Controller::Controller(Logger& log, uint8_t id)
   : log_(log),
@@ -57,7 +57,11 @@ Controller::Controller(Logger& log, uint8_t id)
 {
   node_id_ = id << 1;
   sdo_receive = 0x600 + node_id_;
+  init();
 }
+
+void Controller::init()
+{/*EMPTY*/}
 
 int32_t Controller::requestActualVelocity()
 {
