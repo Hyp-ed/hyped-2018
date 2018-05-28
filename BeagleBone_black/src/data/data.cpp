@@ -92,10 +92,10 @@ void Data::setStripeCount(const StripeCount& stripe_count)
   sensors_.stripe_count = stripe_count;
 }
 
-Sensors Data::getBatteryData()
+Batteries Data::getBatteryData()
 {
-  ScopedLock L(&lock_sensors_);
-  return sensors_;
+  ScopedLock L(&lock_batteries_);
+  return batteries_;
 }
 
 void Data::setBatteryData(const Batteries& batteries_data)
