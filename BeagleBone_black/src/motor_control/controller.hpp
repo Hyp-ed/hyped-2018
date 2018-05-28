@@ -38,7 +38,7 @@ class Controller {
   friend Can;
 
  public:
-  explicit Controller(Logger& log);
+  explicit Controller(Logger& log, uint8_t id);
   /**
     *  @brief  { Read actual velocity from controller }
     */
@@ -49,8 +49,9 @@ class Controller {
   int16_t requestActualTorque();
 
  private:
-  Logger& log_;
-  Can&    can_;
+  Logger&  log_;
+  Can&     can_;
+  uint16_t node_id_;
 };
 
 }}  // namespace hyped::motor_control

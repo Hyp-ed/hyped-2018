@@ -51,6 +51,15 @@ struct MotorTorque {
   int16_t torque_4;
 };
 
+/* Can Frames composed as follows:
+ * Bytes 0-1: 0-11:  COB-ID = Function + Node ID,
+ *            12:    RTR bit,
+ *            13-16: Packet length
+ * Bytes 1-2: Object Dictionary Index
+ * Byte  3:   Object Dictionary Sub-Index
+ * Bytes 4-7: Data
+ */
+
 class Communicator {
   friend Can;
 

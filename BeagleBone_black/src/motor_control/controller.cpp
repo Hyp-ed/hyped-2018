@@ -28,9 +28,10 @@
 namespace hyped {
 namespace motor_control {
 
-Controller::Controller(Logger& log)
+Controller::Controller(Logger& log, id)
   : log_(log),
-    can_(Can::getInstance())
+    can_(Can::getInstance()
+    node_id_(node_id))
 {}
 
 int32_t Controller::requestActualVelocity(int32_t target_velocity)
