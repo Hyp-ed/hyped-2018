@@ -50,14 +50,12 @@ void FakeImu::setData()
   imu_.gyr.value = gyr_val;
 }
 
-Imu FakeImu::getData()
+void FakeImu::getData(Imu* imu)
 {
-  Imu temp;
-  temp.acc = DataPoint<NavigationVector>(imu_.acc.timestamp,
+  imu->acc = DataPoint<NavigationVector>(imu_.acc.timestamp,
                                          imu_.acc.value + addNoiseToData(acc_val, acc_noise));
-  temp.gyr = DataPoint<NavigationVector>(imu_.gyr.timestamp,
+  imu->gyr = DataPoint<NavigationVector>(imu_.gyr.timestamp,
                                          imu_.gyr.value + addNoiseToData(gyr_val, gyr_noise));
-  return temp;
 }
 
 NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType noise)

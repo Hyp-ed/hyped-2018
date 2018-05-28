@@ -33,11 +33,11 @@ using data::NavigationVector;
 
 namespace sensors {
 
-class FakeImu : ImuInterface {
+class FakeImu : public ImuInterface {
  public:
   explicit FakeImu(NavigationVector acc_val, NavigationType acc_noise,
                    NavigationVector gyr_val, NavigationType gyr_noise);
-  Imu getData();
+  void getData(Imu* imu) override;
   void setData();
   NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
   void readDataFromFile(std::string file_path);
