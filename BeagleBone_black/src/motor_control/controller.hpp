@@ -63,7 +63,7 @@ class Controller : public CanProccesor {
     *  @brief  { Send 'broadcast' CAN message containing target torque to all four
     *            controllers by setting Node-ID = 0 }
     */
-  void sendTargetTorque(int32_t target_torque);
+  void sendTargetTorque(int16_t target_torque);
   /**
     *  @brief  { Read actual velocity from each controller and return motor velocity struct }
     */

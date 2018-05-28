@@ -24,14 +24,12 @@
 #include "data/data.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/io/can.hpp"
 
 namespace hyped {
 namespace motor_control {
 
 Communicator::Communicator(Logger& log)
   : log_(log),
-    can_(Can::getInstance()),
     controller1_(log, 1),
     controller2_(log, 2),
     controller3_(log, 3),
@@ -41,15 +39,28 @@ Communicator::Communicator(Logger& log)
 }
 
 void Communicator::registerControllers()
-{}
+{
+  controller1_.registerController();
+  controller2_.registerController();
+  controller3_.registerController();
+  controller4_.registerController();
+}
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
+  controller1_.sendTargetVelocity(target_velocity);
+  controller2_.sendTargetVelocity(target_velocity);
+  controller3_.sendTargetVelocity(target_velocity);
+  controller4_.sendTargetVelocity(target_velocity);
   this->target_velocity_ = target_velocity;
 }
 
 void Communicator::sendTargetTorque(int16_t target_torque)
 {
+  controller1_.sendTargetTorque(target_torque);
+  controller2_.sendTargetTorque(target_torque);
+  controller3_.sendTargetTorque(target_torque);
+  controller4_.sendTargetTorque(target_torque);
   this->target_torque_ = target_torque;
 }
 
@@ -83,6 +94,22 @@ MotorTorque Communicator::requestActualTorque()
     , motor_torque_.torque_4);
 
   return motor_torque_;
+}
+
+void Communicator::initControllers()
+{
+  controller1_.init();
+  controller2_.init();
+  controller3_.init();
+  controller4_.init();
+}
+
+void Communicator::quickStopAll()
+{
+  controller1_.quickStop();
+  controller2_.quickStop();
+  controller3_.quickStop();
+  controller4_.quickStop();
 }
 
 int Communicator::checkFailure()

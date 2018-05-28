@@ -73,6 +73,18 @@ int16_t Controller::requestActualTorque()
   return 0;
 }
 
+void Controller::quickStop()
+{/*EMPTY*/}
+
+void Controller::registerController()
+{/*EMPTY*/}
+
+void Controller::sendTargetVelocity(int32_t target_velocity)
+{/*EMPTY*/}
+
+void Controller::sendTargetTorque(int16_t target_torque)
+{/*EMPTY*/}
+
 void Controller::processNewData(utils::io::can::Frame& message)
 {/*EMPTY*/}
 
