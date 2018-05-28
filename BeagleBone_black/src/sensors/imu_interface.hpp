@@ -33,8 +33,6 @@ namespace sensors {
 class ImuInterface {
  public:
   virtual void getData(Imu* imu) = 0;
-  virtual void addNoiseToData(Imu* imu) = 0;
-  virtual void readDataFromFile(std::string file_path) = 0;
 };
 
 }}  // namespace hyped::sensors
