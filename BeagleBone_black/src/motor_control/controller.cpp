@@ -77,4 +77,9 @@ int Controller::getFailure()
   return failure_;
 }
 
+int Controller::getId()
+{
+  return node_id_;
+}
+
 }}  // namespace hyped::motor_control

@@ -43,6 +43,14 @@ class Controller : public CanProccesor {
  public:
   Controller(Logger& log, uint8_t id);
   /**
+    *   @brief  Initialises the motor
+    */
+  void init();
+  /**
+    *   @brief Stops the motors as fast as possible
+    */
+  void quickStop();
+  /**
     *  @brief  { Register controllers to receive messages on CAN bus }
     */
   void registerController();
@@ -72,6 +80,7 @@ class Controller : public CanProccesor {
    */
   void processNewData(utils::io::can::Frame& message) override;
   int getFailure();
+  int getId();
 
 
  private:
