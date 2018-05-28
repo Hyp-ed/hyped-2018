@@ -21,9 +21,12 @@
 
 #include "sensors/mpu9250.hpp"
 #include "utils/logger.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 namespace sensors {
+
+const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
 
 MPU9250::MPU9250(Logger& log)
     : log_(log)
@@ -34,6 +37,20 @@ MPU9250::MPU9250(Logger& log)
 MPU9250::~MPU9250()
 {
   log_.INFO("MPU9250", "Deconstructing sensor object");
+}
+
+void MPU9250::getData(Imu* imu)
+{
+  auto acc = imu->acc.value;
+  auto gyr = imu->gyr.value;
+  acc[0] = 1.0;
+  acc[1] = 0.0;
+  acc[2] = 0.0;
+  gyr = {};
+
+  uint32_t time = utils::Timer::getTimeMillis() - (time_start/1000);
+  imu->acc.timestamp = time;
+  imu->gyr.timestamp = time;
 }
 
 }}   // namespace hyped::sensors
