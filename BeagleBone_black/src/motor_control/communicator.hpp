@@ -1,5 +1,5 @@
 /*
- * Author: Sean Mullan
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
  * Date: 5/05/18
  * Description:
@@ -29,7 +29,6 @@
 namespace hyped {
 // Forward declarations
 namespace utils { class Logger; }
-namespace utils { namespace io { class Can; } }
 namespace utils { namespace io { namespace can { struct Frame; } } }
 
 namespace motor_control {
@@ -61,10 +60,15 @@ struct MotorTorque {
  */
 
 class Communicator {
-  friend Can;
-
  public:
   explicit Communicator(Logger& log);
+  /**
+    *   @brief  Initialises the motor controllers
+    */
+  void initControllers();
+  /**
+    *   @brief  Registers the motor controllers to the can
+    */
   void registerControllers();
   /**
     *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
@@ -84,11 +88,14 @@ class Communicator {
     *  @brief  { Read actual torque from each controller and return motor velocity struct }
     */
   MotorTorque requestActualTorque();
+  /*
+   *  @brief stops all
+   */
+  void quickStopAll();
   int checkFailure();
 
  private:
   Logger& log_;
-  Can&    can_;
   Controller controller1_;
   Controller controller2_;
   Controller controller3_;
