@@ -107,13 +107,13 @@ constexpr uint16_t MAX_SLIPPAGE_REACHED_MASK        = 0x2000;
 namespace hyped {
 namespace motor_control {
 
-Communicator::Communicator(Logger& log)
+Communicator::Communicator(Logger& log, uni)
   : log_(log),
     can_(Can::getInstance()),
-    controller1_(log),
-    controller2_(log),
-    controller3_(log),
-    controller4_(log)
+    controller1_(log, 1),
+    controller2_(log, 2),
+    controller3_(log, 3),
+    controller4_(log, 4)
 {
   log_.INFO("MOTOR", "Controllers initialised\n");
 }
