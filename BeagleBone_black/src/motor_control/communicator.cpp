@@ -81,7 +81,7 @@ constexpr Frame SET_PROFILE_VELOCITY = {OBD_RECEIVE + NODE_ALL, false, 8, {0x23,
 
 // end velocity is zero because that is usually your speed when you have
 // reached your target.
-// Assuming sub-index is 0x00 as not specified 
+// Assuming sub-index is 0x00 as not specified
 // end velocity is currently 0x00000000 = 0
 constexpr Frame SET_END_VELOCITY = {OBD_RECEIVE + NODE_ALL, false, 8, {0x23,0x60,0x81,0,0,0,0,0}};
 
