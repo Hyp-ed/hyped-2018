@@ -23,18 +23,31 @@
 
 #include <string>
 #include "data/data.hpp"
+#include "sensors/imu_interface.hpp"
 
 namespace hyped {
 
 using data::Imu;
+using data::NavigationType;
+using data::NavigationVector;
 
 namespace sensors {
 
-class FakeImu : public ImuInterface {
+class FakeImu : ImuInterface {
  public:
-  void getData(Imu* imu);
-  void addNoiseToData(Imu* imu);
+  explicit FakeImu(NavigationVector acc_val, NavigationType acc_noise,
+                   NavigationVector gyr_val, NavigationType gyr_noise);
+  Imu getData();
+  void setData();
+  NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
   void readDataFromFile(std::string file_path);
+
+ private:
+  Imu imu_;
+  NavigationVector acc_val;
+  NavigationVector gyr_val;
+  NavigationType acc_noise;
+  NavigationType gyr_noise;
 };
 
 }}  // namespace hyped::sensors
