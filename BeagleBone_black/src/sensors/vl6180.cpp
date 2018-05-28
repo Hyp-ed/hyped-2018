@@ -2,7 +2,7 @@
  * Author: Jack Horsburgh
  * Organisation: HYPED
  * Date: 18/04/18
- * Description: Main file for Vl6180
+ * Description: Main file for VL6180
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,13 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+#include <chrono>
+#include <cstdint>
 
 #include "sensors/vl6180.hpp"
-#include <cstdint>
-#include <thread>
-#include <chrono>
+#include "utils/logger.hpp"
+
+
 
 // Register addresses
 constexpr uint16_t IDENTIFICATION__MODEL_ID              = 0x0000;
@@ -83,23 +85,34 @@ constexpr uint16_t INTERLEAVED_MODE__ENABLE              = 0x02A3;
 constexpr uint16_t RANGE_DEVICE_READY_MASK               = 0x01;
 constexpr uint16_t MODE_START_STOP                       = 0x01;
 constexpr uint16_t MODE_CONTINUOUS                       = 0x02;
+constexpr uint16_t MODE_SINGLESHOT                       = 0x00;
+constexpr uint16_t RESULT_INTERRUPT_STATUS_GPIO          = 0x4F;
+constexpr uint16_t INTERRUPT_CLEAR_RANGING               = 0x01;
+constexpr uint16_t RES_INT_RANGE_MASK                    = 0x07;
 
 namespace hyped {
 namespace sensors {
 
-Vl6180::Vl6180(uint8_t id, Logger& log)
-  :Thread(id, log)
+VL6180::VL6180(uint8_t i2c_addr, Logger& log)
+    : log_(log)
+    , on_(false)
+    , continuous_mode_(false)
 {
-  log_.INFO("VL6180", "Creating a sensor with id: %d", id);
+  // Create I2C instance get register address
+  this->i2c_addr_ = i2c_addr;
+
+  this->turnOn();
+
+  log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
 
-Vl6180::~Vl6180()
+VL6180::~VL6180()
 {
   this->turnOff();
   log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
-void Vl6180::turnOn()
+void VL6180::turnOn()
 {
   // return if already on
   if (this->on_) {
@@ -147,13 +160,8 @@ void Vl6180::turnOn()
   this->writeByte(0x01a7, 0x1f);
   this->writeByte(0x0030, 0x00);
 
-  // Might need to use these register access' trying to understand them
-  // Recommended : Public registers - See data sheet for more detail
-  // VL6180x_WrByte( dev, 0x002e, 0x01); /* perform a single temperature
-  // calibration of the ranging sensor */
-  // VL6180x_WrByte( dev, 0x001b, 0x09); /* Set default ranging
-  // inter-measurement period to 100ms */
-  // VL6180x_WrByte( dev, 0x0014, 0x24); /* Configures interrupt on New sample ready */
+  // Perform a single temperature calibration of the ranging sensor
+  writeByte(0x002e, 0x01);
 
   // Enables polling for New Sample ready when measurement completes
   this->writeByte(0x0011, 0x10);
@@ -169,33 +177,36 @@ void Vl6180::turnOn()
   this->writeByte(SYSRANGE__VHV_RECALIBRATE, 0x01);
 
   // Set max convergence time (Recommended default 50ms)
-  uint8_t time_ms = 50;
+  uint8_t time_ms = 50;  // changes here
   this->setMaxCovergenceTime(time_ms);
 
   this->on_ = true;
   log_.DBG("VL6180", "Sensor is on\n");
 }
 
-void Vl6180::setMaxCovergenceTime(uint8_t time_ms)
+void VL6180::setMaxCovergenceTime(uint8_t time_ms)
 {
   this->writeByte(SYSRANGE__MAX_CONVERGENCE_TIME, time_ms);
 }
 
-void Vl6180::turnOff()
+void VL6180::turnOff()
 {
   // TODO(Anyone) do pin write to turn off vl6180
   this->on_ = false;
   log_.DBG("VL6180", "Sensor is now off\n");
 }
 
-double Vl6180::getDistance()
+double VL6180::getDistance()
 {
-  uint8_t data;
-  this->readByte(RESULT__RANGE_VAL, &data);
-  return static_cast<int>(data);
+  if (continuous_mode_) {
+    return continuousRangeDistance();
+  } else {
+    return singleRangeDistance();
+  }
 }
 
-void Vl6180::setContinuousRangingMode()
+
+void VL6180::setContinuousRangingMode()
 {
   if (this->continuous_mode_ == true) {
     log_.DBG("VL6180", "Sensor already in continuous ranging mode\n");
@@ -203,57 +214,108 @@ void Vl6180::setContinuousRangingMode()
   }
   // Write to sensor and set to continuous ranging mode
   this->writeByte(SYSRANGE__START, MODE_START_STOP | MODE_CONTINUOUS);
+  // CHANGED
+  uint8_t inter_measurement_time = 1;
+  writeByte(SYSRANGE__INTERMEASUREMENT_PERIOD, inter_measurement_time);
+
   this->continuous_mode_ = true;
 }
 
-bool Vl6180::waitDeviceBooted()
+double VL6180::continuousRangeDistance()
+{
+  uint8_t data;
+  data = 1;
+  readByte(RESULT__RANGE_VAL, &data);   // read the sampled data
+  return static_cast<int>(data);
+}
+
+void VL6180::setSingleShotMode()
+{
+  if (this->continuous_mode_ == false) {
+    log_.DBG("VL6180", "Sensor already in single shot mode\n");
+    return;
+  } else {
+    // Write to sensor and set to single shot ranging mode
+    writeByte(SYSRANGE__START, MODE_START_STOP | MODE_SINGLESHOT);
+    this->continuous_mode_ = false;
+  }
+}
+
+double VL6180::singleRangeDistance()
+{
+  uint8_t data;
+  data = 1;
+  uint8_t status;
+  status = 1;
+
+  // Make sure in single shot ranging mode
+  writeByte(SYSRANGE__START, MODE_START_STOP | MODE_SINGLESHOT);
+
+  // Clear the interrupt
+  writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
+
+  // Wait until the sample is ready
+  do {
+    // Loops until device is ready
+    rangeWaitDeviceReady();
+    readByte(RESULT_INTERRUPT_STATUS_GPIO, &status);
+  }while(status);
+
+  // Clear interrupt again
+  writeByte(SYSTEM__INTERRUPT_CLEAR, INTERRUPT_CLEAR_RANGING);
+
+  readByte(RESULT__RANGE_VAL, &data);
+  return static_cast<int>(data);
+}
+
+bool VL6180::waitDeviceBooted()
 {
   // Will hold the return value of the register SYSTEM__FRESH_OUT_OF_RESET
   uint8_t fresh_out_of_reset;
-  int status;
 
   do
   {
-    status = this->readByte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
+    this->readByte(SYSTEM__FRESH_OUT_OF_RESET, &fresh_out_of_reset);
   }
-  while (fresh_out_of_reset != 1 && status == 0);
+  while (fresh_out_of_reset != 1);
 
   return true;
 }
 
-bool Vl6180::rangeWaitDeviceReady()
+bool VL6180::rangeWaitDeviceReady()
 {
   uint8_t data;
-
   while (true) {
-    this->readByte(RESULT__RANGE_STATUS, &data);
-    if (data == (data & RANGE_DEVICE_READY_MASK))
+    readByte(RESULT__RANGE_STATUS, &data);
+    data= data & RANGE_DEVICE_READY_MASK;
+    if (data)
       return true;
   }
   return false;
 }
 
-int Vl6180::readByte(uint16_t reg_add, uint8_t *data)
+int VL6180::readByte(uint16_t reg_add, uint8_t *data)
 {
-  char __attribute__((unused)) buffer[2];
+  uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
-  char __attribute__((unused)) recv_buffer[1];
 
-  // TODO(Anyone) write read I2C
+  i2c_.write(this->i2c_addr_, buffer, 2);
+  i2c_.read(i2c_addr_, data, 1);
+
 
   return 1;
 }
 
-int Vl6180::writeByte(uint16_t reg_add, char data)
+int VL6180::writeByte(uint16_t reg_add, char data)
 {
-  char __attribute__((unused)) buffer[3];
+  uint8_t buffer[3];
   buffer[0]=reg_add>>8;
   buffer[1]=reg_add&0xFF;
   buffer[2]=data;
 
-  // TODO(Anyone) write I2C
-
+  // TODO(Anyone) look back here unsure about this
+  i2c_.write(this->i2c_addr_, buffer, 3);
   return 1;
 }
 

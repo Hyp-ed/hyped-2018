@@ -23,8 +23,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include <linux/types.h>
+
+#ifndef WIN
+// #include <linux/types.h>
 #include <linux/i2c-dev.h>
+#else
+#define I2C_SLAVE 0x0703
+#endif
+
+
 
 #include "utils/logger.hpp"
 
