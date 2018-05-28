@@ -23,6 +23,7 @@ sensors/main.hpp
 sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
+sensors/imu_interface.cpp
 sensors/imu_interface.hpp
 sensors/mpu9250.hpp
 sensors/mpu9250.cpp
