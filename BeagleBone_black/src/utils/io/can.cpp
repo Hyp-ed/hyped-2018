@@ -57,6 +57,7 @@ struct sockaddr_can {
 #endif   // CAN
 
 #include "sensors/bms.hpp"
+#include "motor_control/controller.hpp"
 
 namespace hyped {
 
@@ -171,6 +172,13 @@ void Can::processNewData(can::Frame* message)
 {
   uint32_t  id  = message->id;
   CanProccesor* owner = 0;
+  for (auto const& controller : controller_array_) {
+    if ((0x580 + controller->getId()) == id) {
+      owner = controller;
+      break;
+    }
+  }
+
   for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
     uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
     if (bms_id <= id &&
@@ -193,6 +201,14 @@ void Can::registerBMS(BMS* bms)
   uint8_t id = bms->id_;
 
   bms_map_[id] = bms;
+}
+
+void Can::registerController(Controller* controller)
+{
+  ASSERT(controller);
+
+  controller_array_[array_counter_] = controller;
+  array_counter_++;
 }
 
 }}}   // namespace hyped::utils::io
