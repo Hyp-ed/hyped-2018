@@ -23,6 +23,27 @@
 #include "utils/logger.hpp"
 #include "utils/timer.hpp"
 
+// Accelerometer addresses
+constexpr uint8_t ACCEL_XOUT_H       = 0x3B;
+constexpr uint8_t ACCEL_XOUT_L       = 0x3C;
+constexpr uint8_t ACCEL_YOUT_H       = 0x3D;
+constexpr uint8_t ACCEL_YOUT_L       = 0x3E;
+constexpr uint8_t ACCEL_ZOUT_H       = 0x3F;
+constexpr uint8_t ACCEL_ZOUT_L       = 0x40;
+constexpr uint8_t ACCEL_CONFIG       = 0x1C;
+constexpr uint8_t ACCEL_CONFIG2      = 0x1D;
+
+// gyroscope addresses
+constexpr uint8_t  GYRO_XOUT_H        = 0x43;
+constexpr uint8_t  GYRO_XOUT_L        = 0x44;
+constexpr uint8_t  GYRO_YOUT_H        = 0x45;
+constexpr uint8_t  GYRO_YOUT_L        = 0x46;
+constexpr uint8_t  GYRO_ZOUT_H        = 0x47;
+constexpr uint8_t  GYRO_ZOUT_L        = 0x48;
+constexpr uint8_t  GYRO_CONFIG        = 0x1B;
+
+constexpr uint8_t WHO_AM_I_MPU9250    = 0x75;
+
 namespace hyped {
 namespace sensors {
 
@@ -31,13 +52,47 @@ const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
 MPU9250::MPU9250(Logger& log)
     : log_(log)
 {
+  init();
   log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
 }
+
+void MPU9250::init()
+{/*EMPTY*/}
+
 
 MPU9250::~MPU9250()
 {
   log_.INFO("MPU9250", "Deconstructing sensor object");
 }
+
+
+
+bool MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
+{
+  // select
+  spi_.read(read_reg, read_data, 1);
+  // deselect
+
+  return false;
+}
+
+void MPU9250::performSensorReadings()
+{/*EMPTY*/}
+
+double MPU9250::getAcclData()
+{/*EMPTY*/}
+
+double MPU9250::getGyroData()
+{/*EMPTY*/}
+
+void MPU9250::setGyroScale(int scale)
+{/*EMPTY*/}
+
+void MPU9250::setAcclScale(int scale)
+{/*EMPTY*/}
+
+void MPU9250::calibrateAccl()
+{/*EMPTY*/}
 
 void MPU9250::getData(Imu* imu)
 {
