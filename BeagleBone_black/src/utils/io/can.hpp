@@ -58,6 +58,17 @@ struct Frame {
 
 }   // namespace can
 
+class CanProccesor {
+ public:
+ /**
+  * @brief To be called by CAN receive side. Object processes received CAN
+  * message and updates its local data
+  *
+  * @param message received CAN message to be processed
+  */
+  virtual void processNewData(can::Frame& message) = 0;
+};
+
 /**
  * Can implements singleton pattern to encapsulate one can interface, namely can0.
  * During object construction, can intereface is mapped onto socket_ member variable.

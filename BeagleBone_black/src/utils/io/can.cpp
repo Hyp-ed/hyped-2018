@@ -169,8 +169,8 @@ int Can::receive(can::Frame* frame)
 
 void Can::processNewData(can::Frame* message)
 {
-  uint32_t  id    = message->id;
-  BMS*      owner = 0;
+  uint32_t  id  = message->id;
+  CanProccesor* owner = 0;
   for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
     uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
     if (bms_id <= id &&
