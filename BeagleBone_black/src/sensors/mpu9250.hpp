@@ -21,6 +21,8 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 
+#include <vector>
+
 #include "sensors/imu_interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
@@ -66,23 +68,25 @@ class MPU9250: ImuInterface {
    */
   double getGyroData();
   /*
-   *  @brief Returns the most recent gyroscope & accelerometer readings
-   *
-   *  @return 3Dvector Returns gyroscope & accelerometer readings
+   *  @brief Performs the readings of gyroscope & accelerometer
    */
-  double getAllSensorData();
+  void performSensorReadings();
 
  private:
   static const uint64_t time_start;
   // TODO(Jack)
   // Call this function at startup
   void init();
+  void select();
+  void deSelect();
   // Write to a register
-  bool writeReg(uint8_t write_reg, uint8_t write_data);
+  bool writeByte(uint8_t write_reg, uint8_t write_data);
   // Read from a register
-  bool readReg(uint8_t read_reg, uint8_t *read_data);
+  bool readByte(uint8_t read_reg, uint8_t *read_data);
+  SPI& spi_ = SPI::getInstance();
   double accl_scale_;
   double gyro_scale_;
+  uint8_t cs_;
   Logger& log_;
 };
 
