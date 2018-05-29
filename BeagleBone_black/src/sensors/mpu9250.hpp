@@ -26,18 +26,22 @@
 #include "sensors/imu_interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
+#include "utils/io/gpio.hpp"
 
 namespace hyped {
 
 using hyped::utils::io::SPI;
 using utils::Logger;
+using utils::io::GPIO;
+using utils::io::gpio::Direction;
+
 
 namespace sensors {
 
-class MPU9250: ImuInterface {
+class MPU9250 : ImuInterface {
  public:
   // TODO(Jack)
-  explicit MPU9250(Logger& log);
+  explicit MPU9250(Logger& log, uint32_t pin, Direction direction);
   ~MPU9250();
 
   void getData(Imu* imu) override;
@@ -84,6 +88,7 @@ class MPU9250: ImuInterface {
   // Read from a register
   bool readByte(uint8_t read_reg, uint8_t *read_data);
   SPI& spi_ = SPI::getInstance();
+  GPIO gpio_;
   double accl_scale_;
   double gyro_scale_;
   uint8_t cs_;
