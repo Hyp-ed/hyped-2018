@@ -68,18 +68,18 @@ MPU9250::~MPU9250()
 
 bool MPU9250::writeByte(uint8_t write_reg, uint8_t *write_data)
 {
-  // TODO(anyone) select
+  select();
   spi_.write(write_reg, write_data, 1);
-  // TODO(anyone) deselect
+  deSelect();
 
   return false;
 }
 
 bool MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
-  // TODO(anyone) select
+  select();
   spi_.read(read_reg, read_data, 1);
-  // TODO(anyone) deselect
+  deSelect();
 
   return false;
 }
@@ -101,6 +101,15 @@ void MPU9250::setAcclScale(int scale)
 
 void MPU9250::calibrateAccl()
 {/*EMPTY*/}
+
+void MPU9250::select()
+{
+  gpio_.clear();
+}
+void MPU9250::deSelect()
+{
+  gpio_.set();
+}
 
 void MPU9250::getData(Imu* imu)
 {
