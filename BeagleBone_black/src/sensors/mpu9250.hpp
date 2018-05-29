@@ -80,7 +80,7 @@ class MPU9250: ImuInterface {
   void select();
   void deSelect();
   // Write to a register
-  bool writeByte(uint8_t write_reg, uint8_t write_data);
+  bool writeByte(uint8_t write_reg, uint8_t *write_data);
   // Read from a register
   bool readByte(uint8_t read_reg, uint8_t *read_data);
   SPI& spi_ = SPI::getInstance();

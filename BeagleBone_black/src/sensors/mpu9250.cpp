@@ -65,13 +65,20 @@ MPU9250::~MPU9250()
   log_.INFO("MPU9250", "Deconstructing sensor object");
 }
 
+bool MPU9250::writeByte(uint8_t write_reg, uint8_t *write_data)
+{
+  // TODO(anyone) select
+  spi_.write(write_reg, write_data, 1);
+  // TODO(anyone) deselect
 
+  return false;
+}
 
 bool MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
-  // select
+  // TODO(anyone) select
   spi_.read(read_reg, read_data, 1);
-  // deselect
+  // TODO(anyone) deselect
 
   return false;
 }
