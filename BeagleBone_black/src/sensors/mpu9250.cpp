@@ -44,13 +44,21 @@ constexpr uint8_t  GYRO_CONFIG        = 0x1B;
 
 constexpr uint8_t WHO_AM_I_MPU9250    = 0x75;
 
+
+
+// Configuration bits mpu9250
+#define BIT_H_RESET 0x80
+
 namespace hyped {
+
+utils::io::gpio::Direction kDirection = utils::io::gpio::kOut;
+
 namespace sensors {
 
 const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
 
-MPU9250::MPU9250(Logger& log, uint32_t pin, Direction direction)
-    :gpio_(pin, direction, log),
+MPU9250::MPU9250(Logger& log, uint32_t pin)
+    :gpio_(pin, kDirection, log),
     log_(log)
 {
   init();
@@ -58,7 +66,37 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, Direction direction)
 }
 
 void MPU9250::init()
-{/*EMPTY*/}
+{
+  // Set pin high
+  gpio_.set();
+
+  // Reset device
+
+  // TODO(anyone) Clock source??
+  // 4.34 Register 107 – Power Management 1
+
+  // TODO(anyone) enable accelerometer and gyroscope
+  // 4.35 Register 108 – Power Management 2
+
+  // Check who am i
+}
+
+bool MPU9250::whoAmI()
+{
+  uint8_t data;
+
+  // Who am I checks what address the sensor is at
+  readByte(WHO_AM_I_MPU9250, &data);
+
+  // // TODO(anyone) need to find what it should be equal to
+  // if(data != )
+  // {
+  //   log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
+  //   return false;
+  // }
+
+  return false;
+}
 
 
 MPU9250::~MPU9250()
