@@ -33,7 +33,6 @@ namespace hyped {
 using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
-using utils::io::gpio::Direction;
 
 
 namespace sensors {
@@ -41,7 +40,7 @@ namespace sensors {
 class MPU9250 : ImuInterface {
  public:
   // TODO(Jack)
-  explicit MPU9250(Logger& log, uint32_t pin, Direction direction);
+  explicit MPU9250(Logger& log, uint32_t pin);
   ~MPU9250();
 
   void getData(Imu* imu) override;
@@ -83,6 +82,7 @@ class MPU9250 : ImuInterface {
   void init();
   void select();
   void deSelect();
+  bool whoAmI();
   // Write to a register
   bool writeByte(uint8_t write_reg, uint8_t *write_data);
   // Read from a register
