@@ -78,6 +78,7 @@ class MPU9250 : ImuInterface {
   void select();
   void deSelect();
   bool whoAmI();
+  void calibrateSensors();
   void writeByte(uint8_t write_reg, uint8_t write_data);
   void readByte(uint8_t read_reg, uint8_t *read_data);
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
@@ -88,8 +89,12 @@ class MPU9250 : ImuInterface {
   double gyro_scale_;
   bool isSpi_;
   uint8_t i2c_addr_;
-  uint8_t cs_;
   Logger& log_;
+
+  double acc_divider_;
+  double acc_bias_[3];
+  double gyro_divider_;
+  double gyro_bias_[3];
 };
 
 }}  // namespace hyped::sensors

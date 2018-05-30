@@ -25,15 +25,15 @@
 #include "utils/timer.hpp"
 
 // Accelerometer addresses
-constexpr uint8_t ACCEL_XOUT_H       = 0x3B;
-constexpr uint8_t ACCEL_XOUT_L       = 0x3C;
-constexpr uint8_t ACCEL_YOUT_H       = 0x3D;
-constexpr uint8_t ACCEL_YOUT_L       = 0x3E;
-constexpr uint8_t ACCEL_ZOUT_H       = 0x3F;
-constexpr uint8_t ACCEL_ZOUT_L       = 0x40;
+constexpr uint8_t ACCEL_XOUT_H           = 0x3B;
+constexpr uint8_t ACCEL_XOUT_L           = 0x3C;
+constexpr uint8_t ACCEL_YOUT_H           = 0x3D;
+constexpr uint8_t ACCEL_YOUT_L           = 0x3E;
+constexpr uint8_t ACCEL_ZOUT_H           = 0x3F;
+constexpr uint8_t ACCEL_ZOUT_L           = 0x40;
 
-constexpr uint8_t ACCEL_CONFIG       = 0x1C;
-constexpr uint8_t ACCEL_CONFIG2      = 0x1D;
+constexpr uint8_t ACCEL_CONFIG           = 0x1C;
+constexpr uint8_t ACCEL_CONFIG2          = 0x1D;
 
 // gyroscope addresses
 constexpr uint8_t  GYRO_XOUT_H           = 0x43;
@@ -48,11 +48,42 @@ constexpr uint8_t  GYRO_CONFIG           = 0x1B;
 constexpr uint8_t WHO_AM_I_MPU9250       = 0x75;
 constexpr uint8_t WHO_AM_I_RESET_VALUE   = 0x71;
 
+// User Control
+constexpr uint8_t MPU9250_REG_USER_CTRL  = 0x6A;
+
+// I2C Master Control
+constexpr uint8_t MPU9250_REG_I2C_MST_CTRL  = 0x24;
+
 // Power Management
-constexpr uint8_t REG_PWR_MGMT_1         = 0x6B;
-constexpr uint8_t REG_PWR_MGMT_2         = 0x6C;
+constexpr uint8_t MPU9250_REG_PWR_MGMT_1    = 0x6B;
+constexpr uint8_t MPU9250_REG_PWR_MGMT_2    = 0x6C;
+
+// Configuration
+#define MPU9250_REG_CONFIG              0x1A
+
+// Sample Rate Divider
+#define MPU9250_REG_SMPLRT_DIV          0x19
+
+#define MPUREG_FIFO_COUNTH 0x72
+
+// FIFO Enable
+constexpr uint8_t MPU9250_REG_FIFO_EN       = 0x23;
+
+// Interrupt Enable
+constexpr uint8_t MPU9250_REG_INT_ENABLE    = 0x38;
 
 constexpr uint8_t kReadFlag              = 0x80;
+
+// Configuration bits mpu9250
+#define BITS_FS_250DPS              0x00
+#define BITS_FS_500DPS              0x08
+#define BITS_FS_1000DPS             0x10
+#define BITS_FS_2000DPS             0x18
+#define BITS_FS_2G                  0x00
+#define BITS_FS_4G                  0x08
+#define BITS_FS_8G                  0x10
+#define BITS_FS_16G                 0x18
+
 
 
 
@@ -80,26 +111,68 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr)
 
 void MPU9250::init()
 {
-  // TODO(anyone) disable i2c if neccessary
-
   // Set pin high
   gpio_.set();
+
+  writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
+  writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
+  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
+  writeByte(MPU9250_REG_CONFIG, 0x01);
+  writeByte(GYRO_CONFIG, 0x00);
+  writeByte(ACCEL_CONFIG, 0x00);
+  writeByte(ACCEL_CONFIG2, 0x01);
+  writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
 
   // TODO(anyone) Check who am I
   // Will stay in while look as it is not connected properly
   while (!whoAmI());
 
-  // Reset device -
-  writeByte(REG_PWR_MGMT_1, BIT_H_RESET);
-  // Wait until completed
-
-  // Set clock source
-  writeByte(REG_PWR_MGMT_1, 0x01);
-
   // Enable accelerometer and gyroscope
-  writeByte(REG_PWR_MGMT_2, 0x00);
+  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
+}
 
-  // Gyroscope and accelerometer calibration and set scales
+void MPU9250::calibrateSensors()
+{
+  // TODO(jack) finish calibration
+
+  uint8_t data[12];   // data array to hold accelerometer and gyro x, y, z, data
+  uint16_t ii, packet_count, fifo_count;
+
+  // Configure device for bias calculation
+  // Disable i2c if neccessary
+  writeByte(MPU9250_REG_INT_ENABLE, 0x00);    // Disable all interrupts
+  writeByte(MPU9250_REG_FIFO_EN, 0x00);       // Disable FIFO
+  writeByte(MPU9250_REG_PWR_MGMT_1, 0x00);    // Turn on internal clock source
+  writeByte(MPU9250_REG_I2C_MST_CTRL, 0x00);  // Disable I2C master
+  writeByte(MPU9250_REG_USER_CTRL, 0x00);     // Disable FIFO and I2C master modes
+  writeByte(MPU9250_REG_USER_CTRL, 0x0C);     // Reset FIFO and DMP
+  // Wait for 15ms
+
+  // TODO(anyone) Configure gyro and accelerometer
+  // Configure MPU6050 gyro and accelerometer for bias calculation
+  writeByte(MPU9250_REG_CONFIG, 0x01);       // Set low-pass filter to 188 Hz
+  writeByte(MPU9250_REG_SMPLRT_DIV, 0x00);   // Set sample rate to 1 kHz
+  // Set gyro full-scale to 250 degrees per second, maximum sensitivity
+  writeByte(GYRO_CONFIG, 0x00);
+  // Wait 40ms until completed
+
+  writeByte(ACCEL_CONFIG, 0x00);   // Set accelerometer full-scale to 2 g, maximum sensitivity
+
+  uint16_t  gyrosensitivity  = 131;     // = 131 LSB/degrees/sec
+  uint16_t  accelsensitivity = 16384;   // = 16384 LSB/g
+
+  // Configure FIFO to capture accelerometer and gyro data for bias calculation
+  writeByte(MPU9250_REG_USER_CTRL, 0x40);    // Enable FIFO
+  // Enable gyro and accelerometer sensors for FIFO  (max size 512 bytes in MPU-9150)
+  writeByte(MPU9250_REG_FIFO_EN, 0x78);
+  // Wait 40ms Accumulate 40 samples in 40 milliseconds = 480 bytes
+
+  // At end of sample accumulation, turn off FIFO sensor read
+  writeByte(MPU9250_REG_FIFO_EN, 0x00);        // Disable gyro and accelerometer sensors for FIFO
+  readBytes(MPUREG_FIFO_COUNTH, data, 2);    // read FIFO sample count
+  fifo_count = ( (uint16_t) data[0] << 8) | data[1];
+  // How many sets of full gyro and accelerometer data for averaging
+  packet_count = fifo_count/12;
 }
 
 bool MPU9250::whoAmI()
@@ -127,42 +200,39 @@ MPU9250::~MPU9250()
 void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
   if (isSpi_) {
+    // Write byte for spi
     select();
     spi_.write(write_reg, &write_data, 1);
     deSelect();
   } else {
-    uint8_t buffer[3];
-    buffer[0]=write_reg>>8;
-    buffer[1]=write_reg&0xFF;
-    buffer[2]=write_data;
-
-    i2c_.write(i2c_addr_, buffer, 3);
+    // Write byte for i2c
+    uint8_t buffer[2];
+    buffer[0]=write_reg;
+    buffer[1]=write_data;
+    i2c_.write(i2c_addr_, buffer, 2);
   }
 }
 
 void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
   if (isSpi_) {
+    // Read byte for spi
     select();
-    spi_.read(read_reg, read_data, 1);
+    spi_.read(read_reg | kReadFlag, read_data, 1);
     deSelect();
   } else {
-    uint8_t buffer[2];
-    buffer[0] = read_reg >> 8;
-    buffer[1] = read_reg & 0xFF;
-
-    i2c_.write(i2c_addr_, buffer, 2);
+    // Read byte for i2c
+    i2c_.write(i2c_addr_, &read_reg, 1);
     i2c_.read(i2c_addr_, read_data, 1);
   }
 }
 
+// TODO(jack) put into one read as a buffer
 void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 {
-  if (isSpi_) {
-    int i;
-    for (i = 0; i < length; i++) {
-      readByte(read_reg + i, &read_data[i]);
-    }
+  int i;
+  for (i = 0; i < length; i++) {
+    readByte(read_reg + i, &read_data[i]);
   }
 }
 
@@ -179,7 +249,7 @@ void MPU9250::getAcclData()
     // TODO(anyone) change casting
     data = static_cast<int>(bit_data);
     // TODO(anyone) need to look back at here when scale added
-    accel_data_[i] = data;
+    accel_data_[i] = data/acc_divider_;
   }
 }
 
@@ -196,15 +266,49 @@ void MPU9250::getGyroData()
     // TODO(anyone) change casting
     data = static_cast<int>(bit_data);
     // TODO(anyone) need to look back at here when scale added
-    gyro_data_[i] = data;
+    gyro_data_[i] = data/gyro_divider_;
   }
 }
 
 void MPU9250::setGyroScale(int scale)
-{/*EMPTY*/}
+{
+  writeByte(GYRO_CONFIG, scale);
+
+  switch (scale) {
+    case BITS_FS_250DPS:
+      gyro_divider_ = 131;
+    break;
+    case BITS_FS_500DPS:
+      gyro_divider_ = 65.5;
+      break;
+    case BITS_FS_1000DPS:
+      gyro_divider_ = 32.8;
+    break;
+    case BITS_FS_2000DPS:
+      gyro_divider_ = 16.4;
+    break;
+  }
+}
 
 void MPU9250::setAcclScale(int scale)
-{/*EMPTY*/}
+{
+  writeByte(ACCEL_CONFIG, scale);
+
+  switch (scale) {
+    case BITS_FS_2G:
+      acc_divider_ = 16384;
+    break;
+    case BITS_FS_4G:
+      acc_divider_ = 8192;
+    break;
+    case BITS_FS_8G:
+      acc_divider_ = 4096;
+    break;
+    case BITS_FS_16G:
+      acc_divider_ = 2048;
+    break;
+  }
+}
 
 void MPU9250::calibrateAccl()
 {/*EMPTY*/}
