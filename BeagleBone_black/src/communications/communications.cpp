@@ -18,11 +18,12 @@
  *    limitations under the License.
  */
 
+#include <string>
+
 #include "communications.hpp"
 
 #include "data/data.hpp"
 
-#include <string>
 
 namespace hyped {
 
@@ -70,7 +71,7 @@ int Communications::sendData(std::string message)
   memset(buffer, '\0', 256);
   const char *data = message.c_str();  // cannot use string because strlen requies char*
   n_ = write(sockfd_, data, strlen(data));
-  if (n_ < 0){
+  if (n_ < 0) {
   log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
       cmn_data = data_.getCommunicationsData();
       cmn_data.lostConnection = true;
@@ -85,7 +86,7 @@ int Communications::receiveMessage()
 {
   // TODO(Isabela/Kofi): Two sockets for two reading actions
   n_ = read(sockfd_, buffer, 255);
-  if (n_ < 0){
+  if (n_ < 0) {
   log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
     cmn_data = data_.getCommunicationsData();
     cmn_data.lostConnection = true;
