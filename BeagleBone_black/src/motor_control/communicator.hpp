@@ -56,7 +56,7 @@ class Communicator {
   /**
     *   @brief  Applies configuration settings and sets controllers to Operational mode
     */
-  void initControllers();
+  void configureControllers();
   /**
     *  @brief  { Set target velocity for each controller }
     *

@@ -46,6 +46,14 @@ void Communicator::registerControllers()
   controller4_.registerController();
 }
 
+void Communicator::configureControllers()
+{
+  controller1_.configure();
+  controller2_.configure();
+  controller3_.configure();
+  controller4_.configure();
+}
+
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
   controller1_.sendTargetVelocity(target_velocity);
@@ -94,14 +102,6 @@ MotorTorque Communicator::requestActualTorque()
     , motor_torque_.torque_4);
 
   return motor_torque_;
-}
-
-void Communicator::initControllers()
-{
-  controller1_.init();
-  controller2_.init();
-  controller3_.init();
-  controller4_.init();
 }
 
 void Communicator::quickStopAll()
