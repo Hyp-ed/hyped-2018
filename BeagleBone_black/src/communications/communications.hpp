@@ -33,8 +33,6 @@
 
 #include "data/data.hpp"
 #include "utils/logger.hpp"
-#include "data/data.hpp"
-
 
 namespace hyped {
 
@@ -67,6 +65,8 @@ class Communications
   struct hostent *server;
   char buffer[256];
   Logger& log_;
+  data::Data& data_;
+  data::Communications cmn_data;
 };
 
 }}  //  namespace hyped::communications

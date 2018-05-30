@@ -18,9 +18,12 @@
  *    limitations under the License.
  */
 
+#include <string>
+
 #include "communications.hpp"
 
-#include <string>
+#include "data/data.hpp"
+
 
 namespace hyped {
 
@@ -30,6 +33,7 @@ namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int portNo)
     : log_(log)
+    , data_(data::Data::getInstance())
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -65,9 +69,14 @@ int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
   memset(buffer, '\0', 256);
-  const char *data_ = message.c_str();  // cannot use string because strlen requies char*
-  n_ = write(sockfd_, data_, strlen(data_));
-  if (n_ < 0) log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
+  const char *data = message.c_str();  // cannot use string because strlen requies char*
+  n_ = write(sockfd_, data, strlen(data));
+  if (n_ < 0) {
+  log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
+      cmn_data = data_.getCommunicationsData();
+      cmn_data.lostConnection = true;
+      data_.setCommunicationsData(cmn_data);
+  }
   // TODO(Isabela/Kofi): Two sockets for two reading actions
 
   return atoi(buffer);
@@ -77,7 +86,12 @@ int Communications::receiveMessage()
 {
   // TODO(Isabela/Kofi): Two sockets for two reading actions
   n_ = read(sockfd_, buffer, 255);
-  if (n_ < 0) log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+  if (n_ < 0) {
+  log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    cmn_data = data_.getCommunicationsData();
+    cmn_data.lostConnection = true;
+    data_.setCommunicationsData(cmn_data);
+  }
   command_ = atoi(buffer);
 
   switch (command_) {
