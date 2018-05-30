@@ -112,9 +112,9 @@ void Communicator::quickStopAll()
   controller4_.quickStop();
 }
 
-int Communicator::checkFailure()
+bool Communicator::checkFailure()
 {
-  int f1, f2, f3, f4;
+  bool f1, f2, f3, f4;
   f1 = controller1_.getFailure();
   f2 = controller2_.getFailure();
   f3 = controller3_.getFailure();

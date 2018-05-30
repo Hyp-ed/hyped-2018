@@ -43,52 +43,63 @@ class Controller : public CanProccesor {
  public:
   Controller(Logger& log, uint8_t id);
   /**
-    *   @brief  Initialises the motor
-    */
-  void init();
-  /**
-    *   @brief Stops the motors as fast as possible
-    */
-  void quickStop();
-  /**
-    *  @brief  { Register controllers to receive messages on CAN bus }
+    *  @brief  { Register controller to receive and transmit messages on CAN bus }
     */
   void registerController();
   /**
-    *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
-    *            controllers by setting Node-ID = 0 }
+    *   @brief  { Applies configuration settings and sets controller to Operational }
+    */
+  void init();
+  /**
+    *  @brief  { Set target velocity in controller object dictionary }
+    *
+    *  @param[in] { Target velocity calculated in Main }
     */
   void sendTargetVelocity(int32_t target_velocity);
   /**
-    *  @brief  { Send 'broadcast' CAN message containing target torque to all four
-    *            controllers by setting Node-ID = 0 }
+    *  @brief  { Set target torque in controller object dictionary }
+    *
+    *  @param[in] { Target torque calculated in Main }
     */
   void sendTargetTorque(int16_t target_torque);
   /**
-    *  @brief  { Read actual velocity from each controller and return motor velocity struct }
+    *  @brief  { Read actual velocity from controller }
+    *
+    *  @return { Actual velocity of motor }
     */
   int32_t requestActualVelocity();
   /**
-    *  @brief  { Read actual torque from each controller and return motor velocity struct }
+    *  @brief  { Read actual torque from each controller }
+    *
+    *  @return { Actual torque of motor }
     */
   int16_t requestActualTorque();
   /**
-   * @brief To be called by CAN receive side. Controller processes received CAN
-   * message and updates its local data
+   *  @brief { To be called by CAN receive side. Controller processes received CAN
+   *          message and updates its local data }
    *
-   * @param message received CAN message to be processed
+   *  @param[in] { CAN message to be processed }
    */
   void processNewData(utils::io::can::Frame& message) override;
-  int getFailure();
-  int getId();
-
+  /**
+    *  @brief { Sets controller into quickStop mode. Use in case of critical failure }
+    */
+  void quickStop();
+  /*
+   *  @brief { Return failure flag of controller }
+   */
+  bool getFailure();
+  /*
+   *  @brief { Return ID of controller }
+   */
+  uint8_t getId();
 
  private:
   Logger&  log_;
   Can&     can_;
-  uint16_t node_id_;
+  uint8_t node_id_;
   uint16_t sdo_receive;
-  int failure_;
+  bool     failure_;
 };
 
 }}  // namespace hyped::motor_control
