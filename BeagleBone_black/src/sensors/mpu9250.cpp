@@ -122,7 +122,7 @@ void MPU9250::init()
   writeByte(ACCEL_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG2, 0x01);
   writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-
+  isSpi_ = true;
   // TODO(anyone) Check who am I
   // Will stay in while look as it is not connected properly
   while (!whoAmI());
@@ -181,7 +181,7 @@ bool MPU9250::whoAmI()
 
   // Who am I checks what address the sensor is at
   readByte(WHO_AM_I_MPU9250, &data);
-
+  log_.ERR("MPU9250", "who am I: %u", data);
   // TODO(anyone) need to find what it should be equal to
   if (data != WHO_AM_I_RESET_VALUE) {
      log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
