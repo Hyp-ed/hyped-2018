@@ -59,7 +59,7 @@ struct spi_ioc_transfer {
 #include "utils/concurrent/thread.hpp"
 
 // configure SPI
-#define SPI_CLK   4000000   // 4MHz
+#define SPI_CLK   1000000   // 4MHz
 #define SPI_MODE  3
 #define SPI_BITS  8         // each word is 1B
 #define SPI_MSBFIRST 0
