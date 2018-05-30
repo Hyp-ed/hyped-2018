@@ -27,24 +27,23 @@
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
 #include "utils/io/gpio.hpp"
+#include "utils/io/i2c.hpp"
+
 
 namespace hyped {
 
 using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
+using hyped::utils::io::I2C;
 
 namespace sensors {
 
 class MPU9250 : ImuInterface {
  public:
-  // TODO(Jack)
-  explicit MPU9250(Logger& log, uint32_t pin);
+  MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr);
   ~MPU9250();
-
   void getData(Imu* imu) override;
-
- private:
   /*
    *  @brief Calibrates the accelerometer
    */
@@ -62,22 +61,19 @@ class MPU9250 : ImuInterface {
    *
    *  @return 3Dvector Returns accelerometer readings
    */
-  double getAcclData();
+  void getAcclData();
   /*
    *  @brief Returns the most recent gyroscope readings
    *
    *  @return 3Dvector Returns gyroscope readings
    */
-  double getGyroData();
-  /*
-   *  @brief Performs the readings of gyroscope & accelerometer
-   */
-  void performSensorReadings();
+  void getGyroData();
+  // TODO(anyone) Will be moved but is for testing
+  int accel_data_[3];
+  int gyro_data_[3];
 
  private:
   static const uint64_t time_start;
-  // TODO(Jack)
-  // Call this function at startup
   void init();
   void select();
   void deSelect();
@@ -86,11 +82,12 @@ class MPU9250 : ImuInterface {
   void readByte(uint8_t read_reg, uint8_t *read_data);
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
   SPI& spi_ = SPI::getInstance();
+  I2C& i2c_ = I2C::getInstance();
   GPIO gpio_;
   double accl_scale_;
   double gyro_scale_;
-  double accel_data_[3];
-  double gyro_data_[3];
+  bool isSpi_;
+  uint8_t i2c_addr_;
   uint8_t cs_;
   Logger& log_;
 };

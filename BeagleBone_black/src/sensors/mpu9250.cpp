@@ -68,9 +68,11 @@ namespace sensors {
 
 const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
 
-MPU9250::MPU9250(Logger& log, uint32_t pin)
-    :gpio_(pin, kDirection, log),
-    log_(log)
+MPU9250::MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr)
+    :log_(log),
+    isSpi_(isSpi),
+    gpio_(pin, kDirection, log),
+    i2c_addr_(i2c_addr)
 {
   init();
   log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
@@ -78,11 +80,13 @@ MPU9250::MPU9250(Logger& log, uint32_t pin)
 
 void MPU9250::init()
 {
+  // TODO(anyone) disable i2c if neccessary
+
   // Set pin high
   gpio_.set();
 
   // TODO(anyone) Check who am I
-  // Wil stay in while look as it is not connected properly
+  // Will stay in while look as it is not connected properly
   while (!whoAmI());
 
   // Reset device -
@@ -122,30 +126,47 @@ MPU9250::~MPU9250()
 
 void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
-  select();
-  spi_.write(write_reg, &write_data, 1);
-  deSelect();
+  if (isSpi_) {
+    select();
+    spi_.write(write_reg, &write_data, 1);
+    deSelect();
+  } else {
+    uint8_t buffer[3];
+    buffer[0]=write_reg>>8;
+    buffer[1]=write_reg&0xFF;
+    buffer[2]=write_data;
+
+    i2c_.write(i2c_addr_, buffer, 3);
+  }
 }
 
 void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
-  select();
-  spi_.read(read_reg, read_data, 1);
-  deSelect();
+  if (isSpi_) {
+    select();
+    spi_.read(read_reg, read_data, 1);
+    deSelect();
+  } else {
+    uint8_t buffer[2];
+    buffer[0] = read_reg >> 8;
+    buffer[1] = read_reg & 0xFF;
+
+    i2c_.write(i2c_addr_, buffer, 2);
+    i2c_.read(i2c_addr_, read_data, 1);
+  }
 }
 
 void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 {
-  int i;
-  for (i = 0; i < length; i++) {
-    readByte(read_reg + i, &read_data[i]);
+  if (isSpi_) {
+    int i;
+    for (i = 0; i < length; i++) {
+      readByte(read_reg + i, &read_data[i]);
+    }
   }
 }
 
-void MPU9250::performSensorReadings()
-{/*EMPTY*/}
-
-double MPU9250::getAcclData()
+void MPU9250::getAcclData()
 {
   uint8_t response[6];
   int16_t bit_data;
@@ -155,13 +176,14 @@ double MPU9250::getAcclData()
   readBytes(ACCEL_XOUT_H, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    data = static_cast<double>(bit_data);
-    // TODO(anyone) need to look back at here
+    // TODO(anyone) change casting
+    data = static_cast<int>(bit_data);
+    // TODO(anyone) need to look back at here when scale added
     accel_data_[i] = data;
   }
 }
 
-double MPU9250::getGyroData()
+void MPU9250::getGyroData()
 {
   uint8_t response[6];
   int16_t bit_data;
@@ -171,8 +193,9 @@ double MPU9250::getGyroData()
   readBytes(GYRO_XOUT_H, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    data = static_cast<double>(bit_data);
-    // TODO(anyone) need to look back at here
+    // TODO(anyone) change casting
+    data = static_cast<int>(bit_data);
+    // TODO(anyone) need to look back at here when scale added
     gyro_data_[i] = data;
   }
 }
