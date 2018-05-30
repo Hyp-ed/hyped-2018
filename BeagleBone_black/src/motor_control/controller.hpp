@@ -47,9 +47,17 @@ class Controller : public CanProccesor {
     */
   void registerController();
   /**
-    *   @brief  { Applies configuration settings and sets controller to Operational }
+    *   @brief  { Applies configuration settings }
     */
-  void init();
+  void configure();
+  /**
+    *   @brief  { Checks for any warnings or errors, and enters operational state }
+    */
+  void enterOperational();
+  /**
+    *   @brief  { Checks controller status }
+    */
+  void checkStatus();
   /**
     *  @brief  { Set target velocity in controller object dictionary }
     *
@@ -97,9 +105,10 @@ class Controller : public CanProccesor {
  private:
   Logger&  log_;
   Can&     can_;
-  uint8_t node_id_;
-  uint16_t sdo_receive;
-  bool     failure_;
+  uint8_t  node_id_;
+  bool     critical_failure_;
+  bool     error_status_checked_;
+  bool     error_;
 };
 
 }}  // namespace hyped::motor_control
