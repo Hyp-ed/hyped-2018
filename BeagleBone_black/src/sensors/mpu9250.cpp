@@ -162,7 +162,20 @@ double MPU9250::getAcclData()
 }
 
 double MPU9250::getGyroData()
-{/*EMPTY*/}
+{
+  uint8_t response[6];
+  int16_t bit_data;
+  double data;
+  int i;
+
+  readBytes(GYRO_XOUT_H, response, 6);
+  for (i = 0; i < 3; i++) {
+    bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+    data = static_cast<double>(bit_data);
+    // TODO(anyone) need to look back at here
+    gyro_data_[i] = data;
+  }
+}
 
 void MPU9250::setGyroScale(int scale)
 {/*EMPTY*/}
