@@ -45,3 +45,4 @@ MAINS := \
   demo_differentiator \
   demo_integrator \
   demo_can \
+  demo_mpu9250 \
