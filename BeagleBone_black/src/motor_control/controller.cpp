@@ -30,6 +30,23 @@ namespace motor_control {
 
 using hyped::utils::io::can::Frame;
 
+/* Can Frames composed as follows:
+ * CAN ID:    COB-ID = Function + Node ID,
+ * Len   :    Size of object dictionary entry
+ * Byte 0:    Command
+ * Bytes 1-2: Object Dictionary Index
+ * Byte  3:   Object Dictionary Sub-Index
+ * Bytes 4-7: Data
+ */
+
+ /* Commands:
+  * 0x40: Read dictionary object
+  * 0x23: Write 4 bytes
+  * 0x27: Write 3 bytes
+  * 0x2B: Write 2 bytes
+  * 0x2F: Write 2 Bytes
+  */
+
 constexpr uint16_t sdo_receive = 0x600;
 
 // Status masks, used to mask the return result of a CAN message
@@ -53,14 +70,23 @@ constexpr uint16_t kMaxSlippageReached     = 0x2000;
 Controller::Controller(Logger& log, uint8_t id)
   : log_(log),
     can_(Can::getInstance()),
-    failure_(0)
+    failure_(false)
 {
   node_id_ = id << 1;
   sdo_receive = 0x600 + node_id_;
   init();
 }
 
+void Controller::registerController()
+{/*EMPTY*/}
+
 void Controller::init()
+{/*EMPTY*/}
+
+void Controller::sendTargetVelocity(int32_t target_velocity)
+{/*EMPTY*/}
+
+void Controller::sendTargetTorque(int16_t target_torque)
 {/*EMPTY*/}
 
 int32_t Controller::requestActualVelocity()
@@ -73,27 +99,18 @@ int16_t Controller::requestActualTorque()
   return 0;
 }
 
-void Controller::quickStop()
-{/*EMPTY*/}
-
-void Controller::registerController()
-{/*EMPTY*/}
-
-void Controller::sendTargetVelocity(int32_t target_velocity)
-{/*EMPTY*/}
-
-void Controller::sendTargetTorque(int16_t target_torque)
-{/*EMPTY*/}
-
 void Controller::processNewData(utils::io::can::Frame& message)
 {/*EMPTY*/}
 
-int Controller::getFailure()
+void Controller::quickStop()
+{/*EMPTY*/}
+
+bool Controller::getFailure()
 {
   return failure_;
 }
 
-int Controller::getId()
+uint8_t Controller::getId()
 {
   return node_id_;
 }

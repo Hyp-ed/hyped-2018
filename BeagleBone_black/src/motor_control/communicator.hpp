@@ -3,8 +3,8 @@
  * Organisation: HYPED
  * Date: 5/05/18
  * Description:
- * Sends 'broadcast' CAN messages to all four controllers and requests data from individual
- * controllers.
+ * Abstracts the four controller objects away from the Motor Control Main, updates the data structure
+ * and relays data to Main accordingly.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -27,10 +27,6 @@
 #include "data/data.hpp"
 
 namespace hyped {
-// Forward declarations
-namespace utils { class Logger; }
-namespace utils { namespace io { namespace can { struct Frame; } } }
-
 namespace motor_control {
 
 using utils::Logger;
@@ -50,49 +46,51 @@ struct MotorTorque {
   int16_t torque_4;
 };
 
-/* Can Frames composed as follows:
- * Bytes 0-1: 0-11:  COB-ID = Function + Node ID,
- *            12:    RTR bit,
- *            13-16: Packet length
- * Bytes 1-2: Object Dictionary Index
- * Byte  3:   Object Dictionary Sub-Index
- * Bytes 4-7: Data
- */
-
 class Communicator {
  public:
   explicit Communicator(Logger& log);
-  /**
-    *   @brief  Initialises the motor controllers
-    */
-  void initControllers();
   /**
     *   @brief  Registers the motor controllers to the can
     */
   void registerControllers();
   /**
-    *  @brief  { Send 'broadcast' CAN message containing target velocity to all four
-    *            controllers by setting Node-ID = 0 }
+    *   @brief  Applies configuration settings and sets controllers to Operational mode
+    */
+  void initControllers();
+  /**
+    *  @brief  { Set target velocity for each controller }
+    *
+    *  @param[in] { Target velocity calculated in Main }
     */
   void sendTargetVelocity(int32_t target_velocity);
   /**
-    *  @brief  { Send 'broadcast' CAN message containing target torque to all four
-    *            controllers by setting Node-ID = 0 }
+    *  @brief  { Set target torque for each controller }
+    *
+    *  @param[in] { Target torque calculated in Main }
     */
   void sendTargetTorque(int16_t target_torque);
   /**
-    *  @brief  { Read actual velocity from each controller and return motor velocity struct }
+    *  @brief  { Read actual velocity from each controller }
+    *
+    *  @return { Motor velocity struct }
     */
   MotorVelocity requestActualVelocity();
   /**
-    *  @brief  { Read actual torque from each controller and return motor velocity struct }
+    *  @brief  { Read actual torque from each controller }
+    *
+    *  @return { Motor torque struct }
     */
   MotorTorque requestActualTorque();
   /*
-   *  @brief stops all
+   *  @brief  { Sets all controllers into quickStop mode. Use in case of critical failure }
    */
   void quickStopAll();
-  int checkFailure();
+  /*
+   *  @brief { Checks the critical failure flag in each controller object }
+   *
+   *  @return { True if critial failure, False otherwise }
+   */
+  bool checkFailure();
 
  private:
   Logger& log_;
