@@ -34,7 +34,6 @@ using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
 
-
 namespace sensors {
 
 class MPU9250 : ImuInterface {
@@ -83,14 +82,15 @@ class MPU9250 : ImuInterface {
   void select();
   void deSelect();
   bool whoAmI();
-  // Write to a register
-  bool writeByte(uint8_t write_reg, uint8_t *write_data);
-  // Read from a register
-  bool readByte(uint8_t read_reg, uint8_t *read_data);
+  void writeByte(uint8_t write_reg, uint8_t write_data);
+  void readByte(uint8_t read_reg, uint8_t *read_data);
+  void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
   SPI& spi_ = SPI::getInstance();
   GPIO gpio_;
   double accl_scale_;
   double gyro_scale_;
+  double accel_data_[3];
+  double gyro_data_[3];
   uint8_t cs_;
   Logger& log_;
 };
