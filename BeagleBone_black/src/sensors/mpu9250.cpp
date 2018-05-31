@@ -387,7 +387,7 @@ void MPU9250::getAcclData()
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
     // TODO(anyone) change casting
-    data = static_cast<int>(bit_data);
+    data = bit_data;
     // TODO(anyone) need to look back at here when scale added
     accel_data_[i] = data/acc_divider_ - acc_bias_[i];
   }
@@ -404,7 +404,7 @@ void MPU9250::getGyroData()
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
     // TODO(anyone) change casting
-    data = static_cast<int>(bit_data);
+    data = bit_data;
     // TODO(anyone) need to look back at here when scale added
     gyro_data_[i] = data/gyro_divider_ - gyro_bias_[i];
   }
