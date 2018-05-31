@@ -97,6 +97,7 @@ constexpr uint8_t kReadFlag              = 0x80;
 namespace hyped {
 
 utils::io::gpio::Direction kDirection = utils::io::gpio::kOut;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
@@ -116,25 +117,26 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
-  sleep(100);   // 100ms
+  Thread::sleep(100);   // 100ms
 
-  writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  sleep(100);    // 100ms
   writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
-  writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
-  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
-  writeByte(MPU9250_REG_CONFIG, 0x01);
-  writeByte(GYRO_CONFIG, 0x00);
-  writeByte(ACCEL_CONFIG, 0x00);
-  writeByte(ACCEL_CONFIG2, 0x01);
+  Thread::sleep(100);    // 100ms
+  writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
+  Thread::sleep(1000);    // 100ms
 
-  isSpi_ = true;
+  // writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
+  // writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
+  // writeByte(MPU9250_REG_CONFIG, 0x01);
+  // writeByte(GYRO_CONFIG, 0x00);
+  // writeByte(ACCEL_CONFIG, 0x00);
+  // writeByte(ACCEL_CONFIG2, 0x01);
+
   // TODO(anyone) Check who am I
   // Will stay in while look as it is not connected properly
   while (!whoAmI());
 
   // Enable accelerometer and gyroscope
-  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
+  // writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
 }
 
 void MPU9250::calibrateSensors()
@@ -190,6 +192,7 @@ bool MPU9250::whoAmI()
   log_.ERR("MPU9250", "who am I: %u", data);
   // TODO(anyone) need to find what it should be equal to
   if (data != WHO_AM_I_RESET_VALUE) {
+    Thread::sleep(1000);
      log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
     return false;
   }
