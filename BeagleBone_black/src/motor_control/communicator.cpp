@@ -3,8 +3,8 @@
  * Organisation: HYPED
  * Date: 5/05/18
  * Description:
- * Sends 'broadcast' CAN messages to all four controllers and requests data from individual
- * controllers.
+ * Abstracts the four controller objects away from the Motor Control Main, updates the data structure
+ * and relays data to Main accordingly.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
