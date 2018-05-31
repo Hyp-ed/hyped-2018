@@ -24,17 +24,14 @@ namespace hyped {
 namespace communications {
 
 ReceiverThread::ReceiverThread(Communications* baseCommunicator)
-    : Thread()
-    , baseCommunicator_(baseCommunicator)
-    , data_(data::Data::getInstance())
+    : Thread(),
+      baseCommunicator_(baseCommunicator),
+      data_(data::Data::getInstance())
 { /* Empty */ }
 
 void ReceiverThread::run()
 {
   data::Communications cmn_data;
-
-  cmn_data.stopCommand = false;
-  cmn_data.killPowerCommand = false;
 
   while (1) {
     int command = baseCommunicator_->receiveMessage();
@@ -45,6 +42,12 @@ void ReceiverThread::run()
         break;
       case 2:
         cmn_data.killPowerCommand = true;
+        break;
+      case 3:
+        cmn_data.launchCommand = true;
+        break;
+      case 6:
+        cmn_data.lostConnection = true;
         break;
     }
 

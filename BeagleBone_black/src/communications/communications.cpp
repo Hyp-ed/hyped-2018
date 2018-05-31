@@ -18,14 +18,12 @@
  *    limitations under the License.
  */
 
+
 #include "communications.hpp"
 
-#include <sstream>
 #include <string>
 
 namespace hyped {
-
-using data::Communications;
 
 namespace communications {
 
@@ -62,79 +60,12 @@ Communications::~Communications()
   close(sockfd_);
 }
 
-int Communications::sendDistance(float distance)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << distance;
-
-  return sendData("CMD01" + ss.str() + "\n");
-}
-
-int Communications::sendVelocity(float speed)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << speed;
-
-  return sendData("CMD02" + ss.str() + "\n");
-}
-
-int Communications::sendAcceleration(float accel)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << accel;
-
-  return sendData("CMD03" + ss.str() + "\n");
-}
-
-int Communications::sendStripeCount(int stripes)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << stripes;
-
-  return sendData("CMD04" + ss.str() + "\n");
-}
-
-int Communications::sendRpmFl(float rpmfl)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmfl;
-
-  return sendData("CMD05" + ss.str() + "\n");
-}
-
-int Communications::sendRpmFr(float rpmfr)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmfr;
-
-  return sendData("CMD06" + ss.str() + "\n");
-}
-
-int Communications::sendRpmBl(float rpmbl)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmbl;
-
-  return sendData("CMD07" + ss.str() + "\n");
-}
-
-int Communications::sendRpmBr(float rpmbr)
-{
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmbr;
-
-  return sendData("CMD08" + ss.str() + "\n");
-}
-
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
-  memset(buffer, '\0', 256);
-  const char *data_ = message.c_str();  // cannot use string because strlen requies char*
-  n_ = write(sockfd_, data_, strlen(data_));
-  if (n_ < 0) log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
-  n_ = read(sockfd_, buffer, 255);
-  if (n_ < 0) log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+     memset(buffer, '\0', 256);
+     const char *data = message.c_str();
+     n_ = write(sockfd_, data, message.length());  // ‘_ssize_t write(int, const void*, size_t)’
 
   return atoi(buffer);
 }
@@ -142,27 +73,24 @@ int Communications::sendData(std::string message)
 int Communications::receiveMessage()
 {
   n_ = read(sockfd_, buffer, 255);
-  int command = atoi(buffer);
-//  data::Communications comms_data;
+  if (n_ < 0) {
+  log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    command_ = 6;
+  }
+  command_ = atoi(buffer);
 
-  switch (command) {
+  switch (command_) {
     case 1:
-      log_.INFO("COMN", "Received 1");  // STOP
-//      comms_data.stopCommand = true;
-//      data_.setCommunicationsData(comms_data);
+      log_.INFO("COMN", "Received 1 (STOP)");  // STOP
       break;
     case 2:
-      log_.INFO("COMN", "Received 2");  // KILL POWER
-//      comms_data.killPowerCommand = true;
-//      data_.setCommunicationsData(comms_data);
+      log_.INFO("COMN", "Received 2 (KILL POWER)");  // KILL POWER
       break;
     case 3:
-      log_.INFO("CMN", "Received 3");  // LAUCNH
-//      comms_data.launch = true;
-//      data_.setCommunicationsData(comms_data);
+      log_.INFO("CMN", "Received 3 (LAUNCH)");  // LAUNCH
       break;
   }
 
-  return command;
+  return command_;
 }
 }}  // namespace hyped::communcations

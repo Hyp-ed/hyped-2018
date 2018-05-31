@@ -20,6 +20,8 @@
 
 #include "communications/main.hpp"
 
+#include <sstream>
+
 namespace hyped {
 namespace communications {
 
@@ -31,6 +33,46 @@ Main::Main(uint8_t id, Logger& log)
   baseCommunicator_ = new Communications(log, ipAddress, portNo);
 }
 
+int Main::sendDistance(NavigationType distance)
+{
+  return baseCommunicator_->sendData("CMD01" + std::to_string(distance) + "\n");
+}
+
+int Main::sendVelocity(NavigationType speed)
+{
+  return baseCommunicator_->sendData("CMD02" + std::to_string(speed) + "\n");
+}
+
+int Main::sendAcceleration(NavigationType accel)
+{
+  return baseCommunicator_->sendData("CMD03" + std::to_string(accel) + "\n");
+}
+
+int Main::sendStripeCount(int stripes)
+{
+  return baseCommunicator_->sendData("CMD04" + std::to_string(stripes) + "\n");
+}
+
+int Main::sendRpmFl(float rpmfl)
+{
+  return baseCommunicator_->sendData("CMD05" + std::to_string(rpmfl) + "\n");
+}
+
+int Main::sendRpmFr(float rpmfr)
+{
+  return baseCommunicator_->sendData("CMD06" + std::to_string(rpmfr) + "\n");
+}
+
+int Main::sendRpmBl(float rpmbl)
+{
+  return baseCommunicator_->sendData("CMD07" + std::to_string(rpmbl) + "\n");
+}
+
+int Main::sendRpmBr(float rpmbr)
+{
+  return baseCommunicator_->sendData("CMD08" + std::to_string(rpmbr) + "\n");
+}
+
 void Main::run()
 {
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
@@ -40,14 +82,14 @@ void Main::run()
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
     sns_ = data_.getSensorsData();
-    baseCommunicator_->sendDistance(nav_.distance);
-    baseCommunicator_->sendVelocity(nav_.velocity);
-    baseCommunicator_->sendAcceleration(nav_.acceleration);
-    baseCommunicator_->sendStripeCount(sns_.stripe_count.value);
-    baseCommunicator_->sendRpmFl(mtr_.motor_velocity_1);
-    baseCommunicator_->sendRpmFr(mtr_.motor_velocity_2);
-    baseCommunicator_->sendRpmBl(mtr_.motor_velocity_3);
-    baseCommunicator_->sendRpmBr(mtr_.motor_velocity_4);
+    sendDistance(nav_.distance);
+    sendVelocity(nav_.velocity);
+    sendAcceleration(nav_.acceleration);
+    sendStripeCount(sns_.stripe_count.value);
+    sendRpmFl(mtr_.motor_velocity_1);
+    sendRpmFr(mtr_.motor_velocity_2);
+    sendRpmBl(mtr_.motor_velocity_3);
+    sendRpmBr(mtr_.motor_velocity_4);
   }
 
   receiverThread->join();

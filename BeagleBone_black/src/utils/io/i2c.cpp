@@ -19,30 +19,88 @@
  */
 #include "utils/io/i2c.hpp"
 
-#define I2C_ID 17
+// #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+
+#ifndef WIN
+// #include <linux/types.h>
+#include <linux/i2c-dev.h>
+#else
+#define I2C_SLAVE 0x0703
+#endif
+
+
+
+#include "utils/logger.hpp"
+
+#include "utils/system.hpp"
+
+// #define I2C_ID 17
 
 namespace hyped {
 namespace utils {
 namespace io {
 
-Logger i2clog(true, 1);
-
-I2C::I2C() : concurrent::Thread(I2C_ID, i2clog)
+namespace i2c {
+inline int readHelper(int fd, uint8_t* buf, uint16_t len)
 {
-  i2clog.INFO("I2C", "Constructing");
-  return;
+  return read(fd, buf, len);
+}
+inline int writeHelper(int fd, uint8_t* buf, uint16_t len)
+{
+  return write(fd, buf, len);
+}
+}   // namespace i2c
+
+
+I2C& I2C::getInstance()
+{
+  static I2C i2c(System::getLogger());
+  return i2c;
+}
+
+I2C::I2C(Logger& log)
+    : log_(log),
+      fd_(0),
+      sensor_addr_(0)
+{
+  char device_name[] = "/dev/i2c-2";
+  fd_ = open(device_name, O_RDWR, 0);
+  if (fd_ < 0) log_.ERR("I2C", "Could not open i2c device");
 }
 
 I2C::~I2C()
 {
-  i2clog.INFO("I2C", "Destructing");
-  return;
+  if (fd_) close(fd_);
 }
 
-void I2C::run()
+void I2C::setSensorAddress(uint32_t addr)
 {
-  i2clog.INFO("I2C", "Running");
-  return;
+  if (fd_ < 0) return;
+
+  sensor_addr_ = addr;
+  int ret = ioctl(fd_, I2C_SLAVE, addr);
+  if (ret < 0) log_.ERR("I2C", "Could not set sensor address");
+}
+
+void I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
+{
+  if (sensor_addr_ != addr) setSensorAddress(addr);
+
+  int ret = i2c::readHelper(fd_, rx, len);
+  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected",
+                           ret, len);
+}
+
+void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
+{
+  if (sensor_addr_ != addr) setSensorAddress(addr);
+
+  int ret = i2c::writeHelper(fd_, tx, len);
+  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected",
+                           ret, len);
 }
 
 }}}   // namespace hyped::utils::io

@@ -2,7 +2,7 @@
  * Author: Jack Horsburgh
  * Organisation: HYPED
  * Date: 18/04/18
- * Description: Main file for Vl6180
+ * Description: Main file for VL6180
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,32 +21,49 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 
-#include "utils/concurrent/thread.hpp"
+
 #include "utils/logger.hpp"
+#include "utils/io/i2c.hpp"
 
 namespace hyped {
 
-using utils::concurrent::Thread;
+using utils::io::I2C;
 using utils::Logger;
 
 namespace sensors {
 
-class Vl6180: public Thread {
+class VL6180 {
  public:
-  Vl6180(uint8_t id, Logger& log);
-  ~Vl6180();
+  VL6180(uint8_t i2c_addr, Logger& log);
+  ~VL6180();
   /**
     *  @brief  Returns the distance from the nearest object the sensor is facing
     *
     *  @return double Returns the distance to the nearest object
     */
   double getDistance();
+  /**
+    *  @brief  Sets the the ranging mode to continuous
+    */
+  void setContinuousRangingMode();
+  /**
+    *  @brief  Sets the the ranging mode to single shot
+    */
+  void setSingleShotMode();
 
  private:
- /**
-   *  @brief  Sets the the ranging mode to continuous
-   */
-  void setContinuousRangingMode();
+  /**
+    *  @brief called from getDistance() for single shot ranging
+    *
+    *  @return double Returns the distance to the nearest object
+    */
+  double singleRangeDistance();
+  /**
+    *  @brief called from getDistance() for continuous ranging
+    *
+    *  @return double Returns the distance to the nearest object
+    */
+  double continuousRangeDistance();
   /**
     *  @brief  Loops until the device is out of reset
     *
@@ -64,7 +81,7 @@ class Vl6180: public Thread {
   /**
     *  @brief  Sets the maximum convergence time in ms
     */
-  void setMaxCovergenceTime(uint8_t time);
+  void setMaxConvergenceTime(uint8_t time);
   /**
     *  @brief  Wait for sensor to be ready before a new ranging command
     *            is issued
@@ -84,8 +101,11 @@ class Vl6180: public Thread {
     *  @return int Returns 0 if successful
     */
   int writeByte(uint16_t reg_add, char data);
+  Logger& log_;
   bool on_;
   bool continuous_mode_;
+  uint8_t i2c_addr_;
+  I2C& i2c_;
 };
 
 }}  // namespace hyped::sensors

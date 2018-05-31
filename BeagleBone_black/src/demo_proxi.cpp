@@ -1,10 +1,8 @@
-
 /*
- * Authors : M. Kristien, E. van Woerkom
+ * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 3. February 2018
- * Description:
- * This is an example of how a main function using I2C would look like
+ * Date: 16/05/18
+ * Description: Demo for VL6180 sensor
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,24 +18,40 @@
  *    limitations under the License.
  */
 
-#include "utils/io/i2c.hpp"
+
+#include "sensors/vl6180.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include "utils/concurrent/thread.hpp"
 
-using hyped::utils::io::I2C;
+using hyped::sensors::VL6180;
 using hyped::utils::Logger;
+using hyped::utils::concurrent::Thread;
 
 Logger log(true, 1);
 
+// Not ready yet!
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-	I2C& i2c = I2C::getInstance();
-	uint8_t tx[] = {0, 0};
-	uint8_t rx[8] = {};
+  VL6180 vl6180 = VL6180(0x29, log);
 
-	i2c.write(0x29, tx, 2);
-	i2c.read(0x29, rx, 8);
-	log.INFO("MAIN", "read %x %x %x %x", rx[0], rx[1], rx[2], rx[3]);
-	return 0;
+  log.INFO("TEST-vl6180", "VL6180 instance successfully created");
+
+  vl6180.setContinuousRangingMode();
+  for (int i=0; i< 500; i++) {
+    double distance = vl6180.getDistance();
+    log.INFO("TEST-vl6180", "Continuous Distance: %f", distance);
+    Thread::sleep(20);
+  }
+
+  vl6180.setSingleShotMode();
+  for (int i=0; i< 100; i++) {
+    double distance = vl6180.getDistance();
+    log.INFO("TEST-vl6180", "Single-shot Distance: %f", distance);
+    Thread::sleep(7);
+  }
+
+
+ 	return 0;
 }
