@@ -25,11 +25,9 @@
 #include "utils/logger.hpp"
 #include "utils/io/i2c.hpp"
 
-constexpr uint8_t DEFAULT_I2C_SLAVE_ADDR = 0x29;
-
 namespace hyped {
 
-using hyped::utils::io::I2C;
+using utils::io::I2C;
 using utils::Logger;
 
 namespace sensors {
@@ -106,7 +104,7 @@ class VL6180 {
   Logger& log_;
   bool on_;
   bool continuous_mode_;
-  uint8_t i2c_addr_ = DEFAULT_I2C_SLAVE_ADDR;
+  uint8_t i2c_addr_;
   I2C& i2c_ = I2C::getInstance();
 };
 
