@@ -17,10 +17,12 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+#include "sensors/mpu9250.hpp"
+
 #include <chrono>
 #include <cstdint>
+#include <unistd.h>
 
-#include "sensors/mpu9250.hpp"
 #include "utils/logger.hpp"
 #include "utils/timer.hpp"
 
@@ -113,7 +115,10 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
+  usleep(10000);   // wait 1/100 of a second
 
+  writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
+  usleep(10000);  // wait 1/100 of a second
   writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
   writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
   writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
@@ -121,7 +126,7 @@ void MPU9250::init()
   writeByte(GYRO_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG2, 0x01);
-  writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
+
   isSpi_ = true;
   // TODO(anyone) Check who am I
   // Will stay in while look as it is not connected properly
