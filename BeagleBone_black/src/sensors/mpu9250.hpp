@@ -45,10 +45,6 @@ class MPU9250 : ImuInterface {
   ~MPU9250();
   void getData(Imu* imu) override;
   /*
-   *  @brief Calibrates the accelerometer
-   */
-  void calibrateAccl();
-  /*
    *  @brief Sets the range for the gyroscope
    */
   void setGyroScale(int scale);
@@ -92,9 +88,9 @@ class MPU9250 : ImuInterface {
   Logger& log_;
 
   double acc_divider_;
-  double acc_bias_[3];
+  int32_t acc_bias_[3];
   double gyro_divider_;
-  double gyro_bias_[3];
+  int32_t gyro_bias_[3];
 };
 
 }}  // namespace hyped::sensors
