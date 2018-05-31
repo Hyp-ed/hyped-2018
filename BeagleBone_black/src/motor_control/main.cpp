@@ -38,7 +38,9 @@ Main::Main(uint8_t id, Logger& log)
       motors_set_up_(false),
       run_(true),
       all_motors_stopped_(false)
-{}
+{
+  this->setupMotors();
+}
 
 void Main::run()
 {
@@ -46,7 +48,7 @@ void Main::run()
   while (run_) {
     state_ = data_.getStateMachineData();
     if (state_.current_state == data::State::kIdle) {
-      this->setupMotors();
+      // this->setupMotors();
     } else if (state_.current_state == data::State::kAccelerating) {
       this->accelerateMotors();
     } else if (state_.current_state == data::State::kDecelerating) {
@@ -63,6 +65,7 @@ void Main::setupMotors()
 {
   if (!motors_set_up_) {
     communicator_.registerControllers();
+    communicator_.configureControllers();
     data::Motors motor_data_ = { data::MotorState::kMotorIdle, 0, 0, 0, 0, 0, 0, 0, 0 };
     data_.setMotorData(motor_data_);
     motors_set_up_ = true;
