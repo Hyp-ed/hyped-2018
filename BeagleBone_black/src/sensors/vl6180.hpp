@@ -105,7 +105,7 @@ class VL6180 {
   bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_;
-  I2C& i2c_ = I2C::getInstance();
+  I2C& i2c_;
 };
 
 }}  // namespace hyped::sensors
