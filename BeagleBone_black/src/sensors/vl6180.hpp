@@ -83,7 +83,7 @@ class VL6180 {
   /**
     *  @brief  Sets the maximum convergence time in ms
     */
-  void setMaxCovergenceTime(uint8_t time);
+  void setMaxConvergenceTime(uint8_t time);
   /**
     *  @brief  Wait for sensor to be ready before a new ranging command
     *            is issued
