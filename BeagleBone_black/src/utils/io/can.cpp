@@ -66,7 +66,9 @@ namespace bms = sensors::bms;
 namespace utils {
 namespace io {
 
-uint32_t SDO_TRANSMIT = 0x580;
+uint32_t SDO_TRANSMIT  = 0x580;
+uint32_t EMGY_TRANSMIT = 0x80;
+uint32_t NMT_TRANSMIT  = 0x700;
 
 Can::Can()
     : concurrent::Thread(0)
@@ -172,7 +174,15 @@ void Can::processNewData(can::Frame* message)
   uint32_t  id  = message->id;
   CanProccesor* owner = 0;
   for (auto const& controller : controller_array_) {
+    if ((EMGY_TRANSMIT + controller->getId()) == id) {
+      owner = controller;
+      break;
+    }
     if ((SDO_TRANSMIT + controller->getId()) == id) {
+      owner = controller;
+      break;
+    }
+    if ((NMT_TRANSMIT + controller->getId()) == id) {
       owner = controller;
       break;
     }

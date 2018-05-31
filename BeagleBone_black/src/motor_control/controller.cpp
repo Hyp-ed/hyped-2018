@@ -46,13 +46,21 @@ using hyped::utils::io::can::Frame;
  * Byte 2: Target Node
  */
 
+// Types of CANopen messages, these are used for CAN ID's
+constexpr uint32_t kEMGY_TRANSMIT          = 0x80;
 constexpr uint32_t kSDO_RECEIVE            = 0x600;
+constexpr uint32_t kSDO_TRANSMIT           = 0x580;
+constexpr uint32_t kNMT_RECEIVE            = 0x000;
+constexpr uint32_t kNMT_TRANSMIT           = 0x700;
+
+// Function codes for sending messages
 constexpr uint8_t  kREAD_OBJECT            = 0x40;
 constexpr uint8_t  kWRITE_1_BYTE           = 0x2F;
 constexpr uint8_t  kWRITE_2_BYTES          = 0x2B;
 constexpr uint8_t  kWRITE_3_BYTES          = 0x27;
 constexpr uint8_t  kWRITE_4_BYTES          = 0x23;
-constexpr uint32_t kNMT_RECEIVE            = 0x000;
+
+// Network management commands
 constexpr uint8_t  kNMT_OPERATIONAL        = 0x01;
 constexpr uint8_t  kNMT_STOP               = 0x02;
 constexpr uint8_t  kNMT_PREOPERATIONAL     = 0x80;
@@ -296,7 +304,7 @@ void Controller::enterOperational()
     // Check if controller is in Operational state
     this->checkStatus();
   } else {
-    log_.ERR("MOTOR", "Controller : ERROR");  // TODO(Anyone): Process error SDOMessage
+    log_.ERR("MOTOR", "Controller : ERROR");  // TODO(Anyone): Process error message
   }
 }
 
@@ -390,7 +398,27 @@ int16_t Controller::getTorque()
   return actual_torque_;
 }
 
-void Controller::processNewData(utils::io::can::Frame& SDOMessage)
+void Controller::processNewData(utils::io::can::Frame& message)
+{
+  uint32_t id = message.id;
+  if (id == kEMGY_TRANSMIT + node_id_) {
+    processEmergencyMessage(message);
+  } else if (id == kSDO_TRANSMIT + node_id_) {
+    processSDOMessage(message);
+  } else if (id == kNMT_TRANSMIT + node_id_) {
+    processNMTMessage(message);
+  } else {
+    log_.ERR("MOTOR", "CAN message not recognised");
+  }
+}
+
+void Controller::processEmergencyMessage(utils::io::can::Frame& SDOMessage)
+{/*EMPTY*/}
+
+void Controller::processSDOMessage(utils::io::can::Frame& SDOMessage)
+{/*EMPTY*/}
+
+void Controller::processNMTMessage(utils::io::can::Frame& SDOMessage)
 {/*EMPTY*/}
 
 void Controller::quickStop()
