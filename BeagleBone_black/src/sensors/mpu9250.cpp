@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <unistd.h>
 
+#include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 #include "utils/timer.hpp"
 
@@ -115,10 +116,10 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
-  usleep(10000);   // wait 1/100 of a second
+  sleep(100);   // 100ms
 
   writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  usleep(10000);  // wait 1/100 of a second
+  sleep(100);    // 100ms
   writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
   writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
   writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
