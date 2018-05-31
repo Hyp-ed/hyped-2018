@@ -93,7 +93,9 @@ Controller::Controller(Logger& log, uint8_t id)
     error_status_checked_(true),
     error_(false),
     actual_velocity_(0),
-    actual_torque_(0)
+    actual_torque_(0),
+    configure_count_(0),
+    configured_(false)
 {
   SDOMessage.id       = kSDO_RECEIVE + node_id_;
   SDOMessage.extended = false;
@@ -209,6 +211,10 @@ void Controller::configure()
 
   can_.send(NMTMessage);
   log_.DBG1("MOTOR", "Controller : Reset node");
+
+  if (configure_count_ == 7) {
+    configured_ = true;
+  }
 }
 
 void Controller::enterOperational()
@@ -253,8 +259,8 @@ void Controller::enterOperational()
     SDOMessage.data[0]   = kWRITE_2_BYTES;
     SDOMessage.data[1]   = 0x40;
     SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x06;
-    SDOMessage.data[4]   = 0x00;
+    SDOMessage.data[3]   = 0x00;
+    SDOMessage.data[4]   = 0x06;
     SDOMessage.data[5]   = 0x00;
     SDOMessage.data[6]   = 0x00;
     SDOMessage.data[7]   = 0x00;
@@ -266,8 +272,8 @@ void Controller::enterOperational()
     SDOMessage.data[0]   = kWRITE_2_BYTES;
     SDOMessage.data[1]   = 0x40;
     SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x07;
-    SDOMessage.data[4]   = 0x00;
+    SDOMessage.data[3]   = 0x00;
+    SDOMessage.data[4]   = 0x07;
     SDOMessage.data[5]   = 0x00;
     SDOMessage.data[6]   = 0x00;
     SDOMessage.data[7]   = 0x00;
@@ -279,8 +285,8 @@ void Controller::enterOperational()
     SDOMessage.data[0]   = kWRITE_2_BYTES;
     SDOMessage.data[1]   = 0x40;
     SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x0F;
-    SDOMessage.data[4]   = 0x00;
+    SDOMessage.data[3]   = 0x00;
+    SDOMessage.data[4]   = 0x0F;
     SDOMessage.data[5]   = 0x00;
     SDOMessage.data[6]   = 0x00;
     SDOMessage.data[7]   = 0x00;
@@ -292,8 +298,8 @@ void Controller::enterOperational()
     SDOMessage.data[0]   = kWRITE_2_BYTES;
     SDOMessage.data[1]   = 0x40;
     SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x03;
-    SDOMessage.data[4]   = 0x00;
+    SDOMessage.data[3]   = 0x00;
+    SDOMessage.data[4]   = 0x03;
     SDOMessage.data[5]   = 0x00;
     SDOMessage.data[6]   = 0x00;
     SDOMessage.data[7]   = 0x00;
@@ -304,7 +310,7 @@ void Controller::enterOperational()
     // Check if controller is in Operational state
     this->checkStatus();
   } else {
-    log_.ERR("MOTOR", "Controller : ERROR");  // TODO(Anyone): Process error message
+    log_.ERR("MOTOR", "Controller : ERROR");  // TODO(Anyone): Handle error
   }
 }
 
@@ -417,26 +423,57 @@ void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 
 void Controller::processSDOMessage(utils::io::can::Frame& message)
 {
+  // Process configuration messages
   if (message.data[1] == 0x33 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor poles configured");
   }
   if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x01) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Feedback type configured");
   }
   if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x08) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor phase offset configured");
   }
   if (message.data[1] == 0x54 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Over voltage limit configured");
   }
   if (message.data[1] == 0x55 && message.data[2] == 0x20 && message.data[3] == 0x03) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Under voltage limit configured");
   }
   if (message.data[1] == 0x75 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor rated current configured");
   }
   if (message.data[1] == 0x76 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor rated torque configured");
+  }
+
+  // Process warning and error messages
+  if (message.data[1] == 0x27 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+    if (message.data[4] + message.data[5] != 0) {
+      error_ = true;
+    }
+  }
+  if (message.data[1] == 0x3F && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    if (message.data[4] + message.data[5] != 0) {
+      error_ = true;
+    }
+    error_status_checked_ = true;
+  }
+
+  // Controlword updates
+  if (message.data[1] == 0x40 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    log_.DBG1("MOTOR", "Controller : Control Word updated");
+  }
+
+  // Process Statusword checks
+  if (message.data[1] == 0x41 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    // TODO(Anyone) Process status word
   }
 }
 
@@ -454,6 +491,11 @@ bool Controller::getFailure()
 uint8_t Controller::getId()
 {
   return node_id_;
+}
+
+bool Controller::getConfiguartionStatus()
+{
+  return configured_;
 }
 
 }}  // namespace hyped::motor_control
