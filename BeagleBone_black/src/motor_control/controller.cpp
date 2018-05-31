@@ -67,7 +67,7 @@ constexpr uint8_t  kNMT_PREOPERATIONAL     = 0x80;
 constexpr uint8_t  kNMT_RESET_NODE         = 0x81;
 constexpr uint8_t  kNMT_RESET_COMMS        = 0x82;
 
-// Status masks, used to mask the return result of a CAN SDOMessage
+// Status masks, used to mask the return result of a status check
 // pg51 CANOpen_Motion_Control.pdf
 constexpr uint16_t kNotReadyToSwitch       = 0x0000;
 constexpr uint16_t kSwitchOnDisabled       = 0x0040;
@@ -412,13 +412,35 @@ void Controller::processNewData(utils::io::can::Frame& message)
   }
 }
 
-void Controller::processEmergencyMessage(utils::io::can::Frame& SDOMessage)
+void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 {/*EMPTY*/}
 
-void Controller::processSDOMessage(utils::io::can::Frame& SDOMessage)
-{/*EMPTY*/}
+void Controller::processSDOMessage(utils::io::can::Frame& message)
+{
+  if (message.data[1] == 0x33 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+    log_.DBG1("MOTOR", "Controller : Motor poles configured");
+  }
+  if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x01) {
+    log_.DBG1("MOTOR", "Controller : Feedback type configured");
+  }
+  if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x08) {
+    log_.DBG1("MOTOR", "Controller : Motor phase offset configured");
+  }
+  if (message.data[1] == 0x54 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+    log_.DBG1("MOTOR", "Controller : Over voltage limit configured");
+  }
+  if (message.data[1] == 0x55 && message.data[2] == 0x20 && message.data[3] == 0x03) {
+    log_.DBG1("MOTOR", "Controller : Under voltage limit configured");
+  }
+  if (message.data[1] == 0x75 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    log_.DBG1("MOTOR", "Controller : Motor rated current configured");
+  }
+  if (message.data[1] == 0x76 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+    log_.DBG1("MOTOR", "Controller : Motor rated torque configured");
+  }
+}
 
-void Controller::processNMTMessage(utils::io::can::Frame& SDOMessage)
+void Controller::processNMTMessage(utils::io::can::Frame& message)
 {/*EMPTY*/}
 
 void Controller::quickStop()
