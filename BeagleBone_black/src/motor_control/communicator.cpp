@@ -53,7 +53,15 @@ void Communicator::configureControllers()
   controller2_.configure();
   controller3_.configure();
   controller4_.configure();
-  log_.INFO("MOTOR", "Motors are configured for launch");
+  if (controller1_.getConfiguartionStatus() == true
+      && controller2_.getConfiguartionStatus() == true
+      && controller3_.getConfiguartionStatus() == true
+      && controller1_.getConfiguartionStatus() == true)
+      {
+        log_.INFO("MOTOR", "Motors are configured for launch");
+      } else {
+        // Configuration error. TODO(Anyone) Update data structure with error
+      }
 }
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)

@@ -123,6 +123,10 @@ class Controller : public CanProccesor {
    *  @brief { Return ID of controller }
    */
   uint8_t getId();
+  /*
+   * @brief { Returns true if controller is configured }
+   */
+  bool getConfiguartionStatus();
 
  private:
   Logger&  log_;
@@ -133,6 +137,8 @@ class Controller : public CanProccesor {
   bool     error_;
   int32_t  actual_velocity_;
   int16_t  actual_torque_;
+  int16_t  configure_count_;
+  bool     configured_;
   utils::io::can::Frame SDOMessage;
   utils::io::can::Frame NMTMessage;
 };
