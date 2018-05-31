@@ -19,6 +19,7 @@ using namespace std::chrono;
 #define BUSY_NUM  0
 #define COUNTS    100000
 #define BYTES     7
+#define SPI_WRITE_MASK 0x80
 
 int main (int argc, char* argv[]) {
   System::parseArgs(argc, argv);
@@ -36,7 +37,7 @@ int main (int argc, char* argv[]) {
   uint8_t tx[BYTES] = {};
   uint8_t rx[BYTES] = {};
   // reset clock to time 0
-  spi.write(0, tx, BYTES);
+  spi.write(0 | SPI_WRITE_MASK, tx, BYTES);
   Timer t;
   t.start();
   uint32_t count = 0;
