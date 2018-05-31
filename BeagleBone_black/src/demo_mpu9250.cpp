@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
   Logger log(true, 1);
-  MPU9250 mpu9250 = MPU9250(log, 0x69, true, 0x69);
+  MPU9250 mpu9250 = MPU9250(log, 69, true, 0);
 
   log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
 
