@@ -94,6 +94,24 @@ class Controller : public CanProccesor {
    */
   void processNewData(utils::io::can::Frame& message) override;
   /**
+   *  @brief { Called by processNewData if Emergency message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processEmergencyMessage(utils::io::can::Frame& message);
+  /**
+   *  @brief { Called by processNewData if SDO message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processSDOMessage(utils::io::can::Frame& message);
+  /**
+   *  @brief { Called by processNewData if NMT message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processNMTMessage(utils::io::can::Frame& message);
+  /**
     *  @brief { Sets controller into quickStop mode. Use in case of critical failure }
     */
   void quickStop();
