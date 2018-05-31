@@ -70,13 +70,13 @@ GPIO::GPIO(uint32_t pin, gpio::Direction direction)
 { /* EMPTY, delegate to the other constructor */ }
 
 GPIO::GPIO(uint32_t pin, gpio::Direction direction, Logger& log)
-    : pin_(pin)
-    , direction_(direction)
-    , log_(log)
-    , set_(0)
-    , clear_(0)
-    , data_(0)
-    , fd_(0)
+    : pin_(pin),
+      direction_(direction),
+      log_(log),
+      set_(0),
+      clear_(0),
+      data_(0),
+      fd_(0)
 {
   if (!initialised_)  initialise();
 

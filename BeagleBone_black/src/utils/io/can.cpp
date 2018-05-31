@@ -122,9 +122,8 @@ int Can::send(const can::Frame& frame)
     }
   }
 
-  log_.DBG1("CAN", "message with id %d sent, extended:%d"
-    , frame.id
-    , frame.extended);
+  log_.DBG1("CAN", "message with id %d sent, extended:%d",
+      frame.id, frame.extended);
   return 1;
 }
 
@@ -160,10 +159,8 @@ int Can::receive(can::Frame* frame)
   for (int i = 0; i < frame->len; i++) {
     frame->data[i] = raw_data.data[i];
   }
-  log_.DBG1("CAN", "received %u %u, extended %d"
-    , raw_data.can_id
-    , frame->id
-    , frame->extended);
+  log_.DBG1("CAN", "received %u %u, extended %d",
+      raw_data.can_id, frame->id, frame->extended);
   return 1;
 }
 

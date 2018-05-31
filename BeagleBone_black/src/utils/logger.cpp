@@ -51,10 +51,8 @@ void logHead(FILE* file, const char* title, const char* module)
   using namespace std::chrono;
   std::time_t t = std::time(nullptr);
   tm* tt = localtime(&t);
-  fprintf(file, "%02d:%02d:%02d"
-    , tt->tm_hour
-    , tt->tm_min
-    , tt->tm_sec);
+  fprintf(file, "%02d:%02d:%02d",
+      tt->tm_hour, tt->tm_min, tt->tm_sec);
 
   static const bool print_micro = true;
   if (print_micro) {
@@ -71,8 +69,8 @@ void logHead(FILE* file, const char* title, const char* module)
 }
 
 Logger::Logger(bool verbose, int8_t debug)
-    : verbose_(verbose)
-    , debug_(debug)
+    : verbose_(verbose),
+      debug_(debug)
 { /* EMPTY */ }
 
 void Logger::ERR(const char* module, const char* format, ...)

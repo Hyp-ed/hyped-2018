@@ -57,18 +57,18 @@ System::~System()
 }
 
 System::System(int argc, char* argv[])
-    : verbose(false)
-    , verbose_motor(DEFAULT_VERBOSE)
-    , verbose_nav(DEFAULT_VERBOSE)
-    , verbose_sensor(DEFAULT_VERBOSE)
-    , verbose_state(DEFAULT_VERBOSE)
-    , verbose_cmn(DEFAULT_VERBOSE)
-    , debug(DEFAULT_DEBUG)
-    , debug_motor(DEFAULT_DEBUG)
-    , debug_nav(DEFAULT_DEBUG)
-    , debug_sensor(DEFAULT_DEBUG)
-    , debug_state(DEFAULT_DEBUG)
-    , debug_cmn(DEFAULT_DEBUG)
+    : verbose(false),
+      verbose_motor(DEFAULT_VERBOSE),
+      verbose_nav(DEFAULT_VERBOSE),
+      verbose_sensor(DEFAULT_VERBOSE),
+      verbose_state(DEFAULT_VERBOSE),
+      verbose_cmn(DEFAULT_VERBOSE),
+      debug(DEFAULT_DEBUG),
+      debug_motor(DEFAULT_DEBUG),
+      debug_nav(DEFAULT_DEBUG),
+      debug_sensor(DEFAULT_DEBUG),
+      debug_state(DEFAULT_DEBUG),
+      debug_cmn(DEFAULT_DEBUG)
 {
   int c;
   int option_index = 0;

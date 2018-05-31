@@ -24,9 +24,9 @@ namespace hyped {
 namespace communications {
 
 ReceiverThread::ReceiverThread(Communications* baseCommunicator)
-    : Thread()
-    , baseCommunicator_(baseCommunicator)
-    , data_(data::Data::getInstance())
+    : Thread(),
+      baseCommunicator_(baseCommunicator),
+      data_(data::Data::getInstance())
 { /* Empty */ }
 
 void ReceiverThread::run()

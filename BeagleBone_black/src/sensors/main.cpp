@@ -47,14 +47,14 @@ void Main::run()
       imu.acc.timestamp = time;
     }
 
-    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d"
-      , bms_data->voltage[0]
-      , bms_data->voltage[1]
-      , bms_data->voltage[2]
-      , bms_data->voltage[3]
-      , bms_data->voltage[4]
-      , bms_data->voltage[5]
-      , bms_data->voltage[6]);
+    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d",
+        bms_data->voltage[0],
+        bms_data->voltage[1],
+        bms_data->voltage[2],
+        bms_data->voltage[3],
+        bms_data->voltage[4],
+        bms_data->voltage[5],
+        bms_data->voltage[6]);
     data.setSensorsData(sensors);
     sleep(1000);
     time++;
