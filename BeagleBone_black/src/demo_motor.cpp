@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
   motor->start();
 
   hypedMachine->handleEvent(state_machine::Event::kOnStart);
-  Thread::sleep(500);
+  Thread::sleep(3000);
   hypedMachine->handleEvent(state_machine::Event::kMaxDistanceReached);
   Thread::sleep(250);
   hypedMachine->handleEvent(state_machine::Event::kCriticalFailure);

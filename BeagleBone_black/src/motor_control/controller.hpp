@@ -71,17 +71,21 @@ class Controller : public CanProccesor {
     */
   void sendTargetTorque(int16_t target_torque);
   /**
-    *  @brief  { Read actual velocity from controller }
-    *
+    *  @brief  { Send velocity sensor request to controller }
+    */
+  void updateActualVelocity();
+  /**
+    *  @brief  { Send torque sensor request to controller }
+    */
+  void updateActualTorque();
+  /**
     *  @return { Actual velocity of motor }
     */
-  int32_t requestActualVelocity();
+  int32_t getVelocity();
   /**
-    *  @brief  { Read actual torque from each controller }
-    *
     *  @return { Actual torque of motor }
     */
-  int16_t requestActualTorque();
+  int16_t getTorque();
   /**
    *  @brief { To be called by CAN receive side. Controller processes received CAN
    *          message and updates its local data }
@@ -109,6 +113,10 @@ class Controller : public CanProccesor {
   bool     critical_failure_;
   bool     error_status_checked_;
   bool     error_;
+  int32_t  actual_velocity_;
+  int16_t  actual_torque_;
+  utils::io::can::Frame SDOMessage;
+  utils::io::can::Frame NMTMessage;
 };
 
 }}  // namespace hyped::motor_control

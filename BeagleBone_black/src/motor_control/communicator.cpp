@@ -44,6 +44,7 @@ void Communicator::registerControllers()
   controller2_.registerController();
   controller3_.registerController();
   controller4_.registerController();
+  log_.INFO("MOTOR", "Controllers registered on CAN bus");
 }
 
 void Communicator::configureControllers()
@@ -52,6 +53,7 @@ void Communicator::configureControllers()
   controller2_.configure();
   controller3_.configure();
   controller4_.configure();
+  log_.INFO("MOTOR", "Motors are configured for launch");
 }
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)
@@ -74,10 +76,14 @@ void Communicator::sendTargetTorque(int16_t target_torque)
 
 MotorVelocity Communicator::requestActualVelocity()
 {
-  motor_velocity_.velocity_1 = controller1_.requestActualVelocity();
-  motor_velocity_.velocity_2 = controller2_.requestActualVelocity();
-  motor_velocity_.velocity_3 = controller3_.requestActualVelocity();
-  motor_velocity_.velocity_4 = controller4_.requestActualVelocity();
+  controller1_.updateActualVelocity();
+  controller2_.updateActualVelocity();
+  controller3_.updateActualVelocity();
+  controller4_.updateActualVelocity();
+  motor_velocity_.velocity_1 = controller1_.getVelocity();
+  motor_velocity_.velocity_2 = controller2_.getVelocity();
+  motor_velocity_.velocity_3 = controller3_.getVelocity();
+  motor_velocity_.velocity_4 = controller4_.getVelocity();
 
   log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
     , motor_velocity_.velocity_1
@@ -90,10 +96,14 @@ MotorVelocity Communicator::requestActualVelocity()
 
 MotorTorque Communicator::requestActualTorque()
 {
-  motor_torque_.torque_1 = controller1_.requestActualTorque();
-  motor_torque_.torque_2 = controller2_.requestActualTorque();
-  motor_torque_.torque_3 = controller3_.requestActualTorque();
-  motor_torque_.torque_4 = controller4_.requestActualTorque();
+  controller1_.updateActualTorque();
+  controller2_.updateActualTorque();
+  controller3_.updateActualTorque();
+  controller4_.updateActualTorque();
+  motor_torque_.torque_1 = controller1_.getTorque();
+  motor_torque_.torque_2 = controller2_.getTorque();
+  motor_torque_.torque_3 = controller3_.getTorque();
+  motor_torque_.torque_4 = controller4_.getTorque();
 
   log_.DBG2("MOTOR", "Actual Torque: 1: %d, 2: %d, 3: %d, 4: %d"
     , motor_torque_.torque_1
