@@ -122,7 +122,7 @@ void MPU9250::init()
   writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
   Thread::sleep(100);    // 100ms
   writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  Thread::sleep(1000);    // 100ms
+  Thread::sleep(100);    // 100ms
 
   // writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
   // writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
@@ -131,12 +131,13 @@ void MPU9250::init()
   // writeByte(ACCEL_CONFIG, 0x00);
   // writeByte(ACCEL_CONFIG2, 0x01);
 
+  // isSpi_ = true;
   // TODO(anyone) Check who am I
   // Will stay in while look as it is not connected properly
   while (!whoAmI());
 
   // Enable accelerometer and gyroscope
-  // writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
+  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
 }
 
 void MPU9250::calibrateSensors()
