@@ -140,6 +140,7 @@ struct Communications {
   bool stopCommand;
   bool killPowerCommand;
   bool launchCommand;
+  bool lostConnection;
 };
 
 // -----------------------------------------------------------------------------

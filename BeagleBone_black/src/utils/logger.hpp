@@ -29,8 +29,8 @@ namespace utils {
 class Logger {
  public:
   Logger()
-      : verbose_(false)
-      , debug_(-1)
+      : verbose_(false),
+        debug_(-1)
   { /* EMPTY */ }
 
   /**

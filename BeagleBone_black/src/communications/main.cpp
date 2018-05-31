@@ -35,66 +35,42 @@ Main::Main(uint8_t id, Logger& log)
 
 int Main::sendDistance(NavigationType distance)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << distance;
-
-  return baseCommunicator_->sendData("CMD01" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD01" + std::to_string(distance) + "\n");
 }
 
 int Main::sendVelocity(NavigationType speed)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << speed;
-
-  return baseCommunicator_->sendData("CMD02" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD02" + std::to_string(speed) + "\n");
 }
 
 int Main::sendAcceleration(NavigationType accel)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << accel;
-
-  return baseCommunicator_->sendData("CMD03" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD03" + std::to_string(accel) + "\n");
 }
 
 int Main::sendStripeCount(int stripes)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << stripes;
-
-  return baseCommunicator_->sendData("CMD04" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD04" + std::to_string(stripes) + "\n");
 }
 
 int Main::sendRpmFl(float rpmfl)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmfl;
-
-  return baseCommunicator_->sendData("CMD05" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD05" + std::to_string(rpmfl) + "\n");
 }
 
 int Main::sendRpmFr(float rpmfr)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmfr;
-
-  return baseCommunicator_->sendData("CMD06" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD06" + std::to_string(rpmfr) + "\n");
 }
 
 int Main::sendRpmBl(float rpmbl)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmbl;
-
-  return baseCommunicator_->sendData("CMD07" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD07" + std::to_string(rpmbl) + "\n");
 }
 
 int Main::sendRpmBr(float rpmbr)
 {
-  std::stringstream ss(std::stringstream::in | std::stringstream::out);
-  ss << rpmbr;
-
-  return baseCommunicator_->sendData("CMD08" + ss.str() + "\n");
+  return baseCommunicator_->sendData("CMD08" + std::to_string(rpmbr) + "\n");
 }
 
 void Main::run()

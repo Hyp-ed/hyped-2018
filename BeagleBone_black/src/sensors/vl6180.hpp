@@ -29,7 +29,7 @@ constexpr uint8_t DEFAULT_I2C_SLAVE_ADDR = 0x29;
 
 namespace hyped {
 
-using hyped::utils::io::I2C;
+using utils::io::I2C;
 using utils::Logger;
 
 namespace sensors {
@@ -83,7 +83,7 @@ class VL6180 {
   /**
     *  @brief  Sets the maximum convergence time in ms
     */
-  void setMaxCovergenceTime(uint8_t time);
+  void setMaxConvergenceTime(uint8_t time);
   /**
     *  @brief  Wait for sensor to be ready before a new ranging command
     *            is issued
@@ -106,8 +106,8 @@ class VL6180 {
   Logger& log_;
   bool on_;
   bool continuous_mode_;
-  uint8_t i2c_addr_ = DEFAULT_I2C_SLAVE_ADDR;
-  I2C& i2c_ = I2C::getInstance();
+  uint8_t i2c_addr_;
+  I2C& i2c_;
 };
 
 }}  // namespace hyped::sensors

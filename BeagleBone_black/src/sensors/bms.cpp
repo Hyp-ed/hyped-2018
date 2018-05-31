@@ -112,10 +112,8 @@ void BMS::processNewData(utils::io::can::Frame& message)
       data_.temperature = message.data[0] - bms::Data::kTemperatureOffset;
       break;
     default:
-      log_.ERR("BMS", "received invalid message, id %d, CANID %d, offset %d"
-        , id_
-        , message.id
-        , offset);
+      log_.ERR("BMS", "received invalid message, id %d, CANID %d, offset %d",
+          id_, message.id, offset);
   }
 }
 

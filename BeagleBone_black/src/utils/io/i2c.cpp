@@ -62,9 +62,9 @@ I2C& I2C::getInstance()
 }
 
 I2C::I2C(Logger& log)
-    : log_(log)
-    , fd_(0)
-    , sensor_addr_(0)
+    : log_(log),
+      fd_(0),
+      sensor_addr_(0)
 {
   char device_name[] = "/dev/i2c-2";
   fd_ = open(device_name, O_RDWR, 0);
@@ -90,9 +90,8 @@ void I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::readHelper(fd_, rx, len);
-  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected"
-                            , ret
-                            , len);
+  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected",
+                           ret, len);
 }
 
 void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
@@ -100,9 +99,8 @@ void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::writeHelper(fd_, tx, len);
-  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected"
-                            , ret
-                            , len);
+  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected",
+                           ret, len);
 }
 
 }}}   // namespace hyped::utils::io

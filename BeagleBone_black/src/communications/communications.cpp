@@ -18,13 +18,12 @@
  *    limitations under the License.
  */
 
+
 #include "communications.hpp"
 
 #include <string>
 
 namespace hyped {
-
-using data::Communications;
 
 namespace communications {
 
@@ -64,11 +63,9 @@ Communications::~Communications()
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
-  memset(buffer, '\0', 256);
-  const char *data_ = message.c_str();  // cannot use string because strlen requies char*
-  n_ = write(sockfd_, data_, strlen(data_));
-  if (n_ < 0) log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
-  // TODO(Isabela/Kofi): Two sockets for two reading actions
+     memset(buffer, '\0', 256);
+     const char *data = message.c_str();
+     n_ = write(sockfd_, data, message.length());  // ‘_ssize_t write(int, const void*, size_t)’
 
   return atoi(buffer);
 }
@@ -77,7 +74,10 @@ int Communications::receiveMessage()
 {
   // TODO(Isabela/Kofi): Two sockets for two reading actions
   n_ = read(sockfd_, buffer, 255);
-  if (n_ < 0) log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+  if (n_ < 0) {
+  log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    command_ = 6;
+  }
   command_ = atoi(buffer);
 
   switch (command_) {

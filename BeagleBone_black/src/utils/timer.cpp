@@ -40,9 +40,9 @@ uint64_t Timer::getTimeMicros()
 }
 
 Timer::Timer()
-    : elapsed_(0)
-    , start_(0)
-    , stop_(0)
+    : elapsed_(0),
+      start_(0),
+      stop_(0)
 { /* EMPTY */ }
 
 void Timer::start()
