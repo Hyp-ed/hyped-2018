@@ -65,8 +65,6 @@ class Communications
   struct hostent *server;
   char buffer[256];
   Logger& log_;
-  data::Data& data_;
-  data::Communications cmn_data;
 };
 
 }}  //  namespace hyped::communications

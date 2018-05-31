@@ -46,6 +46,9 @@ void ReceiverThread::run()
       case 3:
         cmn_data.launchCommand = true;
         break;
+      case 6:
+        cmn_data.lostConnection = true;
+        break;
     }
 
     data_.setCommunicationsData(cmn_data);

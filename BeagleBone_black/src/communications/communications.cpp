@@ -23,17 +23,12 @@
 
 #include <string>
 
-#include "data/data.hpp"
-
 namespace hyped {
-
-using data::Communications;
 
 namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int portNo)
     : log_(log)
-    , data_(data::Data::getInstance())
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -71,12 +66,6 @@ int Communications::sendData(std::string message)
      memset(buffer, '\0', 256);
      const char *data = message.c_str();
      n_ = write(sockfd_, data, message.length());  // ‘_ssize_t write(int, const void*, size_t)’
-     if (n_ < 0) {
-     log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
-         cmn_data = data_.getCommunicationsData();
-         cmn_data.lostConnection = true;
-         data_.setCommunicationsData(cmn_data);
-     }
 
   return atoi(buffer);
 }
@@ -86,9 +75,7 @@ int Communications::receiveMessage()
   n_ = read(sockfd_, buffer, 255);
   if (n_ < 0) {
   log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    cmn_data = data_.getCommunicationsData();
-    cmn_data.lostConnection = true;
-    data_.setCommunicationsData(cmn_data);
+    command_ = 6;
   }
   command_ = atoi(buffer);
 
