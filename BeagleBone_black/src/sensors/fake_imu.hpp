@@ -61,7 +61,14 @@ class FakeImu : public ImuInterface {
    */
   void setData();
 
-   private:
+  /*
+   * @brief     A function to read the next set of data from file
+   *
+   * @return     Returns true if the file was successfully read
+   */
+  bool readNextLine();
+
+ private:
   Imu imu_;
   std::ifstream file;
   NavigationVector acc_val;
@@ -77,13 +84,6 @@ class FakeImu : public ImuInterface {
    * @return     Returns true if the file was successfully read
    */
   bool readDataFromFile(std::string file_path);
-
-  /*
-   * @brief     A function to read the next set of data from file
-   *
-   * @return     Returns true if the file was successfully read
-   */
-  bool readNextLine();
 
   /*
    * @brief     A function that adds noise to the imu data
