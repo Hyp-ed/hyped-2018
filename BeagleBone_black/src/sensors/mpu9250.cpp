@@ -107,10 +107,10 @@ namespace sensors {
 const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
 
 MPU9250::MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr)
-    :log_(log),
+    : gpio_(pin, kDirection, log),
     isSpi_(isSpi),
-    gpio_(pin, kDirection, log),
-    i2c_addr_(i2c_addr)
+    i2c_addr_(i2c_addr),
+    log_(log)
 {
   init();
   log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
