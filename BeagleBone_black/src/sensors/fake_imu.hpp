@@ -35,11 +35,30 @@ namespace sensors {
 
 class FakeImu : public ImuInterface {
  public:
+  /*
+   * @brief     A constructor for the fake IMU class
+   */
   explicit FakeImu(NavigationVector acc_val, NavigationType acc_noise,
                    NavigationVector gyr_val, NavigationType gyr_noise);
+
+  /*
+   * @brief     A function that gets the imu data
+   */
   void getData(Imu* imu) override;
+
+  /*
+   * @brief     A function that sets the imu data
+   */
   void setData();
+
+  /*
+   * @brief     A function that adds noise to the imu data
+   */
   NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
+
+  /*
+   * @brief     A function that reads data from file directory
+   */
   void readDataFromFile(std::string file_path);
 
  private:
