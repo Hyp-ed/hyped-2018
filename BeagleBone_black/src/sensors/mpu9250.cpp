@@ -139,6 +139,10 @@ void MPU9250::init()
   // writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
   // Thread::sleep(100);    // 100ms
 
+  // TODO(anyone) Check who am I
+  // Will stay in while look as it is not connected properly
+  while (!whoAmI());
+
   writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
   Thread::sleep(100);    // 100ms
   writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
@@ -149,12 +153,9 @@ void MPU9250::init()
   writeByte(ACCEL_CONFIG2, 0x01);
 
   // isSpi_ = true;
-  // TODO(anyone) Check who am I
-  // Will stay in while look as it is not connected properly
-  while (!whoAmI());
 
-  // Enable accelerometer and gyroscope
-  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
+  setAcclScale(BITS_FS_2G);
+  setGyroScale(BITS_FS_250DPS);
 }
 
 void MPU9250::calibrateSensors()
@@ -350,6 +351,7 @@ void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
     buffer[0]=write_reg;
     buffer[1]=write_data;
     i2c_.write(i2c_addr_, buffer, 2);
+    Thread::sleep(1000);  // Have to delay as I2C can't handle the speed of writes
   }
 }
 
