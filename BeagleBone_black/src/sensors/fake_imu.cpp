@@ -36,12 +36,24 @@ using data::DataPoint;
 
 namespace sensors {
 
+FakeImu::FakeImu(std::string file_path)
+{
+  readDataFromFile(file_path);
+  setData();
+}
+
 FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
                  NavigationVector gyr_val, NavigationType gyr_noise) :
   acc_val(acc_val), gyr_val(gyr_val),
   acc_noise(acc_noise), gyr_noise(gyr_noise)
 {
   setData();
+}
+
+FakeImu::~FakeImu()
+{
+  if (file.is_open())
+    file.close();
 }
 
 void FakeImu::setData()
@@ -71,14 +83,30 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType 
   return temp;
 }
 
-void FakeImu::readDataFromFile(std::string file_path)
+bool FakeImu::readDataFromFile(std::string file_path)
 {
-  std::ifstream file;
-  file.open(file_path);
-  while (!file.eof()) {
-    // TODO(Uday): Implement this
-  }
-  file.close();
+  if (!file.is_open())
+    file.open(file_path);
+  return readNextLine();
+}
+
+bool FakeImu::readNextLine()
+{
+  if (file.is_open() && !file.eof()) {
+    file >> acc_val[0];
+    file >> acc_val[1];
+    file >> acc_val[2];
+
+    file >> acc_noise;
+
+    file >> gyr_val[0];
+    file >> gyr_val[1];
+    file >> gyr_val[2];
+
+    file >> gyr_noise;
+
+    return true;
+  } return false;
 }
 
 }}  // namespace hyped::sensors
