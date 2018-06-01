@@ -137,10 +137,10 @@ struct Motors {
 // -----------------------------------------------------------------------------
 
 struct Communications {
-  bool stopCommand;
-  bool killPowerCommand;
-  bool launchCommand;
-  bool lostConnection;
+  bool stopCommand; // Manually triggered critical failure
+  //bool killPowerCommand;
+  bool launchCommand;  // Allow pod to start acceleration
+  bool lostConnection; // Loss of telemetry
 };
 
 // -----------------------------------------------------------------------------
