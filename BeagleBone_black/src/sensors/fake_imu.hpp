@@ -36,10 +36,20 @@ namespace sensors {
 class FakeImu : public ImuInterface {
  public:
   /*
+   * @brief     A constructor for the fake IMU class by reading from file
+   */
+  explicit FakeImu(std::string file_path);
+
+  /*
    * @brief     A constructor for the fake IMU class
    */
   explicit FakeImu(NavigationVector acc_val, NavigationType acc_noise,
                    NavigationVector gyr_val, NavigationType gyr_noise);
+
+  /*
+   * @brief     A deconstructor for the fake IMU class
+   */
+  ~FakeImu();
 
   /*
    * @brief     A function that gets the imu data
@@ -51,17 +61,29 @@ class FakeImu : public ImuInterface {
    */
   void setData();
 
-  /*
-   * @brief     A function that reads data from file directory
-   */
-  void readDataFromFile(std::string file_path);
-
- private:
+   private:
   Imu imu_;
+  std::ifstream file;
   NavigationVector acc_val;
   NavigationVector gyr_val;
   NavigationType acc_noise;
   NavigationType gyr_noise;
+
+  /*
+   * @brief     A function that reads data from file directory
+   *
+   * @param[in] file_path    The file is in the format acc_val acc_noise gyr_val gyr_noise
+   *
+   * @return     Returns true if the file was successfully read
+   */
+  bool readDataFromFile(std::string file_path);
+
+  /*
+   * @brief     A function to read the next set of data from file
+   *
+   * @return     Returns true if the file was successfully read
+   */
+  bool readNextLine();
 
   /*
    * @brief     A function that adds noise to the imu data
