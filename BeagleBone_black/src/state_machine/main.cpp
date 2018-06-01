@@ -51,7 +51,6 @@ void Main::run()
       hypedMachine.handleEvent(kMaxDistanceReached);
     }
     checkCommunications();
-
   }
 }
 
@@ -69,15 +68,13 @@ void Main::checkCommunications()
 {
   data::Communications comms_data = data_.getCommunicationsData();
 
-   if(comms_data.stopCommand) {
-     hypedMachine.handleEvent(kCriticalFailure);
-   }
+  if (comms_data.stopCommand) {
+    hypedMachine.handleEvent(kCriticalFailure);
+  }
 
-   if(comms_data.launchCommand) {
-     hypedMachine.handleEvent(kOnStart);
-   }
-
-
+  if (comms_data.launchCommand) {
+    hypedMachine.handleEvent(kOnStart);
+  }
 }
 
 }}  // namespace hyped::state_machine
