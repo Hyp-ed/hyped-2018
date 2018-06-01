@@ -138,9 +138,9 @@ struct Motors {
 
 struct Communications {
   bool stopCommand; // Manually triggered critical failure
-  bool killPowerCommand; // Redundant?
+  bool killPowerCommand; // Redundant. Please remove.
   bool launchCommand;  // Allow pod to start acceleration
-  bool lostConnection; // Loss of telemetry
+  bool lostConnection; // Loss of telemetry. Redundant. Please remove.
 };
 
 // -----------------------------------------------------------------------------

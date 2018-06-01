@@ -31,8 +31,7 @@ namespace hyped {
 namespace state_machine {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
-    , hypedMachine(log)
+    : Thread(id, log), hypedMachine(log), data_(data::Data::getInstance())
 { /* EMPTY */ }
 
 /**
@@ -44,12 +43,15 @@ void Main::run()
   while (1) {
     // data::Navigation nav_data = data.getNavigationData();
 
+
     if (hasCriticalFailure()) {
       hypedMachine.handleEvent(kCriticalFailure);
     }
     if (hasReachedMaxDistance()) {
       hypedMachine.handleEvent(kMaxDistanceReached);
     }
+    checkCommunications();
+
   }
 }
 
@@ -61,6 +63,21 @@ bool Main::hasCriticalFailure()
 bool Main::hasReachedMaxDistance()
 {
   return false;
+}
+
+void Main::checkCommunications()
+{
+  data::Communications comms_data = data_.getCommunicationsData();
+
+   if(comms_data.stopCommand) {
+     hypedMachine.handleEvent(kCriticalFailure);
+   }
+
+   if(comms_data.launchCommand) {
+     hypedMachine.handleEvent(kOnStart);
+   }
+
+
 }
 
 }}  // namespace hyped::state_machine
