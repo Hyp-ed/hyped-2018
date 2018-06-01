@@ -52,11 +52,6 @@ class FakeImu : public ImuInterface {
   void setData();
 
   /*
-   * @brief     A function that adds noise to the imu data
-   */
-  NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
-
-  /*
    * @brief     A function that reads data from file directory
    */
   void readDataFromFile(std::string file_path);
@@ -67,6 +62,11 @@ class FakeImu : public ImuInterface {
   NavigationVector gyr_val;
   NavigationType acc_noise;
   NavigationType gyr_noise;
+
+  /*
+   * @brief     A function that adds noise to the imu data
+   */
+  static NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
 };
 
 }}  // namespace hyped::sensors
