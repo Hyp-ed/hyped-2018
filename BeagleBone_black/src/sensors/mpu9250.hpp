@@ -79,18 +79,16 @@ class MPU9250 : ImuInterface {
   void readByte(uint8_t read_reg, uint8_t *read_data);
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
   SPI& spi_ = SPI::getInstance();
-  I2C& i2c_ = I2C::getInstance();
-  GPIO gpio_;
-  double accl_scale_;
-  double gyro_scale_;
-  bool isSpi_;
-  uint8_t i2c_addr_;
   Logger& log_;
+  bool isSpi_;
+  GPIO gpio_;
+  uint8_t i2c_addr_;
+  I2C& i2c_ = I2C::getInstance();
 
   double acc_divider_;
-  int32_t acc_bias_[3];
+  int16_t acc_bias_[3];
   double gyro_divider_;
-  int32_t gyro_bias_[3];
+  int16_t gyro_bias_[3];
 };
 
 }}  // namespace hyped::sensors

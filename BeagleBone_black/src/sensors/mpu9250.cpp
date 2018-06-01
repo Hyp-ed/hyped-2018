@@ -28,12 +28,7 @@
 #include "utils/timer.hpp"
 
 // Accelerometer addresses
-constexpr uint8_t ACCEL_XOUT_H           = 0x3B;
-constexpr uint8_t ACCEL_XOUT_L           = 0x3C;
-constexpr uint8_t ACCEL_YOUT_H           = 0x3D;
-constexpr uint8_t ACCEL_YOUT_L           = 0x3E;
-constexpr uint8_t ACCEL_ZOUT_H           = 0x3F;
-constexpr uint8_t ACCEL_ZOUT_L           = 0x40;
+constexpr uint8_t kAccelXoutH           = 0x3B;
 
 #define MPUREG_XA_OFFSET_H         0x77
 #define MPUREG_XA_OFFSET_L         0x78
@@ -46,12 +41,7 @@ constexpr uint8_t ACCEL_CONFIG           = 0x1C;
 constexpr uint8_t ACCEL_CONFIG2          = 0x1D;
 
 // gyroscope addresses
-constexpr uint8_t  GYRO_XOUT_H           = 0x43;
-constexpr uint8_t  GYRO_XOUT_L           = 0x44;
-constexpr uint8_t  GYRO_YOUT_H           = 0x45;
-constexpr uint8_t  GYRO_YOUT_L           = 0x46;
-constexpr uint8_t  GYRO_ZOUT_H           = 0x47;
-constexpr uint8_t  GYRO_ZOUT_L           = 0x48;
+constexpr uint8_t  kGyroXoutH           = 0x43;
 
 #define MPUREG_XG_OFFS_USRH 0x13
 #define MPUREG_XG_OFFS_USRL 0x14
@@ -130,30 +120,19 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
-  Thread::sleep(100);   // 100ms
-
-
-
   calibrateSensors();
 
-  // writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  // Thread::sleep(100);    // 100ms
-
-  // TODO(anyone) Check who am I
-  // Will stay in while look as it is not connected properly
+  // Test connection
   while (!whoAmI());
 
   writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
-  Thread::sleep(100);    // 100ms
+  // writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
   writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
   writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
   writeByte(MPU9250_REG_CONFIG, 0x01);
   writeByte(GYRO_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG2, 0x01);
-
-  // isSpi_ = true;
-
   setAcclScale(BITS_FS_2G);
   setGyroScale(BITS_FS_250DPS);
 }
@@ -188,9 +167,6 @@ void MPU9250::calibrateSensors()
   // Set gyro full-scale to 250 degrees per second, maximum sensitivity
   writeByte(GYRO_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG, 0x00);   // Set accelerometer full-scale to 2 g, maximum sensitivity
-
-  uint16_t  gyrosensitivity  = 131;     // = 131 LSB/degrees/sec
-  uint16_t  accelsensitivity = 16384;   // = 16384 LSB/g
 
   // Configure FIFO to capture accelerometer and gyro data for bias calculation
   writeByte(MPU9250_REG_USER_CTRL, 0x40);    // Enable FIFO
@@ -235,13 +211,6 @@ void MPU9250::calibrateSensors()
   gyro_bias_[1]  /= (int32_t) packet_count;
   gyro_bias_[2]  /= (int32_t) packet_count;
 
-  // TODO(jack) Ask how to handle gravity
-  // Remove gravity from the z-axis accelerometer bias calculation
-  if (acc_bias_[2] > 0L) {
-    acc_bias_[2] -= (int32_t) accelsensitivity;
-  } else {
-    acc_bias_[2] += (int32_t) accelsensitivity;
-  }
 
   // Construct the gyro biases for push to the hardware gyro bias registers,
   // which are reset to zero upon device startup
@@ -351,7 +320,6 @@ void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
     buffer[0]=write_reg;
     buffer[1]=write_data;
     i2c_.write(i2c_addr_, buffer, 2);
-    Thread::sleep(1000);  // Have to delay as I2C can't handle the speed of writes
   }
 }
 
@@ -385,7 +353,7 @@ void MPU9250::getAcclData()
   double data;
   int i;
 
-  readBytes(ACCEL_XOUT_H, response, 6);
+  readBytes(kAccelXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
     // TODO(anyone) change casting
@@ -402,7 +370,7 @@ void MPU9250::getGyroData()
   double data;
   int i;
 
-  readBytes(GYRO_XOUT_H, response, 6);
+  readBytes(kGyroXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
     // TODO(anyone) change casting
