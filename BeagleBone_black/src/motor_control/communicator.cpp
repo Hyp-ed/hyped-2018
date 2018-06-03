@@ -59,6 +59,10 @@ void Communicator::configureControllers()
       && controller1_.getConfiguartionStatus() == true)
       {
         log_.INFO("MOTOR", "Motors are configured for launch");
+        controller1_.enterOperational();
+        controller2_.enterOperational();
+        controller3_.enterOperational();
+        controller4_.enterOperational();
       } else {
         // Configuration error. TODO(Anyone) Update data structure with error
       }
@@ -70,7 +74,6 @@ void Communicator::sendTargetVelocity(int32_t target_velocity)
   controller2_.sendTargetVelocity(target_velocity);
   controller3_.sendTargetVelocity(target_velocity);
   controller4_.sendTargetVelocity(target_velocity);
-  this->target_velocity_ = target_velocity;
 }
 
 void Communicator::sendTargetTorque(int16_t target_torque)
@@ -79,7 +82,6 @@ void Communicator::sendTargetTorque(int16_t target_torque)
   controller2_.sendTargetTorque(target_torque);
   controller3_.sendTargetTorque(target_torque);
   controller4_.sendTargetTorque(target_torque);
-  this->target_torque_ = target_torque;
 }
 
 MotorVelocity Communicator::requestActualVelocity()
