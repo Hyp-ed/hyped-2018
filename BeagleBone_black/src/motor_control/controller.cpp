@@ -28,7 +28,8 @@
 namespace hyped {
 namespace motor_control {
 
-using hyped::utils::io::can::Frame;
+using utils::io::can::Frame;
+using utils::concurrent::Thread;
 
 /* SDO CAN Frames (Little Edian) composed as follows:
  * CAN ID:    COB-ID = Function + Node ID,
@@ -95,7 +96,9 @@ Controller::Controller(Logger& log, uint8_t id)
     actual_velocity_(0),
     actual_torque_(0),
     configure_count_(0),
-    configured_(false)
+    config_error_count_(0),
+    configured_(false),
+    state(kNotReadyToSwitchOn)
 {
   SDOMessage.id       = kSDO_RECEIVE + node_id_;
   SDOMessage.extended = false;
@@ -212,9 +215,19 @@ void Controller::configure()
   can_.send(NMTMessage);
   log_.DBG1("MOTOR", "Controller : Reset node");
 
-  if (configure_count_ == 7) {
-    configured_ = true;
+  // Wait for 10 x 200ms for all 7 configuration confirmation messages to return.
+  // If we wait for 2 full seconds and there are less than 7 configuration confirmations,
+  // then we throw a configuarion error
+  while (configure_count_ != 7 && config_error_count_ != 10) {
+    Thread::sleep(200);
+    config_error_count_++;
   }
+
+  if (config_error_count_ == 10) {
+    log_.ERR("MOTOR", "Configuration error");  // TODO(Anyone) handle configution error
+  }
+
+  configured_ = true;
 }
 
 void Controller::enterOperational()
@@ -245,6 +258,7 @@ void Controller::enterOperational()
   can_.send(SDOMessage);
   log_.INFO("MOTOR", "Controller : Checking for errors");
 
+  // Wait until warning and error status is checked
   while (!error_status_checked_);
 
   if (!error_) {
@@ -427,30 +441,37 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
   if (message.data[1] == 0x33 && message.data[2] == 0x20 && message.data[3] == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor poles configured");
+    return;
   }
   if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x01) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Feedback type configured");
+    return;
   }
   if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x08) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor phase offset configured");
+    return;
   }
   if (message.data[1] == 0x54 && message.data[2] == 0x20 && message.data[3] == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Over voltage limit configured");
+    return;
   }
   if (message.data[1] == 0x55 && message.data[2] == 0x20 && message.data[3] == 0x03) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Under voltage limit configured");
+    return;
   }
   if (message.data[1] == 0x75 && message.data[2] == 0x60 && message.data[3] == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor rated current configured");
+    return;
   }
   if (message.data[1] == 0x76 && message.data[2] == 0x60 && message.data[3] == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller : Motor rated torque configured");
+    return;
   }
 
   // Process warning and error messages
@@ -458,22 +479,77 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
     if (message.data[4] + message.data[5] != 0) {
       error_ = true;
     }
+    return;
   }
   if (message.data[1] == 0x3F && message.data[2] == 0x60 && message.data[3] == 0x00) {
     if (message.data[4] + message.data[5] != 0) {
       error_ = true;
     }
     error_status_checked_ = true;
+    return;
   }
 
   // Controlword updates
   if (message.data[1] == 0x40 && message.data[2] == 0x60 && message.data[3] == 0x00) {
     log_.DBG1("MOTOR", "Controller : Control Word updated");
+    return;
   }
 
-  // Process Statusword checks
+  /* Process Statusword checks
+   * xxxx xxxx x0xx 0000: Not ready to switch on
+   * xxxx xxxx x1xx 0000: Switch on disabled
+   * xxxx xxxx x01x 0001: Ready to switch on
+   * xxxx xxxx x01x 0011: Switched on
+   * xxxx xxxx x01x 0111: Operation enabled
+   * xxxx xxxx x00x 0111: Quick stop active
+   * xxxx xxxx x0xx 1111: Fault reaction active
+   * xxxx xxxx x0xx 1000: Fault
+   */
   if (message.data[1] == 0x41 && message.data[2] == 0x60 && message.data[3] == 0x00) {
-    // TODO(Anyone) Process status word
+    uint8_t status = message.data[4];
+    if ((status << 4) == 0) {
+      if (status & (1 << 6)) {
+        state = kSwitchOnDisabled;
+        log_.DBG1("MOTOR", "Controller state: Switch on disabled");
+        return;
+      } else {
+        state = kNotReadyToSwitchOn;
+        log_.DBG1("MOTOR", "Controller state: Not ready to switch on");
+        return;
+      }
+    }
+    if ((status << 4) == 16) {
+      state = kReadyToSwitchOn;
+      log_.DBG1("MOTOR", "Controller state: Ready to switch on");
+      return;
+    }
+    if ((status << 4) == 48) {
+      state = kSwitchedOn;
+      log_.DBG1("MOTOR", "Controller state: Switched on");
+      return;
+    }
+    if ((status << 4) == 112) {
+      if (status & (1 << 5)) {
+        state = kOperationEnabled;
+        log_.DBG1("MOTOR", "Controller state: Operation enabled");
+        return;
+      } else {
+        state = kQuickStopActive;
+        log_.DBG1("MOTOR", "Controller state: Quick stop active");
+        return;
+      }
+    }
+    if ((status << 4) == 240) {
+      state = kFaultReactionActive;
+      log_.DBG1("MOTOR", "Controller state: Fault reaction active");
+      return;
+    }
+    if ((status << 4) == 64) {
+      state = kFault;
+      log_.DBG1("MOTOR", "Controller state: Fault");
+      return;
+    }
+    log_.ERR("MOTOR", "Status word not recognised");
   }
 }
 
