@@ -40,6 +40,17 @@ using utils::io::CanProccesor;
 class Controller : public CanProccesor {
   friend Can;
 
+enum ControllerState {
+  kNotReadyToSwitchOn,
+  kSwitchOnDisabled,
+  kReadyToSwitchOn,
+  kSwitchedOn,
+  kOperationEnabled,
+  kQuickStopActive,
+  kFaultReactionActive,
+  kFault,
+};
+
  public:
   Controller(Logger& log, uint8_t id);
   /**
@@ -133,14 +144,16 @@ class Controller : public CanProccesor {
   Can&     can_;
   uint8_t  node_id_;
   bool     critical_failure_;
-  bool     error_status_checked_;
-  bool     error_;
+  bool     error_status_checked_;  // False while error status has not yet been returned
+  bool     error_;                 // True if error status or warning status contains error code
   int32_t  actual_velocity_;
   int16_t  actual_torque_;
-  int16_t  configure_count_;
-  bool     configured_;
+  int16_t  configure_count_;       // Counts number of configuartion confirmation messages received
+  uint16_t config_error_count_;    // Counter for length of time we wait for confirmation messages
+  bool     configured_;            // True if all configution confirmation messages are received
   utils::io::can::Frame SDOMessage;
   utils::io::can::Frame NMTMessage;
+  ControllerState state;
 };
 
 }}  // namespace hyped::motor_control
