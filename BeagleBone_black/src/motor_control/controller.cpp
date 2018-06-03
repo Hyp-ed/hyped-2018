@@ -68,24 +68,6 @@ constexpr uint8_t  kNMT_PREOPERATIONAL     = 0x80;
 constexpr uint8_t  kNMT_RESET_NODE         = 0x81;
 constexpr uint8_t  kNMT_RESET_COMMS        = 0x82;
 
-// Status masks, used to mask the return result of a status check
-// pg51 CANOpen_Motion_Control.pdf
-constexpr uint16_t kNotReadyToSwitch       = 0x0000;
-constexpr uint16_t kSwitchOnDisabled       = 0x0040;
-constexpr uint16_t kReadyToSwitchOn        = 0x0021;
-constexpr uint16_t kSwitchedOn             = 0x0023;
-constexpr uint16_t kOperationEnabled       = 0x0027;
-constexpr uint16_t kQuickStopActive        = 0x0007;
-constexpr uint16_t kFaultReactionActive    = 0x0008;
-// Unsure about this check datasheet TODO(anyone)
-constexpr uint16_t kFault                  = 0x0008;
-
-// Masks for profile velocity status
-// pg123 'CANOpen_Motion_Control.pdf
-constexpr uint16_t kTargetReached          = 0x0400;
-constexpr uint16_t kSpeedEqualToZero       = 0x1000;
-constexpr uint16_t kMaxSlippageReached     = 0x2000;
-
 Controller::Controller(Logger& log, uint8_t id)
   : log_(log),
     can_(Can::getInstance()),
@@ -215,11 +197,11 @@ void Controller::configure()
   can_.send(NMTMessage);
   log_.DBG1("MOTOR", "Controller : Reset node");
 
-  // Wait for 10 x 200ms for all 7 configuration confirmation messages to return.
-  // If we wait for 2 full seconds and there are less than 7 configuration confirmations,
+  // Wait for 10 x 100ms for all 7 configuration confirmation messages to return.
+  // If we wait for 1 full second and there are less than 7 configuration confirmations,
   // then we throw a configuarion error
   while (configure_count_ != 7 && config_error_count_ != 10) {
-    Thread::sleep(200);
+    Thread::sleep(100);
     config_error_count_++;
   }
 
@@ -437,6 +419,20 @@ void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 
 void Controller::processSDOMessage(utils::io::can::Frame& message)
 {
+  // Process actual velocity. TODO(Anyone) Cover negative velocity case
+  if (message.data[1] == 0x6C && message.data[2] == 0x60) {
+    actual_velocity_ = (message.data[7] << 24
+                      | message.data[6] << 16
+                      | message.data[5] << 8
+                      | message.data[4]);
+  }
+
+  // Process actual torque. //TODO(Anyone) Cover negative torque case
+  if (message.data[1] == 0x77 && message.data[2] == 0x60) {
+    actual_torque_   = (message.data[5] << 8
+                      | message.data[4]);
+  }
+
   // Process configuration messages
   if (message.data[1] == 0x33 && message.data[2] == 0x20 && message.data[3] == 0x00) {
     configure_count_++;

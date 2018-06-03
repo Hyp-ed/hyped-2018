@@ -100,8 +100,6 @@ class Communicator {
   Controller controller4_;
   MotorVelocity motor_velocity_;
   MotorTorque motor_torque_;
-  int32_t target_velocity_;   // For testing only
-  int32_t target_torque_;
 };
 
 }}  // namespace hyped::motor_control
