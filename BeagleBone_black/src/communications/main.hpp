@@ -28,6 +28,7 @@
 
 namespace hyped {
 
+using data::State;
 using utils::concurrent::Thread;
 using utils::Logger;
 
@@ -45,13 +46,16 @@ class Main : public Thread {
   int sendRpmFr(float rpmfr);                   // CMD06
   int sendRpmBl(float rpmBl);                   // CMD07
   int sendRpmBr(float rpmBr);                   // CMD08
+  int sendState(State state);                   // CMD09
 
  private:
+  int stateCode_;
   Communications* baseCommunicator_;
   data::Data& data_ = data::Data::getInstance();
   data::Navigation nav_;
   data::Motors mtr_;
   data::Sensors sns_;
+  data::StateMachine stm_;
 };
 
 }}  //  namespace hyped::communications

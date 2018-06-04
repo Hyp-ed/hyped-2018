@@ -23,6 +23,9 @@
 #include <sstream>
 
 namespace hyped {
+
+using data::State;
+
 namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
@@ -73,6 +76,24 @@ int Main::sendRpmBr(float rpmbr)
   return baseCommunicator_->sendData("CMD08" + std::to_string(rpmbr) + "\n");
 }
 
+int Main::sendState(State state)
+{
+  switch (state) {
+    case data::kIdle             : stateCode_ = 0; break;
+    case data::kAccelerating     : stateCode_ = 1; break;
+    case data::kDecelerating     : stateCode_ = 2; break;
+    case data::kEmergencyBraking : stateCode_ = 3; break;
+    case data::kRunComplete      : stateCode_ = 4; break;
+    case data::kFailureStopped   : stateCode_ = 5; break;
+    case data::kExiting          : stateCode_ = 6; break;
+    case data::kFinished         : stateCode_ = 7; break;
+    case data::kInvalid          : stateCode_ = 8; break;
+    default: break;
+  }
+
+  return baseCommunicator_->sendData("CMD09" + std::to_string(stateCode_) + "\n");
+}
+
 void Main::run()
 {
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
@@ -82,6 +103,7 @@ void Main::run()
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
     sns_ = data_.getSensorsData();
+    stm_ = data_.getStateMachineData();
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
@@ -90,6 +112,7 @@ void Main::run()
     sendRpmFr(mtr_.motor_velocity_2);
     sendRpmBl(mtr_.motor_velocity_3);
     sendRpmBr(mtr_.motor_velocity_4);
+    sendState(stm_.current_state);
   }
 
   receiverThread->join();
