@@ -30,12 +30,12 @@ using data::Batteries;
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
-    , data_(data::Data::getInstance())
+    : Thread(id, log),
+      data_(data::Data::getInstance())
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    bms_[i] = new BMS(i, &batteries_.low_power_batteries[i] , log_);
+    bms_[i] = new BMS(i, &batteries_.low_power_batteries[i], log_);
     bms_[i]->start();
   }
 

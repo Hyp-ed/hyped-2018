@@ -43,12 +43,12 @@ BMS::BMS(uint8_t id, Logger& log)
 { /* Do nothing, delegate to the other constructor */ }
 
 BMS::BMS(uint8_t id, data::Battery* battery_unit, Logger& log)
-    : Thread(log)
-    , can_(Can::getInstance())
-    , data_({})
-    , battery_unit_(battery_unit)
-    , id_(id)
-    , running_(false)
+    : Thread(log),
+      can_(Can::getInstance()),
+      data_({}),
+      battery_unit_(battery_unit),
+      id_(id),
+      running_(false)
 {
   ASSERT(id < data::Batteries::kNumLPBatteries);
   // verify this BMS unit has not been instantiated

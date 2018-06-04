@@ -58,11 +58,11 @@ using utils::io::I2C;
 namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, Logger& log)
-    : log_(log)
-    , on_(false)
-    , continuous_mode_(false)
-    , i2c_addr_(i2c_addr)
-    , i2c_(I2C::getInstance())
+    : log_(log),
+      on_(false),
+      continuous_mode_(false),
+      i2c_addr_(i2c_addr),
+      i2c_(I2C::getInstance())
 {
   // Create I2C instance get register address
   turnOn();
