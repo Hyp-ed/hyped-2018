@@ -25,6 +25,7 @@
 namespace hyped {
 
 using data::State;
+using data::Battery;
 
 namespace communications {
 
@@ -94,6 +95,24 @@ int Main::sendState(State state)
   return baseCommunicator_->sendData("CMD09" + std::to_string(stateCode_) + "\n");
 }
 
+int Main::sendHpBattery(int batNo, Battery hpBat)
+{
+  switch (batNo) {
+    case 0:
+      baseCommunicator_->sendData("CMD1000" + std::to_string(hpBat.voltage) + "\n");
+      baseCommunicator_->sendData("CMD1001" + std::to_string(hpBat.temperature) + "\n");
+      break;
+    case 1:
+      baseCommunicator_->sendData("CMD1010" + std::to_string(hpBat.voltage) + "\n");
+      baseCommunicator_->sendData("CMD1011" + std::to_string(hpBat.temperature) + "\n");
+      break;
+    default:
+      break;
+  }
+
+  return 1;
+}
+
 void Main::run()
 {
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
@@ -104,6 +123,7 @@ void Main::run()
     mtr_ = data_.getMotorData();
     sns_ = data_.getSensorsData();
     stm_ = data_.getStateMachineData();
+    bat_ = data_.getBatteryData();
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
@@ -113,6 +133,8 @@ void Main::run()
     sendRpmBl(mtr_.motor_velocity_3);
     sendRpmBr(mtr_.motor_velocity_4);
     sendState(stm_.current_state);
+    sendHpBattery(0, bat_.high_power_batteries.at(0));
+    sendHpBattery(1, bat_.high_power_batteries.at(1));
   }
 
   receiverThread->join();
