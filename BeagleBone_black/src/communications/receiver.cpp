@@ -43,7 +43,7 @@ void ReceiverThread::run()
       case 2:
         cmn_data.launchCommand = true;
         break;
-      case 2:
+      case 3:
         cmn_data.resetCommand = true;
         break;
     }
