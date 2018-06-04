@@ -75,7 +75,7 @@ int Communications::receiveMessage()
   n_ = read(sockfd_, buffer, 255);
   if (n_ < 0) {
   log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    command_ = 6;
+    command_ = 1;
   }
   command_ = atoi(buffer);
 
@@ -84,10 +84,7 @@ int Communications::receiveMessage()
       log_.INFO("COMN", "Received 1 (STOP)");  // STOP
       break;
     case 2:
-      log_.INFO("COMN", "Received 2 (KILL POWER)");  // KILL POWER
-      break;
-    case 3:
-      log_.INFO("CMN", "Received 3 (LAUNCH)");  // LAUNCH
+      log_.INFO("COMN", "Received 2 (LAUNCH)");  // LAUNCH
       break;
   }
 
