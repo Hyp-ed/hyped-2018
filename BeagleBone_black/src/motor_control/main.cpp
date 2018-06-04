@@ -53,7 +53,7 @@ void Main::run()
     } else if (state_.current_state == data::State::kDecelerating) {
       this->decelerateMotors();
     } else if (state_.current_state == data::State::kFailureStopped) {
-      this->enterPreOperational();
+      communicator_.enterPreOperational();
     } else if (state_.current_state == data::State::kEmergencyBraking) {
       this->stopMotors();
     } else {
@@ -68,19 +68,11 @@ void Main::setupMotors()
     communicator_.registerControllers();
     communicator_.configureControllers();
     data::Motors motor_data_ = data_.getMotorData();
-    if (motor_data_.current_motor_state == data::MotorState::kConfigurationError) {
-      this->enterPreOperational();
-    }
     motor_data_ = { data::MotorState::kPreOperational, 0, 0, 0, 0, 0, 0, 0, 0 };
     data_.setMotorData(motor_data_);
     motors_set_up_ = true;
     log_.INFO("MOTOR", "Motor State: Idle");
   }
-}
-
-void Main::enterPreOperational()
-{
-  communicator_.enterPreOperational();
 }
 
 void Main::accelerateMotors()
@@ -210,7 +202,7 @@ void Main::decelerateMotors()
 
 void Main::stopMotors()
 {
-  communicator_.sendTargetVelocity(0);
+  communicator_.quickStopAll();
   // Updates the motor data while motors are stopping
   while (!all_motors_stopped_) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");

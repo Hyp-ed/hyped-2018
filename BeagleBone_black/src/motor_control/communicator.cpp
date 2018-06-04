@@ -54,17 +54,7 @@ void Communicator::configureControllers()
   controller2_.configure();
   controller3_.configure();
   controller4_.configure();
-  if (controller1_.getConfiguartionStatus() == true
-      && controller2_.getConfiguartionStatus() == true
-      && controller3_.getConfiguartionStatus() == true
-      && controller1_.getConfiguartionStatus() == true)
-      {
-        log_.INFO("MOTOR", "Motors are configured for launch");
-      } else {
-        data::Motors motor_data_ = { data::MotorState::kConfigurationError,
-                                     0, 0, 0, 0, 0, 0, 0, 0 };
-        data_.setMotorData(motor_data_);
-      }
+  log_.INFO("MOTOR", "Motors are configured for launch");
 }
 
 bool Communicator::enterOperational()
@@ -79,8 +69,9 @@ bool Communicator::enterOperational()
       && controller1_.getControllerState() == kOperationEnabled)
       {
         return true;
+      } else {
+        this->enterPreOperational();
       }
-  return false;
 }
 
 void Communicator::enterPreOperational()

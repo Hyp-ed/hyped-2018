@@ -50,11 +50,6 @@ class Main: public Thread {
   /**
     *  @brief  { Enter controllers into pre operational state if config error occurs }
     */
-  void enterPreOperational();
-  /**
-    *  @brief  { Will accelerate motors until maximum acceleration distance is reached }
-    */
-
   void accelerateMotors();
   /**
     *  @brief  { Will decelerate motors until total distance is reached }
