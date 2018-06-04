@@ -86,6 +86,9 @@ int Communications::receiveMessage()
     case 2:
       log_.INFO("COMN", "Received 2 (LAUNCH)");  // LAUNCH
       break;
+    case 3:
+      log_.INFO("COMN", "Received 3 (RESET)");  // RESET
+      break;
   }
 
   return command_;
