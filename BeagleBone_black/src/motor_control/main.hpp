@@ -48,8 +48,13 @@ class Main: public Thread {
     */
   void setupMotors();
   /**
+    *  @brief  { Enter controllers into pre operational state if config error occurs }
+    */
+  void enterPreOperational();
+  /**
     *  @brief  { Will accelerate motors until maximum acceleration distance is reached }
     */
+
   void accelerateMotors();
   /**
     *  @brief  { Will decelerate motors until total distance is reached }
@@ -101,6 +106,7 @@ class Main: public Thread {
   int32_t target_velocity_;
   int16_t target_torque_;
   bool motors_set_up_;
+  bool motors_operational_;
   bool motor_failure_;
   bool run_;
   bool all_motors_stopped_;

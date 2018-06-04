@@ -36,11 +36,10 @@ Main::Main(uint8_t id, Logger& log)
       target_velocity_(0),
       target_torque_(0),
       motors_set_up_(false),
+      motors_operational_(false),
       run_(true),
       all_motors_stopped_(false)
-{
-  this->setupMotors();
-}
+{}
 
 void Main::run()
 {
@@ -48,11 +47,13 @@ void Main::run()
   while (run_) {
     state_ = data_.getStateMachineData();
     if (state_.current_state == data::State::kIdle) {
-      // this->setupMotors();
+      this->setupMotors();
     } else if (state_.current_state == data::State::kAccelerating) {
       this->accelerateMotors();
     } else if (state_.current_state == data::State::kDecelerating) {
       this->decelerateMotors();
+    } else if (state_.current_state == data::State::kFailureStopped) {
+      this->enterPreOperational();
     } else if (state_.current_state == data::State::kEmergencyBraking) {
       this->stopMotors();
     } else {
@@ -66,15 +67,35 @@ void Main::setupMotors()
   if (!motors_set_up_) {
     communicator_.registerControllers();
     communicator_.configureControllers();
-    data::Motors motor_data_ = { data::MotorState::kMotorIdle, 0, 0, 0, 0, 0, 0, 0, 0 };
+    data::Motors motor_data_ = data_.getMotorData();
+    if (motor_data_.current_motor_state == data::MotorState::kConfigurationError) {
+      this->enterPreOperational();
+    }
+    motor_data_ = { data::MotorState::kPreOperational, 0, 0, 0, 0, 0, 0, 0, 0 };
     data_.setMotorData(motor_data_);
     motors_set_up_ = true;
     log_.INFO("MOTOR", "Motor State: Idle");
   }
 }
 
+void Main::enterPreOperational()
+{
+  communicator_.enterPreOperational();
+}
+
 void Main::accelerateMotors()
 {
+  if (!motors_operational_) {
+    bool operational = communicator_.enterOperational();
+    if (operational) {
+      motors_operational_ = true;
+    } else {
+      log_.ERR("MOTOR", "Controllers not operational");
+      data::Motors motor_data_ = { data::MotorState::kCriticalFailure, 0, 0, 0, 0, 0, 0, 0, 0 };
+      data_.setMotorData(motor_data_);
+      return;
+    }
+  }
   log_.INFO("MOTOR", "Motor State: Accelerating\n");
   while (state_.current_state == data::State::kAccelerating) {
     // Check for state machine critical failure flag

@@ -80,7 +80,7 @@ Controller::Controller(Logger& log, uint8_t id)
     configure_count_(0),
     config_error_count_(0),
     configured_(false),
-    state(kNotReadyToSwitchOn)
+    state_(kNotReadyToSwitchOn)
 {
   SDOMessage.id       = kSDO_RECEIVE + node_id_;
   SDOMessage.extended = false;
@@ -311,6 +311,11 @@ void Controller::enterOperational()
   }
 }
 
+void Controller::enterPreOperational()
+{
+  // TODO(Anyone) enter preop state
+}
+
 void Controller::checkStatus()
 {
   // Check Statusword in object dictionary
@@ -416,69 +421,78 @@ void Controller::processNewData(utils::io::can::Frame& message)
 }
 
 void Controller::processEmergencyMessage(utils::io::can::Frame& message)
-{/*EMPTY*/}
+{
+  critical_failure_ = true;
+  // TODO(Anyone) Process error message
+}
 
 void Controller::processSDOMessage(utils::io::can::Frame& message)
 {
+  int8_t index_1   = message.data[1];
+  int8_t index_2   = message.data[2];
+  int8_t sub_index = message.data[3];
+
   // Process actual velocity. TODO(Anyone) Cover negative velocity case
-  if (message.data[1] == 0x6C && message.data[2] == 0x60) {
+  if (index_1 == 0x6C && index_2 == 0x60) {
     actual_velocity_ = (message.data[7] << 24
                       | message.data[6] << 16
                       | message.data[5] << 8
                       | message.data[4]);
+    return;
   }
 
-  // Process actual torque. //TODO(Anyone) Cover negative torque case
-  if (message.data[1] == 0x77 && message.data[2] == 0x60) {
+  // Process actual torque. TODO(Anyone) Cover negative torque case
+  if (index_1 == 0x77 && index_2 == 0x60) {
     actual_torque_   = (message.data[5] << 8
                       | message.data[4]);
+    return;
   }
 
   // Process configuration messages
-  if (message.data[1] == 0x33 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+  if (index_1 == 0x33 && index_2 == 0x20 && sub_index == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Motor poles configured", node_id_);
     return;
   }
-  if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x01) {
+  if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x01) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Feedback type configured", node_id_);
     return;
   }
-  if (message.data[1] == 0x40 && message.data[2] == 0x20 && message.data[3] == 0x08) {
+  if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x08) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Motor phase offset configured", node_id_);
     return;
   }
-  if (message.data[1] == 0x54 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+  if (index_1 == 0x54 && index_2 == 0x20 && sub_index == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Over voltage limit configured", node_id_);
     return;
   }
-  if (message.data[1] == 0x55 && message.data[2] == 0x20 && message.data[3] == 0x03) {
+  if (index_1 == 0x55 && index_2 == 0x20 && sub_index == 0x03) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Under voltage limit configured", node_id_);
     return;
   }
-  if (message.data[1] == 0x75 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+  if (index_1 == 0x75 && index_2 == 0x60 && sub_index == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Motor rated current configured", node_id_);
     return;
   }
-  if (message.data[1] == 0x76 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+  if (index_1 == 0x76 && index_2 == 0x60 && sub_index == 0x00) {
     configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Motor rated torque configured", node_id_);
     return;
   }
 
   // Process warning and error messages
-  if (message.data[1] == 0x27 && message.data[2] == 0x20 && message.data[3] == 0x00) {
+  if (index_1 == 0x27 && index_2 == 0x20 && sub_index == 0x00) {
     if (message.data[4] + message.data[5] != 0) {
       error_ = true;
     }
     return;
   }
-  if (message.data[1] == 0x3F && message.data[2] == 0x60 && message.data[3] == 0x00) {
+  if (index_1 == 0x3F && index_2 == 0x60 && sub_index == 0x00) {
     if (message.data[4] + message.data[5] != 0) {
       error_ = true;
     }
@@ -487,7 +501,7 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
   }
 
   // Controlword updates
-  if (message.data[1] == 0x40 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+  if (index_1 == 0x40 && index_2 == 0x60 && sub_index == 0x00) {
     log_.DBG1("MOTOR", "Controller %d: Control Word updated", node_id_);
     return;
   }
@@ -502,47 +516,47 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
    * xxxx xxxx x0xx 1111: Fault reaction active
    * xxxx xxxx x0xx 1000: Fault
    */
-  if (message.data[1] == 0x41 && message.data[2] == 0x60 && message.data[3] == 0x00) {
+  if (index_1 == 0x41 && index_2 == 0x60 && sub_index == 0x00) {
     uint8_t status = message.data[4];
     if ((status << 4) == 0) {
       if (status & (1 << 6)) {
-        state = kSwitchOnDisabled;
+        state_ = kSwitchOnDisabled;
         log_.DBG1("MOTOR", "Controller %d state: Switch on disabled", node_id_);
         return;
       } else {
-        state = kNotReadyToSwitchOn;
+        state_ = kNotReadyToSwitchOn;
         log_.DBG1("MOTOR", "Controller %d state: Not ready to switch on", node_id_);
         return;
       }
     }
     if ((status << 4) == 16) {
-      state = kReadyToSwitchOn;
+      state_ = kReadyToSwitchOn;
       log_.DBG1("MOTOR", "Controller %d state: Ready to switch on", node_id_);
       return;
     }
     if ((status << 4) == 48) {
-      state = kSwitchedOn;
+      state_ = kSwitchedOn;
       log_.DBG1("MOTOR", "Controller %d state: Switched on", node_id_);
       return;
     }
     if ((status << 4) == 112) {
       if (status & (1 << 5)) {
-        state = kOperationEnabled;
+        state_ = kOperationEnabled;
         log_.DBG1("MOTOR", "Controller %d state: Operation enabled", node_id_);
         return;
       } else {
-        state = kQuickStopActive;
+        state_ = kQuickStopActive;
         log_.DBG1("MOTOR", "Controller %d state: Quick stop active", node_id_);
         return;
       }
     }
     if ((status << 4) == 240) {
-      state = kFaultReactionActive;
+      state_ = kFaultReactionActive;
       log_.DBG1("MOTOR", "Controller %d state: Fault reaction active", node_id_);
       return;
     }
     if ((status << 4) == 64) {
-      state = kFault;
+      state_ = kFault;
       log_.DBG1("MOTOR", "Controller %d state: Fault", node_id_);
       return;
     }
@@ -589,6 +603,11 @@ uint8_t Controller::getId()
 bool Controller::getConfiguartionStatus()
 {
   return configured_;
+}
+
+ControllerState Controller::getControllerState()
+{
+  return state_;
 }
 
 }}  // namespace hyped::motor_control
