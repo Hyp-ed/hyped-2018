@@ -29,17 +29,20 @@
 #include <vector>
 
 #include "utils/concurrent/thread.hpp"
+#include "utils/io/can.hpp"
 
 namespace hyped {
 // Forward declarations
 namespace utils { class Logger; }
 namespace utils { namespace io { class Can; } }
+namespace utils { namespace io { class CanProccesor; } }
 namespace utils { namespace io { namespace can { struct Frame; } } }
 
 namespace sensors {
 
 using utils::Logger;
 using utils::io::Can;
+using utils::io::CanProccesor;
 using utils::concurrent::Thread;
 
 namespace bms {
@@ -65,7 +68,7 @@ struct Data {
 
 }   // namespace bms
 
-class BMS : public Thread {
+class BMS : public Thread, public CanProccesor {
   friend Can;
 
  public:
@@ -94,7 +97,7 @@ class BMS : public Thread {
    *
    * @param message received CAN message to be processed
    */
-  void processNewData(utils::io::can::Frame& message);
+  void processNewData(utils::io::can::Frame& message) override;
 
  private:
   Can&      can_;
