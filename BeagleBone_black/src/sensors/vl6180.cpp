@@ -58,13 +58,13 @@ using utils::io::I2C;
 namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, Logger& log)
-    : log_(log),
-    on_(false),
-    continuous_mode_(false),
-    i2c_(I2C::getInstance())
+    : log_(log)
+    , on_(false)
+    , continuous_mode_(false)
+    , i2c_addr_(i2c_addr)
+    , i2c_(I2C::getInstance())
 {
   // Create I2C instance get register address
-  i2c_addr_ = i2c_addr;
   turnOn();
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
@@ -225,11 +225,9 @@ bool VL6180::waitDeviceBooted()
 {
   // Will hold the return value of the register kSystemFreshOutOfReset
   uint8_t fresh_out_of_reset;
-  do
-  {
+  do {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
-  }
-  while (fresh_out_of_reset != 1);
+  } while (fresh_out_of_reset != 1);
   return true;
 }
 
