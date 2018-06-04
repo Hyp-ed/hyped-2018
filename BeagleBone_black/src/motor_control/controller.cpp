@@ -73,13 +73,8 @@ Controller::Controller(Logger& log, uint8_t id)
     can_(Can::getInstance()),
     node_id_(id),
     critical_failure_(false),
-    error_status_checked_(true),
-    error_(false),
     actual_velocity_(0),
     actual_torque_(0),
-    configure_count_(0),
-    config_error_count_(0),
-    configured_(false),
     state_(kNotReadyToSwitchOn)
 {
   SDOMessage.id       = kSDO_RECEIVE + node_id_;
@@ -151,18 +146,31 @@ void Controller::configure()
   can_.send(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring over voltage limit", node_id_);
 
-  // Set under voltage minimum to 30
+  // Set under voltage minimum to 25
   SDOMessage.data[0]   = kWRITE_2_BYTES;
   SDOMessage.data[1]   = 0x55;
   SDOMessage.data[2]   = 0x20;
   SDOMessage.data[3]   = 0x03;
-  SDOMessage.data[4]   = 0x1E;
+  SDOMessage.data[4]   = 0x19;
   SDOMessage.data[5]   = 0x00;
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
   can_.send(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring under voltage limit", node_id_);
+
+  // Set motor temperature sensor
+  SDOMessage.data[0]   = kWRITE_1_BYTE;
+  SDOMessage.data[1]   = 0x57;
+  SDOMessage.data[2]   = 0x20;
+  SDOMessage.data[3]   = 0x01;
+  SDOMessage.data[4]   = 0x03;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  can_.send(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring motor temperature sensor", node_id_);
 
   // Set motor rated current to 80,000 mA
   SDOMessage.data[0]   = kWRITE_4_BYTES;
@@ -189,32 +197,74 @@ void Controller::configure()
 
   can_.send(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
-
-  // Reset node after configuration
-  NMTMessage.data[0]   = kNMT_RESET_NODE;
-  NMTMessage.data[1]   = node_id_;
-
-  can_.send(NMTMessage);
-  log_.DBG1("MOTOR", "Controller %d: Reset node", node_id_);
-
-  // Wait for 10 x 100ms for all 7 configuration confirmation messages to return.
-  // If we wait for 1 full second and there are less than 7 configuration confirmations,
-  // then we throw a configuarion error
-  while (configure_count_ != 7 && config_error_count_ != 10) {
-    Thread::sleep(100);
-    config_error_count_++;
-  }
-
-  if (config_error_count_ == 10) {
-    log_.ERR("MOTOR", "Controller %d: Configuration error", node_id_);
-    // TODO(Anyone) handle configution error
-  }
-
-  configured_ = true;
 }
 
 void Controller::enterOperational()
 {
+  // Enter NMT Operational
+  SDOMessage.data[0]   = kNMT_OPERATIONAL;
+  SDOMessage.data[1]   = node_id_;
+
+  can_.send(NMTMessage);
+  log_.INFO("MOTOR", "Controller %d: NMT Operational command sent", node_id_);
+
+  // Enable velocity mode
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x09;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  can_.send(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
+
+  // Set target velocity to 0;
+  this->sendTargetVelocity(0);
+
+  // Send shutdown message to tranition from state 1 (Not ready to switch on)
+  // to state 2 (Switch on disabled)
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x06;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  can_.send(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
+
+  // Send switch on message to transition from state 2 (Switch on disabled)
+  // to state 3 (Ready to switch on)
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x07;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  can_.send(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
+
+  // Send enter operational message
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x0F;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  can_.send(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
+
   // Check warning status
   SDOMessage.data[0]   = kREAD_OBJECT;
   SDOMessage.data[1]   = 0x27;
@@ -240,19 +290,13 @@ void Controller::enterOperational()
 
   can_.send(SDOMessage);
   log_.INFO("MOTOR", "Controller %d: Checking for errors", node_id_);
+}
 
-  // Wait until warning and error status is checked
-  while (!error_status_checked_);
-
-  if (!error_) {
-    // Enter NMT Operational
-    SDOMessage.data[0]   = kNMT_OPERATIONAL;
-    SDOMessage.data[1]   = node_id_;
-
-    can_.send(NMTMessage);
-    log_.INFO("MOTOR", "Controller %d: NMT Operational command sent", node_id_);
-
-    // Send shutdown message to tranition state (Disable drive function)
+void Controller::enterPreOperational()
+{
+  // Disable active motors if fault occurs in another motor
+  if (!critical_failure_) {
+    // Send shutdown command
     SDOMessage.data[0]   = kWRITE_2_BYTES;
     SDOMessage.data[1]   = 0x40;
     SDOMessage.data[2]   = 0x60;
@@ -263,57 +307,15 @@ void Controller::enterOperational()
     SDOMessage.data[7]   = 0x00;
 
     can_.send(SDOMessage);
-    log_.DBG1("MOTOR", "Controller %d: Disabling drive function", node_id_);
+    log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
 
-    // Send switch on message (Disable breaks)
-    SDOMessage.data[0]   = kWRITE_2_BYTES;
-    SDOMessage.data[1]   = 0x40;
-    SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x00;
-    SDOMessage.data[4]   = 0x07;
-    SDOMessage.data[5]   = 0x00;
-    SDOMessage.data[6]   = 0x00;
-    SDOMessage.data[7]   = 0x00;
+    // Enter NMT Operational
+    SDOMessage.data[0]   = kNMT_PREOPERATIONAL;
+    SDOMessage.data[1]   = node_id_;
 
-    can_.send(SDOMessage);
-    log_.DBG1("MOTOR", "Controller %d: Disabling breaks", node_id_);
-
-    // Send enter operational message
-    SDOMessage.data[0]   = kWRITE_2_BYTES;
-    SDOMessage.data[1]   = 0x40;
-    SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x00;
-    SDOMessage.data[4]   = 0x0F;
-    SDOMessage.data[5]   = 0x00;
-    SDOMessage.data[6]   = 0x00;
-    SDOMessage.data[7]   = 0x00;
-
-    can_.send(SDOMessage);
-    log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
-
-    // Enable velocity mode
-    SDOMessage.data[0]   = kWRITE_2_BYTES;
-    SDOMessage.data[1]   = 0x40;
-    SDOMessage.data[2]   = 0x60;
-    SDOMessage.data[3]   = 0x00;
-    SDOMessage.data[4]   = 0x03;
-    SDOMessage.data[5]   = 0x00;
-    SDOMessage.data[6]   = 0x00;
-    SDOMessage.data[7]   = 0x00;
-
-    can_.send(SDOMessage);
-    log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
-
-    // Check if controller is in Operational state
-    this->checkStatus();
-  } else {
-    log_.ERR("MOTOR", "Controller %d: ERROR", node_id_);  // TODO(Anyone): Handle error
+    can_.send(NMTMessage);
+    log_.INFO("MOTOR", "Controller %d: NMT Pre-Operational command sent", node_id_);
   }
-}
-
-void Controller::enterPreOperational()
-{
-  // TODO(Anyone) enter preop state
 }
 
 void Controller::checkStatus()
@@ -331,6 +333,7 @@ void Controller::checkStatus()
   can_.send(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Checking status", node_id_);
 }
+
 void Controller::sendTargetVelocity(int32_t target_velocity)
 {
   // Send 32 bit integer in Little Edian bytes
@@ -434,69 +437,146 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
 
   // Process actual velocity. TODO(Anyone) Cover negative velocity case
   if (index_1 == 0x6C && index_2 == 0x60) {
-    actual_velocity_ = (message.data[7] << 24
-                      | message.data[6] << 16
-                      | message.data[5] << 8
-                      | message.data[4]);
+    actual_velocity_ = (message.data[7] << 24) | (message.data[6] << 16)
+                      | (message.data[5] << 8) | message.data[4];
     return;
   }
 
   // Process actual torque. TODO(Anyone) Cover negative torque case
   if (index_1 == 0x77 && index_2 == 0x60) {
-    actual_torque_   = (message.data[5] << 8
-                      | message.data[4]);
+    actual_torque_   = (message.data[5] << 8) | message.data[4];
+    return;
+  }
+
+  // Process warning message
+  if (index_1 == 0x27 && index_2 == 0x20 && sub_index == 0x00) {
+    if (message.data[4] != 0 && message.data[5] != 0) {
+      critical_failure_ = true;
+      uint8_t warning_message = message.data[4];
+      switch (warning_message) {
+        case 0x01:
+          log_.ERR("MOTOR", "Controller %d warning: Controller temperature exceeded");
+          break;
+        case 0x02:
+          log_.ERR("MOTOR", "Controller %d warning: Motor temperature exceeded");
+          break;
+        case 0x04:
+          log_.ERR("MOTOR", "Controller %d warning: DC link under voltage");
+          break;
+        case 0x08:
+          log_.ERR("MOTOR", "Controller %d warning: DC link over voltage");
+          break;
+        case 0x10:
+          log_.ERR("MOTOR", "Controller %d warning: DC over current");
+          break;
+        case 0x20:
+          log_.ERR("MOTOR", "Controller %d warning: Stall protection active");
+          break;
+        case 0x40:
+          log_.ERR("MOTOR", "Controller %d warning: Max velocity exceeded");
+          break;
+        default:
+          log_.ERR("MOTOR", "Controller %d warning: Warning code %d", node_id_, warning_message);
+      }
+    }
+    return;
+  }
+
+  // Process error message
+  if (index_1 == 0x3F && index_2 == 0x60 && sub_index == 0x00) {
+    if (message.data[4] != 0 && message.data[5] != 0) {
+      critical_failure_ = true;
+      uint16_t error_message = (message.data[5] << 8) | message.data[4];
+      switch (error_message) {
+        case 0x1000:
+          log_.ERR("MOTOR", "Controller %d error: Unspecified error", node_id_);
+          break;
+        case 0x2220:
+          log_.ERR("MOTOR", "Controller %d error: Overcurrent error", node_id_);
+          break;
+        case 0x3210:
+          log_.ERR("MOTOR", "Controller %d error: DC link over voltage", node_id_);
+          break;
+        case 0xFF01:
+          log_.ERR("MOTOR", "Controller %d error: Phase A current measurement", node_id_);
+          break;
+        case 0xFF02:
+          log_.ERR("MOTOR", "Controller %d error: Phase B current measurement", node_id_);
+          break;
+        case 0xFF03:
+          log_.ERR("MOTOR", "Controller %d error: High side FET short circuit", node_id_);
+          break;
+        case 0xFF04:
+          log_.ERR("MOTOR", "Controller %d error: Low side FET short circuit", node_id_);
+          break;
+        case 0xFF05:
+          log_.ERR("MOTOR", "Controller %d error: Low side phase 1 short circuit", node_id_);
+          break;
+        case 0xFF06:
+          log_.ERR("MOTOR", "Controller %d error: Low side phase 2 short circuit", node_id_);
+          break;
+        case 0xFF07:
+          log_.ERR("MOTOR", "Controller %d error: Low side phase 3 short circuit", node_id_);
+          break;
+        case 0xFF08:
+          log_.ERR("MOTOR", "Controller %d error: High side phase 1 short circuit", node_id_);
+          break;
+        case 0xFF09:
+          log_.ERR("MOTOR", "Controller %d error: High side phase 2 short circuit", node_id_);
+          break;
+        case 0xFF0A:
+          log_.ERR("MOTOR", "Controller %d error: High side phase 3 short circuit", node_id_);
+          break;
+        case 0xFF0B:
+          log_.ERR("MOTOR", "Controller %d error: Motor Feedback", node_id_);
+          break;
+        case 0xFF0C:
+          log_.ERR("MOTOR", "Controller %d error: DC link under voltage", node_id_);
+          break;
+        case 0xFF0D:
+          log_.ERR("MOTOR", "Controller %d error: Pulse mode finished", node_id_);
+          break;
+        case 0xFF0E:
+          log_.ERR("MOTOR", "Controller %d error: Application error", node_id_);
+          break;
+        case 0xFF0F:
+          log_.ERR("MOTOR", "Controller %d error: STO error", node_id_);
+          break;
+        case 0xFF10:
+          log_.ERR("MOTOR", "Controller %d error: Controller temperature exceeded", node_id_);
+          break;
+      }
+    }
     return;
   }
 
   // Process configuration messages
   if (index_1 == 0x33 && index_2 == 0x20 && sub_index == 0x00) {
-    configure_count_++;
-    log_.DBG1("MOTOR", "Controller %d: Motor poles configured", node_id_);
+        log_.DBG1("MOTOR", "Controller %d: Motor poles configured", node_id_);
     return;
   }
   if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x01) {
-    configure_count_++;
-    log_.DBG1("MOTOR", "Controller %d: Feedback type configured", node_id_);
+        log_.DBG1("MOTOR", "Controller %d: Feedback type configured", node_id_);
     return;
   }
   if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x08) {
-    configure_count_++;
-    log_.DBG1("MOTOR", "Controller %d: Motor phase offset configured", node_id_);
+        log_.DBG1("MOTOR", "Controller %d: Motor phase offset configured", node_id_);
     return;
   }
   if (index_1 == 0x54 && index_2 == 0x20 && sub_index == 0x00) {
-    configure_count_++;
-    log_.DBG1("MOTOR", "Controller %d: Over voltage limit configured", node_id_);
+        log_.DBG1("MOTOR", "Controller %d: Over voltage limit configured", node_id_);
     return;
   }
   if (index_1 == 0x55 && index_2 == 0x20 && sub_index == 0x03) {
-    configure_count_++;
-    log_.DBG1("MOTOR", "Controller %d: Under voltage limit configured", node_id_);
+        log_.DBG1("MOTOR", "Controller %d: Under voltage limit configured", node_id_);
     return;
   }
   if (index_1 == 0x75 && index_2 == 0x60 && sub_index == 0x00) {
-    configure_count_++;
-    log_.DBG1("MOTOR", "Controller %d: Motor rated current configured", node_id_);
+        log_.DBG1("MOTOR", "Controller %d: Motor rated current configured", node_id_);
     return;
   }
   if (index_1 == 0x76 && index_2 == 0x60 && sub_index == 0x00) {
-    configure_count_++;
     log_.DBG1("MOTOR", "Controller %d: Motor rated torque configured", node_id_);
-    return;
-  }
-
-  // Process warning and error messages
-  if (index_1 == 0x27 && index_2 == 0x20 && sub_index == 0x00) {
-    if (message.data[4] + message.data[5] != 0) {
-      error_ = true;
-    }
-    return;
-  }
-  if (index_1 == 0x3F && index_2 == 0x60 && sub_index == 0x00) {
-    if (message.data[4] + message.data[5] != 0) {
-      error_ = true;
-    }
-    error_status_checked_ = true;
     return;
   }
 
@@ -587,7 +667,18 @@ void Controller::processNMTMessage(utils::io::can::Frame& message)
 
 void Controller::quickStop()
 {
-  // TODO(Anyone) Add quickStop command
+  // Send quickStop command
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x02;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  can_.send(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Sending quickStop command", node_id_);
 }
 
 bool Controller::getFailure()
@@ -598,11 +689,6 @@ bool Controller::getFailure()
 uint8_t Controller::getId()
 {
   return node_id_;
-}
-
-bool Controller::getConfiguartionStatus()
-{
-  return configured_;
 }
 
 ControllerState Controller::getControllerState()
