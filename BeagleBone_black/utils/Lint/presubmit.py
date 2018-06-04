@@ -256,7 +256,7 @@ class CppLintProcessor(SourceFileProcessor):
     command = ['cpplint.py', '--filter', filt]
     local_cpplint = join(path, "../utils/Lint", "cpplint.py")
     if exists(local_cpplint):
-      command = ['python', local_cpplint, '--filter', filt]
+      command = ['python2.7', local_cpplint, '--filter', filt]
 
     commands = join([command + [file] for file in files])
     count = multiprocessing.cpu_count()
