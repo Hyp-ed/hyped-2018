@@ -58,6 +58,16 @@ class Communicator {
     */
   void configureControllers();
   /**
+    *   @brief  { Controllers are entered into Operational mode }
+    *
+    *   @return { Returns true if successful }
+    */
+  bool enterOperational();
+  /**
+    *   @brief  Sets controllers to pre operational mode
+    */
+  void enterPreOperational();
+  /**
     *  @brief  { Set target velocity for each controller }
     *
     *  @param[in] { Target velocity calculated in Main }
@@ -93,6 +103,7 @@ class Communicator {
   bool checkFailure();
 
  private:
+  data::Data& data_;
   Logger& log_;
   Controller controller1_;
   Controller controller2_;

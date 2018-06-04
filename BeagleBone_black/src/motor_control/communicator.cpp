@@ -29,7 +29,8 @@ namespace hyped {
 namespace motor_control {
 
 Communicator::Communicator(Logger& log)
-  : log_(log),
+  : data_(data::Data::getInstance()),
+    log_(log),
     controller1_(log, 1),
     controller2_(log, 2),
     controller3_(log, 3),
@@ -59,13 +60,35 @@ void Communicator::configureControllers()
       && controller1_.getConfiguartionStatus() == true)
       {
         log_.INFO("MOTOR", "Motors are configured for launch");
-        controller1_.enterOperational();
-        controller2_.enterOperational();
-        controller3_.enterOperational();
-        controller4_.enterOperational();
       } else {
-        // Configuration error. TODO(Anyone) Update data structure with error
+        data::Motors motor_data_ = { data::MotorState::kConfigurationError,
+                                     0, 0, 0, 0, 0, 0, 0, 0 };
+        data_.setMotorData(motor_data_);
       }
+}
+
+bool Communicator::enterOperational()
+{
+  controller1_.enterOperational();
+  controller2_.enterOperational();
+  controller3_.enterOperational();
+  controller4_.enterOperational();
+  if (controller1_.getControllerState() == kOperationEnabled
+      && controller1_.getControllerState() == kOperationEnabled
+      && controller1_.getControllerState() == kOperationEnabled
+      && controller1_.getControllerState() == kOperationEnabled)
+      {
+        return true;
+      }
+  return false;
+}
+
+void Communicator::enterPreOperational()
+{
+  controller1_.enterPreOperational();
+  controller2_.enterPreOperational();
+  controller3_.enterPreOperational();
+  controller4_.enterPreOperational();
 }
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)

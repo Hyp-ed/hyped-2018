@@ -37,9 +37,6 @@ using utils::Logger;
 using utils::io::Can;
 using utils::io::CanProccesor;
 
-class Controller : public CanProccesor {
-  friend Can;
-
 enum ControllerState {
   kNotReadyToSwitchOn,
   kSwitchOnDisabled,
@@ -50,6 +47,9 @@ enum ControllerState {
   kFaultReactionActive,
   kFault,
 };
+
+class Controller : public CanProccesor {
+  friend Can;
 
  public:
   Controller(Logger& log, uint8_t id);
@@ -65,6 +65,10 @@ enum ControllerState {
     *   @brief  { Checks for any warnings or errors, and enters operational state }
     */
   void enterOperational();
+  /**
+    *   @brief  { Enter preop state }
+    */
+  void enterPreOperational();
   /**
     *   @brief  { Checks controller status }
     */
@@ -138,6 +142,12 @@ enum ControllerState {
    * @brief { Returns true if controller is configured }
    */
   bool getConfiguartionStatus();
+  /*
+   * @brief { Returns state of controller }
+   *
+   * @return { ControllerState }
+   */
+  ControllerState getControllerState();
 
  private:
   Logger&  log_;
@@ -153,7 +163,7 @@ enum ControllerState {
   bool     configured_;            // True if all configution confirmation messages are received
   utils::io::can::Frame SDOMessage;
   utils::io::can::Frame NMTMessage;
-  ControllerState state;
+  ControllerState state_;
 };
 
 }}  // namespace hyped::motor_control
