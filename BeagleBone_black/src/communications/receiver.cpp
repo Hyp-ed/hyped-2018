@@ -43,6 +43,9 @@ void ReceiverThread::run()
       case 2:
         cmn_data.launchCommand = true;
         break;
+      case 2:
+        cmn_data.resetCommand = true;
+        break;
     }
 
     data_.setCommunicationsData(cmn_data);
