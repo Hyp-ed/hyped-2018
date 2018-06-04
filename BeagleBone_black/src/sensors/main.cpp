@@ -42,6 +42,7 @@ Main::Main(uint8_t id, Logger& log)
   // create Proximities
   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
     proxi_[i] = new VL6180(0x29, log_);
+    proxi_[i]->setContinuousRangingMode();
   }
 }
 
@@ -51,6 +52,10 @@ void Main::run()
     // keep updating data_ based on values read from sensors
     for (BMS* bms: bms_) {
       bms->update();
+    }
+
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      sensors_.proxi[i].val = proxi_[i]->getDistance();
     }
 
     data_.setSensorsData(sensors_);

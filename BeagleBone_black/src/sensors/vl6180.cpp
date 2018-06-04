@@ -154,7 +154,7 @@ void VL6180::turnOff()
   log_.DBG("VL6180", "Sensor is now off\n");
 }
 
-double VL6180::getDistance()
+uint8_t VL6180::getDistance()
 {
   if (continuous_mode_) {
     return continuousRangeDistance();
@@ -177,12 +177,12 @@ void VL6180::setContinuousRangingMode()
   continuous_mode_ = true;
 }
 
-double VL6180::continuousRangeDistance()
+uint8_t VL6180::continuousRangeDistance()
 {
   uint8_t data;
   data = 1;
   readByte(kResultRangeVal, &data);   // read the sampled data
-  return static_cast<int>(data);
+  return data;
 }
 
 void VL6180::setSingleShotMode()
@@ -197,7 +197,7 @@ void VL6180::setSingleShotMode()
   }
 }
 
-double VL6180::singleRangeDistance()
+uint8_t VL6180::singleRangeDistance()
 {
   uint8_t data;
   data = 1;
@@ -218,7 +218,7 @@ double VL6180::singleRangeDistance()
 
   writeByte(kSystemInterruptClear, kInterruptClearRanging);
   readByte(kResultRangeVal, &data);
-  return static_cast<int>(data);
+  return data;
 }
 
 bool VL6180::waitDeviceBooted()
