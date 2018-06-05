@@ -64,11 +64,20 @@ struct StateMachine {
 // -----------------------------------------------------------------------------
 // Navigation
 // -----------------------------------------------------------------------------
+enum struct NavigationState {
+  kCalibrating,     ///< Navigation module is calibrating. Pod must not be moved in this state.
+  kCriticalFailure, ///< Navigation module has problems and cannot provide reliable output
+  kOperational,     ///< Navigation module is working fine and providing reliable output
+  kReady            ///< Navigation module is still calibrating but ready to transition to
+                    ///  `kOperational` state
+};
+
 typedef float NavigationType;
 struct Navigation {
-  NavigationType distance;
-  NavigationType velocity;
-  NavigationType acceleration;
+  NavigationState state;
+  NavigationType  distance;
+  NavigationType  velocity;
+  NavigationType  acceleration;
 };
 
 // -----------------------------------------------------------------------------
