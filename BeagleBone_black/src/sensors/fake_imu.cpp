@@ -27,13 +27,10 @@
 #include "data/data_point.hpp"
 #include "sensors/fake_imu.hpp"
 
+using std::chrono::duration;
+using std::chrono::duration_cast;
+
 namespace hyped {
-
-using data::Imu;
-using data::NavigationType;
-using data::NavigationVector;
-using data::DataPoint;
-
 namespace sensors {
 
 FakeImu::FakeImu(std::string file_path)
@@ -64,10 +61,16 @@ void FakeImu::setData()
 
 void FakeImu::getData(Imu* imu)
 {
-  imu->acc = DataPoint<NavigationVector>(imu_.acc.timestamp,
-                                         imu_.acc.value + addNoiseToData(acc_val, acc_noise));
-  imu->gyr = DataPoint<NavigationVector>(imu_.gyr.timestamp,
-                                         imu_.gyr.value + addNoiseToData(gyr_val, gyr_noise));
+  if (accCheckTime())
+    prevAccData = DataPoint<NavigationVector>(imu_.acc.timestamp,
+                                           imu_.acc.value + addNoiseToData(acc_val, acc_noise));
+
+  if (gyrCheckTime())
+    prevGyrData = DataPoint<NavigationVector>(imu_.gyr.timestamp,
+                                           imu_.gyr.value + addNoiseToData(gyr_val, gyr_noise));
+
+  imu->acc = prevAccData;
+  imu->gyr = prevGyrData;
 }
 
 NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType noise)
@@ -107,6 +110,32 @@ bool FakeImu::readNextLine()
 
     return true;
   } return false;
+}
+
+bool FakeImu::accCheckTime()
+{
+    high_resolution_clock::time_point now = high_resolution_clock::now();
+    duration<double> time_span = duration_cast<duration<double>>(now - accPrevReadTime);
+
+    if (time_span.count() < 0.000250) {
+        return false;
+    }
+
+    accPrevReadTime = now;
+    return true;
+}
+
+bool FakeImu::gyrCheckTime()
+{
+    high_resolution_clock::time_point now = high_resolution_clock::now();
+    duration<double> time_span = duration_cast<duration<double>>(now - gyrPrevReadTime);
+
+    if (time_span.count() < 0.000125) {
+        return false;
+    }
+
+    gyrPrevReadTime = now;
+    return true;
 }
 
 }}  // namespace hyped::sensors

@@ -22,14 +22,17 @@
 #define BEAGLEBONE_BLACK_SENSORS_FAKE_IMU_HPP_
 
 #include <string>
+
 #include "data/data.hpp"
 #include "sensors/imu_interface.hpp"
 
 namespace hyped {
 
 using data::Imu;
+using data::DataPoint;
 using data::NavigationType;
 using data::NavigationVector;
+using std::chrono::high_resolution_clock;
 
 namespace sensors {
 
@@ -71,10 +74,18 @@ class FakeImu : public ImuInterface {
  private:
   Imu imu_;
   std::ifstream file;
+
   NavigationVector acc_val;
   NavigationVector gyr_val;
+
   NavigationType acc_noise;
   NavigationType gyr_noise;
+
+  high_resolution_clock::time_point accPrevReadTime;
+  high_resolution_clock::time_point gyrPrevReadTime;
+
+  DataPoint<NavigationVector> prevAccData;
+  DataPoint<NavigationVector> prevGyrData;
 
   /*
    * @brief     A function that reads data from file directory
@@ -89,6 +100,12 @@ class FakeImu : public ImuInterface {
    * @brief     A function that adds noise to the imu data
    */
   static NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
+
+  /*
+   * @brief     Checks to see if sufficient time has pass for the sensor to be updated
+   */
+  bool accCheckTime();
+  bool gyrCheckTime();
 };
 
 }}  // namespace hyped::sensors
