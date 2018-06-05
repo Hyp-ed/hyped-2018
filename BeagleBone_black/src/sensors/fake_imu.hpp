@@ -55,6 +55,11 @@ class FakeImu : public ImuInterface {
   ~FakeImu();
 
   /*
+   * @brief     Initializes the values of some variables accordingly
+   */
+  void init();
+
+  /*
    * @brief     A function that gets the imu data
    */
   void getData(Imu* imu) override;
