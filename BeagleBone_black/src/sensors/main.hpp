@@ -32,6 +32,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/bms.hpp"
+#include "sensors/vl6180.hpp"
 
 namespace hyped {
 
@@ -46,8 +47,16 @@ class Main: public Thread {
   void run() override;
 
  private:
-  data::Data& data_;
-  BMS         bms_;
+  // master data structures
+  data::Data&     data_;
+  data::Sensors   sensors_;
+  data::Batteries batteries_;
+
+  // batteries
+  BMS*        bms_[data::Batteries::kNumLPBatteries];
+
+  // nav sensors
+  VL6180*     proxi_[data::Sensors::kNumProximities];
 };
 
 }}  // namespace hyped::sensors

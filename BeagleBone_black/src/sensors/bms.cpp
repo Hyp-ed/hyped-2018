@@ -20,23 +20,37 @@
 
 #include "sensors/bms.hpp"
 
+#include "data/data.hpp"
+#include "utils/io/can.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/io/can.hpp"
+#include "utils/utils.hpp"
 
 namespace hyped {
 namespace sensors {
 
 std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
 
-BMS::BMS(uint8_t id): BMS(id, utils::System::getLogger())
+BMS::BMS(uint8_t id): BMS(id, 0, utils::System::getLogger())
+{ /* Do nothing, delegate to the other constructor */ }
+
+BMS::BMS(uint8_t id, data::Battery* battery_unit)
+    : BMS(id, battery_unit, utils::System::getLogger())
 { /* Do nothing, delegate to the other constructor */ }
 
 BMS::BMS(uint8_t id, Logger& log)
+    : BMS(id, 0, log)
+{ /* Do nothing, delegate to the other constructor */ }
+
+BMS::BMS(uint8_t id, data::Battery* battery_unit, Logger& log)
     : Thread(log),
       can_(Can::getInstance()),
-      id_(id)
+      data_({}),
+      battery_unit_(battery_unit),
+      id_(id),
+      running_(false)
 {
+  ASSERT(id < data::Batteries::kNumLPBatteries);
   // verify this BMS unit has not been instantiated
   for (uint8_t i : existing_ids_) {
     if (id == i) {
@@ -46,18 +60,10 @@ BMS::BMS(uint8_t id, Logger& log)
   }
   existing_ids_.push_back(id);
 
-  // reset module's data
-  for (auto& v : data_.voltage) {
-    v = 0;
-  }
-  data_.temperature = 0;
-
   // tell CAN about yourself
   can_.registerBMS(this);
 
-  // spawn helper thread
   running_ = true;
-  start();
 }
 
 BMS::~BMS()
@@ -77,22 +83,22 @@ void BMS::request()
   message.data[1]   = 0;
 
   can_.send(message);
-  log_.DBG1("BMS", "request message sent");
+  log_.DBG1("BMS", "module %u: request message sent", id_);
 }
 
 void BMS::run()
 {
-  log_.INFO("BMS", "starting BMS module %d", id_);
+  log_.INFO("BMS", "module %u: starting BMS", id_);
   while (running_) {
     request();
     sleep(bms::kPeriod);
   }
-  log_.INFO("BMS", "stopped BMS module %d", id_);
+  log_.INFO("BMS", "module %u: stopped BMS", id_);
 }
 
 void BMS::processNewData(utils::io::can::Frame& message)
 {
-  log_.DBG1("BMS", "id: %d, received CAN message with id %d", id_, message.id);
+  log_.DBG1("BMS", "module %u: received CAN message with id %d", id_, message.id);
   log_.DBG2("BMS", "message data[0,1] %d %d", message.data[0], message.data[1]);
   uint8_t offset = message.id - (bms::kIdBase + (bms::kIdIncrement * id_));
   switch (offset) {
@@ -115,6 +121,20 @@ void BMS::processNewData(utils::io::can::Frame& message)
       log_.ERR("BMS", "received invalid message, id %d, CANID %d, offset %d",
           id_, message.id, offset);
   }
+}
+
+void BMS::update()
+{
+  if (!battery_unit_) {
+    log_.ERR("BMS", "module %u: does not have data::Battery pointer");
+    return;
+  }
+
+  uint16_t voltage = 0;
+  for (uint16_t v : data_.voltage) voltage += v;
+
+  battery_unit_->voltage      = voltage;
+  battery_unit_->temperature  = data_.temperature;
 }
 
 }}  // namespace hyped::sensors
