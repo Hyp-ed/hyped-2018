@@ -64,12 +64,12 @@ struct StateMachine {
 // -----------------------------------------------------------------------------
 // Navigation
 // -----------------------------------------------------------------------------
-enum struct NavigationState {
-  kCalibrating,     ///< Navigation module is calibrating. Pod must not be moved in this state.
-  kCriticalFailure, ///< Navigation module has problems and cannot provide reliable output
-  kOperational,     ///< Navigation module is working fine and providing reliable output
-  kReady            ///< Navigation module is still calibrating but ready to transition to
-                    ///  `kOperational` state
+enum class NavigationState {
+  kCalibrating,      ///< Navigation module is calibrating. Pod must not be moved in this state.
+  kCriticalFailure,  ///< Navigation module has problems and cannot provide reliable output
+  kOperational,      ///< Navigation module is working fine and providing reliable output
+  kReady             ///< Navigation module is still calibrating but ready to transition to
+                     ///  `kOperational` state
 };
 
 typedef float NavigationType;
@@ -83,29 +83,36 @@ struct Navigation {
 // -----------------------------------------------------------------------------
 // Raw Sensor data
 // -----------------------------------------------------------------------------
+struct Sensor {
+  bool operational;
+};
+
 typedef Vector<NavigationType, 3> NavigationVector;
-struct Imu {
+struct Imu : public Sensor {
   DataPoint<NavigationVector> acc;
   DataPoint<NavigationVector> gyr;
 };
 
-struct Proximity {
+struct Proximity : public Sensor {
   uint8_t val;
 };
 
-struct Battery {
-  uint16_t  voltage;
-  int8_t    temperature;
+struct StripeCounter : public Sensor {
+  DataPoint<uint32_t> count;
 };
 
-typedef DataPoint<uint32_t> StripeCount;
 struct Sensors {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 24;
 
   array<Imu, kNumImus> imu;
   array<Proximity, kNumProximities> proxi;
-  StripeCount stripe_count;
+  StripeCounter stripe_counter;
+};
+
+struct Battery {
+  uint16_t  voltage;
+  int8_t    temperature;
 };
 
 struct Batteries {
@@ -198,12 +205,12 @@ class Data {
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
-  StripeCount getStripeCount();
+  StripeCounter getStripeCounterData();
 
   /**
    * @brief       Should be called to update StripeCount part in Sensors data
    */
-  void setStripeCount(const StripeCount& stripe_count);
+  void setStripeCounterData(const StripeCounter& stripe_counter);
 
   /**
    * @brief      Retrieves data from the batteries.

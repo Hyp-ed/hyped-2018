@@ -94,7 +94,7 @@ class Navigation {
    * @param imus         Array of IMU readings
    * @param stripe_count Stripe counter reading
    */
-  void update(ImuArray imus, data::StripeCount stripe_count);
+  void update(ImuArray imus, DataPoint<uint32_t> stripe_count);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -103,7 +103,7 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param stripe_count Stripe counter reading
    */
-  void update(ImuArray imus, ProximityArray proxis, data::StripeCount stripe_count);
+  void update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count);
 
   void gyro_update(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void acclerometer_update(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
