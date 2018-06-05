@@ -95,22 +95,24 @@ int Main::sendState(State state)
   return baseCommunicator_->sendData("CMD09" + std::to_string(stateCode_) + "\n");
 }
 
-int Main::sendHpBattery(int batNo, Battery hpBat)
+int Main::sendHpVoltage(Battery hpBattery)
 {
-  switch (batNo) {
-    case 0:
-      baseCommunicator_->sendData("CMD1000" + std::to_string(hpBat.voltage) + "\n");
-      baseCommunicator_->sendData("CMD1001" + std::to_string(hpBat.temperature) + "\n");
-      break;
-    case 1:
-      baseCommunicator_->sendData("CMD1010" + std::to_string(hpBat.voltage) + "\n");
-      baseCommunicator_->sendData("CMD1011" + std::to_string(hpBat.temperature) + "\n");
-      break;
-    default:
-      break;
-  }
+  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.voltage) + "\n");
+}
 
-  return 1;
+int Main::sendHpTemperature(Battery hpBattery)
+{
+  return baseCommunicator_->sendData("CMD11" + std::to_string(hpBattery.temperature) + "\n");
+}
+
+int Main::sendHpVoltage1(Battery hpBattery1)
+{
+  return baseCommunicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage) + "\n");
+}
+
+int Main::sendHpTemperature1(Battery hpBattery1)
+{
+  return baseCommunicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
 }
 
 void Main::run()
@@ -133,8 +135,10 @@ void Main::run()
     sendRpmBl(mtr_.motor_velocity_3);
     sendRpmBr(mtr_.motor_velocity_4);
     sendState(stm_.current_state);
-    sendHpBattery(0, bat_.high_power_batteries.at(0));
-    sendHpBattery(1, bat_.high_power_batteries.at(1));
+    sendHpVoltage(bat_.high_power_batteries.at(0));
+    sendHpTemperature(bat_.high_power_batteries.at(0));
+    sendHpVoltage1(bat_.high_power_batteries.at(1));
+    sendHpTemperature1(bat_.high_power_batteries.at(1));
   }
 
   receiverThread->join();
