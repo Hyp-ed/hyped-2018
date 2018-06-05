@@ -168,6 +168,9 @@ void MPU9250::calibrateSensors()
   writeByte(GYRO_CONFIG, 0x00);
   writeByte(ACCEL_CONFIG, 0x00);   // Set accelerometer full-scale to 2 g, maximum sensitivity
 
+  uint16_t  gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
+  uint16_t  accelsensitivity = 16384;  // = 16384 LSB/g
+
   // Configure FIFO to capture accelerometer and gyro data for bias calculation
   writeByte(MPU9250_REG_USER_CTRL, 0x40);    // Enable FIFO
   // Enable gyro and accelerometer sensors for FIFO  (max size 512 bytes in MPU-9250)
@@ -231,6 +234,11 @@ void MPU9250::calibrateSensors()
   writeByte(MPUREG_ZG_OFFS_USRH, data[4]);
   writeByte(MPUREG_ZG_OFFS_USRL, data[5]);
 
+  // Set scaled gyro biases
+  gyro_bias_[0] = (double) gyro_bias_[0]/(double) gyrosensitivity;
+  gyro_bias_[1] = (double) gyro_bias_[1]/(double) gyrosensitivity;
+  gyro_bias_[2] = (double) gyro_bias_[2]/(double) gyrosensitivity;
+
   // Construct the accelerometer biases for push to the hardware accelerometer bias registers.
   // These registers contain factory trim values which must be added to the
   // calculated accelerometer biases; on boot up these registers will hold non-zero values.
@@ -282,6 +290,11 @@ void MPU9250::calibrateSensors()
   writeByte(MPUREG_YA_OFFSET_L, data[3]);
   writeByte(MPUREG_ZA_OFFSET_H, data[4]);
   writeByte(MPUREG_ZA_OFFSET_L, data[5]);
+
+  // Set scaled accelerometer biases
+  acc_bias_[0] = (double)acc_bias_[0]/(double)accelsensitivity; 
+  acc_bias_[1] = (double)acc_bias_[1]/(double)accelsensitivity;
+  acc_bias_[2] = (double)acc_bias_[2]/(double)accelsensitivity;
 }
 
 bool MPU9250::whoAmI()
@@ -356,9 +369,7 @@ void MPU9250::getAcclData()
   readBytes(kAccelXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    // TODO(anyone) change casting
-    data = bit_data;
-    // TODO(anyone) need to look back at here when scale added
+    data = static_cast<double>(bit_data);
     accel_data_[i] = data/acc_divider_ - acc_bias_[i];
   }
 }
@@ -373,9 +384,7 @@ void MPU9250::getGyroData()
   readBytes(kGyroXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    // TODO(anyone) change casting
-    data = bit_data;
-    // TODO(anyone) need to look back at here when scale added
+    data = static_cast<double>(bit_data);
     gyro_data_[i] = data/gyro_divider_ - gyro_bias_[i];
   }
 }
