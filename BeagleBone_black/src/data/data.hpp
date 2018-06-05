@@ -5,17 +5,15 @@
  * for holding data produced by each of the sub-teams.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License"); you may
- *    not use this file except in compliance with the License. You may obtain a
- *    copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ *    except in compliance with the License. You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- *    License for the specific language governing permissions and limitations
- *    under the License.
+ *    Unless required by applicable law or agreed to in writing, software distributed under
+ *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *    either express or implied. See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 #ifndef BEAGLEBONE_BLACK_DATA_DATA_HPP_
@@ -38,9 +36,9 @@ using utils::math::Vector;
 
 namespace data {
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // State Machine
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
   kAccelerating,
@@ -61,9 +59,9 @@ struct StateMachine {
   State current_state;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Navigation
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 enum class NavigationState {
   kCalibrating,      ///< Navigation module is calibrating. Pod must not be moved in this state.
   kCriticalFailure,  ///< Navigation module has problems and cannot provide reliable output
@@ -80,9 +78,9 @@ struct Navigation {
   NavigationType  acceleration;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Raw Sensor data
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 struct Sensor {
   bool operational;
 };
@@ -123,9 +121,9 @@ struct Batteries {
   array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Motor data
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 enum MotorState {
   kCriticalFailure,
@@ -148,9 +146,9 @@ struct Motors {
   int16_t motor_torque_4;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Communications data
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 struct Communications {
   bool stopCommand;
@@ -158,9 +156,9 @@ struct Communications {
   bool resetCommand;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Common Data structure/class
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 /**
  * @brief      A singleton class managing the data exchange between sub-team
  * threads.
