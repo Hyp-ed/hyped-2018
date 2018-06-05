@@ -135,12 +135,19 @@ void MPU9250::init()
   writeByte(ACCEL_CONFIG2, 0x01);
   setAcclScale(BITS_FS_2G);
   setGyroScale(BITS_FS_250DPS);
+
+  // After init not quite 0, this is to make it 0.
+  getGyroData();
+  gyro_bias_[0] += gyro_data_[0];
+  gyro_bias_[1] += gyro_data_[1];
+  gyro_bias_[2] += gyro_data_[2];
 }
 
 void MPU9250::calibrateSensors()
 {
   uint8_t data[12];
   uint16_t ii, packet_count, fifo_count;
+  int32_t gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
 
   // reset device
   writeByte(MPU9250_REG_PWR_MGMT_1, 0x80);  // Write a one to bit 7 reset bit; toggle reset device
@@ -185,8 +192,7 @@ void MPU9250::calibrateSensors()
   packet_count = fifo_count/12;
 
   for (ii = 0; ii < packet_count; ii++) {
-    int16_t acc_temp[3] = {0, 0, 0};
-    int16_t gyro_temp[3]  = {0, 0, 0};
+    int16_t acc_temp[3] = {0, 0, 0}, gyro_temp[3]  = {0, 0, 0};
 
     readBytes(MPUREG_FIFO_R_W, data, 12);  // read data for averaging
     // Form signed 16-bit integer for each sample in FIFO
@@ -198,33 +204,33 @@ void MPU9250::calibrateSensors()
     gyro_temp[2]  = (int16_t) (( (int16_t) data[10] << 8) | data[11]);
 
     // Sum individual signed 16-bit biases to get accumulated signed 32-bit biases
-    acc_bias_[0] += (int32_t) acc_temp[0];
-    acc_bias_[1] += (int32_t) acc_temp[1];
-    acc_bias_[2] += (int32_t) acc_temp[2];
-    gyro_bias_[0]  += (int32_t) gyro_temp[0];
-    gyro_bias_[1]  += (int32_t) gyro_temp[1];
-    gyro_bias_[2]  += (int32_t) gyro_temp[2];
+    accel_bias[0] += (int32_t) acc_temp[0];
+    accel_bias[1] += (int32_t) acc_temp[1];
+    accel_bias[2] += (int32_t) acc_temp[2];
+    gyro_bias[0]  += (int32_t) gyro_temp[0];
+    gyro_bias[1]  += (int32_t) gyro_temp[1];
+    gyro_bias[2]  += (int32_t) gyro_temp[2];
   }
 
   // Normalize sums to get average count biases
-  acc_bias_[0] /= (int32_t) packet_count;
-  acc_bias_[1] /= (int32_t) packet_count;
-  acc_bias_[2] /= (int32_t) packet_count;
-  gyro_bias_[0]  /= (int32_t) packet_count;
-  gyro_bias_[1]  /= (int32_t) packet_count;
-  gyro_bias_[2]  /= (int32_t) packet_count;
+  accel_bias[0] /= (int32_t) packet_count;
+  accel_bias[1] /= (int32_t) packet_count;
+  accel_bias[2] /= (int32_t) packet_count;
+  gyro_bias[0]  /= (int32_t) packet_count;
+  gyro_bias[1]  /= (int32_t) packet_count;
+  gyro_bias[2]  /= (int32_t) packet_count;
 
 
   // Construct the gyro biases for push to the hardware gyro bias registers,
   // which are reset to zero upon device startup
   // Divide by 4 to get 32.9 LSB per deg/s to conform to expected bias input format
   // Biases are additive, so change sign on calculated average gyro biases
-  data[0] = (-gyro_bias_[0]/4  >> 8) & 0xFF;
-  data[1] = (-gyro_bias_[0]/4)       & 0xFF;
-  data[2] = (-gyro_bias_[1]/4  >> 8) & 0xFF;
-  data[3] = (-gyro_bias_[1]/4)       & 0xFF;
-  data[4] = (-gyro_bias_[2]/4  >> 8) & 0xFF;
-  data[5] = (-gyro_bias_[2]/4)       & 0xFF;
+  data[0] = (-gyro_bias[0]/4  >> 8) & 0xFF;
+  data[1] = (-gyro_bias[0]/4)       & 0xFF;
+  data[2] = (-gyro_bias[1]/4  >> 8) & 0xFF;
+  data[3] = (-gyro_bias[1]/4)       & 0xFF;
+  data[4] = (-gyro_bias[2]/4  >> 8) & 0xFF;
+  data[5] = (-gyro_bias[2]/4)       & 0xFF;
 
   // Push gyro biases to hardware registers
   writeByte(MPUREG_XG_OFFS_USRH, data[0]);
@@ -235,9 +241,9 @@ void MPU9250::calibrateSensors()
   writeByte(MPUREG_ZG_OFFS_USRL, data[5]);
 
   // Set scaled gyro biases
-  gyro_bias_[0] = static_cast<double>(gyro_bias_[0])/static_cast<double>(gyrosensitivity);
-  gyro_bias_[1] = static_cast<double>(gyro_bias_[1])/static_cast<double>(gyrosensitivity);
-  gyro_bias_[2] = static_cast<double>(gyro_bias_[2])/static_cast<double>(gyrosensitivity);
+  gyro_bias_[0] = static_cast<float>(gyro_bias[0])/static_cast<float>(gyrosensitivity);
+  gyro_bias_[1] = static_cast<float>(gyro_bias[1])/static_cast<float>(gyrosensitivity);
+  gyro_bias_[2] = static_cast<float>(gyro_bias[2])/static_cast<float>(gyrosensitivity);
 
   // Construct the accelerometer biases for push to the hardware accelerometer bias registers.
   // These registers contain factory trim values which must be added to the
@@ -266,9 +272,9 @@ void MPU9250::calibrateSensors()
 
   // Construct total accelerometer bias, including calculated average accelerometer bias from above
   // Subtract calculated averaged accelerometer bias scaled to 2048 LSB/g (16 g full scale)
-  accel_bias_reg[0] -= (acc_bias_[0]/8);
-  accel_bias_reg[1] -= (acc_bias_[1]/8);
-  accel_bias_reg[2] -= (acc_bias_[2]/8);
+  accel_bias_reg[0] -= (accel_bias[0]/8);
+  accel_bias_reg[1] -= (accel_bias[1]/8);
+  accel_bias_reg[2] -= (accel_bias[2]/8);
 
   data[0] = (accel_bias_reg[0] >> 8) & 0xFF;
   data[1] = (accel_bias_reg[0])      & 0xFF;
@@ -277,8 +283,8 @@ void MPU9250::calibrateSensors()
   data[2] = (accel_bias_reg[1] >> 8) & 0xFF;
   data[3] = (accel_bias_reg[1])      & 0xFF;
   // preserve temperature compensation bit when writing back to accelerometer bias registers
-  data[3] = data[3] | mask_bit[1];
   data[4] = (accel_bias_reg[2] >> 8) & 0xFF;
+  data[3] = data[3] | mask_bit[1];
   data[5] = (accel_bias_reg[2])      & 0xFF;
   // preserve temperature compensation bit when writing back to accelerometer bias registers
   data[5] = data[5] | mask_bit[2];
@@ -292,9 +298,9 @@ void MPU9250::calibrateSensors()
   writeByte(MPUREG_ZA_OFFSET_L, data[5]);
 
   // Set scaled accelerometer biases
-  acc_bias_[0] = static_cast<double>(acc_bias_[0])/static_cast<double>(accelsensitivity);
-  acc_bias_[1] = static_cast<double>(acc_bias_[1])/static_cast<double>(accelsensitivity);
-  acc_bias_[2] = static_cast<double>(acc_bias_[2])/static_cast<double>(accelsensitivity);
+  acc_bias_[0] = static_cast<float>(accel_bias[0])/static_cast<float>(accelsensitivity);
+  acc_bias_[1] = static_cast<float>(accel_bias[1])/static_cast<float>(accelsensitivity);
+  acc_bias_[2] = static_cast<float>(accel_bias[2])/static_cast<float>(accelsensitivity);
 }
 
 bool MPU9250::whoAmI()
@@ -369,7 +375,7 @@ void MPU9250::getAcclData()
   readBytes(kAccelXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    data = static_cast<double>(bit_data);
+    data = static_cast<float>(bit_data);
     accel_data_[i] = data/acc_divider_ - acc_bias_[i];
   }
 }
@@ -384,7 +390,7 @@ void MPU9250::getGyroData()
   readBytes(kGyroXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    data = static_cast<double>(bit_data);
+    data = static_cast<float>(bit_data);
     gyro_data_[i] = data/gyro_divider_ - gyro_bias_[i];
   }
 }
