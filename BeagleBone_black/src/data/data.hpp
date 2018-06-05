@@ -215,7 +215,7 @@ class Data {
   /**
    * @brief      Retrieves data from the batteries.
    */
-  Sensors getBatteryData();
+  Batteries getBatteryData();
 
   /**
    * @brief      Should be called to update battery data
