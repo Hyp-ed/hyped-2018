@@ -35,9 +35,9 @@ namespace sensors {
 
 FakeImu::FakeImu(std::string file_path)
 {
-  init();
   readDataFromFile(file_path);
   setData();
+  init();
 }
 
 FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
@@ -45,8 +45,8 @@ FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
   acc_val(acc_val), gyr_val(gyr_val),
   acc_noise(acc_noise), gyr_noise(gyr_noise)
 {
-  init();
   setData();
+  init();
 }
 
 FakeImu::~FakeImu()
@@ -57,13 +57,13 @@ FakeImu::~FakeImu()
 
 void FakeImu::init()
 {
-  /* TODO(Uday): Initialize this
   accPrevReadTime = high_resolution_clock::now();
   gyrPrevReadTime = high_resolution_clock::now();
 
-  prevAccData = ;
-  prevGyrData = ;
-   */
+  prevAccData = DataPoint<NavigationVector>(imu_.acc.timestamp,
+                                            imu_.acc.value + addNoiseToData(acc_val, acc_noise));
+  prevGyrData = DataPoint<NavigationVector>(imu_.gyr.timestamp,
+                                            imu_.gyr.value + addNoiseToData(gyr_val, gyr_noise));
 }
 
 void FakeImu::setData()
