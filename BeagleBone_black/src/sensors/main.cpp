@@ -25,39 +25,42 @@ namespace hyped {
 
 using data::Data;
 using data::Sensors;
+using data::Batteries;
 
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
-      data_(data::Data::getInstance()),
-      bms_(0, log)
-{ /* EMPTY */ }
+      data_(data::Data::getInstance())
+{
+  // create BMS LP
+  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+    bms_[i] = new BMS(i, &batteries_.low_power_batteries[i], log_);
+    bms_[i]->start();
+  }
+
+  // create Proximities
+  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+    proxi_[i] = new VL6180(0x29, log_);
+    proxi_[i]->setContinuousRangingMode();
+  }
+}
 
 void Main::run()
 {
-  Sensors sensors = {{}, {}, {0, 0}};
-  Data& data = Data::getInstance();
-  bms::Data* bms_data = bms_.getDataPointer();
-  uint32_t time = 0;
   while (1) {
     // keep updating data_ based on values read from sensors
-    for (auto& imu : sensors.imu) {
-      imu.acc.value[0]  = imu.acc.value[0] ? 0 : 2;
-      imu.acc.timestamp = time;
+    for (BMS* bms: bms_) {
+      bms->update();
     }
 
-    log_.INFO("SENSORS", "BMS voltage %d %d %d %d %d %d %d",
-        bms_data->voltage[0],
-        bms_data->voltage[1],
-        bms_data->voltage[2],
-        bms_data->voltage[3],
-        bms_data->voltage[4],
-        bms_data->voltage[5],
-        bms_data->voltage[6]);
-    data.setSensorsData(sensors);
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      sensors_.proxi[i].val = proxi_[i]->getDistance();
+    }
+
+    data_.setSensorsData(sensors_);
+    data_.setBatteryData(batteries_);
     sleep(1000);
-    time++;
   }
 }
 

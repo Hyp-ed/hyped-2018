@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "utils/concurrent/thread.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
 // Forward declarations
@@ -59,8 +60,8 @@ constexpr uint16_t kIdSize      = 5;       // size of id-space of BMS-CAN messag
 struct Data {
   static constexpr uint8_t kTemperatureOffset = 40;
   static constexpr uint8_t kCellNum           = 7;
-  uint16_t  voltage[kCellNum];
-  uint8_t   temperature;
+  uint16_t voltage[kCellNum];
+  int8_t   temperature;
 };
 
 }   // namespace bms
@@ -70,7 +71,9 @@ class BMS : public Thread {
 
  public:
   explicit BMS(uint8_t id);
+  BMS(uint8_t id, data::Battery* battery_unit);
   BMS(uint8_t id, Logger& log);
+  BMS(uint8_t id, data::Battery* battery_unit, Logger& log);
 
   ~BMS();
 
@@ -81,6 +84,12 @@ class BMS : public Thread {
 
   bms::Data getData() const { return data_; }
   bms::Data* getDataPointer() { return &data_; }
+
+  /**
+   * @brief Process raw data, check voltage values, assert
+   * out of range flags
+   */
+  void update();
 
  private:
   /**
@@ -97,10 +106,11 @@ class BMS : public Thread {
   void processNewData(utils::io::can::Frame& message);
 
  private:
-  Can&      can_;
-  bms::Data data_;
-  uint8_t   id_;
-  bool      running_;
+  Can&            can_;
+  bms::Data       data_;
+  data::Battery*  battery_unit_;
+  uint8_t         id_;
+  bool            running_;
 
   static std::vector<uint8_t> existing_ids_;
 };
