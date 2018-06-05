@@ -235,9 +235,9 @@ void MPU9250::calibrateSensors()
   writeByte(MPUREG_ZG_OFFS_USRL, data[5]);
 
   // Set scaled gyro biases
-  gyro_bias_[0] = (double) gyro_bias_[0]/(double) gyrosensitivity;
-  gyro_bias_[1] = (double) gyro_bias_[1]/(double) gyrosensitivity;
-  gyro_bias_[2] = (double) gyro_bias_[2]/(double) gyrosensitivity;
+  gyro_bias_[0] = static_cast<double>(gyro_bias_[0])/static_cast<double>(gyrosensitivity);
+  gyro_bias_[1] = static_cast<double>(gyro_bias_[1])/static_cast<double>(gyrosensitivity);
+  gyro_bias_[2] = static_cast<double>(gyro_bias_[2])/static_cast<double>(gyrosensitivity);
 
   // Construct the accelerometer biases for push to the hardware accelerometer bias registers.
   // These registers contain factory trim values which must be added to the
@@ -292,9 +292,9 @@ void MPU9250::calibrateSensors()
   writeByte(MPUREG_ZA_OFFSET_L, data[5]);
 
   // Set scaled accelerometer biases
-  acc_bias_[0] = (double)acc_bias_[0]/(double)accelsensitivity; 
-  acc_bias_[1] = (double)acc_bias_[1]/(double)accelsensitivity;
-  acc_bias_[2] = (double)acc_bias_[2]/(double)accelsensitivity;
+  acc_bias_[0] = static_cast<double>(acc_bias_[0])/static_cast<double>(accelsensitivity);
+  acc_bias_[1] = static_cast<double>(acc_bias_[1])/static_cast<double>(accelsensitivity);
+  acc_bias_[2] = static_cast<double>(acc_bias_[2])/static_cast<double>(accelsensitivity);
 }
 
 bool MPU9250::whoAmI()
