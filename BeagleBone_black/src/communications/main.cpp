@@ -25,6 +25,7 @@
 namespace hyped {
 
 using data::State;
+using data::Battery;
 
 namespace communications {
 
@@ -94,6 +95,26 @@ int Main::sendState(State state)
   return baseCommunicator_->sendData("CMD09" + std::to_string(stateCode_) + "\n");
 }
 
+int Main::sendHpVoltage(Battery hpBattery)
+{
+  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.voltage) + "\n");
+}
+
+int Main::sendHpTemperature(Battery hpBattery)
+{
+  return baseCommunicator_->sendData("CMD11" + std::to_string(hpBattery.temperature) + "\n");
+}
+
+int Main::sendHpVoltage1(Battery hpBattery1)
+{
+  return baseCommunicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage) + "\n");
+}
+
+int Main::sendHpTemperature1(Battery hpBattery1)
+{
+  return baseCommunicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
+}
+
 void Main::run()
 {
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
@@ -104,6 +125,7 @@ void Main::run()
     mtr_ = data_.getMotorData();
     sns_ = data_.getSensorsData();
     stm_ = data_.getStateMachineData();
+    bat_ = data_.getBatteryData();
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
@@ -113,6 +135,10 @@ void Main::run()
     sendRpmBl(mtr_.motor_velocity_3);
     sendRpmBr(mtr_.motor_velocity_4);
     sendState(stm_.current_state);
+    sendHpVoltage(bat_.high_power_batteries.at(0));
+    sendHpTemperature(bat_.high_power_batteries.at(0));
+    sendHpVoltage1(bat_.high_power_batteries.at(1));
+    sendHpTemperature1(bat_.high_power_batteries.at(1));
   }
 
   receiverThread->join();
