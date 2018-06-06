@@ -51,38 +51,39 @@ class FakeImu : public ImuInterface {
                    NavigationVector gyr_val, NavigationType gyr_noise);
 
   /*
-   * @brief     Initializes the values of some variables accordingly
-   */
-  void init();
-
-  /*
    * @brief     A function that gets the imu data
    */
   void getData(Imu* imu) override;
 
-  /*
-   * @brief     A function that sets the imu data
-   */
-  void setData();
-
  private:
   Imu imu_;
+  bool readFromFile;
 
   NavigationVector acc_val;
   NavigationVector gyr_val;
-  std::vector<NavigationVector> acc_val_read;
-  std::vector<NavigationVector> gyr_val_read;
 
   NavigationType acc_noise;
   NavigationType gyr_noise;
-  std::vector<NavigationType> acc_noise_read;
-  std::vector<NavigationType> gyr_noise_read;
+
+  unsigned filePointerAcc, filePointerGyr;
+  std::vector<DataPoint<NavigationVector>> acc_val_read;
+  std::vector<DataPoint<NavigationVector>> gyr_val_read;
 
   high_resolution_clock::time_point accPrevReadTime;
   high_resolution_clock::time_point gyrPrevReadTime;
 
   DataPoint<NavigationVector> prevAccData;
   DataPoint<NavigationVector> prevGyrData;
+
+  /*
+   * @brief     A function that sets the imu data
+   */
+  void setData();
+
+  /*
+   * @brief     Initializes the values of some variables accordingly
+   */
+  void init();
 
   /*
    * @brief     A function that reads data from file directory
