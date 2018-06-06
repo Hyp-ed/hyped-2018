@@ -35,6 +35,7 @@ namespace sensors {
 
 FakeImu::FakeImu(std::string file_path)
 {
+  readFromFile = true;
   readDataFromFile(file_path);
   setData();
   init();
@@ -45,6 +46,7 @@ FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
   acc_val(acc_val), gyr_val(gyr_val),
   acc_noise(acc_noise), gyr_noise(gyr_noise)
 {
+  readFromFile = false;
   setData();
   init();
 }
@@ -68,6 +70,24 @@ void FakeImu::setData()
 
 void FakeImu::getData(Imu* imu)
 {
+  if (readFromFile == true) {
+    if (filePointerAcc == acc_val_read.size()) {
+      // TODO(Uday): Set the acc sensor state to offline
+    } else {
+      prevAccData = acc_val_read[filePointerAcc];
+      filePointerAcc++;
+    }
+
+    if (filePointerGyr == gyr_val_read.size()) {
+      // TODO(Uday): Set the gyr sensor state to offline
+    } else {
+      prevGyrData = gyr_val_read[filePointerGyr];
+      filePointerGyr++;
+    }
+
+    return;
+  }
+
   if (accCheckTime())
     prevAccData = DataPoint<NavigationVector>(imu_.acc.timestamp,
                                            imu_.acc.value + addNoiseToData(acc_val, acc_noise));
@@ -99,30 +119,21 @@ void FakeImu::readDataFromFile(std::string file_path)
   if (!file.is_open())
     file.open(file_path);
 
-  NavigationVector acc_val_temp;
-  NavigationVector gyr_val_temp;
-
-  NavigationType acc_noise_temp;
-  NavigationType gyr_noise_temp;
-
+  uint32_t acc_timestamp, gyr_timestamp;
+  NavigationVector acc_val_temp, gyr_val_temp;
   while (file.is_open() && !file.eof()) {
+    file >> acc_timestamp;
     file >> acc_val_temp[0];
     file >> acc_val_temp[1];
     file >> acc_val_temp[2];
 
-    file >> acc_noise_temp;
-
+    file >> gyr_timestamp;
     file >> gyr_val_temp[0];
     file >> gyr_val_temp[1];
     file >> gyr_val_temp[2];
 
-    file >> gyr_noise_temp;
-
-    acc_val_read.push_back(acc_val_temp);
-    acc_noise_read.push_back(acc_noise_temp);
-
-    gyr_val_read.push_back(gyr_val_temp);
-    gyr_noise_read.push_back(gyr_noise_temp);
+    acc_val_read.push_back(DataPoint<NavigationVector>(acc_timestamp, acc_val_temp));
+    gyr_val_read.push_back(DataPoint<NavigationVector>(gyr_timestamp, gyr_val_temp));
   }
 
   if (file.is_open())
