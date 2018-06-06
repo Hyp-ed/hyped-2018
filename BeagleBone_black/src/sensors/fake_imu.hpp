@@ -22,6 +22,7 @@
 #define BEAGLEBONE_BLACK_SENSORS_FAKE_IMU_HPP_
 
 #include <string>
+#include <vector>
 
 #include "data/data.hpp"
 #include "sensors/imu_interface.hpp"
@@ -50,11 +51,6 @@ class FakeImu : public ImuInterface {
                    NavigationVector gyr_val, NavigationType gyr_noise);
 
   /*
-   * @brief     A deconstructor for the fake IMU class
-   */
-  ~FakeImu();
-
-  /*
    * @brief     Initializes the values of some variables accordingly
    */
   void init();
@@ -69,22 +65,18 @@ class FakeImu : public ImuInterface {
    */
   void setData();
 
-  /*
-   * @brief     A function to read the next set of data from file
-   *
-   * @return     Returns true if the file was successfully read
-   */
-  bool readNextLine();
-
  private:
   Imu imu_;
-  std::ifstream file;
 
   NavigationVector acc_val;
   NavigationVector gyr_val;
+  std::vector<NavigationVector> acc_val_read;
+  std::vector<NavigationVector> gyr_val_read;
 
   NavigationType acc_noise;
   NavigationType gyr_noise;
+  std::vector<NavigationType> acc_noise_read;
+  std::vector<NavigationType> gyr_noise_read;
 
   high_resolution_clock::time_point accPrevReadTime;
   high_resolution_clock::time_point gyrPrevReadTime;
@@ -99,7 +91,7 @@ class FakeImu : public ImuInterface {
    *
    * @return     Returns true if the file was successfully read
    */
-  bool readDataFromFile(std::string file_path);
+  void readDataFromFile(std::string file_path);
 
   /*
    * @brief     A function that adds noise to the imu data

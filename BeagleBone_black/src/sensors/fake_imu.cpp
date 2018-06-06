@@ -49,12 +49,6 @@ FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
   init();
 }
 
-FakeImu::~FakeImu()
-{
-  if (file.is_open())
-    file.close();
-}
-
 void FakeImu::init()
 {
   accPrevReadTime = high_resolution_clock::now();
@@ -99,30 +93,40 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType 
   return temp;
 }
 
-bool FakeImu::readDataFromFile(std::string file_path)
+void FakeImu::readDataFromFile(std::string file_path)
 {
+  std::ifstream file;
   if (!file.is_open())
     file.open(file_path);
-  return readNextLine();
-}
 
-bool FakeImu::readNextLine()
-{
-  if (file.is_open() && !file.eof()) {
-    file >> acc_val[0];
-    file >> acc_val[1];
-    file >> acc_val[2];
+  NavigationVector acc_val_temp;
+  NavigationVector gyr_val_temp;
 
-    file >> acc_noise;
+  NavigationType acc_noise_temp;
+  NavigationType gyr_noise_temp;
 
-    file >> gyr_val[0];
-    file >> gyr_val[1];
-    file >> gyr_val[2];
+  while (file.is_open() && !file.eof()) {
+    file >> acc_val_temp[0];
+    file >> acc_val_temp[1];
+    file >> acc_val_temp[2];
 
-    file >> gyr_noise;
+    file >> acc_noise_temp;
 
-    return true;
-  } return false;
+    file >> gyr_val_temp[0];
+    file >> gyr_val_temp[1];
+    file >> gyr_val_temp[2];
+
+    file >> gyr_noise_temp;
+
+    acc_val_read.push_back(acc_val_temp);
+    acc_noise_read.push_back(acc_noise_temp);
+
+    gyr_val_read.push_back(gyr_val_temp);
+    gyr_noise_read.push_back(gyr_noise_temp);
+  }
+
+  if (file.is_open())
+    file.close();
 }
 
 bool FakeImu::accCheckTime()
