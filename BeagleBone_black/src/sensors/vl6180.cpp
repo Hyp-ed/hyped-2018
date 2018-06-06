@@ -242,17 +242,65 @@ bool VL6180::rangeWaitDeviceReady()
 void VL6180::checkStatus()
 {
   uint8_t data;
+  uint8_t status;
   // Check for an error in the error/status register
   readByte(kResultRangeStatus, &data);
+  status = data >> 4;
 
   // If there is an error update the data structure
-  if (data == 0) {
+  if (status == 0) {
     error_status_ = false;
+    // TODO(anyone) write to the data structure
+
+  } else {
+    error_status_ = true;
+    // Parse the error
+    switch (status) {
+    case 1:
+      log_.ERR("VL6180", "System error detected. No measurement possible.");
+    break;
+    case 2:
+      log_.ERR("VL6180", "System error detected. No measurement possible.");
+    break;
+    case 3:
+      log_.ERR("VL6180", "System error detected. No measurement possible.");
+    break;
+    case 4:
+      log_.ERR("VL6180", "System error detected. No measurement possible.");
+    break;
+    case 5:
+      log_.ERR("VL6180", "System error detected. No measurement possible.");
+    break;
+    case 6:
+      log_.ERR("VL6180", "Early convergence estimate check failed.");
+    break;
+    case 7:
+      log_.ERR("VL6180", "System did not converge before the specified max.");
+    break;
+    case 8:
+      log_.ERR("VL6180", "Ignore threshold check failed");
+    break;
+    case 11:
+      log_.ERR("VL6180", "Ambient conditions too high. Measurement invalidated");
+    break;
+    case 12:
+      log_.ERR("VL6180", "Range < 0");
+    break;
+    case 13:
+      log_.ERR("VL6180", "Result is out of range. This occurs typically around 200 mm");
+    break;
+    case 14:
+      log_.ERR("VL6180", "Range < 0 .");
+    break;
+    case 15:
+      log_.ERR("VL6180", "Result is out of range. This occurs typically around 200 mm");
+    break;
+    default:
+          log_.ERR("VL6180", "Unidentified error");
+  }
     // TODO(anyone) write to the data structure
     // TODO(anyone) turn off and on again (run turn on again)
     // Could reset the readings, might be worth a try, ask team
-  } else {
-    error_status_ = true;
   }
 }
 
