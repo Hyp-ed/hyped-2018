@@ -34,54 +34,54 @@ namespace hyped {
 namespace sensors {
 
 FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
-  : filePointerAcc(0), filePointerGyr(0)
+    : pt_acc(0), pt_gyr(0)
 {
-  readFromFile = true;
+  read_file = true;
   readDataFromFile(acc_file_path, gyr_file_path);
   setData();
 }
 
 FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
-                 NavigationVector gyr_val, NavigationType gyr_noise) :
-  acc_val(acc_val), gyr_val(gyr_val),
-  acc_noise(acc_noise), gyr_noise(gyr_noise)
+                 NavigationVector gyr_val, NavigationType gyr_noise)
+    : acc_val(acc_val), gyr_val(gyr_val),
+      acc_noise(acc_noise), gyr_noise(gyr_noise)
 {
-  readFromFile = false;
+  read_file = false;
   setData();
 }
 
 void FakeImu::setData()
 {
-  imuRefTime = high_resolution_clock::now();
-  accReadCount = gyrReadCount = 0;
+  imu_ref_time = high_resolution_clock::now();
+  acc_count = gyr_count = 0;
 }
 
 void FakeImu::getData(Imu* imu)
 {
-  if (readFromFile == true) {
+  if (read_file == true) {
     if (accCheckTime()) {
-      prevAccData = acc_val_read[filePointerAcc];
-      filePointerAcc++;
-      filePointerAcc = std::min(filePointerAcc, unsigned(acc_val_read.size()-1));
+      prev_acc = acc_val_read[pt_acc];
+      pt_acc++;
+      pt_acc = std::min(pt_acc, unsigned(acc_val_read.size()-1));
     }
 
     if (gyrCheckTime()) {
-      prevGyrData = gyr_val_read[filePointerGyr];
-      filePointerGyr++;
-      filePointerGyr = std::min(filePointerGyr, unsigned(gyr_val_read.size()-1));
+      prev_gyr = gyr_val_read[pt_gyr];
+      pt_gyr++;
+      pt_gyr = std::min(pt_gyr, unsigned(gyr_val_read.size()-1));
     }
   } else {
     if (accCheckTime())
-      prevAccData = DataPoint<NavigationVector>(accTimeInterval*(accReadCount-1),
+      prev_acc = DataPoint<NavigationVector>(kAccTimeInterval*(acc_count-1),
                                                 addNoiseToData(acc_val, acc_noise));
 
     if (gyrCheckTime())
-      prevGyrData = DataPoint<NavigationVector>(gyrTimeInterval*(gyrReadCount-1),
+      prev_gyr = DataPoint<NavigationVector>(kGyrTimeInterval*(gyr_count-1),
                                                 addNoiseToData(gyr_val, gyr_noise));
   }
 
-  imu->acc = prevAccData;
-  imu->gyr = prevGyrData;
+  imu->acc = prev_acc;
+  imu->gyr = prev_gyr;
 }
 
 NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType noise)
@@ -125,26 +125,26 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
 bool FakeImu::accCheckTime()
 {
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - imuRefTime);
+    duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
 
-    if (time_span.count() < 0.000250*accReadCount) {
+    if (time_span.count() < 0.000250*acc_count) {
         return false;
     }
 
-    accReadCount++;
+    acc_count++;
     return true;
 }
 
 bool FakeImu::gyrCheckTime()
 {
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - imuRefTime);
+    duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
 
-    if (time_span.count() < 0.000125*gyrReadCount) {
+    if (time_span.count() < 0.000125*gyr_count) {
         return false;
     }
 
-    gyrReadCount++;
+    gyr_count++;
     return true;
 }
 

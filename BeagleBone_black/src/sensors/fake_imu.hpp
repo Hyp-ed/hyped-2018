@@ -41,6 +41,9 @@ class FakeImu : public ImuInterface {
  public:
   /*
    * @brief     A constructor for the fake IMU class by reading from file
+   *
+   * @param[in]    For each file, the 1st line consists of the noise value.
+   *               The next lines are timestamp and value pairs.
    */
   explicit FakeImu(std::string acc_file_path, std::string gyr_file_path);
 
@@ -56,36 +59,18 @@ class FakeImu : public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
-  bool readFromFile;
-
-  NavigationVector acc_val;
-  NavigationVector gyr_val;
-  NavigationType acc_noise;
-  NavigationType gyr_noise;
-
-  DataPoint<NavigationVector> prevAccData;
-  DataPoint<NavigationVector> prevGyrData;
-
-  unsigned filePointerAcc, filePointerGyr;
-  std::vector<DataPoint<NavigationVector>> acc_val_read;
-  std::vector<DataPoint<NavigationVector>> gyr_val_read;
-
-  high_resolution_clock::time_point imuRefTime;
-  unsigned accReadCount, gyrReadCount;
-  const double accTimeInterval = 0.000250;
-  const double gyrTimeInterval = 0.000125;
+  const double kAccTimeInterval = 0.000250;
+  const double kGyrTimeInterval = 0.000125;
 
   /*
-   * @brief     A function that sets the imu data
+   * @brief     A function that initializes the variables
    */
   void setData();
 
   /*
    * @brief     A function that reads data from file directory
    *
-   * @param[in] file_path    The file is in the format acc_val acc_noise gyr_val gyr_noise
-   *
-   * @return     Returns true if the file was successfully read
+   * @param[in]    The file format is as stated in the constructor comments
    */
   void readDataFromFile(std::string acc_file_path, std::string gyr_file_path);
 
@@ -99,6 +84,23 @@ class FakeImu : public ImuInterface {
    */
   bool accCheckTime();
   bool gyrCheckTime();
+
+  bool read_file;
+
+  NavigationVector acc_val;
+  NavigationVector gyr_val;
+  NavigationType acc_noise;
+  NavigationType gyr_noise;
+
+  DataPoint<NavigationVector> prev_acc;
+  DataPoint<NavigationVector> prev_gyr;
+
+  unsigned pt_acc, pt_gyr;
+  std::vector<DataPoint<NavigationVector>> acc_val_read;
+  std::vector<DataPoint<NavigationVector>> gyr_val_read;
+
+  unsigned acc_count, gyr_count;
+  high_resolution_clock::time_point imu_ref_time;
 };
 
 }}  // namespace hyped::sensors
