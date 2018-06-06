@@ -59,7 +59,7 @@ struct spi_ioc_transfer {
 #include "utils/concurrent/thread.hpp"
 
 // configure SPI
-#define SPI_CLK   4000000   // 4MHz
+#define SPI_CLK   1000000   // 4MHz
 #define SPI_MODE  3
 #define SPI_BITS  8         // each word is 1B
 #define SPI_MSBFIRST 0
@@ -67,7 +67,7 @@ struct spi_ioc_transfer {
 
 // DO NOT TOUCH
 #define SPI_MAX_SIZE    4096
-#define SPI_WRITE_MASK  0x80
+
 
 namespace hyped {
 namespace utils {
@@ -147,7 +147,6 @@ void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
 void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
 {
   spi_ioc_transfer message[2] = {};
-  addr |= SPI_WRITE_MASK;
   // send address
   message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);
   message[0].rx_buf = 0;
