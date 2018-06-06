@@ -50,11 +50,11 @@ void Main::run()
       continue;
     }
     if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->proxi, readings->stripe_count);
+      nav_.update(readings->imu, readings->proxi, readings->stripe_counter.count);
     else if (proxiChanged(*last_readings, *readings))
       nav_.update(readings->imu, readings->proxi);
     else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->stripe_count);
+      nav_.update(readings->imu, readings->stripe_counter.count);
     else
       nav_.update(readings->imu);
 
@@ -89,7 +89,7 @@ bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  return new_data.stripe_count.timestamp != old_data.stripe_count.timestamp;
+  return new_data.stripe_counter.count.timestamp != old_data.stripe_counter.count.timestamp;
 }
 
 }}  // namespace hyped::navigation

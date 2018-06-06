@@ -41,7 +41,7 @@ class VL6180 {
     *
     *  @return double Returns the distance to the nearest object
     */
-  double getDistance();
+  uint8_t getDistance();
   /**
     *  @brief  Sets the the ranging mode to continuous
     */
@@ -57,13 +57,13 @@ class VL6180 {
     *
     *  @return double Returns the distance to the nearest object
     */
-  double singleRangeDistance();
+  uint8_t singleRangeDistance();
   /**
     *  @brief called from getDistance() for continuous ranging
     *
     *  @return double Returns the distance to the nearest object
     */
-  double continuousRangeDistance();
+  uint8_t continuousRangeDistance();
   /**
     *  @brief  Loops until the device is out of reset
     *
