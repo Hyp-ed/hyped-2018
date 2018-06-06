@@ -33,11 +33,11 @@ using std::chrono::duration_cast;
 namespace hyped {
 namespace sensors {
 
-FakeImu::FakeImu(std::string file_path)
+FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
   : filePointerAcc(0), filePointerGyr(0)
 {
   readFromFile = true;
-  readDataFromFile(file_path);
+  readDataFromFile(acc_file_path, gyr_file_path);
   setData();
 }
 
@@ -97,31 +97,29 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType 
   return temp;
 }
 
-void FakeImu::readDataFromFile(std::string file_path)
+void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_path)
 {
   std::ifstream file;
-  if (!file.is_open())
-    file.open(file_path);
+  uint32_t timestamp;
+  NavigationVector temp;
 
-  uint32_t acc_timestamp, gyr_timestamp;
-  NavigationVector acc_val_temp, gyr_val_temp;
+  file.open(acc_file_path);
+
+  file >> acc_noise;
   while (file.is_open() && !file.eof()) {
-    file >> acc_timestamp;
-    file >> acc_val_temp[0];
-    file >> acc_val_temp[1];
-    file >> acc_val_temp[2];
-
-    file >> gyr_timestamp;
-    file >> gyr_val_temp[0];
-    file >> gyr_val_temp[1];
-    file >> gyr_val_temp[2];
-
-    acc_val_read.push_back(DataPoint<NavigationVector>(acc_timestamp, acc_val_temp));
-    gyr_val_read.push_back(DataPoint<NavigationVector>(gyr_timestamp, gyr_val_temp));
+    file >> timestamp >> temp[0] >> temp[1] >> temp[2];
+    acc_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(temp, acc_noise)));
   }
 
   if (file.is_open())
     file.close();
+
+  file.open(gyr_file_path);
+  file >> gyr_noise;
+  while (file.is_open() && !file.eof()) {
+    file >> timestamp >> temp[0] >> temp[1] >> temp[2];
+    gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(temp, gyr_noise)));
+  }
 }
 
 bool FakeImu::accCheckTime()

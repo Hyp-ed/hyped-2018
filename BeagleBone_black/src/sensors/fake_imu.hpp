@@ -42,7 +42,7 @@ class FakeImu : public ImuInterface {
   /*
    * @brief     A constructor for the fake IMU class by reading from file
    */
-  explicit FakeImu(std::string file_path);
+  explicit FakeImu(std::string acc_file_path, std::string gyr_file_path);
 
   /*
    * @brief     A constructor for the fake IMU class
@@ -87,7 +87,7 @@ class FakeImu : public ImuInterface {
    *
    * @return     Returns true if the file was successfully read
    */
-  void readDataFromFile(std::string file_path);
+  void readDataFromFile(std::string acc_file_path, std::string gyr_file_path);
 
   /*
    * @brief     A function that adds noise to the imu data
