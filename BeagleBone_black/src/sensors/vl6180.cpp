@@ -26,20 +26,12 @@
 
 
 // Register addresses
-constexpr uint16_t kSystemModeGpio0                    = 0x0010;
-constexpr uint16_t kSystemModeGpio1                    = 0x0011;
-constexpr uint16_t kSystemHistoryCtrl                  = 0x0012;
-constexpr uint16_t kSystemInterruptConfigGpio          = 0x0014;
 constexpr uint16_t kSystemInterruptClear               = 0x0015;
 constexpr uint16_t kSystemFreshOutOfReset              = 0x0016;
-constexpr uint16_t kSystemGroupedParameterHold         = 0x0017;
 constexpr uint16_t kSysrangeStart                      = 0x0018;
-constexpr uint16_t kSysrangeThreshHigh                 = 0x0019;
-constexpr uint16_t kSysrangeThreshLow                  = 0x001A;
 constexpr uint16_t kSysrangeIntermeasurementPeriod     = 0x001B;
 constexpr uint16_t kSysrangeMaxConvergenceTime         = 0x001C;
 constexpr uint16_t kSysrangeVhvRecalibrate             = 0x002E;
-constexpr uint16_t kSysrangeVhvRepeatRate              = 0x0031;
 constexpr uint16_t kResultRangeStatus                  = 0x004D;
 constexpr uint16_t kResultRangeVal                     = 0x0062;
 constexpr uint16_t kRangeDeviceReadyMask               = 0x01;
@@ -48,8 +40,6 @@ constexpr uint16_t kModeContinuous                     = 0x02;
 constexpr uint16_t kModeSingleShot                     = 0x00;
 constexpr uint16_t kResultInterruptStatusGpio          = 0x4F;
 constexpr uint16_t kInterruptClearRanging              = 0x01;
-constexpr uint16_t kResIntRangeMask                    = 0x07;
-constexpr uint8_t kDefaultI2cSlaveAddr                 = 0x29;
 
 namespace hyped {
 
@@ -62,7 +52,9 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
       on_(false),
       continuous_mode_(false),
       i2c_addr_(i2c_addr),
-      i2c_(I2C::getInstance())
+      i2c_(I2C::getInstance()),
+      status_counter_(0),
+      error_status_(false)
 {
   // Create I2C instance get register address
   turnOn();
@@ -157,8 +149,12 @@ void VL6180::turnOff()
 uint8_t VL6180::getDistance()
 {
   if (continuous_mode_) {
+    // TODO(anyone) write to the data structure
+
     return continuousRangeDistance();
   } else {
+    // TODO(anyone) write to the data structure
+
     return singleRangeDistance();
   }
 }
@@ -243,7 +239,24 @@ bool VL6180::rangeWaitDeviceReady()
   return false;
 }
 
-int VL6180::readByte(uint16_t reg_add, uint8_t *data)
+void VL6180::checkStatus()
+{
+  uint8_t data;
+  // Check for an error in the error/status register
+  readByte(kResultRangeStatus, &data);
+
+  // If there is an error update the data structure
+  if (data == 0) {
+    error_status_ = false;
+    // TODO(anyone) write to the data structure
+    // TODO(anyone) turn off and on again (run turn on again)
+    // Could reset the readings, might be worth a try, ask team
+  } else {
+    error_status_ = true;
+  }
+}
+
+void VL6180::readByte(uint16_t reg_add, uint8_t *data)
 {
   uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
@@ -252,10 +265,16 @@ int VL6180::readByte(uint16_t reg_add, uint8_t *data)
   i2c_.write(i2c_addr_, buffer, 2);
   i2c_.read(i2c_addr_, data, 1);
 
-  return 1;
+  // Increment status_counter_
+  status_counter_++;
+  if (status_counter_ >= 100) {
+    checkStatus();
+    // reset counter
+    status_counter_ = 0;
+  }
 }
 
-int VL6180::writeByte(uint16_t reg_add, char data)
+void VL6180::writeByte(uint16_t reg_add, char data)
 {
   uint8_t buffer[3];
   buffer[0]=reg_add>>8;
@@ -263,7 +282,6 @@ int VL6180::writeByte(uint16_t reg_add, char data)
   buffer[2]=data;
 
   i2c_.write(i2c_addr_, buffer, 3);
-  return 1;
 }
 
 }}   // namespace hyped::sensors
