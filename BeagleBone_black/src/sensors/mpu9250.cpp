@@ -30,72 +30,72 @@
 // Accelerometer addresses
 constexpr uint8_t kAccelXoutH           = 0x3B;
 
-#define MPUREG_XA_OFFSET_H         0x77
-#define MPUREG_XA_OFFSET_L         0x78
-#define MPUREG_YA_OFFSET_H         0x7A
-#define MPUREG_YA_OFFSET_L         0x7B
-#define MPUREG_ZA_OFFSET_H         0x7D
-#define MPUREG_ZA_OFFSET_L         0x7E
+constexpr uint8_t kMpuXaOffsetH        = 0x77;
+constexpr uint8_t kMpuXaOffsetL        = 0x78;
+constexpr uint8_t kMpuYaOffsetH        = 0x7A;
+constexpr uint8_t kMpuYaOffsetL        = 0x7B;
+constexpr uint8_t kMpuZaOffsetH        = 0x7D;
+constexpr uint8_t kMpuZaOffsetL        = 0x7E;
 
-constexpr uint8_t ACCEL_CONFIG           = 0x1C;
-constexpr uint8_t ACCEL_CONFIG2          = 0x1D;
+constexpr uint8_t kAccelConfig           = 0x1C;
+constexpr uint8_t kAccelConfig2          = 0x1D;
 
 // gyroscope addresses
 constexpr uint8_t  kGyroXoutH           = 0x43;
 
-#define MPUREG_XG_OFFS_USRH 0x13
-#define MPUREG_XG_OFFS_USRL 0x14
-#define MPUREG_YG_OFFS_USRH 0x15
-#define MPUREG_YG_OFFS_USRL 0x16
-#define MPUREG_ZG_OFFS_USRH 0x17
-#define MPUREG_ZG_OFFS_USRL 0x18
+constexpr uint8_t kMpuXgOffsetUsrh     = 0x13;
+constexpr uint8_t kMpuXgOffsetUsrl     = 0x14;
+constexpr uint8_t kMpuYgOffsetUsrh     = 0x15;
+constexpr uint8_t kMpuYgOffsetUsrl     = 0x16;
+constexpr uint8_t kMpuZgOffsetUsrh     = 0x17;
+constexpr uint8_t kMpuZgOffsetUsrl     = 0x18;
 
-constexpr uint8_t  GYRO_CONFIG           = 0x1B;
+constexpr uint8_t  kGyroConfig           = 0x1B;
 
-constexpr uint8_t WHO_AM_I_MPU9250       = 0x75;
-constexpr uint8_t WHO_AM_I_RESET_VALUE   = 0x71;
+constexpr uint8_t kWhoAmIMpu9250       = 0x75;
+constexpr uint8_t kWhoAmIResetValue   = 0x71;
 
 // User Control
-constexpr uint8_t MPU9250_REG_USER_CTRL  = 0x6A;
+constexpr uint8_t kMpuRegUserCtrl  = 0x6A;
 
 // I2C Master Control
-constexpr uint8_t MPU9250_REG_I2C_MST_CTRL  = 0x24;
+constexpr uint8_t kMpuRegI2cMstCtrl  = 0x24;
 
 // Power Management
-constexpr uint8_t MPU9250_REG_PWR_MGMT_1    = 0x6B;
-constexpr uint8_t MPU9250_REG_PWR_MGMT_2    = 0x6C;
+constexpr uint8_t kMpuRegPwrMgmt1    = 0x6B;
+constexpr uint8_t kMpuRegPwrMgmt2    = 0x6C;
 
 // Configuration
-#define MPU9250_REG_CONFIG              0x1A
+constexpr uint8_t kMpuRegConfig         = 0x1A;
 
 // Sample Rate Divider
-#define MPU9250_REG_SMPLRT_DIV          0x19
+constexpr uint8_t kMpuRegSmplrtDiv     = 0x19;
 
-#define MPUREG_FIFO_COUNTH 0x72
+constexpr uint8_t kMpuRegFifoCountH         = 0x72;
 
 // FIFO Enable
-constexpr uint8_t MPU9250_REG_FIFO_EN       = 0x23;
+constexpr uint8_t kMpuRegFifoEn       = 0x23;
 
 // Interrupt Enable
-constexpr uint8_t MPU9250_REG_INT_ENABLE    = 0x38;
+constexpr uint8_t kMpuRegIntEnable    = 0x38;
 
 constexpr uint8_t kReadFlag              = 0x80;
 
 // Configuration bits mpu9250
-#define BITS_FS_250DPS              0x00
-#define BITS_FS_500DPS              0x08
-#define BITS_FS_1000DPS             0x10
-#define BITS_FS_2000DPS             0x18
-#define BITS_FS_2G                  0x00
-#define BITS_FS_4G                  0x08
-#define BITS_FS_8G                  0x10
-#define BITS_FS_16G                 0x18
+constexpr uint8_t kBitsFs250Dps             = 0x00;
+constexpr uint8_t kBitsFs500Dps             = 0x08;
+constexpr uint8_t kBitsFs1000Dps            = 0x10;
+constexpr uint8_t kBitsFs2000Dps            = 0x18;
+constexpr uint8_t kBitsFs2G                 = 0x00;
+constexpr uint8_t kBitsFs4G                 = 0x08;
+constexpr uint8_t kBitsFs8G                 = 0x10;
+constexpr uint8_t kBitsFs16G                = 0x18;
 
 // Configuration bits mpu9250
-#define MPUREG_FIFO_R_W 0x74
+constexpr uint8_t kMpuRegFifoRW            = 0x74;
 
 // Resets the device to defaults
-#define BIT_H_RESET 0x80
+constexpr uint8_t kBitHReset                = 0x80;
 
 namespace hyped {
 
@@ -125,16 +125,16 @@ void MPU9250::init()
   // Test connection
   while (!whoAmI());
 
-  writeByte(MPU9250_REG_PWR_MGMT_1, BIT_H_RESET);   // Reset Device
-  // writeByte(MPU9250_REG_USER_CTRL, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);          // Clock Source
-  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);          // Enable Acc & Gyro
-  writeByte(MPU9250_REG_CONFIG, 0x01);
-  writeByte(GYRO_CONFIG, 0x00);
-  writeByte(ACCEL_CONFIG, 0x00);
-  writeByte(ACCEL_CONFIG2, 0x01);
-  setAcclScale(BITS_FS_2G);
-  setGyroScale(BITS_FS_250DPS);
+  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
+  // writeByte(kMpuRegUserCtrl, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
+  writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
+  writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
+  writeByte(kMpuRegConfig, 0x01);
+  writeByte(kGyroConfig, 0x00);
+  writeByte(kAccelConfig, 0x00);
+  writeByte(kAccelConfig2, 0x01);
+  setAcclScale(kBitsFs2G);
+  setGyroScale(kBitsFs250Dps);
 
   // After init not quite 0, this is to make it 0.
   getGyroData();
@@ -150,43 +150,43 @@ void MPU9250::calibrateSensors()
   int32_t gyro_bias[3]  = {0, 0, 0}, accel_bias[3] = {0, 0, 0};
 
   // reset device
-  writeByte(MPU9250_REG_PWR_MGMT_1, 0x80);  // Write a one to bit 7 reset bit; toggle reset device
+  writeByte(kMpuRegPwrMgmt1, kBitHReset);  // Write a one to bit 7 reset bit; toggle reset device
   Thread::sleep(100);
 
   // get stable time source; Auto select clock source to be PLL gyroscope reference if ready
   // else use the internal oscillator, bits 2:0 = 001
-  writeByte(MPU9250_REG_PWR_MGMT_1, 0x01);
-  writeByte(MPU9250_REG_PWR_MGMT_2, 0x00);
+  writeByte(kMpuRegPwrMgmt1, 0x01);
+  writeByte(kMpuRegPwrMgmt2, 0x00);
   Thread::sleep(200);
 
   // Configure device for bias calculation
-  writeByte(MPU9250_REG_INT_ENABLE, 0x00);    // Disable all interrupts
-  writeByte(MPU9250_REG_FIFO_EN, 0x00);       // Disable FIFO
-  writeByte(MPU9250_REG_PWR_MGMT_1, 0x00);    // Turn on internal clock source
-  writeByte(MPU9250_REG_I2C_MST_CTRL, 0x00);  // Disable I2C master
-  writeByte(MPU9250_REG_USER_CTRL, 0x00);     // Disable FIFO and I2C master modes
-  writeByte(MPU9250_REG_USER_CTRL, 0x0C);     // Reset FIFO and DMP
+  writeByte(kMpuRegIntEnable, 0x00);    // Disable all interrupts
+  writeByte(kMpuRegFifoEn, 0x00);       // Disable FIFO
+  writeByte(kMpuRegPwrMgmt1, 0x00);    // Turn on internal clock source
+  writeByte(kMpuRegI2cMstCtrl, 0x00);  // Disable I2C master
+  writeByte(kMpuRegUserCtrl, 0x00);     // Disable FIFO and I2C master modes
+  writeByte(kMpuRegUserCtrl, 0x0C);     // Reset FIFO and DMP
   Thread::sleep(15);
 
   // Configure MPU6050 gyro and accelerometer for bias calculation
-  writeByte(MPU9250_REG_CONFIG, 0x01);       // Set low-pass filter to 188 Hz
-  writeByte(MPU9250_REG_SMPLRT_DIV, 0x00);   // Set sample rate to 1 kHz
+  writeByte(kMpuRegConfig, 0x01);       // Set low-pass filter to 188 Hz
+  writeByte(kMpuRegSmplrtDiv, 0x00);   // Set sample rate to 1 kHz
   // Set gyro full-scale to 250 degrees per second, maximum sensitivity
-  writeByte(GYRO_CONFIG, 0x00);
-  writeByte(ACCEL_CONFIG, 0x00);   // Set accelerometer full-scale to 2 g, maximum sensitivity
+  writeByte(kGyroConfig, 0x00);
+  writeByte(kAccelConfig, 0x00);   // Set accelerometer full-scale to 2 g, maximum sensitivity
 
   uint16_t  gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
   uint16_t  accelsensitivity = 16384;  // = 16384 LSB/g
 
   // Configure FIFO to capture accelerometer and gyro data for bias calculation
-  writeByte(MPU9250_REG_USER_CTRL, 0x40);    // Enable FIFO
+  writeByte(kMpuRegUserCtrl, 0x40);    // Enable FIFO
   // Enable gyro and accelerometer sensors for FIFO  (max size 512 bytes in MPU-9250)
-  writeByte(MPU9250_REG_FIFO_EN, 0x78);
+  writeByte(kMpuRegFifoEn, 0x78);
   Thread::sleep(40);
 
   // At end of sample accumulation, turn off FIFO sensor read
-  writeByte(MPU9250_REG_FIFO_EN, 0x00);        // Disable gyro and accelerometer sensors for FIFO
-  readBytes(MPUREG_FIFO_COUNTH, data, 2);    // read FIFO sample count
+  writeByte(kMpuRegFifoEn, 0x00);        // Disable gyro and accelerometer sensors for FIFO
+  readBytes(kMpuRegFifoCountH, data, 2);    // read FIFO sample count
   fifo_count = ( (uint16_t) data[0] << 8) | data[1];
   // How many sets of full gyro and accelerometer data for averaging
   packet_count = fifo_count/12;
@@ -194,7 +194,7 @@ void MPU9250::calibrateSensors()
   for (ii = 0; ii < packet_count; ii++) {
     int16_t acc_temp[3] = {0, 0, 0}, gyro_temp[3]  = {0, 0, 0};
 
-    readBytes(MPUREG_FIFO_R_W, data, 12);  // read data for averaging
+    readBytes(kMpuRegFifoRW, data, 12);  // read data for averaging
     // Form signed 16-bit integer for each sample in FIFO
     acc_temp[0] = (int16_t) (( (int16_t) data[0] << 8)  | data[1]);
     acc_temp[1] = (int16_t) (( (int16_t) data[2] << 8)  | data[3]);
@@ -233,12 +233,12 @@ void MPU9250::calibrateSensors()
   data[5] = (-gyro_bias[2]/4)       & 0xFF;
 
   // Push gyro biases to hardware registers
-  writeByte(MPUREG_XG_OFFS_USRH, data[0]);
-  writeByte(MPUREG_XG_OFFS_USRL, data[1]);
-  writeByte(MPUREG_YG_OFFS_USRH, data[2]);
-  writeByte(MPUREG_YG_OFFS_USRL, data[3]);
-  writeByte(MPUREG_ZG_OFFS_USRH, data[4]);
-  writeByte(MPUREG_ZG_OFFS_USRL, data[5]);
+  writeByte(kMpuXgOffsetUsrh, data[0]);
+  writeByte(kMpuXgOffsetUsrl, data[1]);
+  writeByte(kMpuYgOffsetUsrh, data[2]);
+  writeByte(kMpuYgOffsetUsrl, data[3]);
+  writeByte(kMpuZgOffsetUsrh, data[4]);
+  writeByte(kMpuZgOffsetUsrl, data[5]);
 
   // Set scaled gyro biases
   gyro_bias_[0] = static_cast<float>(gyro_bias[0])/static_cast<float>(gyrosensitivity);
@@ -253,11 +253,11 @@ void MPU9250::calibrateSensors()
   // so that the accelerometer biases calculated above must be divided by 8.
 
   int32_t accel_bias_reg[3] = {0, 0, 0};   // A place to hold the factory accelerometer trim biases
-  readBytes(MPUREG_XA_OFFSET_H, data, 2);   // Read factory accelerometer trim values
+  readBytes(kMpuXaOffsetH, data, 2);   // Read factory accelerometer trim values
   accel_bias_reg[0] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
-  readBytes(MPUREG_YA_OFFSET_H, data, 2);
+  readBytes(kMpuYaOffsetH, data, 2);
   accel_bias_reg[1] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
-  readBytes(MPUREG_ZA_OFFSET_H, data, 2);
+  readBytes(kMpuZaOffsetH, data, 2);
   accel_bias_reg[2] = (int32_t) (((int16_t)data[0] << 8) | data[1]);
 
   // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
@@ -290,12 +290,12 @@ void MPU9250::calibrateSensors()
   data[5] = data[5] | mask_bit[2];
 
   // Push accelerometer biases to hardware registers
-  writeByte(MPUREG_XA_OFFSET_H, data[0]);
-  writeByte(MPUREG_XA_OFFSET_L, data[1]);
-  writeByte(MPUREG_YA_OFFSET_H, data[2]);
-  writeByte(MPUREG_YA_OFFSET_L, data[3]);
-  writeByte(MPUREG_ZA_OFFSET_H, data[4]);
-  writeByte(MPUREG_ZA_OFFSET_L, data[5]);
+  writeByte(kMpuXaOffsetH, data[0]);
+  writeByte(kMpuXaOffsetL, data[1]);
+  writeByte(kMpuYaOffsetH, data[2]);
+  writeByte(kMpuYaOffsetL, data[3]);
+  writeByte(kMpuZaOffsetH, data[4]);
+  writeByte(kMpuZaOffsetL, data[5]);
 
   // Set scaled accelerometer biases
   acc_bias_[0] = static_cast<float>(accel_bias[0])/static_cast<float>(accelsensitivity);
@@ -308,10 +308,10 @@ bool MPU9250::whoAmI()
   uint8_t data;
 
   // Who am I checks what address the sensor is at
-  readByte(WHO_AM_I_MPU9250, &data);
+  readByte(kWhoAmIMpu9250, &data);
   log_.ERR("MPU9250", "who am I: %u", data);
   // TODO(anyone) need to find what it should be equal to
-  if (data != WHO_AM_I_RESET_VALUE) {
+  if (data != kWhoAmIResetValue) {
     Thread::sleep(1000);
      log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
     return false;
@@ -397,19 +397,19 @@ void MPU9250::getGyroData()
 
 void MPU9250::setGyroScale(int scale)
 {
-  writeByte(GYRO_CONFIG, scale);
+  writeByte(kGyroConfig, scale);
 
   switch (scale) {
-    case BITS_FS_250DPS:
+    case kBitsFs250Dps:
       gyro_divider_ = 131;
     break;
-    case BITS_FS_500DPS:
+    case kBitsFs500Dps:
       gyro_divider_ = 65.5;
       break;
-    case BITS_FS_1000DPS:
+    case kBitsFs1000Dps:
       gyro_divider_ = 32.8;
     break;
-    case BITS_FS_2000DPS:
+    case kBitsFs2000Dps:
       gyro_divider_ = 16.4;
     break;
   }
@@ -417,19 +417,19 @@ void MPU9250::setGyroScale(int scale)
 
 void MPU9250::setAcclScale(int scale)
 {
-  writeByte(ACCEL_CONFIG, scale);
+  writeByte(kAccelConfig, scale);
 
   switch (scale) {
-    case BITS_FS_2G:
+    case kBitsFs2G:
       acc_divider_ = 16384;
     break;
-    case BITS_FS_4G:
+    case kBitsFs4G:
       acc_divider_ = 8192;
     break;
-    case BITS_FS_8G:
+    case kBitsFs8G:
       acc_divider_ = 4096;
     break;
-    case BITS_FS_16G:
+    case kBitsFs16G:
       acc_divider_ = 2048;
     break;
   }
