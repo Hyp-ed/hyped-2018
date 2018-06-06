@@ -129,7 +129,7 @@ void Main::run()
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
-    sendStripeCount(sns_.stripe_count.value);
+    sendStripeCount(sns_.stripe_counter.count.value);
     sendRpmFl(mtr_.motor_velocity_1);
     sendRpmFr(mtr_.motor_velocity_2);
     sendRpmBl(mtr_.motor_velocity_3);
