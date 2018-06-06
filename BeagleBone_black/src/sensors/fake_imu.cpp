@@ -34,11 +34,11 @@ namespace hyped {
 namespace sensors {
 
 FakeImu::FakeImu(std::string file_path)
+  : filePointerAcc(0), filePointerGyr(0)
 {
   readFromFile = true;
   readDataFromFile(file_path);
   setData();
-  init();
 }
 
 FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
@@ -48,24 +48,19 @@ FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
 {
   readFromFile = false;
   setData();
-  init();
-}
-
-void FakeImu::init()
-{
-  accPrevReadTime = high_resolution_clock::now();
-  gyrPrevReadTime = high_resolution_clock::now();
-
-  prevAccData = DataPoint<NavigationVector>(imu_.acc.timestamp,
-                                            imu_.acc.value + addNoiseToData(acc_val, acc_noise));
-  prevGyrData = DataPoint<NavigationVector>(imu_.gyr.timestamp,
-                                            imu_.gyr.value + addNoiseToData(gyr_val, gyr_noise));
 }
 
 void FakeImu::setData()
 {
-  imu_.acc.value = acc_val;
-  imu_.gyr.value = gyr_val;
+  accPrevReadTime = high_resolution_clock::now();
+  gyrPrevReadTime = high_resolution_clock::now();
+
+  // TODO(Uday): Set the timestamp
+  uint32_t timestamp = 0;
+  prevAccData = DataPoint<NavigationVector>(timestamp,
+                                            addNoiseToData(acc_val, acc_noise));
+  prevGyrData = DataPoint<NavigationVector>(timestamp,
+                                            addNoiseToData(gyr_val, gyr_noise));
 }
 
 void FakeImu::getData(Imu* imu)
@@ -73,28 +68,29 @@ void FakeImu::getData(Imu* imu)
   if (readFromFile == true) {
     if (filePointerAcc == acc_val_read.size()) {
       // TODO(Uday): Set the acc sensor state to offline
-    } else {
+    } else if (accCheckTime()) {
       prevAccData = acc_val_read[filePointerAcc];
       filePointerAcc++;
     }
 
     if (filePointerGyr == gyr_val_read.size()) {
       // TODO(Uday): Set the gyr sensor state to offline
-    } else {
+    } else if (gyrCheckTime()) {
       prevGyrData = gyr_val_read[filePointerGyr];
       filePointerGyr++;
     }
+  } else {
+    // TODO(Uday): Set the timestamp
+    uint32_t timestamp = 0;
 
-    return;
+    if (accCheckTime())
+      prevAccData = DataPoint<NavigationVector>(timestamp,
+                                                addNoiseToData(acc_val, acc_noise));
+
+    if (gyrCheckTime())
+      prevGyrData = DataPoint<NavigationVector>(timestamp,
+                                                addNoiseToData(gyr_val, gyr_noise));
   }
-
-  if (accCheckTime())
-    prevAccData = DataPoint<NavigationVector>(imu_.acc.timestamp,
-                                           imu_.acc.value + addNoiseToData(acc_val, acc_noise));
-
-  if (gyrCheckTime())
-    prevGyrData = DataPoint<NavigationVector>(imu_.gyr.timestamp,
-                                           imu_.gyr.value + addNoiseToData(gyr_val, gyr_noise));
 
   imu->acc = prevAccData;
   imu->gyr = prevGyrData;
@@ -106,7 +102,7 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType 
   std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
-    std::normal_distribution<double> distribution(value[i], noise);
+    std::normal_distribution<NavigationType> distribution(value[i], noise);
     temp[i] = distribution(generator);
   }
 
