@@ -43,6 +43,7 @@ utils/math/differentiator.hpp
 utils/math/integrator.hpp
 utils/math/kalman.hpp
 utils/math/quaternion.hpp
+utils/math/statistics.hpp
 utils/math/vector.hpp
 utils/io/can.hpp
 utils/io/can.cpp
