@@ -52,8 +52,8 @@ FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
 
 void FakeImu::setData()
 {
-  accPrevReadTime = high_resolution_clock::now();
-  gyrPrevReadTime = high_resolution_clock::now();
+  imuRefTime = high_resolution_clock::now();
+  accReadCount = gyrReadCount = 0;
 
   // TODO(Uday): Set the timestamp
   uint32_t timestamp = 0;
@@ -139,26 +139,26 @@ void FakeImu::readDataFromFile(std::string file_path)
 bool FakeImu::accCheckTime()
 {
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - accPrevReadTime);
+    duration<double> time_span = duration_cast<duration<double>>(now - imuRefTime);
 
-    if (time_span.count() < 0.000250) {
+    if (time_span.count() < 0.000250*accReadCount) {
         return false;
     }
 
-    accPrevReadTime = now;
+    accReadCount++;
     return true;
 }
 
 bool FakeImu::gyrCheckTime()
 {
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - gyrPrevReadTime);
+    duration<double> time_span = duration_cast<duration<double>>(now - imuRefTime);
 
-    if (time_span.count() < 0.000125) {
+    if (time_span.count() < 0.000125*gyrReadCount) {
         return false;
     }
 
-    gyrPrevReadTime = now;
+    gyrReadCount++;
     return true;
 }
 

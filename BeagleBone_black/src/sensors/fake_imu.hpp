@@ -70,8 +70,10 @@ class FakeImu : public ImuInterface {
   std::vector<DataPoint<NavigationVector>> acc_val_read;
   std::vector<DataPoint<NavigationVector>> gyr_val_read;
 
-  high_resolution_clock::time_point accPrevReadTime;
-  high_resolution_clock::time_point gyrPrevReadTime;
+  high_resolution_clock::time_point imuRefTime;
+  unsigned accReadCount, gyrReadCount;
+  const double accTimeInterval = 0.000250;
+  const double gyrTimeInterval = 0.000125;
 
   /*
    * @brief     A function that sets the imu data
