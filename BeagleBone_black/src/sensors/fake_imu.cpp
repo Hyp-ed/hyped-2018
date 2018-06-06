@@ -19,7 +19,7 @@
  */
 
 #include <random>
-
+#include <algorithm>
 #include <fstream>
 #include <string>
 
@@ -54,41 +54,29 @@ void FakeImu::setData()
 {
   imuRefTime = high_resolution_clock::now();
   accReadCount = gyrReadCount = 0;
-
-  // TODO(Uday): Set the timestamp
-  uint32_t timestamp = 0;
-  prevAccData = DataPoint<NavigationVector>(timestamp,
-                                            addNoiseToData(acc_val, acc_noise));
-  prevGyrData = DataPoint<NavigationVector>(timestamp,
-                                            addNoiseToData(gyr_val, gyr_noise));
 }
 
 void FakeImu::getData(Imu* imu)
 {
   if (readFromFile == true) {
-    if (filePointerAcc == acc_val_read.size()) {
-      // TODO(Uday): Set the acc sensor state to offline
-    } else if (accCheckTime()) {
+    if (accCheckTime()) {
       prevAccData = acc_val_read[filePointerAcc];
       filePointerAcc++;
+      filePointerAcc = std::min(filePointerAcc, unsigned(acc_val_read.size()-1));
     }
 
-    if (filePointerGyr == gyr_val_read.size()) {
-      // TODO(Uday): Set the gyr sensor state to offline
-    } else if (gyrCheckTime()) {
+    if (gyrCheckTime()) {
       prevGyrData = gyr_val_read[filePointerGyr];
       filePointerGyr++;
+      filePointerGyr = std::min(filePointerGyr, unsigned(gyr_val_read.size()-1));
     }
   } else {
-    // TODO(Uday): Set the timestamp
-    uint32_t timestamp = 0;
-
     if (accCheckTime())
-      prevAccData = DataPoint<NavigationVector>(timestamp,
+      prevAccData = DataPoint<NavigationVector>(accTimeInterval*(accReadCount-1),
                                                 addNoiseToData(acc_val, acc_noise));
 
     if (gyrCheckTime())
-      prevGyrData = DataPoint<NavigationVector>(timestamp,
+      prevGyrData = DataPoint<NavigationVector>(gyrTimeInterval*(gyrReadCount-1),
                                                 addNoiseToData(gyr_val, gyr_noise));
   }
 
