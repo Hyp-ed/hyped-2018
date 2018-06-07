@@ -43,6 +43,8 @@ using utils::math::Vector;
 
 namespace navigation {
 
+constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
+
 class Navigation {
  public:
   typedef std::array<Imu,       Sensors::kNumImus>        ImuArray;
@@ -70,6 +72,12 @@ class Navigation {
    * @return uint16_t Returns the forward component of displacement vector
    */
   NavigationType get_displacement();
+  /**
+   * @brief Get the emergency braking distance in metres
+   * 
+   * @return NavigationType 
+   */
+  NavigationType getEmergencyBrakingDistance();
 
  private:
   /**

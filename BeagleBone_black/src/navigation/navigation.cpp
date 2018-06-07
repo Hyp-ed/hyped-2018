@@ -52,6 +52,12 @@ NavigationType Navigation::get_displacement()
   return displacement_[0];
 }
 
+NavigationType Navigation::getEmergencyBrakingDistance()
+{
+  // TODO(Brano): Account for actuation delay and/or communication latency?
+  return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
+}
+
 
 void Navigation::update(ImuArray imus)
 {
