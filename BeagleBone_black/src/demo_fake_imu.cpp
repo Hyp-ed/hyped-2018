@@ -19,6 +19,7 @@
 #include "sensors/fake_imu.hpp"
 
 #include <stdio.h>
+#include <unistd.h>
 
 using hyped::data::Imu;
 using hyped::data::NavigationVector;
@@ -38,5 +39,7 @@ int main()
     generator.getData(&reading);
     printf("From generator:  %d\n", reading.acc.timestamp);
     printf("From generator:  %d\n", reading.gyr.timestamp);
+
+    usleep(100);
   }
 }
