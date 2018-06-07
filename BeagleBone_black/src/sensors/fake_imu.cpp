@@ -41,8 +41,8 @@ FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
   setData();
 }
 
-FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
-                 NavigationVector gyr_val, NavigationType gyr_noise)
+FakeImu::FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
+                 NavigationVector gyr_val, NavigationVector gyr_noise)
     : acc_val(acc_val), gyr_val(gyr_val),
       acc_noise(acc_noise), gyr_noise(gyr_noise)
 {
@@ -84,13 +84,13 @@ void FakeImu::getData(Imu* imu)
   imu->gyr = prev_gyr;
 }
 
-NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType noise)
+NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
   std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
-    std::normal_distribution<NavigationType> distribution(value[i], noise);
+    std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
     temp[i] = distribution(generator);
   }
 
@@ -101,24 +101,24 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
 {
   std::ifstream file;
   uint32_t timestamp;
-  NavigationVector temp;
+  NavigationVector value, noise;
 
   file.open(acc_file_path);
 
-  file >> acc_noise;
   while (file.is_open() && !file.eof()) {
-    file >> timestamp >> temp[0] >> temp[1] >> temp[2];
-    acc_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(temp, acc_noise)));
+    file >> timestamp >> value[0] >> value[1] >> value[2]
+         >> noise[0] >> noise[1] >> noise[2];
+    acc_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
   }
 
   if (file.is_open())
     file.close();
 
   file.open(gyr_file_path);
-  file >> gyr_noise;
   while (file.is_open() && !file.eof()) {
-    file >> timestamp >> temp[0] >> temp[1] >> temp[2];
-    gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(temp, gyr_noise)));
+    file >> timestamp >> value[0] >> value[1] >> value[2]
+         >> noise[0] >> noise[1] >> noise[2];
+    gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
   }
 }
 

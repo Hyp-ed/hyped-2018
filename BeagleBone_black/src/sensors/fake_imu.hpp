@@ -50,8 +50,8 @@ class FakeImu : public ImuInterface {
   /*
    * @brief     A constructor for the fake IMU class
    */
-  explicit FakeImu(NavigationVector acc_val, NavigationType acc_noise,
-                   NavigationVector gyr_val, NavigationType gyr_noise);
+  explicit FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
+                   NavigationVector gyr_val, NavigationVector gyr_noise);
 
   /*
    * @brief     A function that gets the imu data
@@ -77,7 +77,7 @@ class FakeImu : public ImuInterface {
   /*
    * @brief     A function that adds noise to the imu data
    */
-  static NavigationVector addNoiseToData(NavigationVector value, NavigationType noise);
+  static NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
 
   /*
    * @brief     Checks to see if sufficient time has pass for the sensor to be updated
@@ -87,10 +87,8 @@ class FakeImu : public ImuInterface {
 
   bool read_file;
 
-  NavigationVector acc_val;
-  NavigationVector gyr_val;
-  NavigationType acc_noise;
-  NavigationType gyr_noise;
+  NavigationVector acc_val, gyr_val;
+  NavigationVector acc_noise, gyr_noise;
 
   DataPoint<NavigationVector> prev_acc;
   DataPoint<NavigationVector> prev_gyr;
