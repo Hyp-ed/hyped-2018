@@ -127,11 +127,11 @@ bool FakeImu::accCheckTime()
     high_resolution_clock::time_point now = high_resolution_clock::now();
     duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
 
-    if (time_span.count() < 0.000250*acc_count) {
+    if (time_span.count() < kAccTimeInterval*acc_count) {
         return false;
     }
 
-    acc_count++;
+    acc_count = ceil(time_span.count()/kAccTimeInterval);
     return true;
 }
 
@@ -140,11 +140,11 @@ bool FakeImu::gyrCheckTime()
     high_resolution_clock::time_point now = high_resolution_clock::now();
     duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
 
-    if (time_span.count() < 0.000125*gyr_count) {
+    if (time_span.count() < kGyrTimeInterval*gyr_count) {
         return false;
     }
 
-    gyr_count++;
+    gyr_count = ceil(time_span.count()/kGyrTimeInterval);
     return true;
 }
 
