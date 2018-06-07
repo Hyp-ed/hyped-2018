@@ -118,6 +118,9 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
          >> noise[0] >> noise[1] >> noise[2];
     gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
   }
+
+  if (file.is_open())
+    file.close();
 }
 
 bool FakeImu::accCheckTime()
