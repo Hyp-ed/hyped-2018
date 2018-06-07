@@ -60,15 +60,13 @@ void FakeImu::getData(Imu* imu)
 {
   if (read_file == true) {
     if (accCheckTime()) {
-      prev_acc = acc_val_read[pt_acc];
-      pt_acc++;
-      pt_acc = std::min(pt_acc, unsigned(acc_val_read.size()-1));
+      prev_acc = acc_val_read[acc_count-1];
+      acc_count = std::min(acc_count, unsigned(acc_val_read.size()));
     }
 
     if (gyrCheckTime()) {
-      prev_gyr = gyr_val_read[pt_gyr];
-      pt_gyr++;
-      pt_gyr = std::min(pt_gyr, unsigned(gyr_val_read.size()-1));
+      prev_gyr = gyr_val_read[gyr_count-1];
+      gyr_count = std::min(gyr_count, unsigned(gyr_val_read.size()));
     }
   } else {
     if (accCheckTime())
