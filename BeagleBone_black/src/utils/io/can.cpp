@@ -57,6 +57,7 @@ struct sockaddr_can {
 #endif   // CAN
 
 #include "sensors/bms.hpp"
+#include "motor_control/controller.hpp"
 
 namespace hyped {
 
@@ -64,6 +65,10 @@ namespace bms = sensors::bms;
 
 namespace utils {
 namespace io {
+
+uint32_t SDO_TRANSMIT  = 0x580;
+uint32_t EMGY_TRANSMIT = 0x80;
+uint32_t NMT_TRANSMIT  = 0x700;
 
 Can::Can()
     : concurrent::Thread(0)
@@ -166,8 +171,23 @@ int Can::receive(can::Frame* frame)
 
 void Can::processNewData(can::Frame* message)
 {
-  uint32_t  id    = message->id;
-  BMS*      owner = 0;
+  uint32_t  id  = message->id;
+  CanProccesor* owner = 0;
+  for (auto const& controller : controller_array_) {
+    if ((EMGY_TRANSMIT + controller->getId()) == id) {
+      owner = controller;
+      break;
+    }
+    if ((SDO_TRANSMIT + controller->getId()) == id) {
+      owner = controller;
+      break;
+    }
+    if ((NMT_TRANSMIT + controller->getId()) == id) {
+      owner = controller;
+      break;
+    }
+  }
+
   for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
     uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
     if (bms_id <= id &&
@@ -190,6 +210,14 @@ void Can::registerBMS(BMS* bms)
   uint8_t id = bms->id_;
 
   bms_map_[id] = bms;
+}
+
+void Can::registerController(Controller* controller)
+{
+  ASSERT(controller);
+
+  controller_array_[array_counter_] = controller;
+  array_counter_++;
 }
 
 }}}   // namespace hyped::utils::io

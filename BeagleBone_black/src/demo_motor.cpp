@@ -18,26 +18,34 @@
  *    limitations under the License.
  */
 
-// #include <iostream>
 #include "motor_control/main.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "state_machine/hyped-machine.hpp"
 
+#include "utils/logger.hpp"
+#include "utils/system.hpp"
+
 using hyped::utils::concurrent::Thread;
 using hyped::utils::Logger;
+using hyped::utils::System;
 using hyped::state_machine::HypedMachine;
+
 using namespace hyped;
 
-int main()
+int main(int argc, char* argv[])
 {
+  System::parseArgs(argc, argv);
+  System& sys = System::getSystem();
+  Logger log_motor(sys.verbose_motor, sys.debug_motor);
+  Logger log_state(sys.verbose_state, sys.debug_state);
+
   Logger log(true, 1);
   HypedMachine* hypedMachine = new HypedMachine(log);
   Thread* motor  = new hyped::motor_control::Main(1, log);
   motor->start();
 
-  log.INFO("TEST", "State machine thread successfully started");
   hypedMachine->handleEvent(state_machine::Event::kOnStart);
-  Thread::sleep(500);
+  Thread::sleep(3000);
   hypedMachine->handleEvent(state_machine::Event::kMaxDistanceReached);
   Thread::sleep(250);
   hypedMachine->handleEvent(state_machine::Event::kCriticalFailure);

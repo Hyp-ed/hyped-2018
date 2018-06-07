@@ -36,16 +36,64 @@ namespace motor_control {
 class Main: public Thread {
  public:
   explicit Main(uint8_t id, Logger& log);
+  /**
+    *  @brief  { Runs motor control thread. Switches to correct motor state
+    *            based on state machine state }
+    */
   void run() override;
 
  private:
+  /**
+    *  @brief  { Establish CAN connections with motor controllers }
+    */
   void setupMotors();
+  /**
+    *  @brief  { Enter controllers into pre operational state if config error occurs }
+    */
   void accelerateMotors();
+  /**
+    *  @brief  { Will decelerate motors until total distance is reached }
+    */
   void decelerateMotors();
+  /**
+    *  @brief  { Emergency stop, used in the case of a critical failure }
+    */
   void stopMotors();
+  /**
+    *  @brief  { This function will run through slip ratio algorithm to calculate
+    *            the desired acceleration velocity}
+    *
+    *  @param[in]  translational_velocity  { Value read from shared data structure }
+    *
+    *  @return  { Acceleration velocity calculation of type int }
+    */
   int32_t accelerationVelocity(NavigationType velocity);
+  /**
+    *  @brief  { This function will run through slip ratio algorithm to calculate
+    *            the desired deceleration velocity }
+    *
+    *  @param[in]  translational_velocity  { Value read from shared data structure }
+    *
+    *  @return  { Deceleration velocity calculation of type int }
+    */
   int32_t decelerationVelocity(NavigationType velocity);
+  /**
+    *  @brief  { This function will calculate desired torque based on current
+    *            translational velocity }
+    *
+    *  @param[in]  translational_velocity  { Value read from shared data structure }
+    *
+    *  @return  { 16 bit integer - target torque }
+    */
   int16_t accelerationTorque(NavigationType velocity);
+  /**
+    *  @brief  { This function will calculate desired torque based on current
+    *            translational velocity }
+    *
+    *  @param[in]  translational_velocity  { Value read from shared data structure }
+    *
+    *  @return  { 16 bit integer - target torque }
+    */
   int16_t decelerationTorque(NavigationType velocity);
   data::Data& data_;
   data::StateMachine state_;
@@ -53,8 +101,10 @@ class Main: public Thread {
   int32_t target_velocity_;
   int16_t target_torque_;
   bool motors_set_up_;
+  bool motors_operational_;
   bool motor_failure_;
   bool run_;
+  bool all_motors_stopped_;
 };
 
 }}  // namespace hyped::motor_control

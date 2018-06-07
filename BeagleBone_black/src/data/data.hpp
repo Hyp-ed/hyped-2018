@@ -127,7 +127,7 @@ struct Batteries {
 
 enum MotorState {
   kCriticalFailure,
-  kMotorIdle,
+  kPreOperational,
   kMotorAccelerating,
   kMotorDecelerating,
   kMotorStopping,
