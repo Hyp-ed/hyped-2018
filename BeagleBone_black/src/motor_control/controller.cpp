@@ -1,5 +1,5 @@
 /*
- * Author: Sean Mullan
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
  * Date: 5/05/18
  * Description:
@@ -426,7 +426,189 @@ void Controller::processNewData(utils::io::can::Frame& message)
 void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 {
   critical_failure_ = true;
+  log_.ERR("MOTOR", "Controller %d: CAN Emergency", node_id_);
   // TODO(Anyone) Process error message
+  int8_t index_1   = message.data[1];
+  int8_t index_2   = message.data[2];
+  int8_t sub_index = message.data[3];
+
+  if (index_2 == 0x00) {
+    log_.ERR("MOTOR", "Controller %d: No emergency/error", node_id_);
+  }
+
+  if (index_2 == 0x10) {
+    log_.ERR("MOTOR", "Controller %d: Generic error", node_id_);
+  }
+
+  if (index_2 == 0x20 || index_2 == 0x21) {
+    log_.ERR("MOTOR", "Controller %d: Current error", node_id_);
+  }
+
+  if (index_2 == 0x22) {
+    log_.ERR("MOTOR", "Controller %d: Internal Current error", node_id_);
+  }
+
+  if (index_2 == 0x23) {
+    log_.ERR("MOTOR", "Controller %d: Current on device ouput side error", node_id_);
+  }
+
+  if (index_2 == 0x30) {
+    log_.ERR("MOTOR", "Controller %d: Voltage error", node_id_);
+  }
+
+  if (index_2 == 0x31) {
+    log_.ERR("MOTOR", "Controller %d: Mains voltage error", node_id_);
+  }
+
+  if (index_2 == 0x31 && index_1 >= 0x10 && index_1 <= 0x13) {
+    log_.ERR("MOTOR", "Controller %d: Mains over-voltage error", node_id_);
+  }
+
+  if (index_2 == 0x31 && index_1 >= 0x20 && index_1 <= 0x23) {
+    log_.ERR("MOTOR", "Controller %d: Mains under-voltage error", node_id_);
+  }
+
+  if (index_2 == 0x32) {
+    log_.ERR("MOTOR", "Controller %d: DC link voltage", node_id_);
+  }
+
+  if (index_2 == 0x32 && index_1 >= 0x10 && index_1 <= 0x12) {
+    log_.ERR("MOTOR", "Controller %d: DC link over-voltage", node_id_);
+  }
+
+  if (index_2 == 0x32 && index_1 >= 0x20 && index_1 <= 0x22) {
+    log_.ERR("MOTOR", "Controller %d: DC link under-voltage", node_id_);
+  }
+
+  if (index_2 == 0x33) {
+    log_.ERR("MOTOR", "Controller %d: Output voltage", node_id_);
+  }
+
+  if (index_2 == 0x33 && index_1 >= 0x10 && index_1 <= 0x13) {
+    log_.ERR("MOTOR", "Controller %d: Output over-voltage", node_id_);
+  }
+
+  if (index_2 >= 0x40 && index_2 <=0x44) {
+    log_.ERR("MOTOR", "Controller %d: Temperature error", node_id_);
+  }
+
+  if (index_2 >= 0x50 && index_2 <= 0x54) {
+    log_.ERR("MOTOR", "Controller %d: Device hardware error", node_id_);
+  }
+
+  if (index_2 == 0x55) {
+    log_.ERR("MOTOR", "Controller %d: Device storage error", node_id_);
+  }
+
+  if (index_2 >= 0x60 && index_2 <=0x63) {
+    log_.ERR("MOTOR", "Controller %d: Device software error", node_id_);
+  }
+
+  if (index_2 == 0x70) {
+    log_.ERR("MOTOR", "Controller %d: Additional modules error", node_id_);
+  }
+
+  if (index_2 == 0x71) {
+    log_.ERR("MOTOR", "Controller %d: Power error", node_id_);
+  }
+
+  if (index_2 == 0x71 && index_1 >= 0x10 && index_1 <= 0x13) {
+    log_.ERR("MOTOR", "Controller %d: Brake chopper error", node_id_);
+  }
+
+  if (index_2 == 0x71 && index_1 >= 0x20 && index_1 <= 0x23) {
+    log_.ERR("MOTOR", "Controller %d: Motor error", node_id_);
+  }
+
+  if (index_2 == 0x72) {
+    log_.ERR("MOTOR", "Controller %d: Measurement circuit error", node_id_);
+  }
+
+  if (index_2 == 0x73) {
+    log_.ERR("MOTOR", "Controller %d: Sensor error", node_id_);
+  }
+
+  if (index_2 == 0x74) {
+    log_.ERR("MOTOR", "Controller %d: Computation circuit error", node_id_);
+  }
+
+  if (index_2 == 0x75) {
+    log_.ERR("MOTOR", "Controller %d: Communication error", node_id_);
+  }
+
+  if (index_2 == 0x76) {
+    log_.ERR("MOTOR", "Controller %d: Data storage error", node_id_);
+  }
+
+  if (index_2 == 0x80) {
+    log_.ERR("MOTOR", "Controller %d: Monitoring error", node_id_);
+  }
+
+  if (index_2 == 0x81) {
+    log_.ERR("MOTOR", "Controller %d: Commmunication error", node_id_);
+  }
+
+  if (index_2 == 0x82) {
+    log_.ERR("MOTOR", "Controller %d: Protocol error", node_id_);
+  }
+
+  if (index_2 == 0x83) {
+    log_.ERR("MOTOR", "Controller %d: Torque control error", node_id_);
+  }
+
+  if (index_2 == 0x84) {
+    log_.ERR("MOTOR", "Controller %d: Velocity speed controller error", node_id_);
+  }
+
+  if (index_2 == 0x85) {
+    log_.ERR("MOTOR", "Controller %d: Position controller error", node_id_);
+  }
+
+  if (index_2 == 0x86) {
+    log_.ERR("MOTOR", "Controller %d: Positioning controller error", node_id_);
+  }
+
+  if (index_2 == 0x87) {
+    log_.ERR("MOTOR", "Controller %d: Sync controller error", node_id_);
+  }
+
+  if (index_2 == 0x88) {
+    log_.ERR("MOTOR", "Controller %d: Winding controller error", node_id_);
+  }
+
+  if (index_2 == 0x89) {
+    log_.ERR("MOTOR", "Controller %d: Process data error", node_id_);
+  }
+
+  if (index_2 == 0x8A) {
+    log_.ERR("MOTOR", "Controller %d: Control error", node_id_);
+  }
+
+  if (index_2 == 0x90) {
+    log_.ERR("MOTOR", "Controller %d: External error", node_id_);
+  }
+
+  if (index_2 == 0xF0 && index_1 == 0x01) {
+    log_.ERR("MOTOR", "Controller %d: Deceleration error", node_id_);
+  }
+
+  if (index_2 == 0xF0 && index_1 == 0x02) {
+    log_.ERR("MOTOR", "Controller %d: Sub-synchronous run error", node_id_);
+  }
+
+  if (index_2 == 0xF0 && index_1 == 0x03) {
+    log_.ERR("MOTOR", "Controller %d: Stroke operation error", node_id_);
+  }
+
+  if (index_2 == 0xF0 && index_1 == 0x04) {
+    log_.ERR("MOTOR", "Controller %d: Control error", node_id_);
+  }
+
+  if (index_2 == 0xFF) {
+    log_.ERR("MOTOR", "Controller %d: Manufacturer error", node_id_);
+  }
+
+  log_.DBG1("MOTOR", "index 1: %d, index 2: %d", index_1, index_2);
 }
 
 void Controller::processSDOMessage(utils::io::can::Frame& message)
