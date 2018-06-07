@@ -33,10 +33,10 @@ class Statistics {
  public:
   Statistics();
   virtual void update(T new_value) = 0;
-  T getSum() {return sum_;}
-  T getMean() {return mean_;}
-  T getVariance() {return variance_;}
-  T getStdDev() {return std::sqrt(variance_);}
+  T getSum() const {return sum_;}
+  T getMean() const {return mean_;}
+  T getVariance() const {return variance_;}
+  T getStdDev() const {return std::sqrt(variance_);}
 
  protected:
   T sum_;
@@ -48,7 +48,14 @@ template <typename T>
 Statistics<T>::Statistics() : sum_(0), mean_(0), variance_(0)
 {}
 
-
+/**
+ * @brief Computes stats (mean, variance, etc.) of a set of numbers by consuming one number at a
+ *        time (via the `update()` method). Implementation uses the numerically stable Welford's
+ *        method as described here:
+ *        http://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
+ *
+ * @tparam T Underlying numeric type
+ */
 template <typename T>
 class OnlineStatistics : public Statistics<T> {
  public:
@@ -75,10 +82,15 @@ void OnlineStatistics<T>::update(T new_value)
   this->variance_ = s_ / (n_ - 1);
 }
 
-
+/**
+ * @brief Computes stats (mean, variance, etc.) of a rolling window of numbers. Memory usage is
+ *        linear in `window_size`.
+ *
+ * @tparam T Underlying numeric type
+ */
 template <typename T>
 class RollingStatistics : public Statistics<T> {
-  public:
+ public:
   explicit RollingStatistics(std::size_t window_size);
   void update(T new_value) override;
 
@@ -92,6 +104,14 @@ template <typename T>
 RollingStatistics<T>::RollingStatistics(std::size_t window_size) : window_size_(window_size)
 {}
 
+/**
+ * @brief Advances the window by one position, updating the outputs accordingly. Running time is
+ *        constant. Implemented using a numerically stable method described here:
+ *        http://jonisalonen.com/2014/efficient-and-accurate-rolling-standard-deviation/
+ *
+ * @tparam T Underlying numeric type
+ * @param new_value New value entering the window
+ */
 template <typename T>
 void RollingStatistics<T>::update(T new_value)
 {
