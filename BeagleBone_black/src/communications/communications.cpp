@@ -45,8 +45,12 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 
   memset(&serv_addr, '\0', sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;   // server byte order
-  memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
+  // memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portNo);
+
+  if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0) {
+    log_.ERR("COMN", "Invalid address.\n");
+  }
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
