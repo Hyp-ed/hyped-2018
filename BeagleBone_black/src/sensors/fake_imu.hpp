@@ -47,7 +47,7 @@ class FakeImu : public ImuInterface {
    *               timestamp value_x value_y value_z
    *                         noise_x noise_y noise_z
    *
-   *               Sample of the format is located at 'src/fake_imu_input.txt'
+   *               Sample of the format is located at 'src/fake_imu_input_xxx.txt'
    */
   explicit FakeImu(std::string acc_file_path, std::string gyr_file_path);
 
