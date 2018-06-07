@@ -22,29 +22,139 @@
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_CONTROLLER_HPP_
 
 #include <cstdint>
+#include "utils/io/can.hpp"
 
 namespace hyped {
 // Forward declarations
 namespace utils { class Logger; }
 namespace utils { namespace io { class Can; } }
+namespace utils { namespace io { class CanProccesor; } }
 namespace utils { namespace io { namespace can { struct Frame; } } }
 
 namespace motor_control {
 
 using utils::Logger;
 using utils::io::Can;
+using utils::io::CanProccesor;
 
-class Controller {
+enum ControllerState {
+  kNotReadyToSwitchOn,
+  kSwitchOnDisabled,
+  kReadyToSwitchOn,
+  kSwitchedOn,
+  kOperationEnabled,
+  kQuickStopActive,
+  kFaultReactionActive,
+  kFault,
+};
+
+class Controller : public CanProccesor {
   friend Can;
 
  public:
-  explicit Controller(Logger& log);
-  int32_t requestActualVelocity(int32_t target_velocity);
-  int16_t requestActualTorque();
+  Controller(Logger& log, uint8_t id);
+  /**
+    *  @brief  { Register controller to receive and transmit messages on CAN bus }
+    */
+  void registerController();
+  /**
+    *   @brief  { Applies configuration settings }
+    */
+  void configure();
+  /**
+    *   @brief  { Checks for any warnings or errors, and enters operational state }
+    */
+  void enterOperational();
+  /**
+    *   @brief  { Enter preop state }
+    */
+  void enterPreOperational();
+  /**
+    *   @brief  { Checks controller status }
+    */
+  void checkStatus();
+  /**
+    *  @brief  { Set target velocity in controller object dictionary }
+    *
+    *  @param[in] { Target velocity calculated in Main }
+    */
+  void sendTargetVelocity(int32_t target_velocity);
+  /**
+    *  @brief  { Set target torque in controller object dictionary }
+    *
+    *  @param[in] { Target torque calculated in Main }
+    */
+  void sendTargetTorque(int16_t target_torque);
+  /**
+    *  @brief  { Send velocity sensor request to controller }
+    */
+  void updateActualVelocity();
+  /**
+    *  @brief  { Send torque sensor request to controller }
+    */
+  void updateActualTorque();
+  /**
+    *  @return { Actual velocity of motor }
+    */
+  int32_t getVelocity();
+  /**
+    *  @return { Actual torque of motor }
+    */
+  int16_t getTorque();
+  /**
+   *  @brief { To be called by CAN receive side. Controller processes received CAN
+   *          message and updates its local data }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processNewData(utils::io::can::Frame& message) override;
+  /**
+   *  @brief { Called by processNewData if Emergency message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processEmergencyMessage(utils::io::can::Frame& message);
+  /**
+   *  @brief { Called by processNewData if SDO message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processSDOMessage(utils::io::can::Frame& message);
+  /**
+   *  @brief { Called by processNewData if NMT message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processNMTMessage(utils::io::can::Frame& message);
+  /**
+    *  @brief { Sets controller into quickStop mode. Use in case of critical failure }
+    */
+  void quickStop();
+  /*
+   *  @brief { Return failure flag of controller }
+   */
+  bool getFailure();
+  /*
+   *  @brief { Return ID of controller }
+   */
+  uint8_t getId();
+  /*
+   * @brief { Returns state of controller }
+   *
+   * @return { ControllerState }
+   */
+  ControllerState getControllerState();
 
  private:
-  Logger& log_;
-  Can&    can_;
+  Logger&  log_;
+  Can&     can_;
+  uint8_t  node_id_;
+  bool     critical_failure_;
+  int32_t  actual_velocity_;
+  int16_t  actual_torque_;
+  utils::io::can::Frame SDOMessage;
+  utils::io::can::Frame NMTMessage;
+  ControllerState state_;
 };
 
 }}  // namespace hyped::motor_control
