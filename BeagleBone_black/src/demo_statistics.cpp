@@ -22,7 +22,7 @@ template <typename T>
 void printStatistics(Statistics<T>& s)
 {
   std::cout << "\t" << "sum=" << s.getSum() << ", mean=" << s.getMean()
-            << ", variance = " << s.getVariance() << ", stddev =   " << s.getStdDev() << std::endl;
+            << ", variance=" << s.getVariance() << ", stddev=" << s.getStdDev() << std::endl;
 }
 
 int main()
