@@ -31,17 +31,22 @@ namespace math {
 template <typename T>
 class Statistics {
  public:
+  Statistics();
   virtual void update(T new_value) = 0;
   T getSum() {return sum_;}
   T getMean() {return mean_;}
   T getVariance() {return variance_;}
-  decltype(std::sqrt(variance_)) getStdDev() {return std::sqrt(variance_);}
+  T getStdDev() {return std::sqrt(variance_);}
 
  protected:
   T sum_;
   T mean_;
   T variance_;
 };
+
+template <typename T>
+Statistics<T>::Statistics() : sum_(0), mean_(0), variance_(0)
+{}
 
 
 template <typename T>
@@ -56,35 +61,35 @@ class OnlineStatistics : public Statistics<T> {
 };
 
 template <typename T>
-OnlineStatistics<T>::OnlineStatistics() : n_(0), sum_(0), mean_(0), variance_(0), s_(0)
+OnlineStatistics<T>::OnlineStatistics() : n_(0), s_(0)
 {}
 
 template <typename T>
 void OnlineStatistics<T>::update(T new_value)
 {
-  T delta = new_value - mean_;
+  T delta = new_value - this->mean_;
   n_++;
-  sum_ += new_value;
-  mean_ = sum_/n_;
-  s_ += delta * (new_value - mean_);
-  variance_ = s_ / (n_ - 1);
+  this->sum_ += new_value;
+  this->mean_ = this->sum_/n_;
+  s_ += delta * (new_value - this->mean_);
+  this->variance_ = s_ / (n_ - 1);
 }
 
 
 template <typename T>
 class RollingStatistics : public Statistics<T> {
   public:
-  explicit RollingStatistics(int window_size);
+  explicit RollingStatistics(std::size_t window_size);
   void update(T new_value) override;
 
  private:
-  const int window_size_;
+  const std::size_t window_size_;
   std::queue<T, std::list<T>> window_;
+  OnlineStatistics<T> online_;
 };
 
 template <typename T>
-RollingStatistics<T>::RollingStatistics(int window_size)
-    : sum_(0), mean_(0), variance_(0), window_size_(window_size)
+RollingStatistics<T>::RollingStatistics(std::size_t window_size) : window_size_(window_size)
 {}
 
 template <typename T>
@@ -92,13 +97,20 @@ void RollingStatistics<T>::update(T new_value)
 {
   if (window_.size() < window_size_) {
     window_.push(new_value);
+    online_.update(new_value);
+    this->sum_      = online_.getSum();
+    this->mean_     = online_.getMean();
+    this->variance_ = online_.getVariance();
   } else {
     assert(window_.size() == window_size_);
-    sum_ = sum_ + new_value - window_.front();
-    T new_mean = sum_ / window_size_;
-    variance_ += (new_value - window_.front()) * (new_value - new_mean + window_.front() - mean_)
-                  / (window_size_ - 1)
-    mean_ = new_mean;
+    this->sum_ = this->sum_ + new_value - window_.front();
+    T new_mean = this->sum_ / window_size_;
+    this->variance_ += (new_value - window_.front())
+                        * (new_value - new_mean + window_.front() - this->mean_)
+                        / (window_size_ - 1);
+    this->mean_ = new_mean;
+    window_.pop();
+    window_.push(new_value);
   }
 }
 
