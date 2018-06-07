@@ -76,6 +76,7 @@ struct Navigation {
   NavigationType  distance;
   NavigationType  velocity;
   NavigationType  acceleration;
+  NavigationType  emergency_braking_distance;
 };
 
 // -------------------------------------------------------------------------------------------------
