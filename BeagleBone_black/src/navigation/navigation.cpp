@@ -75,14 +75,14 @@ void Navigation::update(ImuArray imus, ProximityArray proxis)
   // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
 }
 
-void Navigation::update(ImuArray imus, data::StripeCount stripe_count)
+void Navigation::update(ImuArray imus, DataPoint<uint32_t> stripe_count)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
   stripe_counter_update(stripe_count.value);
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis, data::StripeCount stripe_count)
+void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count)
 {
   update(imus, proxis);
   stripe_counter_update(stripe_count.value);

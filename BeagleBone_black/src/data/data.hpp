@@ -5,17 +5,15 @@
  * for holding data produced by each of the sub-teams.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License"); you may
- *    not use this file except in compliance with the License. You may obtain a
- *    copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ *    except in compliance with the License. You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- *    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- *    License for the specific language governing permissions and limitations
- *    under the License.
+ *    Unless required by applicable law or agreed to in writing, software distributed under
+ *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ *    either express or implied. See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 #ifndef BEAGLEBONE_BLACK_DATA_DATA_HPP_
@@ -38,9 +36,9 @@ using utils::math::Vector;
 
 namespace data {
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // State Machine
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
   kAccelerating,
@@ -61,42 +59,58 @@ struct StateMachine {
   State current_state;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Navigation
-// -----------------------------------------------------------------------------
-typedef float NavigationType;
-struct Navigation {
-  NavigationType distance;
-  NavigationType velocity;
-  NavigationType acceleration;
+// -------------------------------------------------------------------------------------------------
+enum class NavigationState {
+  kCalibrating,      ///< Navigation module is calibrating. Pod must not be moved in this state.
+  kCriticalFailure,  ///< Navigation module has problems and cannot provide reliable output
+  kOperational,      ///< Navigation module is working fine and providing reliable output
+  kReady             ///< Navigation module is still calibrating but ready to transition to
+                     ///  `kOperational` state
 };
 
-// -----------------------------------------------------------------------------
+typedef float NavigationType;
+struct Navigation {
+  NavigationState state;
+  NavigationType  distance;
+  NavigationType  velocity;
+  NavigationType  acceleration;
+};
+
+// -------------------------------------------------------------------------------------------------
 // Raw Sensor data
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
+struct Sensor {
+  bool operational;
+};
+
 typedef Vector<NavigationType, 3> NavigationVector;
-struct Imu {
+struct Imu : public Sensor {
   DataPoint<NavigationVector> acc;
   DataPoint<NavigationVector> gyr;
 };
 
-struct Proximity {
+struct Proximity : public Sensor {
   uint8_t val;
 };
 
-struct Battery {
-  uint16_t  voltage;
-  int8_t    temperature;
+struct StripeCounter : public Sensor {
+  DataPoint<uint32_t> count;
 };
 
-typedef DataPoint<uint32_t> StripeCount;
 struct Sensors {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 24;
 
   array<Imu, kNumImus> imu;
   array<Proximity, kNumProximities> proxi;
-  StripeCount stripe_count;
+  StripeCounter stripe_counter;
+};
+
+struct Battery {
+  uint16_t  voltage;
+  int8_t    temperature;
 };
 
 struct Batteries {
@@ -107,9 +121,9 @@ struct Batteries {
   array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Motor data
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 enum MotorState {
   kCriticalFailure,
@@ -132,9 +146,9 @@ struct Motors {
   int16_t motor_torque_4;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Communications data
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 struct Communications {
   bool stopCommand;
@@ -142,9 +156,9 @@ struct Communications {
   bool resetCommand;
 };
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 // Common Data structure/class
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 /**
  * @brief      A singleton class managing the data exchange between sub-team
  * threads.
@@ -189,17 +203,17 @@ class Data {
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
-  StripeCount getStripeCount();
+  StripeCounter getStripeCounterData();
 
   /**
    * @brief       Should be called to update StripeCount part in Sensors data
    */
-  void setStripeCount(const StripeCount& stripe_count);
+  void setStripeCounterData(const StripeCounter& stripe_counter);
 
   /**
    * @brief      Retrieves data from the batteries.
    */
-  Sensors getBatteryData();
+  Batteries getBatteryData();
 
   /**
    * @brief      Should be called to update battery data

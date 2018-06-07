@@ -63,9 +63,13 @@ Communications::~Communications()
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
-     memset(buffer, '\0', 256);
-     const char *data = message.c_str();
-     n_ = write(sockfd_, data, message.length());  // ‘_ssize_t write(int, const void*, size_t)’
+  memset(buffer, '\0', 256);
+  const char *data = message.c_str();
+  n_ = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
+
+  if (n_ < 0) {
+    log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+  }
 
   return atoi(buffer);
 }
@@ -73,10 +77,12 @@ int Communications::sendData(std::string message)
 int Communications::receiveMessage()
 {
   n_ = read(sockfd_, buffer, 255);
+
   if (n_ < 0) {
-  log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
     command_ = 1;
   }
+
   command_ = atoi(buffer);
 
   switch (command_) {

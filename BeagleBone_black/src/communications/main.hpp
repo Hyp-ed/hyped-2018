@@ -29,6 +29,7 @@
 namespace hyped {
 
 using data::State;
+using data::Battery;
 using utils::concurrent::Thread;
 using utils::Logger;
 
@@ -47,6 +48,10 @@ class Main : public Thread {
   int sendRpmBl(float rpmBl);                   // CMD07
   int sendRpmBr(float rpmBr);                   // CMD08
   int sendState(State state);                   // CMD09
+  int sendHpVoltage(Battery hpBattery);        // CMD10
+  int sendHpTemperature(Battery hpBattery);    // CMD11
+  int sendHpVoltage1(Battery hpBattery1);       // CMD12
+  int sendHpTemperature1(Battery hpBattery1);   // CMD13
 
  private:
   int stateCode_;
@@ -56,6 +61,7 @@ class Main : public Thread {
   data::Motors mtr_;
   data::Sensors sns_;
   data::StateMachine stm_;
+  data::Batteries bat_;
 };
 
 }}  //  namespace hyped::communications
