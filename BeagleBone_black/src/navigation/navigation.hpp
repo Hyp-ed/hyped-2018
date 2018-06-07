@@ -74,8 +74,8 @@ class Navigation {
   NavigationType get_displacement();
   /**
    * @brief Get the emergency braking distance in metres
-   * 
-   * @return NavigationType 
+   *
+   * @return NavigationType emergency braking distance in metres
    */
   NavigationType getEmergencyBrakingDistance();
 
