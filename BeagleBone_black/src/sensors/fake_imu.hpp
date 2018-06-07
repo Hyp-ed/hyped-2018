@@ -63,8 +63,8 @@ class FakeImu : public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
-  const double kAccTimeInterval = 0.000250;
-  const double kGyrTimeInterval = 0.000125;
+  const uint64_t kAccTimeInterval = 250;
+  const uint64_t kGyrTimeInterval = 125;
 
   /*
    * @brief     A function that initializes the variables

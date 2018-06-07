@@ -22,11 +22,13 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <iostream>
 
 #include "data/data.hpp"
 #include "data/data_point.hpp"
 #include "sensors/fake_imu.hpp"
 
+using std::chrono::microseconds;
 using std::chrono::duration;
 using std::chrono::duration_cast;
 
@@ -102,7 +104,6 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
   NavigationVector value, noise;
 
   file.open(acc_file_path);
-
   while (file.is_open() && !file.eof()) {
     file >> timestamp >> value[0] >> value[1] >> value[2]
          >> noise[0] >> noise[1] >> noise[2];
@@ -126,7 +127,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
 bool FakeImu::accCheckTime()
 {
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
+    microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
 
     if (time_span.count() < kAccTimeInterval*acc_count) {
         return false;
@@ -139,7 +140,7 @@ bool FakeImu::accCheckTime()
 bool FakeImu::gyrCheckTime()
 {
     high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
+    microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
 
     if (time_span.count() < kGyrTimeInterval*gyr_count) {
         return false;

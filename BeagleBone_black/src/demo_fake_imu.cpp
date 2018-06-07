@@ -30,7 +30,7 @@ int main()
   FakeImu generator(NavigationVector(0), NavigationVector(1), NavigationVector(0), NavigationVector(1));
   FakeImu file("src/fake_imu_input_acc.txt", "src/fake_imu_input_gyr.txt");
 
-  while (1) {
+  for (int i=0; i<3; i++) {
     file.getData(&reading);
     printf("From file:  %d\n", reading.acc.timestamp);
     printf("From file:  %d\n", reading.gyr.timestamp);
