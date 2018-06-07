@@ -42,8 +42,14 @@ class FakeImu : public ImuInterface {
   /*
    * @brief     A constructor for the fake IMU class by reading from file
    *
-   * @param[in]    For each file, the 1st line consists of the noise value.
-   *               The next lines are timestamp and value pairs.
+   * @param[in]    The line format of the input file would be the following
+   *
+   *               acc_timestamp acc_value_x acc_value_y acc_value_z
+   *                             acc_noise_x acc_noise_y acc_noise_z
+   *               gyr_timestamp gyr_value_x gyr_value_y gyr_value_z
+   *                             gyr_noise_x gyr_noise_y gyr_noise_z
+   *
+   *               Sample of the format is located at 'src/fake_imu_input.txt'
    */
   explicit FakeImu(std::string acc_file_path, std::string gyr_file_path);
 
