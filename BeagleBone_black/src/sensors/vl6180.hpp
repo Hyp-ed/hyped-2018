@@ -21,7 +21,7 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 
-
+#include "sensors/interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/i2c.hpp"
 
@@ -32,10 +32,16 @@ using utils::Logger;
 
 namespace sensors {
 
-class VL6180 {
+class VL6180: public ProxiInterface {
  public:
   VL6180(uint8_t i2c_addr, Logger& log);
   ~VL6180();
+
+  bool isOnline() override { return false; }   // TODO(anyone): rethink this
+  void getData(Proximity* proxi) override {
+    proxi->val = getDistance();
+  }
+
   /**
     *  @brief  Returns the distance from the nearest object the sensor is facing
     *

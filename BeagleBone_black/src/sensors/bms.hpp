@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "sensors/interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/can.hpp"
 #include "data/data.hpp"
@@ -69,8 +70,8 @@ struct Data {
 
 }   // namespace bms
 
-class BMS : public Thread, public CanProccesor {
-  // friend Can;
+class BMS : public Thread, public CanProccesor, public BMSInterface {
+  friend Can;
 
  public:
   explicit BMS(uint8_t id);
@@ -87,6 +88,14 @@ class BMS : public Thread, public CanProccesor {
 
   bms::Data getData() const { return data_; }
   bms::Data* getDataPointer() { return &data_; }
+
+  bool isOnline() { return false; }   // TODO(anyone): rethink this
+  void getData(Battery* battery) override {
+    battery->voltage = 0;
+    for (uint16_t v: data_.voltage) battery->voltage += v;
+
+    battery->temperature = data_.temperature;
+  }
 
   /**
    * @brief Process raw data, check voltage values, assert

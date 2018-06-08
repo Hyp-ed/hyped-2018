@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include "sensors/imu_interface.hpp"
+#include "sensors/interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
 #include "utils/io/gpio.hpp"
@@ -39,10 +39,15 @@ using hyped::utils::io::I2C;
 
 namespace sensors {
 
-class MPU9250 : ImuInterface {
+class MPU9250 : public ImuInterface {
  public:
   MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr);
   ~MPU9250();
+
+  bool isOnline() override {
+    return whoAmI();
+  }
+
   void getData(Imu* imu) override;
   /*
    *  @brief Sets the range for the gyroscope
