@@ -70,7 +70,7 @@ struct Data {
 }   // namespace bms
 
 class BMS : public Thread, public CanProccesor {
-  friend Can;
+  // friend Can;
 
  public:
   explicit BMS(uint8_t id);

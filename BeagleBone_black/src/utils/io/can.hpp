@@ -87,8 +87,6 @@ class Can : public concurrent::Thread {
   }
 
   NO_COPY_ASSIGN(Can);
-  // explicit Can(Can const&)    = delete;
-  // void operator=(Can const&)  = delete;
 
   /**
    * @param  frame data to be sent
@@ -100,6 +98,11 @@ class Can : public concurrent::Thread {
    * @brief Called by any Can-enabled device implementing CanProcessor interface
    */
   void registerProcessor(CanProccesor* processor);
+
+  /**
+   * @brief To be called for starting the receive thread
+   */
+  void start();
 
  private:
   /**
@@ -117,7 +120,7 @@ class Can : public concurrent::Thread {
   void processNewData(can::Frame* frame);
 
   /**
-   * Blocking read and demultiplex messages based on configure id spaces
+   * Blocking read and demultiplex messages based on configured id spaces
    */
   void run() override;
 
@@ -127,9 +130,8 @@ class Can : public concurrent::Thread {
  private:
   int   socket_;
   bool  running_;
-  std::vector<CanProccesor*> processors_;
-
-  concurrent::Lock          socket_lock_;
+  std::vector<CanProccesor*>  processors_;
+  concurrent::Lock            socket_lock_;
 };
 
 }}}   // namespace hyped::utils::io

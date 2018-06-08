@@ -94,6 +94,14 @@ Can::~Can()
   running_ = false;
 }
 
+void Can::start()
+{
+  if (running_) return;   // already started
+
+  running_ = true;
+  concurrent::Thread::start();
+}
+
 int Can::send(const can::Frame& frame)
 {
   if (socket_ < 0) return 0;  // early exit if no can device present

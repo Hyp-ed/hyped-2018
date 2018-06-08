@@ -63,6 +63,7 @@ BMS::BMS(uint8_t id, data::Battery* battery_unit, Logger& log)
 
   // tell CAN about yourself
   can_.registerProcessor(this);
+  can_.start();
 
   running_ = true;
 }

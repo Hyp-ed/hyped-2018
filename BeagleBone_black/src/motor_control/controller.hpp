@@ -101,6 +101,11 @@ class Controller : public CanProccesor {
     *  @return { Actual torque of motor }
     */
   int16_t getTorque();
+
+  /**
+   * @brief Does this CanProcessor own the corresponding can message?
+   * @return true - iff I am the owner of this can message
+   */
   bool hasId(uint32_t id, bool extended) override;
   /**
    *  @brief { To be called by CAN receive side. Controller processes received CAN

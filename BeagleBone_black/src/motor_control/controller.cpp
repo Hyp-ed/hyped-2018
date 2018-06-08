@@ -83,6 +83,8 @@ Controller::Controller(Logger& log, uint8_t id)
   NMTMessage.id       = kNMT_RECEIVE;
   NMTMessage.extended = false;
   NMTMessage.len      = 2;
+
+  can_.start();
 }
 
 void Controller::registerController()
