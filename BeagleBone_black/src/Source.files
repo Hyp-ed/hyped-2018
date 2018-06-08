@@ -44,5 +44,6 @@ MAINS := \
   demo_quaternion \
   demo_differentiator \
   demo_integrator \
+  demo_statistics\
   demo_can \
   demo_mpu9250 \
