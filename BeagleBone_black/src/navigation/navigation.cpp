@@ -37,17 +37,17 @@ Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
     filter.configure(0, 0, 0);
 }
 
-NavigationType Navigation::get_accleration()
+NavigationType Navigation::getAcceleration()
 {
-  return accleration_[0];
+  return acceleration_[0];
 }
 
-NavigationType Navigation::get_velocity()
+NavigationType Navigation::getVelocity()
 {
   return velocity_[0];
 }
 
-NavigationType Navigation::get_displacement()
+NavigationType Navigation::getDisplacement()
 {
   return displacement_[0];
 }
@@ -72,7 +72,7 @@ void Navigation::update(ImuArray imus)
 
   avg /= imus.size();
   // TODO(Brano,Adi): Change the timestamping strategy
-  this->acclerometer_update(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
+  this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
 }
 
 void Navigation::update(ImuArray imus, ProximityArray proxis)
@@ -85,16 +85,16 @@ void Navigation::update(ImuArray imus, DataPoint<uint32_t> stripe_count)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
-  stripe_counter_update(stripe_count.value);
+  stripeCounterUpdate(stripe_count.value);
 }
 
 void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count)
 {
   update(imus, proxis);
-  stripe_counter_update(stripe_count.value);
+  stripeCounterUpdate(stripe_count.value);
 }
 
-void Navigation::gyro_update(DataPoint<NavigationVector> angular_velocity)
+void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)
 {
   double theta             = prev_angular_velocity_.value.norm();
   double angle_of_rotation = (angular_velocity.timestamp - prev_angular_velocity_.timestamp)
@@ -107,25 +107,25 @@ void Navigation::gyro_update(DataPoint<NavigationVector> angular_velocity)
   prev_angular_velocity_ = angular_velocity;
 }
 
-void Navigation::acclerometer_update(DataPoint<NavigationVector> acceleration)
+void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
 {
-  accleration_  = acceleration.value;
+  acceleration_  = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
   velocity_     = velocity.value;
   displacement_ = velocity_integrator_.update(velocity).value;
 }
 
-void Navigation::proximity_orientation_update()
+void Navigation::proximityOrientationUpdate()
 {
   // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
 }
 
-void Navigation::proximity_displacement_update()
+void Navigation::proximityDisplacementUpdate()
 {
   // TODO(Adi): Calculate displacement from proximity. (Point 7)
 }
 
-void Navigation::stripe_counter_update(uint16_t count)
+void Navigation::stripeCounterUpdate(uint16_t count)
 {}
 
 }}  // namespace hyped::navigation
