@@ -409,6 +409,14 @@ int16_t Controller::getTorque()
   return actual_torque_;
 }
 
+bool Controller::hasId(uint32_t id, bool extended)
+{
+  if (kEMGY_TRANSMIT + node_id_ == id) return true;
+  if (kSDO_TRANSMIT  + node_id_ == id) return true;
+  if (kNMT_TRANSMIT  + node_id_ == id) return true;
+  return false;
+}
+
 void Controller::processNewData(utils::io::can::Frame& message)
 {
   uint32_t id = message.id;

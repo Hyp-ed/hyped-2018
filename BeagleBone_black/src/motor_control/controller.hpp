@@ -101,6 +101,7 @@ class Controller : public CanProccesor {
     *  @return { Actual torque of motor }
     */
   int16_t getTorque();
+  bool hasId(uint32_t id, bool extended) override;
   /**
    *  @brief { To be called by CAN receive side. Controller processes received CAN
    *          message and updates its local data }

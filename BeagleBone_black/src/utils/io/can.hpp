@@ -30,6 +30,7 @@
 
 #include <cstdint>
 #include <map>
+#include <vector>
 
 #include "utils/concurrent/lock.hpp"
 #include "utils/concurrent/thread.hpp"
@@ -69,6 +70,15 @@ class CanProccesor {
   * @param message received CAN message to be processed
   */
   virtual void processNewData(can::Frame& message) = 0;
+
+  /**
+   * @brief To be called by CAN receive side to find owner of receinve can::Frame
+   *
+   * @param id        - of the received can::Frame
+   * @param extended  - is the id extended?
+   * @return true     - iff this CanProcessor owns the corresponding message
+   */
+  virtual bool hasId(uint32_t id, bool extended) = 0;
 };
 
 /**
@@ -133,6 +143,8 @@ class Can : public concurrent::Thread {
  private:
   int   socket_;
   bool  running_;
+  std::vector<CanProccesor*> processors_;
+
   std::map<uint32_t, BMS*>  bms_map_;
   Controller  *controller_array_[4];
   uint8_t array_counter_ = 0;
