@@ -100,14 +100,13 @@ class VL6180 {
   /**
     *  @brief  Checks the status register and sets the error_status_
     */
-  void checkStatus();
+  bool checkStatus();
 
   Logger& log_;
   bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_;
   I2C& i2c_;
-  uint16_t status_counter_;
   bool error_status_;
 };
 

@@ -53,7 +53,6 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
       continuous_mode_(false),
       i2c_addr_(i2c_addr),
       i2c_(I2C::getInstance()),
-      status_counter_(0),
       error_status_(false)
 {
   // Create I2C instance get register address
@@ -149,12 +148,8 @@ void VL6180::turnOff()
 uint8_t VL6180::getDistance()
 {
   if (continuous_mode_) {
-    // TODO(anyone) write to the data structure
-
     return continuousRangeDistance();
   } else {
-    // TODO(anyone) write to the data structure
-
     return singleRangeDistance();
   }
 }
@@ -239,7 +234,7 @@ bool VL6180::rangeWaitDeviceReady()
   return false;
 }
 
-void VL6180::checkStatus()
+bool VL6180::checkStatus()
 {
   uint8_t data;
   uint8_t status;
@@ -247,11 +242,8 @@ void VL6180::checkStatus()
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
 
-  // If there is an error update the data structure
   if (status == 0) {
     error_status_ = false;
-    // TODO(anyone) write to the data structure
-
   } else {
     error_status_ = true;
     // Parse the error
@@ -297,11 +289,9 @@ void VL6180::checkStatus()
     break;
     default:
           log_.ERR("VL6180", "Unidentified error");
+    }
   }
-    // TODO(anyone) write to the data structure
-    // TODO(anyone) turn off and on again (run turn on again)
-    // Could reset the readings, might be worth a try, ask team
-  }
+  return error_status_;
 }
 
 void VL6180::readByte(uint16_t reg_add, uint8_t *data)
@@ -312,14 +302,6 @@ void VL6180::readByte(uint16_t reg_add, uint8_t *data)
 
   i2c_.write(i2c_addr_, buffer, 2);
   i2c_.read(i2c_addr_, data, 1);
-
-  // Increment status_counter_
-  status_counter_++;
-  if (status_counter_ >= 100) {
-    checkStatus();
-    // reset counter
-    status_counter_ = 0;
-  }
 }
 
 void VL6180::writeByte(uint16_t reg_add, char data)
