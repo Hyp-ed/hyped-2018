@@ -31,7 +31,12 @@ namespace hyped {
 namespace state_machine {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log), hypedMachine(log), data_(data::Data::getInstance())
+    : Thread(id, log),
+    hypedMachine(log),
+    data_(data::Data::getInstance()),
+    comms_data(data_.getCommunicationsData()),
+    nav_data(data_.getNavigationData()),
+    sm_data(data_.getStateMachineData())
 { /* EMPTY */ }
 
 /**
@@ -47,14 +52,11 @@ void Main::run()
 
 void Main::checkNavigation()
 {
-data::Navigation nav_data = data_.getNavigationData();
-data::StateMachine sm_data = data_.getStateMachineData();
-
 /**
   *  @TODO Check if margin (20m) is appropriate
   */
 
-if((nav_data.distance + nav_data.emergency_braking_distance) + 20 >= sm_data.run_length)
+if((nav_data.distance + nav_data.emergency_braking_distance) + 20 >= comms_data.run_length)
 {
 hypedMachine.handleEvent(kCriticalFailure);
 }
@@ -67,8 +69,6 @@ if(nav_data.state == data::NavigationState::kCriticalFailure)
 
 void Main::checkCommunications()
 {
-  data::Communications comms_data = data_.getCommunicationsData();
-
   if (comms_data.stopCommand) {
     hypedMachine.handleEvent(kCriticalFailure);
   }

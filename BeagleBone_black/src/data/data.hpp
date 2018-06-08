@@ -57,7 +57,6 @@ extern const char* states[num_states];
 struct StateMachine {
   bool critical_failure;
   State current_state;
-  float run_length;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -156,6 +155,7 @@ struct Communications {
   bool stopCommand;
   bool launchCommand;
   bool resetCommand;
+  float run_length;
 };
 
 // -------------------------------------------------------------------------------------------------
