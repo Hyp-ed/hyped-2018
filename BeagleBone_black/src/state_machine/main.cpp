@@ -41,29 +41,28 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   while (1) {
-
     checkCommunications();
   }
 }
 
-
 void Main::checkNavigation()
 {
-data::Navigations nav_data = data_.getNavigationData();
+data::Navigation nav_data = data_.getNavigationData();
 data::StateMachine sm_data = data_.getStateMachineData();
 
 /**
   *  @TODO Check if margin (20m) is appropriate
   */
 
-if((nav_data.distance + nav_data.emergency_braking_distance) + 20 >= sm_data.run_length) {
+if((nav_data.distance + nav_data.emergency_braking_distance) + 20 >= sm_data.run_length)
+{
 hypedMachine.handleEvent(kCriticalFailure);
 }
 
-if(nav_data.state == kCriticalFailure) {
+if(nav_data.state == data::NavigationState::kCriticalFailure)
+{
   hypedMachine.handleEvent(kCriticalFailure);
 }
-
 }
 
 void Main::checkCommunications()

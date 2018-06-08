@@ -44,7 +44,6 @@ class Main: public Thread {
  private:
   HypedMachine hypedMachine;
   data::Data& data_;
-  
   void checkNavigation();
   void checkCommunications();
 };
