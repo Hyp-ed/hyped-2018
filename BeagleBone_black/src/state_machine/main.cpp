@@ -76,6 +76,10 @@ void Main::checkCommunications()
   if (comms_data.launchCommand) {
     hypedMachine.handleEvent(kOnStart);
   }
+
+  if (comms_data.resetCommand) {
+    hypedMachine.reset();
+  }
 }
 
 }}  // namespace hyped::state_machine
