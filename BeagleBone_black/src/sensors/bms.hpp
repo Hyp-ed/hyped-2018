@@ -70,7 +70,7 @@ struct Data {
 }   // namespace bms
 
 class BMS : public Thread, public CanProccesor {
-  friend Can;
+  // friend Can;
 
  public:
   explicit BMS(uint8_t id);
@@ -94,6 +94,8 @@ class BMS : public Thread, public CanProccesor {
    */
   void update();
 
+  bool hasId(uint32_t id, bool extended) override;
+
  private:
   /**
    * @brief Send request CAN message to update data periodically
@@ -113,6 +115,7 @@ class BMS : public Thread, public CanProccesor {
   bms::Data       data_;
   data::Battery*  battery_unit_;
   uint8_t         id_;
+  uint32_t        id_base_;
   bool            running_;
 
   static std::vector<uint8_t> existing_ids_;

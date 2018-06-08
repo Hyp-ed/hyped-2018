@@ -56,25 +56,15 @@ struct sockaddr_can {
 
 #endif   // CAN
 
-#include "sensors/bms.hpp"
-#include "motor_control/controller.hpp"
-
 namespace hyped {
-
-namespace bms = sensors::bms;
-
 namespace utils {
 namespace io {
-
-uint32_t SDO_TRANSMIT  = 0x580;
-uint32_t EMGY_TRANSMIT = 0x80;
-uint32_t NMT_TRANSMIT  = 0x700;
 
 Can::Can()
     : concurrent::Thread(0)
 {
   if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
-    perror("socket");
+    log_.ERR("CAN", "Could not open can socket");
     return;
   }
 
@@ -82,25 +72,40 @@ Can::Can()
   addr.can_family   = AF_CAN;
   addr.can_ifindex  = if_nametoindex("can0");   // ifr.ifr_ifindex;
 
-  if (bind(socket_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    perror("bind");
+  if (addr.can_ifindex == 0) {
+    log_.ERR("CAN", "Could not find can0 network interface");
+    close(socket_);
+    socket_ = -1;
     return;
   }
 
-  running_ = true;
-  start();    // spawn reading thread
-  yield();
+  if (bind(socket_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+    log_.ERR("CAN", "Could not bind can socket");
+    close(socket_);
+    socket_ = -1;
+    return;
+  }
+
+  log_.INFO("CAN", "socket successfully created");
 }
 
 Can::~Can()
 {
   running_ = false;
-  // join();
-  close(socket_);
+}
+
+void Can::start()
+{
+  if (running_) return;   // already started
+
+  running_ = true;
+  concurrent::Thread::start();
 }
 
 int Can::send(const can::Frame& frame)
 {
+  if (socket_ < 0) return 0;  // early exit if no can device present
+
   can_frame can;
   log_.DBG2("CAN", "trying to send something");
   // checks, id <= ID_MAX, len <= LEN_MAX
@@ -108,8 +113,6 @@ int Can::send(const can::Frame& frame)
     log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
     return 0;
   }
-  // if (frame.id & CAN_EFF_FLAG && frame.id)
-  // if (frame.id  > 127)  return 0;
 
   can.can_id  = frame.id;
   can.can_id |= frame.extended ? can::Frame::kExtendedMask : 0;  // add extended id flag
@@ -121,7 +124,6 @@ int Can::send(const can::Frame& frame)
   {
     concurrent::ScopedLock L(&socket_lock_);
     if (write(socket_, &can, CAN_MTU) != CAN_MTU) {
-      // perror("write");
       log_.ERR("CAN", "cannot write to socket");
       return 0;
     }
@@ -138,12 +140,13 @@ void Can::run()
   can::Frame data;
 
   log_.INFO("CAN", "starting continuous reading");
-  while (running_) {
+  while (running_ && socket_ >= 0) {
     receive(&data);
     processNewData(&data);
   }
-
   log_.INFO("CAN", "stopped continuous reading");
+
+  if (socket_ >= 0) close(socket_);
 }
 
 int Can::receive(can::Frame* frame)
@@ -171,28 +174,11 @@ int Can::receive(can::Frame* frame)
 
 void Can::processNewData(can::Frame* message)
 {
-  uint32_t  id  = message->id;
   CanProccesor* owner = 0;
-  for (auto const& controller : controller_array_) {
-    if ((EMGY_TRANSMIT + controller->getId()) == id) {
-      owner = controller;
-      break;
-    }
-    if ((SDO_TRANSMIT + controller->getId()) == id) {
-      owner = controller;
-      break;
-    }
-    if ((NMT_TRANSMIT + controller->getId()) == id) {
-      owner = controller;
-      break;
-    }
-  }
 
-  for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
-    uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
-    if (bms_id <= id &&
-        id < bms_id + bms::kIdSize) {
-      owner = bms.second;
+  for (CanProccesor* processor : processors_) {
+    if (processor->hasId(message->id, message->extended)) {
+      owner = processor;
       break;
     }
   }
@@ -200,24 +186,13 @@ void Can::processNewData(can::Frame* message)
   if (owner) {
     owner->processNewData(*message);
   } else {
-    log_.ERR("CAN", "did not find owner of received CAN message with id %d", id);
+    log_.ERR("CAN", "did not find owner of received CAN message with id %d", message->id);
   }
 }
 
-void Can::registerBMS(BMS* bms)
+void Can::registerProcessor(CanProccesor* processor)
 {
-  ASSERT(bms);
-  uint8_t id = bms->id_;
-
-  bms_map_[id] = bms;
-}
-
-void Can::registerController(Controller* controller)
-{
-  ASSERT(controller);
-
-  controller_array_[array_counter_] = controller;
-  array_counter_++;
+  processors_.push_back(processor);
 }
 
 }}}   // namespace hyped::utils::io
