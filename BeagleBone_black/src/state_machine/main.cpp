@@ -47,6 +47,8 @@ void Main::run()
 {
   while (1) {
     checkCommunications();
+    checkNavigation();
+    checkReady();
   }
 }
 
@@ -79,6 +81,13 @@ void Main::checkCommunications()
 
   if (comms_data.resetCommand) {
     hypedMachine.reset();
+  }
+}
+//  @TODO add checks for other modules' states
+void Main::checkReady()
+{
+  if (nav_data.state == data::NavigationState::kReady) {
+    hypedMachine.handleEvent(kSystemsChecked);
   }
 }
 

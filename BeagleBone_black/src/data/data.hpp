@@ -41,6 +41,7 @@ namespace data {
 // -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
+  kReady,
   kAccelerating,
   kDecelerating,
   kEmergencyBraking,

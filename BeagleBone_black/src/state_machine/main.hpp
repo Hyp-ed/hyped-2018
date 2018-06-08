@@ -49,6 +49,7 @@ class Main: public Thread {
   data::StateMachine sm_data;
   void checkNavigation();
   void checkCommunications();
+  void checkReady();
 };
 
 }}  // namespace hyped::motor_control
