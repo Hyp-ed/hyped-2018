@@ -87,7 +87,7 @@ Controller::Controller(Logger& log, uint8_t id)
 
 void Controller::registerController()
 {
-  can_.registerController(this);
+  can_.registerProcessor(this);
 }
 
 void Controller::configure()

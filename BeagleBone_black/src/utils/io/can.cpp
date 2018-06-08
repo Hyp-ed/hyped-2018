@@ -56,19 +56,9 @@ struct sockaddr_can {
 
 #endif   // CAN
 
-#include "sensors/bms.hpp"
-#include "motor_control/controller.hpp"
-
 namespace hyped {
-
-namespace bms = sensors::bms;
-
 namespace utils {
 namespace io {
-
-uint32_t SDO_TRANSMIT  = 0x580;
-uint32_t EMGY_TRANSMIT = 0x80;
-uint32_t NMT_TRANSMIT  = 0x700;
 
 Can::Can()
     : concurrent::Thread(0)
@@ -176,28 +166,11 @@ int Can::receive(can::Frame* frame)
 
 void Can::processNewData(can::Frame* message)
 {
-  uint32_t  id  = message->id;
   CanProccesor* owner = 0;
-  for (auto const& controller : controller_array_) {
-    if ((EMGY_TRANSMIT + controller->getId()) == id) {
-      owner = controller;
-      break;
-    }
-    if ((SDO_TRANSMIT + controller->getId()) == id) {
-      owner = controller;
-      break;
-    }
-    if ((NMT_TRANSMIT + controller->getId()) == id) {
-      owner = controller;
-      break;
-    }
-  }
 
-  for (auto const& bms : bms_map_) {  // map iterator is pair(id, BMS*)
-    uint32_t bms_id = bms::kIdBase + (bms.first * bms::kIdIncrement);
-    if (bms_id <= id &&
-        id < bms_id + bms::kIdSize) {
-      owner = bms.second;
+  for (CanProccesor* processor : processors_) {
+    if (processor->hasId(message->id, message->extended)) {
+      owner = processor;
       break;
     }
   }
@@ -205,24 +178,13 @@ void Can::processNewData(can::Frame* message)
   if (owner) {
     owner->processNewData(*message);
   } else {
-    log_.ERR("CAN", "did not find owner of received CAN message with id %d", id);
+    log_.ERR("CAN", "did not find owner of received CAN message with id %d", message->id);
   }
 }
 
-void Can::registerBMS(BMS* bms)
+void Can::registerProcessor(CanProccesor* processor)
 {
-  ASSERT(bms);
-  uint8_t id = bms->id_;
-
-  bms_map_[id] = bms;
-}
-
-void Can::registerController(Controller* controller)
-{
-  ASSERT(controller);
-
-  controller_array_[array_counter_] = controller;
-  array_counter_++;
+  processors_.push_back(processor);
 }
 
 }}}   // namespace hyped::utils::io
