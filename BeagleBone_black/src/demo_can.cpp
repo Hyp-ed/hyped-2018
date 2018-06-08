@@ -42,6 +42,7 @@ int main(int argc, char* argv[])
   Frame data = {14, false, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
 
   Can& can = Can::getInstance();
+  can.start();
   can.send(data);
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < data.len; j++) {
