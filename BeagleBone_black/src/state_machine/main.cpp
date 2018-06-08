@@ -41,27 +41,27 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   while (1) {
-    // data::Navigation nav_data = data.getNavigationData();
 
-
-    if (hasCriticalFailure()) {
-      hypedMachine.handleEvent(kCriticalFailure);
-    }
-    if (hasReachedMaxDistance()) {
-      hypedMachine.handleEvent(kMaxDistanceReached);
-    }
     checkCommunications();
   }
 }
 
-bool Main::hasCriticalFailure()
+
+void Main::checkNavigation()
 {
-  return false;
+data::Navigations nav_data = data_.getNavigationData();
+data::StateMachine sm_data = data_.getStateMachineData();
+
+/**
+  *  @TODO Add appropriate margin
+  */
+
+if((nav_data.distance + nav_data.emergency_braking_distance) >= sm_data.run_length) {
+hypedMachine.handleEvent(kCriticalFailure);
 }
 
-bool Main::hasReachedMaxDistance()
-{
-  return false;
+
+
 }
 
 void Main::checkCommunications()
