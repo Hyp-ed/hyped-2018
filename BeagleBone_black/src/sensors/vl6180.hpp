@@ -91,21 +91,23 @@ class VL6180 {
   bool rangeWaitDeviceReady();
   /**
     *  @brief  Reads a single byte register and returns its status
-    *
-    *  @return int Returns 0 if successful
     */
-  int readByte(uint16_t reg_add, uint8_t *data);
+  void readByte(uint16_t reg_add, uint8_t *data);
   /**
     *  @brief  Writes a byte to the register and returns its status
-    *
-    *  @return int Returns 0 if successful
     */
-  int writeByte(uint16_t reg_add, char data);
+  void writeByte(uint16_t reg_add, char data);
+  /**
+    *  @brief  Checks the status register and sets the error_status_
+    */
+  bool checkStatus();
+
   Logger& log_;
   bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_;
   I2C& i2c_;
+  bool error_status_;
 };
 
 }}  // namespace hyped::sensors
