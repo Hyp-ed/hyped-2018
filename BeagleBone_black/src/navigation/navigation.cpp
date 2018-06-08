@@ -37,9 +37,9 @@ Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
     filter.configure(0, 0, 0);
 }
 
-NavigationType Navigation::getAccleration()
+NavigationType Navigation::getAcceleration()
 {
-  return accleration_[0];
+  return acceleration_[0];
 }
 
 NavigationType Navigation::getVelocity()
@@ -72,7 +72,7 @@ void Navigation::update(ImuArray imus)
 
   avg /= imus.size();
   // TODO(Brano,Adi): Change the timestamping strategy
-  this->acclerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
+  this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
 }
 
 void Navigation::update(ImuArray imus, ProximityArray proxis)
@@ -107,9 +107,9 @@ void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)
   prev_angular_velocity_ = angular_velocity;
 }
 
-void Navigation::acclerometerUpdate(DataPoint<NavigationVector> acceleration)
+void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
 {
-  accleration_  = acceleration.value;
+  acceleration_  = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
   velocity_     = velocity.value;
   displacement_ = velocity_integrator_.update(velocity).value;

@@ -60,7 +60,7 @@ void Main::run()
 
     nav_data.distance                   = nav_.getDisplacement();
     nav_data.velocity                   = nav_.getVelocity();
-    nav_data.acceleration               = nav_.getAccleration();
+    nav_data.acceleration               = nav_.getAcceleration();
     nav_data.emergency_braking_distance = nav_.getEmergencyBrakingDistance();
     data_.setNavigationData(nav_data);
 
