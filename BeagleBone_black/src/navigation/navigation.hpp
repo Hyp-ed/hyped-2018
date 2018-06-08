@@ -56,20 +56,20 @@ class Navigation {
   /**
    * @brief Get the accleration value
    *
-   * @return uint16_t Returns the forward component of acceleration vector (negative when
-   *                  decelerating)
+   * @return NavigationType Returns the forward component of acceleration vector (negative when
+   *                        decelerating)
    */
   NavigationType getAccleration();
   /**
    * @brief Get the velocity value
    *
-   * @return uint16_t Returns the forward component of velocity vector
+   * @return NavigationType Returns the forward component of velocity vector
    */
   NavigationType getVelocity();
   /**
    * @brief Get the displacement value
    *
-   * @return uint16_t Returns the forward component of displacement vector
+   * @return NavigationType Returns the forward component of displacement vector
    */
   NavigationType getDisplacement();
   /**
