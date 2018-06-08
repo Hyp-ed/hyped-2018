@@ -14,6 +14,8 @@ SRCS := \
   sensors/main.cpp \
   sensors/bms.cpp \
   sensors/vl6180.cpp \
+  sensors/mpu9250.cpp \
+  sensors/fake_imu.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
@@ -42,4 +44,6 @@ MAINS := \
   demo_quaternion \
   demo_differentiator \
   demo_integrator \
+  demo_statistics\
   demo_can \
+  demo_mpu9250 \

@@ -39,12 +39,14 @@ namespace hyped {
 
 // Forward declaration
 namespace sensors { class BMS; }
+namespace motor_control { class Controller; }
 
 namespace utils {
 namespace io {
 
 // Import
 using sensors::BMS;
+using motor_control::Controller;
 
 namespace can {
 
@@ -57,6 +59,17 @@ struct Frame {
 };
 
 }   // namespace can
+
+class CanProccesor {
+ public:
+ /**
+  * @brief To be called by CAN receive side. Object processes received CAN
+  * message and updates its local data
+  *
+  * @param message received CAN message to be processed
+  */
+  virtual void processNewData(can::Frame& message) = 0;
+};
 
 /**
  * Can implements singleton pattern to encapsulate one can interface, namely can0.
@@ -88,6 +101,11 @@ class Can : public concurrent::Thread {
    * @param bms pointer to BMS object to be registered
    */
   void registerBMS(BMS* bms);
+  /**
+   * @brief Controller is registered for receiving CAN messages
+   * @param controller pointer to Controller object to be registered
+   */
+  void registerController(Controller* controller);
 
  private:
   /**
@@ -116,6 +134,8 @@ class Can : public concurrent::Thread {
   int   socket_;
   bool  running_;
   std::map<uint32_t, BMS*>  bms_map_;
+  Controller  *controller_array_[4];
+  uint8_t array_counter_ = 0;
   concurrent::Lock          socket_lock_;
 };
 

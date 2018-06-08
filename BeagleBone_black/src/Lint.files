@@ -23,6 +23,11 @@ sensors/main.hpp
 sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
+sensors/imu_interface.hpp
+sensors/fake_imu.hpp
+sensors/fake_imu.cpp
+sensors/mpu9250.hpp
+sensors/mpu9250.cpp
 sensors/vl6180.hpp
 sensors/vl6180.cpp
 communications/main.hpp
@@ -43,6 +48,7 @@ utils/math/differentiator.hpp
 utils/math/integrator.hpp
 utils/math/kalman.hpp
 utils/math/quaternion.hpp
+utils/math/statistics.hpp
 utils/math/vector.hpp
 utils/io/can.hpp
 utils/io/can.cpp
