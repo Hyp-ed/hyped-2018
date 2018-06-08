@@ -59,19 +59,19 @@ class Navigation {
    * @return uint16_t Returns the forward component of acceleration vector (negative when
    *                  decelerating)
    */
-  NavigationType get_accleration();
+  NavigationType getAccleration();
   /**
    * @brief Get the velocity value
    *
    * @return uint16_t Returns the forward component of velocity vector
    */
-  NavigationType get_velocity();
+  NavigationType getVelocity();
   /**
    * @brief Get the displacement value
    *
    * @return uint16_t Returns the forward component of displacement vector
    */
-  NavigationType get_displacement();
+  NavigationType getDisplacement();
   /**
    * @brief Get the emergency braking distance in metres
    *
@@ -113,11 +113,11 @@ class Navigation {
    */
   void update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count);
 
-  void gyro_update(DataPoint<NavigationVector> angular_velocity);  // Point number 1
-  void acclerometer_update(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
-  void proximity_orientation_update();  // Point number 7
-  void proximity_displacement_update();  // Point number 7
-  void stripe_counter_update(uint16_t count);  // Point number 7
+  void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
+  void acclerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
+  void proximityOrientationUpdate();  // Point number 7
+  void proximityDisplacementUpdate();  // Point number 7
+  void stripeCounterUpdate(uint16_t count);  // Point number 7
 
   // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
   NavigationVector accleration_;

@@ -27,9 +27,9 @@ using data::Sensors;
 namespace navigation {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
-    , data_(data::Data::getInstance())
-    , nav_()
+    : Thread(id, log),
+      data_(data::Data::getInstance()),
+      nav_()
 {/* EMPTY */}
 
 void Main::run()
@@ -58,9 +58,9 @@ void Main::run()
     else
       nav_.update(readings->imu);
 
-    nav_data.distance                   = nav_.get_displacement();
-    nav_data.velocity                   = nav_.get_velocity();
-    nav_data.acceleration               = nav_.get_accleration();
+    nav_data.distance                   = nav_.getDisplacement();
+    nav_data.velocity                   = nav_.getVelocity();
+    nav_data.acceleration               = nav_.getAccleration();
     nav_data.emergency_braking_distance = nav_.getEmergencyBrakingDistance();
     data_.setNavigationData(nav_data);
 
