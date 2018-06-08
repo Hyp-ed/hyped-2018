@@ -53,7 +53,8 @@ constexpr uint8_t kMpuZgOffsetUsrl     = 0x18;
 constexpr uint8_t  kGyroConfig           = 0x1B;
 
 constexpr uint8_t kWhoAmIMpu9250       = 0x75;
-constexpr uint8_t kWhoAmIResetValue   = 0x71;
+constexpr uint8_t kWhoAmIResetValue1   = 0x71;
+constexpr uint8_t kWhoAmIResetValue2   = 0x73;
 
 // User Control
 constexpr uint8_t kMpuRegUserCtrl  = 0x6A;
@@ -106,11 +107,11 @@ namespace sensors {
 
 const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
 
-MPU9250::MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr)
+MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale)
     : log_(log),
-    isSpi_(isSpi),
     gpio_(pin, kDirection, log),
-    i2c_addr_(i2c_addr)
+    acc_scale_(acc_scale),
+    gyro_scale_(gyro_scale)
 {
   init();
   log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
@@ -120,27 +121,26 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
+  // // wake up device
+  // writeByte(kMpuRegPwrMgmt1, 0x00);  // Clear sleep mode bit (6), enable all sensors
+  // Thread::sleep(100);  // Wait for all registers to reset
+
   calibrateSensors();
 
   // Test connection
   while (!whoAmI());
 
   writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
-  // writeByte(kMpuRegUserCtrl, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
+  Thread::sleep(200);
+  writeByte(kMpuRegUserCtrl, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
   writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
   writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
   writeByte(kMpuRegConfig, 0x01);
   writeByte(kGyroConfig, 0x00);
   writeByte(kAccelConfig, 0x00);
   writeByte(kAccelConfig2, 0x01);
-  setAcclScale(kBitsFs2G);
-  setGyroScale(kBitsFs250Dps);
-
-  // After init not quite 0, this is to make it 0.
-  getGyroData();
-  gyro_bias_[0] += gyro_data_[0];
-  gyro_bias_[1] += gyro_data_[1];
-  gyro_bias_[2] += gyro_data_[2];
+  setAcclScale(acc_scale_);
+  setGyroScale(gyro_scale_);
 }
 
 void MPU9250::calibrateSensors()
@@ -283,8 +283,8 @@ void MPU9250::calibrateSensors()
   data[2] = (accel_bias_reg[1] >> 8) & 0xFF;
   data[3] = (accel_bias_reg[1])      & 0xFF;
   // preserve temperature compensation bit when writing back to accelerometer bias registers
-  data[4] = (accel_bias_reg[2] >> 8) & 0xFF;
   data[3] = data[3] | mask_bit[1];
+  data[4] = (accel_bias_reg[2] >> 8) & 0xFF;
   data[5] = (accel_bias_reg[2])      & 0xFF;
   // preserve temperature compensation bit when writing back to accelerometer bias registers
   data[5] = data[5] | mask_bit[2];
@@ -310,8 +310,7 @@ bool MPU9250::whoAmI()
   // Who am I checks what address the sensor is at
   readByte(kWhoAmIMpu9250, &data);
   log_.ERR("MPU9250", "who am I: %u", data);
-  // TODO(anyone) need to find what it should be equal to
-  if (data != kWhoAmIResetValue) {
+  if (data != kWhoAmIResetValue1 && data != kWhoAmIResetValue2) {
     Thread::sleep(1000);
      log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
     return false;
@@ -328,32 +327,16 @@ MPU9250::~MPU9250()
 
 void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
-  if (isSpi_) {
-    // Write byte for spi
     select();
     spi_.write(write_reg, &write_data, 1);
     deSelect();
-  } else {
-    // Write byte for i2c
-    uint8_t buffer[2];
-    buffer[0]=write_reg;
-    buffer[1]=write_data;
-    i2c_.write(i2c_addr_, buffer, 2);
-  }
 }
 
 void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
-  if (isSpi_) {
-    // Read byte for spi
     select();
     spi_.read(read_reg | kReadFlag, read_data, 1);
     deSelect();
-  } else {
-    // Read byte for i2c
-    i2c_.write(i2c_addr_, &read_reg, 1);
-    i2c_.read(i2c_addr_, read_data, 1);
-  }
 }
 
 // TODO(jack) put into one read as a buffer
@@ -369,14 +352,14 @@ void MPU9250::getAcclData()
 {
   uint8_t response[6];
   int16_t bit_data;
-  double data;
+  float data;
   int i;
 
   readBytes(kAccelXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
     data = static_cast<float>(bit_data);
-    accel_data_[i] = data/acc_divider_ - acc_bias_[i];
+    accel_data_[i] = data/acc_divider_  * 9.80665;   // - acc_bias_[i];
   }
 }
 
@@ -384,14 +367,14 @@ void MPU9250::getGyroData()
 {
   uint8_t response[6];
   int16_t bit_data;
-  double data;
+  float data;
   int i;
 
   readBytes(kGyroXoutH, response, 6);
   for (i = 0; i < 3; i++) {
     bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
     data = static_cast<float>(bit_data);
-    gyro_data_[i] = data/gyro_divider_ - gyro_bias_[i];
+    gyro_data_[i] = data/gyro_divider_;    // - gyro_bias_[i];
   }
 }
 
