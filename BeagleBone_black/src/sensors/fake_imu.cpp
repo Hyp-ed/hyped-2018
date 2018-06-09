@@ -133,7 +133,7 @@ bool FakeImu::accCheckTime()
         return false;
     }
 
-    acc_count = floor(time_span.count()/kAccTimeInterval) + 1;
+    acc_count = time_span.count()/kAccTimeInterval + 1;
     return true;
 }
 
@@ -146,7 +146,7 @@ bool FakeImu::gyrCheckTime()
         return false;
     }
 
-    gyr_count = floor(time_span.count()/kGyrTimeInterval) + 1;
+    gyr_count = time_span.count()/kGyrTimeInterval + 1;
     return true;
 }
 
