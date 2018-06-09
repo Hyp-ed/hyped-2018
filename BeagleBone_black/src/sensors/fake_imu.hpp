@@ -52,7 +52,7 @@ class FakeImu : public ImuInterface {
    *               timestamp value_x value_y value_z noise_x noise_y noise_z
    *
    *               Sample of the format is located at 'src/fake_imu_input_xxx.txt'. Note that the
-   *               timestamp for accelerometer has to start with 0 and must be multiples of 250 and 
+   *               timestamp for accelerometer has to start with 0 and must be multiples of 250 and
    *               125 for accelerometer and gyroscope respectively. You must include every timestamp
    *               from 0 to the last timestamp which will be a multiple of 250 or 125 depending on
    *               if it is an accelerometer or gyroscope.
