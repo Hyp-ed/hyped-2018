@@ -29,7 +29,8 @@ namespace navigation {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      nav_()
+      nav_(),
+      last_state_(data_.getStateMachineData().current_state)
 {/* EMPTY */}
 
 void Main::run()
@@ -41,6 +42,11 @@ void Main::run()
 
   *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
+    // State updates
+    if (data_.getStateMachineData().current_state == State::kAccelerating
+        && last_state_ != State::kAccelerating)
+      nav_.finishCalibration(data_.navigation_motors_sync_);
+
     *readings = data_.getSensorsData();
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
