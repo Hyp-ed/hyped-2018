@@ -75,7 +75,8 @@ Controller::Controller(Logger& log, uint8_t id)
     critical_failure_(false),
     actual_velocity_(0),
     actual_torque_(0),
-    state_(kNotReadyToSwitchOn)
+    state_(kNotReadyToSwitchOn),
+    sdo_frame_recieved_(false)
 {
   SDOMessage.id       = kSDO_RECEIVE + node_id_;
   SDOMessage.extended = false;
@@ -104,7 +105,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor poles", node_id_);
 
   // Set feedback type to SSI
@@ -117,7 +118,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring feedback type", node_id_);
 
   // Set motor phase offset compensation to 190
@@ -130,7 +131,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset", node_id_);
 
   // Set over voltage limit to 125
@@ -143,7 +144,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring over voltage limit", node_id_);
 
   // Set under voltage minimum to 25
@@ -156,7 +157,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring under voltage limit", node_id_);
 
   // Set motor temperature sensor
@@ -169,7 +170,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor temperature sensor", node_id_);
 
   // Set motor rated current to 80,000 mA
@@ -182,7 +183,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x01;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated current", node_id_);
 
   // Set motor rated torque to 80N
@@ -195,7 +196,7 @@ void Controller::configure()
   SDOMessage.data[6]   = 0x01;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
 }
 
@@ -218,7 +219,7 @@ SDOMessage.data[5]   = 0x00;
 SDOMessage.data[6]   = 0x00;
 SDOMessage.data[7]   = 0x00;
 
-can_.send(SDOMessage);
+sendSdoCan(SDOMessage);
 log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
 
 // Set target velocity to 0;
@@ -235,7 +236,7 @@ SDOMessage.data[5]   = 0x00;
 SDOMessage.data[6]   = 0x00;
 SDOMessage.data[7]   = 0x00;
 
-can_.send(SDOMessage);
+sendSdoCan(SDOMessage);
 log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
 
 while (state_ == kSwitchOnDisabled);
@@ -252,7 +253,7 @@ SDOMessage.data[5]   = 0x00;
 SDOMessage.data[6]   = 0x00;
 SDOMessage.data[7]   = 0x00;
 
-can_.send(SDOMessage);
+sendSdoCan(SDOMessage);
 log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
 
 while (state_ == kReadyToSwitchOn);
@@ -269,7 +270,7 @@ SDOMessage.data[5]   = 0x00;
 SDOMessage.data[6]   = 0x00;
 SDOMessage.data[7]   = 0x00;
 
-can_.send(SDOMessage);
+sendSdoCan(SDOMessage);
 log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
 
 while (state_ == kSwitchedOn);
@@ -285,7 +286,7 @@ SDOMessage.data[5]   = 0x00;
 SDOMessage.data[6]   = 0x00;
 SDOMessage.data[7]   = 0x00;
 
-can_.send(SDOMessage);
+sendSdoCan(SDOMessage);
 log_.INFO("MOTOR", "Controller %d: Checking for warnings", node_id_);
 
 // Check error status
@@ -298,7 +299,7 @@ SDOMessage.data[5]   = 0x00;
 SDOMessage.data[6]   = 0x00;
 SDOMessage.data[7]   = 0x00;
 
-can_.send(SDOMessage);
+sendSdoCan(SDOMessage);
 log_.INFO("MOTOR", "Controller %d: Checking for errors", node_id_);
 }
 
@@ -316,7 +317,7 @@ void Controller::enterPreOperational()
     SDOMessage.data[6]   = 0x00;
     SDOMessage.data[7]   = 0x00;
 
-    can_.send(SDOMessage);
+    sendSdoCan(SDOMessage);
     log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
 
     // Enter NMT Operational
@@ -340,7 +341,7 @@ void Controller::checkStatus()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Checking status", node_id_);
 }
 
@@ -356,7 +357,7 @@ void Controller::sendTargetVelocity(int32_t target_velocity)
   SDOMessage.data[5]   = (target_velocity >> 8) & 0xFF;
   SDOMessage.data[6]   = (target_velocity >> 16) & 0xFF;
   SDOMessage.data[7]   = (target_velocity >> 24) & 0xFF;
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity", node_id_);
 }
 
@@ -373,7 +374,7 @@ void Controller::sendTargetTorque(int16_t target_torque)
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG2("MOTOR", "Controller %d: Updating target torque", node_id_);
 }
 
@@ -389,7 +390,7 @@ void Controller::updateActualVelocity()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG2("MOTOR", "Controller %d: Reading actual velocity", node_id_);
 }
 
@@ -405,7 +406,7 @@ void Controller::updateActualTorque()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG2("MOTOR", "Controller %d: Reading actual torque", node_id_);
 }
 
@@ -621,6 +622,7 @@ void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 
 void Controller::processSDOMessage(utils::io::can::Frame& message)
 {
+  sdo_frame_recieved_ = true;
   int8_t index_1   = message.data[1];
   int8_t index_2   = message.data[2];
   int8_t sub_index = message.data[3];
@@ -863,8 +865,17 @@ void Controller::quickStop()
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
 
-  can_.send(SDOMessage);
+  sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Sending quickStop command", node_id_);
+}
+
+void Controller::sendSdoCan(utils::io::can::Frame& message)
+{
+  sdo_frame_recieved_ = false;
+  can_.send(message);
+  while (!sdo_frame_recieved_) {
+    Thread::sleep(10);
+  }
 }
 
 bool Controller::getFailure()
