@@ -22,7 +22,12 @@
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
+Navigation::Navigation()
+    : prev_angular_velocity_(0 , NavigationVector()),
+      state_(NavigationState::kCalibrating),
+      num_gravity_samples_(0),
+      g_(0),
+      num_gyro_samples_(0)
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
       acceleration_filter_[i].configure(NavigationVector(),
@@ -58,21 +63,54 @@ NavigationType Navigation::getEmergencyBrakingDistance()
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
+NavigationState Navigation::getState()
+{
+  return state_;
+}
+
+bool Navigation::finishCalibration(Barrier navigation_motors_sync)
+{
+  if (state_ != NavigationState::kReady)
+    return false;
+
+  // Finalize calibration, update state, hit the barrier
+  g_ /= num_gravity_samples_;
+  for (NavigationVector& v : gyro_offsets_)
+    v /= num_gyro_samples_;
+  
+  // Update state
+  state_ = NavigationState::kOperational;
+
+  // Hit the barrier to sync with motors
+  navigation_motors_sync.wait();
+
+  return true;
+}
+
 
 void Navigation::update(ImuArray imus)
 {
-  // TODO(Brano,Adi): Gyro update. (Data format should change first.)
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
-    imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
+  if (state_ == NavigationState::kCalibrating || state_ == NavigationState::kReady) {
+    calibrationUpdate(imus);
+  } else {
+    // TODO(Brano,Adi): Gyro update. (Data format should change first.)
+    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
+      imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
+    }
+
+    NavigationVector acc_avg(0), gyr_avg(0);
+    for (const auto& imu : imus) {
+      acc_avg += imu.acc.value;
+      gyr_avg += imu.gyr.value;  // TODO(Brano,Adi): Check if gyro can be averaged like this
+    }
+    acc_avg /= imus.size();
+    gyr_avg /= imus.size();
+
+    // TODO(Brano,Adi): Change the timestamping strategy
+    this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, acc_avg));
+    this->gyroUpdate(DataPoint<NavigationVector>(imus[0].gyr.timestamp, gyr_avg));
   }
-
-  NavigationVector avg(0);
-  for (const auto& imu : imus) avg += imu.acc.value;
-
-  avg /= imus.size();
-  // TODO(Brano,Adi): Change the timestamping strategy
-  this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
 }
 
 void Navigation::update(ImuArray imus, ProximityArray proxis)
@@ -92,6 +130,16 @@ void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t
 {
   update(imus, proxis);
   stripeCounterUpdate(stripe_count.value);
+}
+
+void Navigation::calibrationUpdate(ImuArray imus)
+{
+  for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
+    g_ += imus[i].acc.value;
+    gyro_offsets_[i] += imus[i].gyr.value;
+  }
+  ++num_gravity_samples_;
+  ++num_gyro_samples_;
 }
 
 void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)

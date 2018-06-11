@@ -23,6 +23,7 @@
 #include <cstdint>
 
 #include "data/data.hpp"
+#include "utils/concurrent/barrier.hpp"
 #include "utils/math/integrator.hpp"
 #include "utils/math/kalman.hpp"
 #include "utils/math/quaternion.hpp"
@@ -34,8 +35,10 @@ using data::DataPoint;
 using data::Imu;
 using data::Proximity;
 using data::Sensors;
+using data::NavigationState;
 using data::NavigationType;
 using data::NavigationVector;
+using utils::concurrent::Barrier;
 using utils::math::Integrator;
 using utils::math::Kalman;
 using utils::math::Quaternion;
@@ -78,8 +81,24 @@ class Navigation {
    * @return NavigationType emergency braking distance in metres
    */
   NavigationType getEmergencyBrakingDistance();
+  /**
+   * @brief Get the state of the nav module
+   *
+   * @return NavigationState state of the nav module
+   */
+  NavigationState getState();
+  /**
+   * @brief Transition the navigation module from 'ready' to 'operational' state
+   * 
+   * @param navigation_motors_sync Hits this Barrier before returning to indicate to motors that
+   *                               calibration is done
+   * @return true  Transition to 'operational' state has been successful
+   * @return false Transition to 'operational' state is not possible at the moment
+   */
+  bool finishCalibration(Barrier navigation_motors_sync);
 
  private:
+  static constexpr int kMinNumCalibrationSamples = 200000;
   /**
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
@@ -113,11 +132,19 @@ class Navigation {
    */
   void update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count);
 
+  void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate();  // Point number 7
   void proximityDisplacementUpdate();  // Point number 7
   void stripeCounterUpdate(uint16_t count);  // Point number 7
+
+  // Calibration variables
+  NavigationState state_;
+  int num_gravity_samples_;
+  NavigationVector g_;  // Acceleration due to gravity. Measured during calibration.
+  int num_gyro_samples_;
+  std::array<NavigationVector, Sensors::kNumImus> gyro_offsets_;  // Measured during calibration
 
   // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
   NavigationVector acceleration_;
