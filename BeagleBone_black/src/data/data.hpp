@@ -24,6 +24,7 @@
 
 #include "data/data_point.hpp"
 #include "utils/math/vector.hpp"
+#include "utils/concurrent/barrier.hpp"
 #include "utils/concurrent/lock.hpp"
 
 using std::array;
@@ -31,6 +32,7 @@ using std::array;
 namespace hyped {
 
 // imports
+using utils::concurrent::Barrier;
 using utils::concurrent::Lock;
 using utils::math::Vector;
 
@@ -240,6 +242,12 @@ class Data {
    * @brief      Should be called to update communications data.
    */
   void setCommunicationsData(const Communications& communications_data);
+
+  /**
+   * @brief Barrier used by navigation and motor control modules on stm transition to accelerating
+   *        state. Navigation must finish calibration before motors start spinning.
+   */
+  Barrier navigation_motors_sync_ = Barrier(2);
 
  private:
   StateMachine state_machine_;
