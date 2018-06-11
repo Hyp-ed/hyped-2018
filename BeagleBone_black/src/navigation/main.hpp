@@ -46,7 +46,6 @@ class Main: public Thread {
 
   data::Data& data_;
   Navigation nav_;
-  State last_state_;
 };
 
 }}  // namespace hyped::navigation

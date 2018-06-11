@@ -32,8 +32,7 @@ namespace navigation {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      nav_(System::getSystem().navigation_motors_sync_),
-      last_state_(data_.getStateMachineData().current_state)
+      nav_(System::getSystem().navigation_motors_sync_)
 {/* EMPTY */}
 
 void Main::run()
@@ -46,8 +45,11 @@ void Main::run()
   *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
     // State updates
-    if (data_.getStateMachineData().current_state == State::kAccelerating
-        && last_state_ != State::kAccelerating)
+    State current_state = data_.getStateMachineData().current_state;
+    if (current_state != State::kIdle
+        && current_state != State::kReady
+        && nav_.getState() != NavigationState::kOperational
+        && nav_.getState() != NavigationState::kCriticalFailure)
       nav_.finishCalibration();
 
     *readings = data_.getSensorsData();
