@@ -22,12 +22,13 @@
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation()
-    : prev_angular_velocity_(0 , NavigationVector()),
+Navigation::Navigation(Barrier& post_calibration_barrier)
+    : post_calibration_barrier_(post_calibration_barrier),
       state_(NavigationState::kCalibrating),
       num_gravity_samples_(0),
       g_(0),
-      num_gyro_samples_(0)
+      num_gyro_samples_(0),
+      prev_angular_velocity_(0 , NavigationVector())
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
       acceleration_filter_[i].configure(NavigationVector(),
@@ -68,7 +69,7 @@ NavigationState Navigation::getState()
   return state_;
 }
 
-bool Navigation::finishCalibration(Barrier navigation_motors_sync)
+bool Navigation::finishCalibration()
 {
   if (state_ != NavigationState::kReady)
     return false;
@@ -82,7 +83,7 @@ bool Navigation::finishCalibration(Barrier navigation_motors_sync)
   state_ = NavigationState::kOperational;
 
   // Hit the barrier to sync with motors
-  navigation_motors_sync.wait();
+  post_calibration_barrier_.wait();
 
   return true;
 }

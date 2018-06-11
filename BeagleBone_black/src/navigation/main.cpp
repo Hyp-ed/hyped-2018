@@ -32,7 +32,7 @@ namespace navigation {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      nav_(),
+      nav_(System::getSystem().navigation_motors_sync_),
       last_state_(data_.getStateMachineData().current_state)
 {/* EMPTY */}
 
@@ -48,7 +48,7 @@ void Main::run()
     // State updates
     if (data_.getStateMachineData().current_state == State::kAccelerating
         && last_state_ != State::kAccelerating)
-      nav_.finishCalibration(System::getSystem().navigation_motors_sync_);
+      nav_.finishCalibration();
 
     *readings = data_.getSensorsData();
 

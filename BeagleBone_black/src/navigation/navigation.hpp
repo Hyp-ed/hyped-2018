@@ -54,7 +54,14 @@ class Navigation {
   typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
   friend class Main;
 
-  Navigation();
+  /**
+   * @brief Construct a new Navigation object
+   *
+   * @param post_calibration_barrier Navigation module will wait on this barrier at the end of the
+   *                                 transition to 'operational' state. It is primarily meant for
+   *                                 syncing with motors module.
+   */
+  explicit Navigation(Barrier& post_calibration_barrier);
 
   /**
    * @brief Get the acceleration value
@@ -88,14 +95,13 @@ class Navigation {
    */
   NavigationState getState();
   /**
-   * @brief Transition the navigation module from 'ready' to 'operational' state
-   *
-   * @param navigation_motors_sync Hits this Barrier before returning to indicate to motors that
-   *                               calibration is done
+   * @brief Transition the navigation module from 'ready' to 'operational' state. Hits the
+   *        `post_calibration_barrier` before returning `true` (to indicate to motors that the
+   *        calibration is done).
    * @return true  Transition to 'operational' state has been successful
    * @return false Transition to 'operational' state is not possible at the moment
    */
-  bool finishCalibration(Barrier navigation_motors_sync);
+  bool finishCalibration();
 
  private:
   static constexpr int kMinNumCalibrationSamples = 200000;
@@ -138,6 +144,9 @@ class Navigation {
   void proximityOrientationUpdate();  // Point number 7
   void proximityDisplacementUpdate();  // Point number 7
   void stripeCounterUpdate(uint16_t count);  // Point number 7
+
+  // Admin stuff
+  Barrier& post_calibration_barrier_;
 
   // Calibration variables
   NavigationState state_;
