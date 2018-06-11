@@ -52,4 +52,10 @@ void HypedMachine::transition(State *state)
   d.setStateMachineData(state_machine_);
 }
 
+void HypedMachine::reset()
+{
+  log_.INFO("STATE", "State Machine resetted");
+  transition(new(current_state_) Idle());
+}
+
 }}   // namespace hyped::state_machine

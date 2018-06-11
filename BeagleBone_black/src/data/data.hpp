@@ -41,6 +41,7 @@ namespace data {
 // -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
+  kReady,
   kAccelerating,
   kDecelerating,
   kEmergencyBraking,
@@ -157,6 +158,7 @@ struct Communications {
   bool stopCommand;
   bool launchCommand;
   bool resetCommand;
+  float run_length;
 };
 
 // -------------------------------------------------------------------------------------------------
