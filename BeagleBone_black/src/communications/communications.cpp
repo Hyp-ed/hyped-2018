@@ -78,6 +78,15 @@ int Communications::sendData(std::string message)
   return atoi(buffer);
 }
 
+int Communications::receiveTrackLength()
+{
+  n_ = read(sockfd_, trackBuffer, 1280);
+  trackLength_ = atoi(trackBuffer);
+  log_.INFO("COMN", "Received track length of %d", trackLength_);
+
+  return trackLength_;
+}
+
 int Communications::receiveMessage()
 {
   n_ = read(sockfd_, buffer, 255);
@@ -90,6 +99,9 @@ int Communications::receiveMessage()
   command_ = atoi(buffer);
 
   switch (command_) {
+    case 0:
+      log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
+      break;
     case 1:
       log_.INFO("COMN", "Received 1 (STOP)");  // STOP
       break;
@@ -98,6 +110,9 @@ int Communications::receiveMessage()
       break;
     case 3:
       log_.INFO("COMN", "Received 3 (RESET)");  // RESET
+      break;
+    case 4:
+      log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // RESET
       break;
   }
 

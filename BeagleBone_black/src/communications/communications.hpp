@@ -53,6 +53,12 @@ class Communications
    * @pararm[in] message which contains with a command code, a value and a newline
    */
   int sendData(std::string message);
+   /**
+    * @brief Reads trackLength data from Server
+    *
+    * @return int Returns length of track in mm. Buffer assumes test track will be < 100,000mm
+    */
+  int receiveTrackLength();
   /**
    * @brief Reads data from server.
    *
@@ -61,10 +67,11 @@ class Communications
   int receiveMessage();
 
  private:
-  int sockfd_, n_, command_;
+  int sockfd_, n_, command_, trackLength_;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
+  char trackBuffer[1280];
   Logger& log_;
 };
 
