@@ -41,6 +41,7 @@ namespace data {
 // -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
+  kReady,
   kAccelerating,
   kDecelerating,
   kEmergencyBraking,
@@ -102,10 +103,12 @@ struct StripeCounter : public Sensor {
 
 struct Sensors {
   static constexpr int kNumImus = 8;
-  static constexpr int kNumProximities = 24;
+  static constexpr int kNumProximities = 8;
 
   array<Imu, kNumImus> imu;
-  array<Proximity, kNumProximities> proxi;
+  array<Proximity, kNumProximities> proxi;  // TODO(nav): remove after adapting to proxi_front/back
+  array<Proximity, kNumProximities> proxi_front;
+  array<Proximity, kNumProximities> proxi_back;
   StripeCounter stripe_counter;
 };
 
@@ -155,6 +158,7 @@ struct Communications {
   bool stopCommand;
   bool launchCommand;
   bool resetCommand;
+  float run_length;
 };
 
 // -------------------------------------------------------------------------------------------------

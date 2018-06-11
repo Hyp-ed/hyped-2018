@@ -31,8 +31,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/bms.hpp"
-#include "sensors/vl6180.hpp"
+#include "sensors/interface.hpp"
 
 namespace hyped {
 
@@ -41,22 +40,29 @@ using utils::Logger;
 
 namespace sensors {
 
+class CANProxi;
+
 class Main: public Thread {
  public:
   explicit Main(uint8_t id, Logger& log);
   void run() override;
 
  private:
-  // master data structures
   data::Data&     data_;
+
+  // master data structures
   data::Sensors   sensors_;
   data::Batteries batteries_;
 
   // batteries
-  BMS*        bms_[data::Batteries::kNumLPBatteries];
+  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
 
   // nav sensors
-  VL6180*     proxi_[data::Sensors::kNumProximities];
+  ProxiInterface* proxi_[data::Sensors::kNumProximities];
+  ProxiInterface* can_proxi_[data::Sensors::kNumProximities];
+
+  uint8_t         chip_select_[data::Sensors::kNumImus];
+  ImuInterface*   imu_[data::Sensors::kNumImus];
 };
 
 }}  // namespace hyped::sensors
