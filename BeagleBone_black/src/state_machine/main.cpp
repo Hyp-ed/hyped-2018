@@ -32,11 +32,11 @@ namespace state_machine {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
-    hypedMachine(log),
-    data_(data::Data::getInstance()),
-    comms_data(data_.getCommunicationsData()),
-    nav_data(data_.getNavigationData()),
-    sm_data(data_.getStateMachineData())
+      hypedMachine(log),
+      data_(data::Data::getInstance()),
+      comms_data(data_.getCommunicationsData()),
+      nav_data(data_.getNavigationData()),
+      sm_data(data_.getStateMachineData())
 { /* EMPTY */ }
 
 /**

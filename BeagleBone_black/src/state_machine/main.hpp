@@ -43,13 +43,15 @@ class Main: public Thread {
 
  private:
   HypedMachine hypedMachine;
+
+  void checkNavigation();
+  void checkCommunications();
+  void checkReady();
+
   data::Data& data_;
   data::Communications comms_data;
   data::Navigation nav_data;
   data::StateMachine sm_data;
-  void checkNavigation();
-  void checkCommunications();
-  void checkReady();
 };
 
 }}  // namespace hyped::motor_control
