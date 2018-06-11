@@ -89,7 +89,7 @@ class Navigation {
   NavigationState getState();
   /**
    * @brief Transition the navigation module from 'ready' to 'operational' state
-   * 
+   *
    * @param navigation_motors_sync Hits this Barrier before returning to indicate to motors that
    *                               calibration is done
    * @return true  Transition to 'operational' state has been successful

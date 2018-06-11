@@ -77,7 +77,7 @@ bool Navigation::finishCalibration(Barrier navigation_motors_sync)
   g_ /= num_gravity_samples_;
   for (NavigationVector& v : gyro_offsets_)
     v /= num_gyro_samples_;
-  
+
   // Update state
   state_ = NavigationState::kOperational;
 
