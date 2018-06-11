@@ -20,9 +20,12 @@
 
 #include <memory>
 
+#include "utils/system.hpp"
+
 namespace hyped {
 
 using data::Sensors;
+using utils::System;
 
 namespace navigation {
 
@@ -45,7 +48,7 @@ void Main::run()
     // State updates
     if (data_.getStateMachineData().current_state == State::kAccelerating
         && last_state_ != State::kAccelerating)
-      nav_.finishCalibration(data_.navigation_motors_sync_);
+      nav_.finishCalibration(System::getSystem().navigation_motors_sync_);
 
     *readings = data_.getSensorsData();
 
