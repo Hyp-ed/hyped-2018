@@ -613,10 +613,13 @@ void Controller::processEmergencyMessage(utils::io::can::Frame& message)
     log_.ERR("MOTOR", "Controller %d: Control error", node_id_);
   }
 
-  if (index_2 == 0xFF) {
+  if (index_2 == 0xFF || index_1 == 0xFF) {
     log_.ERR("MOTOR", "Controller %d: Manufacturer error", node_id_);
+    // Manufacturer specific error calling processErrorMessage
+    log_.ERR("MOTOR", "Calling process error function");
+    uint16_t error_message = (index_2 << 8) | index_1;
+    processErrorMessage(error_message);
   }
-
   log_.DBG1("MOTOR", "index 1: %d, index 2: %d", index_1, index_2);
 }
 
@@ -681,65 +684,7 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
     if (message.data[4] != 0 && message.data[5] != 0) {
       critical_failure_ = true;
       uint16_t error_message = (message.data[5] << 8) | message.data[4];
-      switch (error_message) {
-        case 0x1000:
-          log_.ERR("MOTOR", "Controller %d error: Unspecified error", node_id_);
-          break;
-        case 0x2220:
-          log_.ERR("MOTOR", "Controller %d error: Overcurrent error", node_id_);
-          break;
-        case 0x3210:
-          log_.ERR("MOTOR", "Controller %d error: DC link over voltage", node_id_);
-          break;
-        case 0xFF01:
-          log_.ERR("MOTOR", "Controller %d error: Phase A current measurement", node_id_);
-          break;
-        case 0xFF02:
-          log_.ERR("MOTOR", "Controller %d error: Phase B current measurement", node_id_);
-          break;
-        case 0xFF03:
-          log_.ERR("MOTOR", "Controller %d error: High side FET short circuit", node_id_);
-          break;
-        case 0xFF04:
-          log_.ERR("MOTOR", "Controller %d error: Low side FET short circuit", node_id_);
-          break;
-        case 0xFF05:
-          log_.ERR("MOTOR", "Controller %d error: Low side phase 1 short circuit", node_id_);
-          break;
-        case 0xFF06:
-          log_.ERR("MOTOR", "Controller %d error: Low side phase 2 short circuit", node_id_);
-          break;
-        case 0xFF07:
-          log_.ERR("MOTOR", "Controller %d error: Low side phase 3 short circuit", node_id_);
-          break;
-        case 0xFF08:
-          log_.ERR("MOTOR", "Controller %d error: High side phase 1 short circuit", node_id_);
-          break;
-        case 0xFF09:
-          log_.ERR("MOTOR", "Controller %d error: High side phase 2 short circuit", node_id_);
-          break;
-        case 0xFF0A:
-          log_.ERR("MOTOR", "Controller %d error: High side phase 3 short circuit", node_id_);
-          break;
-        case 0xFF0B:
-          log_.ERR("MOTOR", "Controller %d error: Motor Feedback", node_id_);
-          break;
-        case 0xFF0C:
-          log_.ERR("MOTOR", "Controller %d error: DC link under voltage", node_id_);
-          break;
-        case 0xFF0D:
-          log_.ERR("MOTOR", "Controller %d error: Pulse mode finished", node_id_);
-          break;
-        case 0xFF0E:
-          log_.ERR("MOTOR", "Controller %d error: Application error", node_id_);
-          break;
-        case 0xFF0F:
-          log_.ERR("MOTOR", "Controller %d error: STO error", node_id_);
-          break;
-        case 0xFF10:
-          log_.ERR("MOTOR", "Controller %d error: Controller temperature exceeded", node_id_);
-          break;
-      }
+      processErrorMessage(error_message);
     }
     return;
   }
@@ -829,6 +774,69 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
   if (index_1 == 0x40 && index_2 == 0x60 && sub_index == 0x00) {
     log_.DBG1("MOTOR", "Controller %d: Control Word updated", node_id_);
     return;
+  }
+}
+
+void Controller::processErrorMessage(uint16_t error_message)
+{
+  switch (error_message) {
+    case 0x1000:
+      log_.ERR("MOTOR", "Controller %d error: Unspecified error", node_id_);
+      break;
+    case 0x2220:
+      log_.ERR("MOTOR", "Controller %d error: Overcurrent error", node_id_);
+      break;
+    case 0x3210:
+      log_.ERR("MOTOR", "Controller %d error: DC link over voltage", node_id_);
+      break;
+    case 0xFF01:
+      log_.ERR("MOTOR", "Controller %d error: Phase A current measurement", node_id_);
+      break;
+    case 0xFF02:
+      log_.ERR("MOTOR", "Controller %d error: Phase B current measurement", node_id_);
+      break;
+    case 0xFF03:
+      log_.ERR("MOTOR", "Controller %d error: High side FET short circuit", node_id_);
+      break;
+    case 0xFF04:
+      log_.ERR("MOTOR", "Controller %d error: Low side FET short circuit", node_id_);
+      break;
+    case 0xFF05:
+      log_.ERR("MOTOR", "Controller %d error: Low side phase 1 short circuit", node_id_);
+      break;
+    case 0xFF06:
+      log_.ERR("MOTOR", "Controller %d error: Low side phase 2 short circuit", node_id_);
+      break;
+    case 0xFF07:
+      log_.ERR("MOTOR", "Controller %d error: Low side phase 3 short circuit", node_id_);
+      break;
+    case 0xFF08:
+      log_.ERR("MOTOR", "Controller %d error: High side phase 1 short circuit", node_id_);
+      break;
+    case 0xFF09:
+      log_.ERR("MOTOR", "Controller %d error: High side phase 2 short circuit", node_id_);
+      break;
+    case 0xFF0A:
+      log_.ERR("MOTOR", "Controller %d error: High side phase 3 short circuit", node_id_);
+      break;
+    case 0xFF0B:
+      log_.ERR("MOTOR", "Controller %d error: Motor Feedback", node_id_);
+      break;
+    case 0xFF0C:
+      log_.ERR("MOTOR", "Controller %d error: DC link under voltage", node_id_);
+      break;
+    case 0xFF0D:
+      log_.ERR("MOTOR", "Controller %d error: Pulse mode finished", node_id_);
+      break;
+    case 0xFF0E:
+      log_.ERR("MOTOR", "Controller %d error: Application error", node_id_);
+      break;
+    case 0xFF0F:
+      log_.ERR("MOTOR", "Controller %d error: STO error", node_id_);
+      break;
+    case 0xFF10:
+      log_.ERR("MOTOR", "Controller %d error: Controller temperature exceeded", node_id_);
+      break;
   }
 }
 
