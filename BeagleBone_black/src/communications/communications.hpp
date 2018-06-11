@@ -67,11 +67,11 @@ class Communications
   int receiveMessage();
 
  private:
-  int sockfd_, n_, command_, trackLength_;
+  int sockfd_, n_, command_, track_length_;
   struct sockaddr_in serv_addr;
   struct hostent *server;
   char buffer[256];
-  char trackBuffer[1280];
+  char track_buffer_[1280];
   Logger& log_;
 };
 

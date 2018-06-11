@@ -80,11 +80,11 @@ int Communications::sendData(std::string message)
 
 int Communications::receiveTrackLength()
 {
-  n_ = read(sockfd_, trackBuffer, 1280);
-  trackLength_ = atoi(trackBuffer);
-  log_.INFO("COMN", "Received track length of %d", trackLength_);
+  n_ = read(sockfd_, track_buffer_, 1280);
+  track_length_ = atoi(track_buffer_);
+  log_.INFO("COMN", "Received track length of %d", track_length_);
 
-  return trackLength_;
+  return track_length_;
 }
 
 int Communications::receiveMessage()
