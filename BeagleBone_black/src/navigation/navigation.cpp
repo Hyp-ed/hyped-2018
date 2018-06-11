@@ -141,6 +141,10 @@ void Navigation::calibrationUpdate(ImuArray imus)
   }
   ++num_gravity_samples_;
   ++num_gyro_samples_;
+
+  if (num_gravity_samples_ > kMinNumCalibrationSamples
+      && num_gyro_samples_ > kMinNumCalibrationSamples)
+    state_ = NavigationState::kReady;
 }
 
 void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)
