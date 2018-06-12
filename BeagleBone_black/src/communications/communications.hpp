@@ -67,9 +67,7 @@ class Communications
   int receiveMessage();
 
  private:
-  int sockfd_, n_, command_, run_length_;
-  struct sockaddr_in serv_addr_;
-  struct hostent *server_;
+  int sockfd_;
   char buffer_[256];
   Logger& log_;
 };

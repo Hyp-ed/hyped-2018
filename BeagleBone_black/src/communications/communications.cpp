@@ -32,6 +32,8 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
+  struct sockaddr_in serv_addr_;
+  struct hostent *server_;
 
   if (sockfd_ < 0) {
     log_.ERR("COMN", "CANNOT OPEN SOCKET.");
@@ -67,6 +69,7 @@ Communications::~Communications()
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
+  int n_;
   memset(buffer_, '\0', 256);
   const char *data = message.c_str();
   n_ = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
@@ -80,7 +83,7 @@ int Communications::sendData(std::string message)
 
 int Communications::receiveRunLength()
 {
-  n_ = read(sockfd_, buffer_, 255);
+  int run_length_;
   run_length_ = atoi(buffer_);
   log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length_));
 
@@ -89,7 +92,9 @@ int Communications::receiveRunLength()
 
 int Communications::receiveMessage()
 {
+  int n_;
   n_ = read(sockfd_, buffer_, 255);
+  int command_;
 
   if (n_ < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
