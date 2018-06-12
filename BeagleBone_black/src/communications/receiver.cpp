@@ -47,7 +47,7 @@ void ReceiverThread::run()
         cmn_data.resetCommand = true;
         break;
       case 4:
-        cmn_data.run_length = static_cast<float>(baseCommunicator_->receiveTrackLength());
+        cmn_data.run_length = static_cast<float>(baseCommunicator_->receiveRunLength())/1000;
         break;
     }
 

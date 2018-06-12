@@ -37,22 +37,22 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
     log_.ERR("COMN", "CANNOT OPEN SOCKET.");
   }
 
-  server = gethostbyname(ip);
+  server_ = gethostbyname(ip);
 
-  if (server == NULL) {
+  if (server_ == NULL) {
     log_.ERR("COMN", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
   }
 
-  memset(&serv_addr, '\0', sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;   // server byte order
-  // memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
-  serv_addr.sin_port = htons(portNo);
+  memset(&serv_addr_, '\0', sizeof(serv_addr_));
+  serv_addr_.sin_family = AF_INET;   // server byte order
+  // memcpy(server_->h_addr, &serv_addr_.sin_addr.s_addr, server_->h_length);
+  serv_addr_.sin_port = htons(portNo);
 
-  if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0) {
+  if (inet_pton(AF_INET, ip, &serv_addr_.sin_addr) <= 0) {
     log_.ERR("COMN", "Invalid address.\n");
   }
 
-  if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+  if (connect(sockfd_, (struct sockaddr *) &serv_addr_, sizeof(serv_addr_)) < 0) {
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
   }
 
@@ -67,7 +67,7 @@ Communications::~Communications()
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
-  memset(buffer, '\0', 256);
+  memset(buffer_, '\0', 256);
   const char *data = message.c_str();
   n_ = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
 
@@ -75,28 +75,28 @@ int Communications::sendData(std::string message)
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
   }
 
-  return atoi(buffer);
+  return atoi(buffer_);
 }
 
-int Communications::receiveTrackLength()
+int Communications::receiveRunLength()
 {
-  n_ = read(sockfd_, track_buffer_, 1280);
-  track_length_ = atoi(track_buffer_);
-  log_.INFO("COMN", "Received track length of %d", track_length_);
+  n_ = read(sockfd_, track_buffer_, 255);
+  run_length_ = atoi(track_buffer_);
+  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length_));
 
-  return track_length_;
+  return run_length_;
 }
 
 int Communications::receiveMessage()
 {
-  n_ = read(sockfd_, buffer, 255);
+  n_ = read(sockfd_, buffer_, 255);
 
   if (n_ < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
     command_ = 1;
   }
 
-  command_ = atoi(buffer);
+  command_ = atoi(buffer_);
 
   switch (command_) {
     case 0:
