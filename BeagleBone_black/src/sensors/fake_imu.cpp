@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <stdexcept>
 #include <iostream>
 
 #include "data/data.hpp"
@@ -38,9 +40,11 @@ namespace sensors {
 FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
     : pt_acc(0), pt_gyr(0)
 {
-  read_file = true;
-  readDataFromFile(acc_file_path, gyr_file_path);
-  setData();
+  if (checkFile(acc_file_path, gyr_file_path)) {
+    read_file = true;
+    readDataFromFile(acc_file_path, gyr_file_path);
+    setData();
+  }
 }
 
 FakeImu::FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
@@ -126,28 +130,81 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
 
 bool FakeImu::accCheckTime()
 {
-    high_resolution_clock::time_point now = high_resolution_clock::now();
-    microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
+  high_resolution_clock::time_point now = high_resolution_clock::now();
+  microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
 
-    if (unsigned(time_span.count()) < kAccTimeInterval*acc_count) {
-        return false;
-    }
+  if (unsigned(time_span.count()) < kAccTimeInterval*acc_count) {
+    return false;
+  }
 
-    acc_count = time_span.count()/kAccTimeInterval + 1;
-    return true;
+  acc_count = time_span.count()/kAccTimeInterval + 1;
+  return true;
 }
 
 bool FakeImu::gyrCheckTime()
 {
-    high_resolution_clock::time_point now = high_resolution_clock::now();
-    microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
+  high_resolution_clock::time_point now = high_resolution_clock::now();
+  microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
 
-    if (unsigned(time_span.count()) < kGyrTimeInterval*gyr_count) {
-        return false;
+  if (unsigned(time_span.count()) < kGyrTimeInterval*gyr_count) {
+    return false;
+  }
+
+  gyr_count = time_span.count()/kGyrTimeInterval + 1;
+  return true;
+}
+
+bool FakeImu::checkFile(std::string acc_file_path, std::string gyr_file_path)
+{
+  for (int i = 0; i < 2; i++) {
+    std::string file_path;
+    uint32_t timestamp;
+
+    if (i == 0) {
+      file_path = acc_file_path;
+      timestamp = kAccTimeInterval;
+    } else {
+      file_path = gyr_file_path;
+      timestamp = kGyrTimeInterval;
     }
 
-    gyr_count = time_span.count()/kGyrTimeInterval + 1;
-    return true;
+    std::ifstream file;
+    file.open(file_path);
+    if (!file.is_open()) {
+      throw std::invalid_argument("Wrong file path for argument " + i);
+      return false;
+    }
+
+    double value;
+    int counter = 0;
+    uint32_t temp_time;
+    std::string line;
+
+    while (getline(file, line)) {
+      std::stringstream input(line);
+      input >> temp_time;
+
+      if (temp_time != timestamp*counter) {
+        throw std::invalid_argument("Timestamp format invalid");
+        return false;
+      }
+
+      int value_counter = 0;
+      while (input >> value) {
+        value_counter++;
+      }
+
+      if (value_counter != 6) {
+        throw std::invalid_argument("Incomplete values for the argument timestamp " + temp_time);
+        return false;
+      }
+
+      counter++;
+    }
+
+    file.close();
+  }
+  return true;
 }
 
 }}  // namespace hyped::sensors

@@ -110,6 +110,14 @@ class FakeImu : public ImuInterface {
   bool accCheckTime();
   bool gyrCheckTime();
 
+  /*
+   * @brief     This function takes in the file path of both the files and validates them by checking if
+   *              1) The timestamp values are valid. Multiples of 250 or 150 depending on the file.
+   *              2) The file follows the format given in the comments of the constructor above.
+   *              3) The file exists.
+   */
+  bool checkFile(std::string acc_file_path, std::string gyr_file_path);
+
   bool read_file;
 
   NavigationVector acc_val, gyr_val;
