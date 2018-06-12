@@ -80,7 +80,7 @@ void Decelerating::entry()
 
 void Decelerating::react(HypedMachine &machine, Event event)
 {
-  if (event == kEndOfRunReached) {
+  if (event == kVelocityZeroReached) {
     machine.transition(new(alloc_) RunComplete());
   } else if (event == kCriticalFailure) {
     machine.transition(new(alloc_) EmergencyBraking());
@@ -129,20 +129,9 @@ void Exiting::entry()
 
 void Exiting::react(HypedMachine &machine, Event event)
 {
-  if (event == kEndOfTubeReached) {
-    machine.transition(new(alloc_) Finished());
-  } else if (event == kCriticalFailure) {
+if (event == kCriticalFailure) {
     machine.transition(new(alloc_) EmergencyBraking());
   }
-}
-
-void Finished::entry()
-{
-  state_ = state::kFinished;
-}
-
-void Finished::react(HypedMachine &machine, Event event)
-{
 }
 
 }}   // namespace hyped::state_machine

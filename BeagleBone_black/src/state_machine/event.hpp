@@ -29,9 +29,7 @@ enum Event {
   kOnStart,
   kCriticalFailure,
   kMaxDistanceReached,
-  kEndOfRunReached,
   kOnExit,
-  kEndOfTubeReached,
   kVelocityZeroReached
 };
 
