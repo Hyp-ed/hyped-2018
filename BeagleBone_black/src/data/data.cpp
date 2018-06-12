@@ -26,6 +26,7 @@ namespace data {
 
 const char* states[num_states] = {
   "Idle",
+  "Ready",
   "Accelerating",
   "Decelerating",
   "EmergencyBraking",

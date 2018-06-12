@@ -40,10 +40,23 @@ void Idle::entry()
 
 void Idle::react(HypedMachine &machine, Event event)
 {
-  if (event == kOnStart)              new(alloc_) Accelerating();
-  else if (event == kCriticalFailure) new(alloc_) FailureStopped();
+  if (event == kSystemsChecked) {
+    machine.transition(new(alloc_) Ready());
+  }
+}
 
-  machine.transition(0);
+void Ready::entry()
+{
+  state_ = state::kReady;
+}
+
+void Ready::react(HypedMachine &machine, Event event)
+{
+  if (event == kOnStart) {
+     machine.transition(new(alloc_) Accelerating());
+  } else if (event == kCriticalFailure) {
+    machine.transition(new(alloc_) FailureStopped());
+  }
 }
 
 void Accelerating::entry()

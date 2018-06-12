@@ -73,7 +73,7 @@ I2C::I2C(Logger& log)
 
 I2C::~I2C()
 {
-  if (fd_) close(fd_);
+  if (fd_ >= 0) close(fd_);
 }
 
 void I2C::setSensorAddress(uint32_t addr)
@@ -87,6 +87,8 @@ void I2C::setSensorAddress(uint32_t addr)
 
 void I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
 {
+  if (fd_ < 0) return;  // early exit if no i2c device present
+
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::readHelper(fd_, rx, len);
@@ -96,6 +98,8 @@ void I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
 
 void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
 {
+  if (fd_ < 0) return;  // early exit if no i2c device present
+
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::writeHelper(fd_, tx, len);

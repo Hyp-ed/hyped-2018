@@ -40,6 +40,7 @@ class HypedMachine {
   explicit HypedMachine(utils::Logger& log);
   void handleEvent(Event event);
   void transition(State *state);
+  void reset();
 
  private:
   State*             current_state_;

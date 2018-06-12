@@ -65,9 +65,6 @@ struct spi_ioc_transfer {
 #define SPI_MSBFIRST 0
 #define SPI_LSBFIRST 1
 
-// DO NOT TOUCH
-#define SPI_MAX_SIZE    4096
-
 
 namespace hyped {
 namespace utils {
@@ -85,7 +82,10 @@ SPI::SPI(Logger& log)
   const char device[] = "/dev/spidev1.0";
   spi_fd_ = open(device, O_RDWR, 0);
 
-  ASSERT(spi_fd_ >= 0);
+  if (spi_fd_ < 0) {
+    log_.ERR("SPI", "Could not open spi device");
+    return;
+  }
 
   // set clock frequency
   uint32_t clock = SPI_CLK;
@@ -114,6 +114,8 @@ SPI::SPI(Logger& log)
 
 void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
 {
+  if (spi_fd_ < 0) return;  // early exit if no spi device present
+
   spi_ioc_transfer message = {};
 
   message.tx_buf = reinterpret_cast<uint64_t>(tx);
@@ -127,6 +129,8 @@ void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
 
 void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
 {
+  if (spi_fd_ < 0) return;  // early exit if no spi device present
+
   spi_ioc_transfer message[2] = {};
 
   // send address
@@ -146,6 +150,8 @@ void SPI::read(uint8_t addr, uint8_t* rx, uint16_t len)
 
 void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
 {
+  if (spi_fd_ < 0) return;  // early exit if no spi device present
+
   spi_ioc_transfer message[2] = {};
   // send address
   message[0].tx_buf = reinterpret_cast<uint64_t>(&addr);
@@ -164,6 +170,8 @@ void SPI::write(uint8_t addr, uint8_t* tx, uint16_t len)
 
 SPI::~SPI()
 {
+  if (spi_fd_ < 0) return;  // early exit if no spi device present
+
   close(spi_fd_);
 }
 }}}   // namespace hyped::utils::io

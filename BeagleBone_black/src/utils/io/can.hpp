@@ -29,24 +29,15 @@
 #define BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
 
 #include <cstdint>
-#include <map>
+#include <vector>
 
 #include "utils/concurrent/lock.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/utils.hpp"
 
 namespace hyped {
-
-// Forward declaration
-namespace sensors { class BMS; }
-namespace motor_control { class Controller; }
-
 namespace utils {
 namespace io {
-
-// Import
-using sensors::BMS;
-using motor_control::Controller;
 
 namespace can {
 
@@ -69,6 +60,15 @@ class CanProccesor {
   * @param message received CAN message to be processed
   */
   virtual void processNewData(can::Frame& message) = 0;
+
+  /**
+   * @brief To be called by CAN receive side to find owner of receinve can::Frame
+   *
+   * @param id        - of the received can::Frame
+   * @param extended  - is the id extended?
+   * @return true     - iff this CanProcessor owns the corresponding message
+   */
+  virtual bool hasId(uint32_t id, bool extended) = 0;
 };
 
 /**
@@ -87,8 +87,6 @@ class Can : public concurrent::Thread {
   }
 
   NO_COPY_ASSIGN(Can);
-  // explicit Can(Can const&)    = delete;
-  // void operator=(Can const&)  = delete;
 
   /**
    * @param  frame data to be sent
@@ -97,15 +95,14 @@ class Can : public concurrent::Thread {
   int send(const can::Frame& frame);
 
   /**
-   * @brief BMS is registered for receiving CAN messages
-   * @param bms pointer to BMS object to be registered
+   * @brief Called by any Can-enabled device implementing CanProcessor interface
    */
-  void registerBMS(BMS* bms);
+  void registerProcessor(CanProccesor* processor);
+
   /**
-   * @brief Controller is registered for receiving CAN messages
-   * @param controller pointer to Controller object to be registered
+   * @brief To be called for starting the receive thread
    */
-  void registerController(Controller* controller);
+  void start();
 
  private:
   /**
@@ -123,7 +120,7 @@ class Can : public concurrent::Thread {
   void processNewData(can::Frame* frame);
 
   /**
-   * Blocking read and demultiplex messages based on configure id spaces
+   * Blocking read and demultiplex messages based on configured id spaces
    */
   void run() override;
 
@@ -133,10 +130,8 @@ class Can : public concurrent::Thread {
  private:
   int   socket_;
   bool  running_;
-  std::map<uint32_t, BMS*>  bms_map_;
-  Controller  *controller_array_[4];
-  uint8_t array_counter_ = 0;
-  concurrent::Lock          socket_lock_;
+  std::vector<CanProccesor*>  processors_;
+  concurrent::Lock            socket_lock_;
 };
 
 }}}   // namespace hyped::utils::io

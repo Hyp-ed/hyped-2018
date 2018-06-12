@@ -43,16 +43,15 @@ class Main: public Thread {
 
  private:
   HypedMachine hypedMachine;
-  data::Data& data_;
-  /**
-   * @brief      Checks all the system for critical failures. Returns false if all checked have passed.
-   */
-  bool hasCriticalFailure();
-  /**
-   * @brief      Computes the maxDistance and returns true if it has been reached.
-   */
-  bool hasReachedMaxDistance();
+
+  void checkNavigation();
   void checkCommunications();
+  void checkReady();
+
+  data::Data& data_;
+  data::Communications comms_data;
+  data::Navigation nav_data;
+  data::StateMachine sm_data;
 };
 
 }}  // namespace hyped::motor_control
