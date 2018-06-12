@@ -129,7 +129,8 @@ void Exiting::entry()
 
 void Exiting::react(HypedMachine &machine, Event event)
 {
-if (event == kCriticalFailure) {
+if (event == kCriticalFailure)
+  {
     machine.transition(new(alloc_) EmergencyBraking());
   }
 }
