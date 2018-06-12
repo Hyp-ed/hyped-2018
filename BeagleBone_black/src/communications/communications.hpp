@@ -71,7 +71,6 @@ class Communications
   struct sockaddr_in serv_addr_;
   struct hostent *server_;
   char buffer_[256];
-  char track_buffer_[255];
   Logger& log_;
 };
 
