@@ -30,6 +30,7 @@ int main()
 {
   hyped::utils::Logger log(true, 1);
   HypedMachine hypedMachine(log);
+  hypedMachine.handleEvent(kSystemsChecked);
   hypedMachine.handleEvent(kOnStart);
   hypedMachine.handleEvent(kMaxDistanceReached);
   hypedMachine.handleEvent(kEndOfRunReached);

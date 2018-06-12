@@ -25,7 +25,7 @@
 #include <vector>
 
 #include "data/data.hpp"
-#include "sensors/imu_interface.hpp"
+#include "sensors/interface.hpp"
 
 namespace hyped {
 
@@ -53,6 +53,7 @@ class FakeImu : public ImuInterface {
   explicit FakeImu(NavigationVector acc_val, NavigationType acc_noise,
                    NavigationVector gyr_val, NavigationType gyr_noise);
 
+  bool isOnline() override { return true; }
   /*
    * @brief     A function that gets the imu data
    */
