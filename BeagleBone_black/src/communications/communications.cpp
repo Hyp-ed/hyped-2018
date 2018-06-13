@@ -74,7 +74,7 @@ int Communications::sendData(std::string message)
   int n = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
 
   if (n < 0) {
-    log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
   }
 
   return atoi(buffer_);
@@ -86,20 +86,23 @@ int Communications::receiveRunLength()
   int run_length = atoi(buffer_);
   log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
 
+  if (n < 0) {
+      log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    }
+
   return run_length;
 }
 
 int Communications::receiveMessage()
 {
   int n = read(sockfd_, buffer_, 255);
-  int command;
 
   if (n < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    command = 1;
+    return 1;
   }
 
-  command = atoi(buffer_);
+  int command = atoi(buffer_);
 
   switch (command) {
     case 0:
