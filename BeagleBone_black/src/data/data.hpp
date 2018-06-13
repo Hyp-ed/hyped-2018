@@ -39,7 +39,6 @@ namespace data {
 // -------------------------------------------------------------------------------------------------
 // Global Module States
 // -------------------------------------------------------------------------------------------------
-
 enum class ModuleStatus {
   kStart,   // Initial module state
   kInit,  // SM transistions to Calibrating if all modules have Init status.
@@ -47,6 +46,9 @@ enum class ModuleStatus {
   kCriticalFailure  // SM transitions to EmergencyBraking/FailureStopped
 };
 
+struct Module {
+  ModuleStatus module_status;
+};
 
 
 // -------------------------------------------------------------------------------------------------
@@ -78,8 +80,7 @@ struct StateMachine {
 // Navigation
 // -------------------------------------------------------------------------------------------------
 typedef float NavigationType;
-struct Navigation {
-  ModuleStatus    module_status;
+struct Navigation : Module {
   NavigationType  distance;
   NavigationType  velocity;
   NavigationType  acceleration;
@@ -107,8 +108,7 @@ struct StripeCounter : public Sensor {
   DataPoint<uint32_t> count;
 };
 
-struct Sensors {
-  ModuleStatus module_status;
+struct Sensors : Module {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 8;
 
@@ -124,8 +124,7 @@ struct Battery {
   int8_t    temperature;
 };
 
-struct Batteries {
-  ModuleStatus module_status;
+struct Batteries : Module {
   static constexpr int kNumLPBatteries = 2;
   static constexpr int kNumHPBatteries = 2;
 
@@ -146,8 +145,7 @@ enum MotorState {
   kMotorStopped
 };
 
-struct Motors {
-  // ModuleStatus module_status;  // @TODO (Sean) Uncomment and integrate
+struct Motors /*: Module*/ {  // @TODO (Sean) Uncomment and integrate
   MotorState current_motor_state;
   int32_t motor_velocity_1;
   int32_t motor_velocity_2;
