@@ -46,10 +46,7 @@ void Main::run()
   while (1) {
     // State updates
     State current_state = data_.getStateMachineData().current_state;
-    if (current_state != State::kIdle
-        && current_state != State::kReady
-        && nav_.getState() != NavigationState::kOperational
-        && nav_.getState() != NavigationState::kCriticalFailure)
+    if (current_state == State::kAccelerating && nav_.getState() == NavigationState::kReady)
       nav_.finishCalibration();
 
     *readings = data_.getSensorsData();
