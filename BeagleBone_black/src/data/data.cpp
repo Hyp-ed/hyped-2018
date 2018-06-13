@@ -91,7 +91,7 @@ void Data::setStripeCounterData(const StripeCounter& stripe_counter)
   sensors_.stripe_counter = stripe_counter;
 }
 
-Batteries Data::getBatteryData()
+Batteries Data::getBatteriesData()
 {
   ScopedLock L(&lock_batteries_);
   return batteries_;

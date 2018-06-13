@@ -154,7 +154,7 @@ enum MotorState {
 };
 
 struct Motors {
-  //ModuleStatus module_status;        @TODO(Sean):move to module status
+  // ModuleStatus module_status;  // @TODO (Sean) Uncomment and integrate
   MotorState current_motor_state;
   int32_t motor_velocity_1;
   int32_t motor_velocity_2;
@@ -172,7 +172,7 @@ struct Motors {
 
 struct Communications {
   ModuleStatus module_status;
-  bool stopCommand; // deprecate
+  bool stopCommand;   // deprecate
   bool launchCommand;
   bool resetCommand;
   float run_length;
@@ -235,7 +235,7 @@ class Data {
   /**
    * @brief      Retrieves data from the batteries.
    */
-  Batteries getBatteryData();
+  Batteries getBatteriesData();
 
   /**
    * @brief      Should be called to update battery data

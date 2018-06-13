@@ -126,7 +126,7 @@ void Main::run()
     mtr_ = data_.getMotorData();
     sns_ = data_.getSensorsData();
     stm_ = data_.getStateMachineData();
-    bat_ = data_.getBatteryData();
+    bat_ = data_.getBatteriesData();
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
