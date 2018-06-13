@@ -135,12 +135,13 @@ void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t
 
 void Navigation::calibrationUpdate(ImuArray imus)
 {
-  for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
-    g_ += imus[i].acc.value;
-    gyro_offsets_[i] += imus[i].gyr.value;
-  }
-  ++num_gravity_samples_;
+  // Online mean algorithm
   ++num_gyro_samples_;
+  for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
+    ++num_gravity_samples_;
+    g_ = g_ + (imus[i].acc.value - g_)/num_gravity_samples_;
+    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr.value - gyro_offsets_[i])/num_gyro_samples_;
+  }
 
   if (num_gravity_samples_ > kMinNumCalibrationSamples
       && num_gyro_samples_ > kMinNumCalibrationSamples)
