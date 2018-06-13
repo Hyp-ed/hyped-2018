@@ -17,7 +17,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include "sensors/mpu9250.hpp"
+#include "mpu9250.hpp"
 
 #include <chrono>
 #include <cstdint>
@@ -28,59 +28,59 @@
 #include "utils/timer.hpp"
 
 // Accelerometer addresses
-constexpr uint8_t kAccelXoutH           = 0x3B;
+constexpr uint8_t kAccelXoutH               = 0x3B;
 
-constexpr uint8_t kMpuXaOffsetH        = 0x77;
-constexpr uint8_t kMpuXaOffsetL        = 0x78;
-constexpr uint8_t kMpuYaOffsetH        = 0x7A;
-constexpr uint8_t kMpuYaOffsetL        = 0x7B;
-constexpr uint8_t kMpuZaOffsetH        = 0x7D;
-constexpr uint8_t kMpuZaOffsetL        = 0x7E;
+constexpr uint8_t kMpuXaOffsetH             = 0x77;
+constexpr uint8_t kMpuXaOffsetL             = 0x78;
+constexpr uint8_t kMpuYaOffsetH             = 0x7A;
+constexpr uint8_t kMpuYaOffsetL             = 0x7B;
+constexpr uint8_t kMpuZaOffsetH             = 0x7D;
+constexpr uint8_t kMpuZaOffsetL             = 0x7E;
 
-constexpr uint8_t kAccelConfig           = 0x1C;
-constexpr uint8_t kAccelConfig2          = 0x1D;
+constexpr uint8_t kAccelConfig              = 0x1C;
+constexpr uint8_t kAccelConfig2             = 0x1D;
 
 // gyroscope addresses
-constexpr uint8_t  kGyroXoutH           = 0x43;
+constexpr uint8_t  kGyroXoutH               = 0x43;
 
-constexpr uint8_t kMpuXgOffsetUsrh     = 0x13;
-constexpr uint8_t kMpuXgOffsetUsrl     = 0x14;
-constexpr uint8_t kMpuYgOffsetUsrh     = 0x15;
-constexpr uint8_t kMpuYgOffsetUsrl     = 0x16;
-constexpr uint8_t kMpuZgOffsetUsrh     = 0x17;
-constexpr uint8_t kMpuZgOffsetUsrl     = 0x18;
+constexpr uint8_t kMpuXgOffsetUsrh          = 0x13;
+constexpr uint8_t kMpuXgOffsetUsrl          = 0x14;
+constexpr uint8_t kMpuYgOffsetUsrh          = 0x15;
+constexpr uint8_t kMpuYgOffsetUsrl          = 0x16;
+constexpr uint8_t kMpuZgOffsetUsrh          = 0x17;
+constexpr uint8_t kMpuZgOffsetUsrl          = 0x18;
 
-constexpr uint8_t  kGyroConfig           = 0x1B;
+constexpr uint8_t  kGyroConfig              = 0x1B;
 
-constexpr uint8_t kWhoAmIMpu9250       = 0x75;
-constexpr uint8_t kWhoAmIResetValue1   = 0x71;
-constexpr uint8_t kWhoAmIResetValue2   = 0x73;
+constexpr uint8_t kWhoAmIMpu9250            = 0x75;
+constexpr uint8_t kWhoAmIResetValue1        = 0x71;
+constexpr uint8_t kWhoAmIResetValue2        = 0x73;
 
 // User Control
-constexpr uint8_t kMpuRegUserCtrl  = 0x6A;
+constexpr uint8_t kMpuRegUserCtrl           = 0x6A;
 
 // I2C Master Control
-constexpr uint8_t kMpuRegI2cMstCtrl  = 0x24;
+constexpr uint8_t kMpuRegI2cMstCtrl         = 0x24;
 
 // Power Management
-constexpr uint8_t kMpuRegPwrMgmt1    = 0x6B;
-constexpr uint8_t kMpuRegPwrMgmt2    = 0x6C;
+constexpr uint8_t kMpuRegPwrMgmt1           = 0x6B;
+constexpr uint8_t kMpuRegPwrMgmt2           = 0x6C;
 
 // Configuration
-constexpr uint8_t kMpuRegConfig         = 0x1A;
+constexpr uint8_t kMpuRegConfig             = 0x1A;
 
 // Sample Rate Divider
-constexpr uint8_t kMpuRegSmplrtDiv     = 0x19;
+constexpr uint8_t kMpuRegSmplrtDiv          = 0x19;
 
 constexpr uint8_t kMpuRegFifoCountH         = 0x72;
 
 // FIFO Enable
-constexpr uint8_t kMpuRegFifoEn       = 0x23;
+constexpr uint8_t kMpuRegFifoEn             = 0x23;
 
 // Interrupt Enable
-constexpr uint8_t kMpuRegIntEnable    = 0x38;
+constexpr uint8_t kMpuRegIntEnable          = 0x38;
 
-constexpr uint8_t kReadFlag              = 0x80;
+constexpr uint8_t kReadFlag                 = 0x80;
 
 // Configuration bits mpu9250
 constexpr uint8_t kBitsFs250Dps             = 0x00;
@@ -121,9 +121,6 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
-  // // wake up device
-  // writeByte(kMpuRegPwrMgmt1, 0x00);  // Clear sleep mode bit (6), enable all sensors
-  // Thread::sleep(100);  // Wait for all registers to reset
 
   calibrateSensors();
 
@@ -315,7 +312,6 @@ bool MPU9250::whoAmI()
      log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
     return false;
   }
-
   return true;
 }
 
@@ -429,12 +425,16 @@ void MPU9250::deSelect()
 
 void MPU9250::getData(Imu* imu)
 {
+  getGyroData();
+  getAcclData();
   auto acc = imu->acc.value;
   auto gyr = imu->gyr.value;
-  acc[0] = 1.0;
-  acc[1] = 0.0;
-  acc[2] = 0.0;
-  gyr = {};
+  acc[0] = accel_data_[0];
+  acc[1] = accel_data_[1];
+  acc[2] = accel_data_[2];
+  gyr[0] = gyro_data_[0];
+  gyr[1] = gyro_data_[1];
+  gyr[2] = gyro_data_[2];
 
   uint32_t time = utils::Timer::getTimeMillis() - (time_start/1000);
   imu->acc.timestamp = time;
