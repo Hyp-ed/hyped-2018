@@ -26,6 +26,7 @@ namespace data {
 
 const char* states[num_states] = {
   "Idle",
+  "Calibrating",
   "Ready",
   "Accelerating",
   "Decelerating",
@@ -34,7 +35,6 @@ const char* states[num_states] = {
   "FailureStopped",
   "Exiting",
   "Finished",
-  "Invalid"
 };
 
 Data& Data::getInstance()

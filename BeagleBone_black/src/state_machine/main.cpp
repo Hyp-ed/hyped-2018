@@ -72,8 +72,6 @@ if(nav_data.velocity <= 0.01)
 {
   hypedMachine.handleEvent(kVelocityZeroReached);
 }
-
-
 }
 
 void Main::checkCommunications()

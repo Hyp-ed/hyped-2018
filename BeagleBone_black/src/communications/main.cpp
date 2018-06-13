@@ -81,15 +81,15 @@ int Main::sendState(State state)
 {
   switch (state) {
     case data::kIdle             : stateCode_ = 0; break;
-    case data::kReady            : stateCode_ = 1; break;
-    case data::kAccelerating     : stateCode_ = 2; break;
-    case data::kDecelerating     : stateCode_ = 3; break;
-    case data::kEmergencyBraking : stateCode_ = 4; break;
-    case data::kRunComplete      : stateCode_ = 5; break;
-    case data::kFailureStopped   : stateCode_ = 6; break;
-    case data::kExiting          : stateCode_ = 7; break;
-    case data::kFinished         : stateCode_ = 8; break;
-    case data::kInvalid          : stateCode_ = 9; break;
+    case data::kCalibrating      : stateCode_ = 1; break;
+    case data::kReady            : stateCode_ = 2; break;
+    case data::kAccelerating     : stateCode_ = 3; break;
+    case data::kDecelerating     : stateCode_ = 4; break;
+    case data::kEmergencyBraking : stateCode_ = 5; break;
+    case data::kRunComplete      : stateCode_ = 6; break;
+    case data::kFailureStopped   : stateCode_ = 7; break;
+    case data::kExiting          : stateCode_ = 8; break;
+    case data::kFinished         : stateCode_ = 9; break;
     default: break;
   }
 

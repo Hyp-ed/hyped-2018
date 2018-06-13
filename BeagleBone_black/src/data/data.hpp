@@ -37,10 +37,24 @@ using utils::math::Vector;
 namespace data {
 
 // -------------------------------------------------------------------------------------------------
-// State Machine
+// Global Module States
+// -------------------------------------------------------------------------------------------------
+
+enum class ModuleStatus {
+  kStart,   // Initial module state
+  kInit,  // SM transistions to Calibrating if all modules have Init status.
+  kReady,  // SM transistions to Ready if Motors and Navigation have the Ready status.
+  kCriticalFailure  // SM transitions to EmergencyBraking/FailureStopped
+};
+
+
+
+// -------------------------------------------------------------------------------------------------
+// State Machine States
 // -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
+  kCalibrating,
   kReady,
   kAccelerating,
   kDecelerating,
@@ -78,6 +92,7 @@ struct Navigation {
   NavigationType  velocity;
   NavigationType  acceleration;
   NavigationType  emergency_braking_distance;
+  ModuleStatus module_status;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -102,6 +117,7 @@ struct StripeCounter : public Sensor {
 };
 
 struct Sensors {
+  ModuleStatus module_status;
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 24;
 
@@ -116,6 +132,7 @@ struct Battery {
 };
 
 struct Batteries {
+  ModuleStatus module_status;
   static constexpr int kNumLPBatteries = 2;
   static constexpr int kNumHPBatteries = 2;
 
@@ -137,6 +154,7 @@ enum MotorState {
 };
 
 struct Motors {
+  //ModuleStatus module_status;        @TODO(Sean):move to module status
   MotorState current_motor_state;
   int32_t motor_velocity_1;
   int32_t motor_velocity_2;
@@ -153,7 +171,8 @@ struct Motors {
 // -------------------------------------------------------------------------------------------------
 
 struct Communications {
-  bool stopCommand;
+  ModuleStatus module_status;
+  bool stopCommand; // deprecate
   bool launchCommand;
   bool resetCommand;
   float run_length;
