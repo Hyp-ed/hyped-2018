@@ -17,7 +17,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-#include "mpu9250.hpp"
+#include "sensors/mpu9250.hpp"
 
 #include <chrono>
 #include <cstdint>
@@ -427,8 +427,8 @@ void MPU9250::getData(Imu* imu)
 {
   getGyroData();
   getAcclData();
-  auto acc = imu->acc.value;
-  auto gyr = imu->gyr.value;
+  auto& acc = imu->acc.value;
+  auto& gyr = imu->gyr.value;
   acc[0] = accel_data_[0];
   acc[1] = accel_data_[1];
   acc[2] = accel_data_[2];
