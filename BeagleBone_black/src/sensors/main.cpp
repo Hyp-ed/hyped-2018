@@ -19,6 +19,10 @@
  */
 
 #include "sensors/main.hpp"
+
+#include "sensors/bms.hpp"
+#include "sensors/mpu9250.hpp"
+#include "sensors/vl6180.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -31,18 +35,33 @@ namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
-      data_(data::Data::getInstance())
+      data_(data::Data::getInstance()),
+      chip_select_ {31, 50, 48, 51}
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    bms_[i] = new BMS(i, &batteries_.low_power_batteries[i], log_);
-    bms_[i]->start();
+    BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
+    bms->start();
+    bms_[i] = bms;
   }
 
   // create Proximities
   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    proxi_[i] = new VL6180(0x29, log_);
-    proxi_[i]->setContinuousRangingMode();
+    VL6180* proxi = new VL6180(0x29, log_);
+    proxi->setContinuousRangingMode();
+    proxi_[i] = proxi;
+  }
+
+  // TODO(anyone): change this to use CAN-based proxies
+  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+    VL6180* proxi = new VL6180(0x29, log_);
+    proxi->setContinuousRangingMode();
+    can_proxi_[i] = proxi;
+  }
+
+  // create IMUs, might consider using fake_imus based on input arguments
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    imu_[i] = new MPU9250(log_, chip_select_[i], true, 0x0);
   }
 }
 
@@ -50,12 +69,25 @@ void Main::run()
 {
   while (1) {
     // keep updating data_ based on values read from sensors
-    for (BMS* bms: bms_) {
-      bms->update();
+
+    // update BMS LP
+    for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+      bms_[i]->getData(&batteries_.low_power_batteries[i]);
     }
 
+    // update front cluster of proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      sensors_.proxi[i].val = proxi_[i]->getDistance();
+      proxi_[i]->getData(&sensors_.proxi_front[i]);
+    }
+
+    // update back cluster of proximities
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      can_proxi_[i]->getData(&sensors_.proxi_back[i]);
+    }
+
+    // update imus
+    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      imu_[i]->getData(&sensors_.imu[i]);
     }
 
     data_.setSensorsData(sensors_);

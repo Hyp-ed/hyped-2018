@@ -48,6 +48,7 @@ BMS::BMS(uint8_t id, data::Battery* battery_unit, Logger& log)
       data_({}),
       battery_unit_(battery_unit),
       id_(id),
+      id_base_(bms::kIdBase + (bms::kIdIncrement * id_)),
       running_(false)
 {
   ASSERT(id < data::Batteries::kNumLPBatteries);
@@ -61,7 +62,8 @@ BMS::BMS(uint8_t id, data::Battery* battery_unit, Logger& log)
   existing_ids_.push_back(id);
 
   // tell CAN about yourself
-  can_.registerBMS(this);
+  can_.registerProcessor(this);
+  can_.start();
 
   running_ = true;
 }
@@ -94,6 +96,13 @@ void BMS::run()
     sleep(bms::kPeriod);
   }
   log_.INFO("BMS", "module %u: stopped BMS", id_);
+}
+
+bool BMS::hasId(uint32_t id, bool extended)
+{
+  if (!extended) return false;  // this BMS only understands extended IDs
+
+  return id_base_ <= id && id < id_base_ + bms::kIdSize;
 }
 
 void BMS::processNewData(utils::io::can::Frame& message)
