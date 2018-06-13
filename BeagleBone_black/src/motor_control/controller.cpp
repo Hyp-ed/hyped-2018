@@ -880,9 +880,20 @@ void Controller::quickStop()
 void Controller::sendSdoCan(utils::io::can::Frame& message)
 {
   sdo_frame_recieved_ = false;
-  can_.send(message);
-  while (!sdo_frame_recieved_) {
+  int send_counter = 0;
+  for (send_counter = 0; send_counter < 3; send_counter++) {
+    can_.send(message);
     Thread::sleep(10);
+    if (sdo_frame_recieved_) {
+      break;
+    } else {
+      log_.DBG1("MOTOR", "Controller %d: Sending SDO frame again none recieved", node_id_);
+    }
+  }
+  // No SDO frame recieved controller must be offline/communication error
+  if (!sdo_frame_recieved_) {
+    log_.ERR("MOTOR", "Controller %d: Sent SDO message %d times no response", node_id_, send_counter); //NOLINT
+    critical_failure_ = true;
   }
 }
 
