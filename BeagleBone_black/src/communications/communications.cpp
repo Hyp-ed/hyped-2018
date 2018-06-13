@@ -32,29 +32,29 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
-  struct sockaddr_in serv_addr_;
-  struct hostent *server_;
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
 
   if (sockfd_ < 0) {
     log_.ERR("COMN", "CANNOT OPEN SOCKET.");
   }
 
-  server_ = gethostbyname(ip);
+  server = gethostbyname(ip);
 
-  if (server_ == NULL) {
+  if (server == NULL) {
     log_.ERR("COMN", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
   }
 
-  memset(&serv_addr_, '\0', sizeof(serv_addr_));
-  serv_addr_.sin_family = AF_INET;   // server byte order
-  // memcpy(server_->h_addr, &serv_addr_.sin_addr.s_addr, server_->h_length);
-  serv_addr_.sin_port = htons(portNo);
+  memset(&serv_addr, '\0', sizeof(serv_addr));
+  serv_addr.sin_family = AF_INET;   // server byte order
+  // memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
+  serv_addr.sin_port = htons(portNo);
 
-  if (inet_pton(AF_INET, ip, &serv_addr_.sin_addr) <= 0) {
+  if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0) {
     log_.ERR("COMN", "Invalid address.\n");
   }
 
-  if (connect(sockfd_, (struct sockaddr *) &serv_addr_, sizeof(serv_addr_)) < 0) {
+  if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
   }
 
@@ -69,12 +69,11 @@ Communications::~Communications()
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
-  int n_;
   memset(buffer_, '\0', 256);
   const char *data = message.c_str();
-  n_ = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
+  int n = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
 
-  if (n_ < 0) {
+  if (n < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
   }
 
@@ -83,27 +82,26 @@ int Communications::sendData(std::string message)
 
 int Communications::receiveRunLength()
 {
-  int run_length_;
-  run_length_ = atoi(buffer_);
-  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length_));
+  int n = read(sockfd_, buffer_, 255);
+  int run_length = atoi(buffer_);
+  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
 
-  return run_length_;
+  return run_length;
 }
 
 int Communications::receiveMessage()
 {
-  int n_;
-  n_ = read(sockfd_, buffer_, 255);
-  int command_;
+  int n = read(sockfd_, buffer_, 255);
+  int command;
 
-  if (n_ < 0) {
+  if (n < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    command_ = 1;
+    command = 1;
   }
 
-  command_ = atoi(buffer_);
+  command = atoi(buffer_);
 
-  switch (command_) {
+  switch (command) {
     case 0:
       log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
       break;
@@ -121,6 +119,6 @@ int Communications::receiveMessage()
       break;
   }
 
-  return command_;
+  return command;
 }
 }}  // namespace hyped::communcations
