@@ -34,23 +34,23 @@ int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
   Logger log(true, 1);
-  MPU9250 mpu9250 = MPU9250(log, 0, false, 0x68);
+  MPU9250 mpu9250 = MPU9250(log, 60, 0x08, 0x00);
 
   log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
 
-  for (int i=0; i< 50; i++) {
+  for (int i=0; i< 100; i++) {
     mpu9250.getAcclData();
-    log.DBG("TEST-mpu9250", "accelerometer readings x: %d", mpu9250.accel_data_[0]);
-    log.DBG("TEST-mpu9250", "accelerometer readings y: %d", mpu9250.accel_data_[1]);
-    log.DBG("TEST-mpu9250", "accelerometer readings z: %d", mpu9250.accel_data_[2]);
+    log.DBG("TEST-mpu9250", "accelerometer readings x: %f", mpu9250.accel_data_[0]);
+    log.DBG("TEST-mpu9250", "accelerometer readings y: %f", mpu9250.accel_data_[1]);
+    log.DBG("TEST-mpu9250", "accelerometer readings z: %f", mpu9250.accel_data_[2]);
     Thread::sleep(50);
   }
 
   for (int i=0; i< 50; i++) {
     mpu9250.getGyroData();
-    log.DBG("TEST-mpu9250", "gyroscope readings x: %d", mpu9250.gyro_data_[0]);
-    log.DBG("TEST-mpu9250", "gyroscope readings y: %d", mpu9250.gyro_data_[1]);
-    log.DBG("TEST-mpu9250", "gyroscope readings z: %d", mpu9250.gyro_data_[2]);
+    log.DBG("TEST-mpu9250", "gyroscope readings x: %f", mpu9250.gyro_data_[0]);
+    log.DBG("TEST-mpu9250", "gyroscope readings y: %f", mpu9250.gyro_data_[1]);
+    log.DBG("TEST-mpu9250", "gyroscope readings z: %f", mpu9250.gyro_data_[2]);
     Thread::sleep(50);
   }
 

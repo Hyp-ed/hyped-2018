@@ -35,28 +35,26 @@ namespace hyped {
 using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
-using hyped::utils::io::I2C;
 
 namespace sensors {
 
 class MPU9250 : public ImuInterface {
  public:
-  MPU9250(Logger& log, uint32_t pin, bool isSpi, uint8_t i2c_addr);
+  MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale);
   ~MPU9250();
-
+  /*
+   *  @brief Returns if the sensor is online
+   *
+   *  @return true if the sensor is online
+   */
   bool isOnline() override {
     return whoAmI();
   }
-
+  /*
+   *  @brief Get the IMU data and update the pointer
+   */
   void getData(Imu* imu) override;
-  /*
-   *  @brief Sets the range for the gyroscope
-   */
-  void setGyroScale(int scale);
-  /*
-   *  @brief Sets the range for the accelerometer
-   */
-  void setAcclScale(int scale);
+  // Below methods and variables are used for demo_file
   /*
    *  @brief Returns the most recent Accelerometer readings
    *
@@ -69,11 +67,18 @@ class MPU9250 : public ImuInterface {
    *  @return 3Dvector Returns gyroscope readings
    */
   void getGyroData();
-  // TODO(anyone) Will be moved but is for testing
-  int accel_data_[3];
-  int gyro_data_[3];
+  float accel_data_[3];
+  float gyro_data_[3];
 
  private:
+  /*
+   *  @brief Sets the range for the gyroscope
+   */
+  void setGyroScale(int scale);
+  /*
+   *  @brief Sets the range for the accelerometer
+   */
+  void setAcclScale(int scale);
   static const uint64_t time_start;
   void init();
   void select();
@@ -85,11 +90,9 @@ class MPU9250 : public ImuInterface {
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
   SPI& spi_ = SPI::getInstance();
   Logger& log_;
-  bool isSpi_;
   GPIO gpio_;
-  uint8_t i2c_addr_;
-  I2C& i2c_ = I2C::getInstance();
-
+  uint8_t acc_scale_;
+  uint8_t gyro_scale_;
   double acc_divider_;
   int16_t acc_bias_[3];
   double gyro_divider_;
