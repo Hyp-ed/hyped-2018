@@ -118,8 +118,14 @@ int Communications::receiveMessage()
       log_.INFO("COMN", "Received 3 (RESET)");  // RESET
       break;
     case 4:
-      log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // RESET
+      log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
       break;
+    case 5:
+      log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO
+      break;
+    case 6:
+       log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
+       break;
   }
 
   return command;
