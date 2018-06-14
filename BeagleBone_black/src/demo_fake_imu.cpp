@@ -18,7 +18,7 @@
 
 #include "sensors/fake_imu.hpp"
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 
 using hyped::data::Imu;
