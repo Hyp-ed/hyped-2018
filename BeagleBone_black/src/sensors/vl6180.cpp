@@ -154,6 +154,21 @@ uint8_t VL6180::getDistance()
   }
 }
 
+bool VL6180::isOnline()
+{
+  uint8_t data;
+  uint8_t status;
+
+  readByte(kResultRangeStatus, &data);
+  status = data >> 4;
+
+  if (status == 0) {
+    return true;
+  } else if (status != 0) {
+    checkStatus();
+  }
+  return false;
+}
 
 void VL6180::setContinuousRangingMode()
 {
