@@ -88,7 +88,7 @@ void Main::checkFailure()
 {
   if (comms_data.module_status == data::ModuleStatus::kCriticalFailure
       || nav_data.module_status == data::ModuleStatus::kCriticalFailure
-      /*|| motor_data.module_status == data::ModuleStatus::kCriticalFailure*/
+      || motor_data.module_status == data::ModuleStatus::kCriticalFailure
       || sensors_data.module_status == data::ModuleStatus::kCriticalFailure
       || batteries_data.module_status == data::ModuleStatus::kCriticalFailure) {
     hypedMachine.handleEvent(kCriticalFailure);  //  Transitions to FailureStopped/EmergencyBraking
@@ -99,7 +99,7 @@ void Main::checkFailure()
 void Main::checkReady()
 {
   if (nav_data.module_status == data::ModuleStatus::kReady
-  /*&&  motor_data.module_status == data::ModuleStatus::kReady*/) {
+      &&  motor_data.module_status == data::ModuleStatus::kReady) {
     hypedMachine.handleEvent(kSystemsChecked);  // Transitions to Ready
   }
 }
@@ -108,7 +108,7 @@ void Main::checkInit()
 {
   if (comms_data.module_status == data::ModuleStatus::kInit
       && nav_data.module_status == data::ModuleStatus::kInit
-      /*&& motor_data.module_status == data::ModuleStatus::kInit*/
+      && motor_data.module_status == data::ModuleStatus::kInit
       && sensors_data.module_status == data::ModuleStatus::kInit
       && batteries_data.module_status == data::ModuleStatus::kInit) {
     hypedMachine.handleEvent(kInitialised);  // Transitions to Calibrating
