@@ -79,8 +79,8 @@ class FakeImu : public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
-  const uint64_t kAccTimeInterval = 250;
-  const uint64_t kGyrTimeInterval = 125;
+  const int64_t kAccTimeInterval = 250;
+  const int64_t kGyrTimeInterval = 125;
 
   /*
    * @brief     A function that initializes the common variables
@@ -127,7 +127,7 @@ class FakeImu : public ImuInterface {
   std::vector<DataPoint<NavigationVector>> acc_val_read;
   std::vector<DataPoint<NavigationVector>> gyr_val_read;
 
-  unsigned acc_count, gyr_count;
+  int64_t acc_count, gyr_count;
   high_resolution_clock::time_point imu_ref_time;
 };
 

@@ -65,12 +65,12 @@ void FakeImu::getData(Imu* imu)
 {
   if (read_file == true) {
     if (accCheckTime()) {
-      acc_count = std::min(acc_count, unsigned(acc_val_read.size()));
+      acc_count = std::min(acc_count, (int64_t) acc_val_read.size());
       prev_acc = acc_val_read[acc_count-1];
     }
 
     if (gyrCheckTime()) {
-      gyr_count = std::min(gyr_count, unsigned(gyr_val_read.size()));
+      gyr_count = std::min(gyr_count, (int64_t) gyr_val_read.size());
       prev_gyr = gyr_val_read[gyr_count-1];
     }
   } else {
@@ -165,7 +165,7 @@ bool FakeImu::accCheckTime()
   high_resolution_clock::time_point now = high_resolution_clock::now();
   microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
 
-  if (unsigned(time_span.count()) < kAccTimeInterval*acc_count) {
+  if (time_span.count() < kAccTimeInterval*acc_count) {
     return false;
   }
 
@@ -178,7 +178,7 @@ bool FakeImu::gyrCheckTime()
   high_resolution_clock::time_point now = high_resolution_clock::now();
   microseconds time_span = duration_cast<microseconds>(now - imu_ref_time);
 
-  if (unsigned(time_span.count()) < kGyrTimeInterval*gyr_count) {
+  if (time_span.count() < kGyrTimeInterval*gyr_count) {
     return false;
   }
 
