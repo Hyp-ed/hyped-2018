@@ -136,7 +136,7 @@ struct Batteries : public Module {
 // Motor data
 // -------------------------------------------------------------------------------------------------
 
-struct Motors : public Module {  // @TODO (Sean) Uncomment and integrate
+struct Motors : public Module {
   int32_t velocity_1;
   int32_t velocity_2;
   int32_t velocity_3;
