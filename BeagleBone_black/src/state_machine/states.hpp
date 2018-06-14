@@ -55,6 +55,12 @@ class Idle : public State {
   virtual void entry() override;
 };
 
+class Calibrating : public State {
+ public:
+  virtual void react(HypedMachine &machine, Event event) override;
+  virtual void entry() override;
+};
+
 class Ready : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
