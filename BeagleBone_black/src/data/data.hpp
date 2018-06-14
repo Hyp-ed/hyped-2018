@@ -80,7 +80,7 @@ struct StateMachine {
 // Navigation
 // -------------------------------------------------------------------------------------------------
 typedef float NavigationType;
-struct Navigation : Module {
+struct Navigation : public Module {
   NavigationType  distance;
   NavigationType  velocity;
   NavigationType  acceleration;
@@ -108,7 +108,7 @@ struct StripeCounter : public Sensor {
   DataPoint<uint32_t> count;
 };
 
-struct Sensors : Module {
+struct Sensors : public Module {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 8;
 
@@ -124,7 +124,7 @@ struct Battery {
   int8_t    temperature;
 };
 
-struct Batteries : Module {
+struct Batteries : public Module {
   static constexpr int kNumLPBatteries = 2;
   static constexpr int kNumHPBatteries = 2;
 
@@ -136,33 +136,22 @@ struct Batteries : Module {
 // Motor data
 // -------------------------------------------------------------------------------------------------
 
-enum MotorState {
-  kCriticalFailure,
-  kPreOperational,
-  kMotorAccelerating,
-  kMotorDecelerating,
-  kMotorStopping,
-  kMotorStopped
-};
-
-struct Motors /*: Module*/ {  // @TODO (Sean) Uncomment and integrate
-  MotorState current_motor_state;
-  int32_t motor_velocity_1;
-  int32_t motor_velocity_2;
-  int32_t motor_velocity_3;
-  int32_t motor_velocity_4;
-  int16_t motor_torque_1;
-  int16_t motor_torque_2;
-  int16_t motor_torque_3;
-  int16_t motor_torque_4;
+struct Motors : public Module {  // @TODO (Sean) Uncomment and integrate
+  int32_t velocity_1;
+  int32_t velocity_2;
+  int32_t velocity_3;
+  int32_t velocity_4;
+  int16_t torque_1;
+  int16_t torque_2;
+  int16_t torque_3;
+  int16_t torque_4;
 };
 
 // -------------------------------------------------------------------------------------------------
 // Communications data
 // -------------------------------------------------------------------------------------------------
 
-struct Communications {
-  ModuleStatus module_status;
+struct Communications : public Module {
   bool stopCommand;   // deprecate
   bool launchCommand;
   bool resetCommand;

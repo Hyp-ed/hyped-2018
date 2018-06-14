@@ -131,10 +131,10 @@ void Main::run()
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
     sendStripeCount(sns_.stripe_counter.count.value);
-    sendRpmFl(mtr_.motor_velocity_1);
-    sendRpmFr(mtr_.motor_velocity_2);
-    sendRpmBl(mtr_.motor_velocity_3);
-    sendRpmBr(mtr_.motor_velocity_4);
+    sendRpmFl(mtr_.velocity_1);
+    sendRpmFr(mtr_.velocity_2);
+    sendRpmBl(mtr_.velocity_3);
+    sendRpmBr(mtr_.velocity_4);
     sendState(stm_.current_state);
     sendHpVoltage(bat_.high_power_batteries.at(0));
     sendHpTemperature(bat_.high_power_batteries.at(0));
