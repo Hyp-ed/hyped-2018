@@ -156,6 +156,7 @@ struct Communications : public Module {
   bool launchCommand;
   bool resetCommand;
   float run_length;
+  bool servicePropulsionGo;
 };
 
 // -------------------------------------------------------------------------------------------------

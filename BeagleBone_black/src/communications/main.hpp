@@ -48,10 +48,14 @@ class Main : public Thread {
   int sendRpmBl(float rpmBl);                   // CMD07
   int sendRpmBr(float rpmBr);                   // CMD08
   int sendState(State state);                   // CMD09
-  int sendHpVoltage(Battery hpBattery);        // CMD10
-  int sendHpTemperature(Battery hpBattery);    // CMD11
+  int sendHpVoltage(Battery hpBattery);         // CMD10
+  int sendHpTemperature(Battery hpBattery);     // CMD11
   int sendHpVoltage1(Battery hpBattery1);       // CMD12
   int sendHpTemperature1(Battery hpBattery1);   // CMD13
+  int sendTorqueFl(float torquefl);             // CMD14
+  int sendTorqueFr(float torquefr);             // CMD15
+  int sendTorqueBl(float torquebl);             // CMD16
+  int sendTorqueBr(float torquebr);             // CMD17
 
  private:
   int stateCode_;
