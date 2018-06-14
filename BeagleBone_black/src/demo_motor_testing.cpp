@@ -1,8 +1,7 @@
-
 /*
- * Authors: Yash Mittal and Ragnor Comerford
+ * Author: Sean Mullan and Jack Horsburgh
  * Organisation: HYPED
- * Date: 11. February 2018
+ * Date: 28/03/18
  * Description:
  *
  *    Copyright 2018 HYPED
@@ -19,20 +18,31 @@
  *    limitations under the License.
  */
 
-#include "state_machine/event.hpp"
-#include "state_machine/hyped-machine.hpp"
-#include "state_machine/states.hpp"
+#include "motor_control/controller.hpp"
+
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 
-using namespace hyped::state_machine;
+using hyped::utils::Logger;
+using hyped::utils::System;
+using hyped::utils::concurrent::Thread;
 
-int main()
+using namespace hyped;
+
+using hyped::motor_control::Controller;
+
+int main(int argc, char* argv[])
 {
-  hyped::utils::Logger log(true, 1);
-  HypedMachine hypedMachine(log);
-  hypedMachine.handleEvent(kSystemsChecked);
-  hypedMachine.handleEvent(kOnStart);
-  hypedMachine.handleEvent(kMaxDistanceReached);
-  hypedMachine.handleEvent(kOnExit);
-  return 0;
+  System::parseArgs(argc, argv);
+  System& sys = System::getSystem();
+  Logger log_motor(sys.verbose_motor, sys.debug_motor);
+
+  Logger log(true, 1);
+  Controller* controller = new Controller(log,1);
+
+  controller->registerController();
+  controller->configure();
+  Thread::sleep(2000);
+  controller->enterOperational();
+  Thread::sleep(10000);
 }

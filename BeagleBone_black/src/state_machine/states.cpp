@@ -40,8 +40,24 @@ void Idle::entry()
 
 void Idle::react(HypedMachine &machine, Event event)
 {
+  if (event == kInitialised) {
+    machine.transition(new(alloc_) Calibrating());
+  } else if (event == kCriticalFailure) {
+    machine.transition(new(alloc_) FailureStopped());
+  }
+}
+
+void Calibrating::entry()
+{
+  state_ = state::kCalibrating;
+}
+
+void Calibrating::react(HypedMachine &machine, Event event)
+{
   if (event == kSystemsChecked) {
     machine.transition(new(alloc_) Ready());
+  } else if (event == kCriticalFailure) {
+    machine.transition(new(alloc_) FailureStopped());
   }
 }
 
@@ -80,7 +96,7 @@ void Decelerating::entry()
 
 void Decelerating::react(HypedMachine &machine, Event event)
 {
-  if (event == kEndOfRunReached) {
+  if (event == kVelocityZeroReached) {
     machine.transition(new(alloc_) RunComplete());
   } else if (event == kCriticalFailure) {
     machine.transition(new(alloc_) EmergencyBraking());
@@ -129,7 +145,7 @@ void Exiting::entry()
 
 void Exiting::react(HypedMachine &machine, Event event)
 {
-  if (event == kEndOfTubeReached) {
+  if (event == kFinish) {
     machine.transition(new(alloc_) Finished());
   } else if (event == kCriticalFailure) {
     machine.transition(new(alloc_) EmergencyBraking());
@@ -144,5 +160,6 @@ void Finished::entry()
 void Finished::react(HypedMachine &machine, Event event)
 {
 }
+
 
 }}   // namespace hyped::state_machine

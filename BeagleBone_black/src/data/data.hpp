@@ -37,10 +37,26 @@ using utils::math::Vector;
 namespace data {
 
 // -------------------------------------------------------------------------------------------------
-// State Machine
+// Global Module States
+// -------------------------------------------------------------------------------------------------
+enum class ModuleStatus {
+  kStart,   // Initial module state
+  kInit,  // SM transistions to Calibrating if all modules have Init status.
+  kReady,  // SM transistions to Ready if Motors and Navigation have the Ready status.
+  kCriticalFailure  // SM transitions to EmergencyBraking/FailureStopped
+};
+
+struct Module {
+  ModuleStatus module_status;
+};
+
+
+// -------------------------------------------------------------------------------------------------
+// State Machine States
 // -------------------------------------------------------------------------------------------------
 enum State {
   kIdle,
+  kCalibrating,
   kReady,
   kAccelerating,
   kDecelerating,
@@ -63,17 +79,8 @@ struct StateMachine {
 // -------------------------------------------------------------------------------------------------
 // Navigation
 // -------------------------------------------------------------------------------------------------
-enum class NavigationState {
-  kCalibrating,      ///< Navigation module is calibrating. Pod must not be moved in this state.
-  kCriticalFailure,  ///< Navigation module has problems and cannot provide reliable output
-  kOperational,      ///< Navigation module is working fine and providing reliable output
-  kReady             ///< Navigation module is still calibrating but ready to transition to
-                     ///  `kOperational` state
-};
-
 typedef float NavigationType;
-struct Navigation {
-  NavigationState state;
+struct Navigation : public Module {
   NavigationType  distance;
   NavigationType  velocity;
   NavigationType  acceleration;
@@ -101,7 +108,7 @@ struct StripeCounter : public Sensor {
   DataPoint<uint32_t> count;
 };
 
-struct Sensors {
+struct Sensors : public Module {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 8;
 
@@ -117,7 +124,7 @@ struct Battery {
   int8_t    temperature;
 };
 
-struct Batteries {
+struct Batteries : public Module {
   static constexpr int kNumLPBatteries = 2;
   static constexpr int kNumHPBatteries = 2;
 
@@ -129,36 +136,27 @@ struct Batteries {
 // Motor data
 // -------------------------------------------------------------------------------------------------
 
-enum MotorState {
-  kCriticalFailure,
-  kPreOperational,
-  kMotorAccelerating,
-  kMotorDecelerating,
-  kMotorStopping,
-  kMotorStopped
-};
-
-struct Motors {
-  MotorState current_motor_state;
-  int32_t motor_velocity_1;
-  int32_t motor_velocity_2;
-  int32_t motor_velocity_3;
-  int32_t motor_velocity_4;
-  int16_t motor_torque_1;
-  int16_t motor_torque_2;
-  int16_t motor_torque_3;
-  int16_t motor_torque_4;
+struct Motors : public Module {
+  int32_t velocity_1;
+  int32_t velocity_2;
+  int32_t velocity_3;
+  int32_t velocity_4;
+  int16_t torque_1;
+  int16_t torque_2;
+  int16_t torque_3;
+  int16_t torque_4;
 };
 
 // -------------------------------------------------------------------------------------------------
 // Communications data
 // -------------------------------------------------------------------------------------------------
 
-struct Communications {
-  bool stopCommand;
+struct Communications : public Module {
+  bool stopCommand;   // deprecate
   bool launchCommand;
   bool resetCommand;
   float run_length;
+  bool servicePropulsionGo;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -218,7 +216,7 @@ class Data {
   /**
    * @brief      Retrieves data from the batteries.
    */
-  Batteries getBatteryData();
+  Batteries getBatteriesData();
 
   /**
    * @brief      Should be called to update battery data
