@@ -48,3 +48,4 @@ MAINS := \
   demo_statistics\
   demo_can \
   demo_mpu9250 \
+  demo_fake_imu \
