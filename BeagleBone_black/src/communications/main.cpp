@@ -116,6 +116,26 @@ int Main::sendHpTemperature1(Battery hpBattery1)
   return baseCommunicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
 }
 
+int Main::sendTorqueFr(float torquefr)
+{
+  return baseCommunicator_->sendData("CMD14" + std::to_string(torquefr) + "\n");
+}
+
+int Main::sendTorqueFl(float torquefl)
+{
+  return baseCommunicator_->sendData("CMD15" + std::to_string(torquefl) + "\n");
+}
+
+int Main::sendTorqueBr(float torquebr)
+{
+  return baseCommunicator_->sendData("CMD16" + std::to_string(torquebr) + "\n");
+}
+
+int Main::sendTorqueBl(float torquebl)
+{
+  return baseCommunicator_->sendData("CMD17" + std::to_string(torquebl) + "\n");
+}
+
 void Main::run()
 {
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
@@ -140,6 +160,10 @@ void Main::run()
     sendHpTemperature(bat_.high_power_batteries.at(0));
     sendHpVoltage1(bat_.high_power_batteries.at(1));
     sendHpTemperature1(bat_.high_power_batteries.at(1));
+    sendTorqueFr(mtr_.motor_torque_1);
+    sendTorqueFl(mtr_.motor_torque_2);
+    sendTorqueBr(mtr_.motor_torque_3);
+    sendTorqueBl(mtr_.motor_torque_4);
   }
 
   receiverThread->join();
