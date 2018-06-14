@@ -44,6 +44,12 @@ using utils::math::Vector;
 namespace navigation {
 
 constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
+constexpr std::array<NavigationType, 41> kStripeLocations = {
+      30.48,   60.96,   91.44,  121.92,  152.4,  182.88,  213.36,  243.84,  274.32,  304.8,
+     335.28,  365.76,  396.24,  426.72,  457.2,  487.68,  518.16,  548.64,  579.12,  609.6,
+     640.08,  670.56,  701.04,  731.52,  762.0,  792.48,  822.96,  853.44,  883.92,  914.4,
+     944.88,  975.36, 1005.84, 1036.32, 1066.8, 1097.28, 1127.76, 1158.24, 1188.72, 1219.2,
+    1249.68};
 
 class Navigation {
  public:
@@ -80,6 +86,14 @@ class Navigation {
   NavigationType getEmergencyBrakingDistance();
 
  private:
+  /**
+   * @brief Calculates distance to the last stripe, the next stripe and the one after that.
+   *
+   * @return std::array<NavigationType, 3> Index 0 contains distance to last stripe (should be
+   *                                       negative); indices 1 and 2 contain distances to the
+   *                                       next 2 stripes (both should be positive).
+   */
+  std::array<NavigationType, 3> getNearestStripeDists();
   /**
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
@@ -123,6 +137,7 @@ class Navigation {
   NavigationVector acceleration_;
   NavigationVector velocity_;
   NavigationVector displacement_;
+  uint16_t stripe_count_;
 
   // Internal data that is not published
   DataPoint<NavigationVector> prev_angular_velocity_;  // To calculate how much has the pod rotated

@@ -75,6 +75,14 @@ void Navigation::update(ImuArray imus)
   this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
 }
 
+std::array<NavigationType, 3> Navigation::getNearestStripeDists()
+{
+  std::array<NavigationType, 3> arr;
+  for (unsigned int i = 0; arr.size(); ++i)
+    arr[i] = kStripeLocations[stripe_count_ + i] - getDisplacement();
+  return arr;
+}
+
 void Navigation::update(ImuArray imus, ProximityArray proxis)
 {
   update(imus);
