@@ -108,9 +108,8 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
   NavigationVector value, noise;
 
   file.open(acc_file_path);
-  while (file.is_open() && !file.eof()) {
-    file >> timestamp >> value[0] >> value[1] >> value[2]
-         >> noise[0] >> noise[1] >> noise[2];
+  while (file >> timestamp >> value[0] >> value[1] >> value[2]
+              >> noise[0] >> noise[1] >> noise[2]) {
     acc_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
   }
 
@@ -118,9 +117,8 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
     file.close();
 
   file.open(gyr_file_path);
-  while (file.is_open() && !file.eof()) {
-    file >> timestamp >> value[0] >> value[1] >> value[2]
-         >> noise[0] >> noise[1] >> noise[2];
+  while (file >> timestamp >> value[0] >> value[1] >> value[2]
+              >> noise[0] >> noise[1] >> noise[2]) {
     gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
   }
 
