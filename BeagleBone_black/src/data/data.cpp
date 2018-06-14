@@ -26,6 +26,7 @@ namespace data {
 
 const char* states[num_states] = {
   "Idle",
+  "Calibrating",
   "Ready",
   "Accelerating",
   "Decelerating",
@@ -34,7 +35,6 @@ const char* states[num_states] = {
   "FailureStopped",
   "Exiting",
   "Finished",
-  "Invalid"
 };
 
 Data& Data::getInstance()
@@ -91,7 +91,7 @@ void Data::setStripeCounterData(const StripeCounter& stripe_counter)
   sensors_.stripe_counter = stripe_counter;
 }
 
-Batteries Data::getBatteryData()
+Batteries Data::getBatteriesData()
 {
   ScopedLock L(&lock_batteries_);
   return batteries_;
