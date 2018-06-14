@@ -33,9 +33,6 @@ int main()
   hypedMachine.handleEvent(kSystemsChecked);
   hypedMachine.handleEvent(kOnStart);
   hypedMachine.handleEvent(kMaxDistanceReached);
-  hypedMachine.handleEvent(kEndOfRunReached);
   hypedMachine.handleEvent(kOnExit);
-  hypedMachine.handleEvent(kEndOfTubeReached);
-
   return 0;
 }
