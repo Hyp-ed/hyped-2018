@@ -32,6 +32,8 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
+  struct sockaddr_in serv_addr;
+  struct hostent *server;
 
   if (sockfd_ < 0) {
     log_.ERR("COMN", "CANNOT OPEN SOCKET.");
@@ -67,29 +69,45 @@ Communications::~Communications()
 int Communications::sendData(std::string message)
 {
   // Incoming strings should be terminated by "...\n".
-  memset(buffer, '\0', 256);
+  memset(buffer_, '\0', 256);
   const char *data = message.c_str();
-  n_ = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
+  int n = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
 
-  if (n_ < 0) {
-    log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+  if (n < 0) {
+    log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
   }
 
-  return atoi(buffer);
+  return atoi(buffer_);
+}
+
+int Communications::receiveRunLength()
+{
+  int n = read(sockfd_, buffer_, 255);
+  int run_length = atoi(buffer_);
+  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
+
+  if (n < 0) {
+      log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    }
+
+  return run_length;
 }
 
 int Communications::receiveMessage()
 {
-  n_ = read(sockfd_, buffer, 255);
+  int n = read(sockfd_, buffer_, 255);
 
-  if (n_ < 0) {
+  if (n < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    command_ = 1;
+    return 1;
   }
 
-  command_ = atoi(buffer);
+  int command = atoi(buffer_);
 
-  switch (command_) {
+  switch (command) {
+    case 0:
+      log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
+      break;
     case 1:
       log_.INFO("COMN", "Received 1 (STOP)");  // STOP
       break;
@@ -99,8 +117,17 @@ int Communications::receiveMessage()
     case 3:
       log_.INFO("COMN", "Received 3 (RESET)");  // RESET
       break;
+    case 4:
+      log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
+      break;
+    case 5:
+      log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO
+      break;
+    case 6:
+      log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
+      break;
   }
 
-  return command_;
+  return command;
 }
 }}  // namespace hyped::communcations

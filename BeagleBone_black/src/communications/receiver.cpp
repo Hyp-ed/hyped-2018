@@ -46,6 +46,15 @@ void ReceiverThread::run()
       case 3:
         cmn_data.resetCommand = true;
         break;
+      case 4:
+        cmn_data.run_length = static_cast<float>(baseCommunicator_->receiveRunLength())/1000;
+        break;
+      case 5:
+        cmn_data.servicePropulsionGo = true;
+        break;
+      case 6:
+        cmn_data.servicePropulsionGo = false;
+        break;
     }
 
     data_.setCommunicationsData(cmn_data);
