@@ -56,13 +56,13 @@ class CanProxi : public ProxiInterface, public CanProccesor {
   explicit CanProxi(uint8_t id);  // id must be < data::Sensors::kNumProximities
   CanProxi(uint8_t id, Logger& log);
 
+  // from ProxiInterface
   bool isOnline() override;
   void getData(Proximity* proxi) override;
 
-  void processNewData(Frame& message);
-  bool hasId(uint32_t id, bool extended);
-
-
+  // from CanProcessor
+  void processNewData(Frame& message) override;
+  bool hasId(uint32_t id, bool extended) override;
 
  private:
   Logger& log_;
