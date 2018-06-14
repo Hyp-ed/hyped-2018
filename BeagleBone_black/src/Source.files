@@ -13,6 +13,7 @@ SRCS := \
   navigation/navigation.cpp \
   sensors/main.cpp \
   sensors/bms.cpp \
+  sensors/can_proxi.cpp \
   sensors/vl6180.cpp \
   sensors/mpu9250.cpp \
   sensors/fake_imu.cpp \
