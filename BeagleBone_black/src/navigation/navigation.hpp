@@ -35,7 +35,7 @@ using data::DataPoint;
 using data::Imu;
 using data::Proximity;
 using data::Sensors;
-using data::NavigationState;
+using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
 using utils::concurrent::Barrier;
@@ -89,17 +89,24 @@ class Navigation {
    */
   NavigationType getEmergencyBrakingDistance();
   /**
-   * @brief Get the state of the nav module
+   * @brief Get the status of the nav module
    *
-   * @return NavigationState state of the nav module
+   * @return ModuleStatus Status of the nav module
    */
-  NavigationState getState();
+  ModuleStatus getStatus();
   /**
-   * @brief Transition the navigation module from 'ready' to 'operational' state. Hits the
-   *        `post_calibration_barrier` before returning `true` (to indicate to motors that the
-   *        calibration is done).
-   * @return true  Transition to 'operational' state has been successful
-   * @return false Transition to 'operational' state is not possible at the moment
+   * @brief Starts the calibration phase if the module's status is `kInit`.
+   *
+   * @return true  Navigation module is now in the calibration phase
+   * @return false Calibration cannot be started
+   */
+  bool startCalibration();
+  /**
+   * @brief Transition the navigation module to an operational state so that it starts producing
+   *        useful output. Hits the `post_calibration_barrier` before returning `true` (to indicate
+   *        to motors that the calibration is done).
+   * @return true  Transition has been successful
+   * @return false Transition is not possible at the moment
    */
   bool finishCalibration();
 
@@ -147,9 +154,10 @@ class Navigation {
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
+  ModuleStatus status_;
 
   // Calibration variables
-  NavigationState state_;
+  bool is_calibrating_;
   int num_gravity_samples_;
   NavigationVector g_;  // Acceleration due to gravity. Measured during calibration.
   int num_gyro_samples_;
@@ -162,7 +170,7 @@ class Navigation {
 
   // Internal data that is not published
   DataPoint<NavigationVector> prev_angular_velocity_;  // To calculate how much has the pod rotated
-  Quaternion<int16_t> orientation_;  // Pod's orientation is updated with every gyro reading
+  Quaternion<NavigationType> orientation_;  // Pod's orientation is updated with every gyro reading
 
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU

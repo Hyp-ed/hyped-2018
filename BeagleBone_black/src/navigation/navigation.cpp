@@ -24,23 +24,31 @@ namespace navigation {
 
 Navigation::Navigation(Barrier& post_calibration_barrier)
     : post_calibration_barrier_(post_calibration_barrier),
-      state_(NavigationState::kCalibrating),
+      status_(ModuleStatus::kStart),
+      is_calibrating_(false),
       num_gravity_samples_(0),
       g_(0),
       num_gyro_samples_(0),
-      prev_angular_velocity_(0 , NavigationVector())
+      acceleration_(0),  // TODO(Brano): Should this be g or 0?
+      velocity_(0),
+      displacement_(0),
+      prev_angular_velocity_(0 , NavigationVector()),
+      orientation_(1, 0, 0, 0)
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
-      acceleration_filter_[i].configure(NavigationVector(),
-                                        NavigationVector(),
-                                        NavigationVector());
-      gyro_filter_[i].configure(NavigationVector(),
-                                NavigationVector(),
-                                NavigationVector());
+    // TODO(Brano,Uday): Properly initialise filters (with std dev of sensors and stuff)
+    acceleration_filter_[i].configure(NavigationVector(),
+                                      NavigationVector(),
+                                      NavigationVector());
+    gyro_filter_[i].configure(NavigationVector(),
+                              NavigationVector(),
+                              NavigationVector());
   }
 
   for (auto filter: proximity_filter_)
     filter.configure(0, 0, 0);
+
+  status_ = ModuleStatus::kInit;
 }
 
 NavigationType Navigation::getAcceleration()
@@ -64,23 +72,34 @@ NavigationType Navigation::getEmergencyBrakingDistance()
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
-NavigationState Navigation::getState()
+ModuleStatus Navigation::getStatus()
 {
-  return state_;
+  return status_;
+}
+
+bool Navigation::startCalibration()
+{
+  if (is_calibrating_)
+    return true;
+  if (status_ != ModuleStatus::kInit)
+    return false;
+
+  is_calibrating_ = true;
+  return true;
 }
 
 bool Navigation::finishCalibration()
 {
-  if (state_ != NavigationState::kReady)
+  if (!is_calibrating_ || status_ != ModuleStatus::kReady)
     return false;
 
-  // Finalize calibration, update state, hit the barrier
+  // Finalize calibration
   g_ /= num_gravity_samples_;
   for (NavigationVector& v : gyro_offsets_)
     v /= num_gyro_samples_;
 
   // Update state
-  state_ = NavigationState::kOperational;
+  is_calibrating_ = false;
 
   // Hit the barrier to sync with motors
   post_calibration_barrier_.wait();
@@ -91,9 +110,9 @@ bool Navigation::finishCalibration()
 
 void Navigation::update(ImuArray imus)
 {
-  if (state_ == NavigationState::kCalibrating || state_ == NavigationState::kReady) {
+  if (is_calibrating_) {
     calibrationUpdate(imus);
-  } else {
+  } else if (status_ == ModuleStatus::kReady || status_ == ModuleStatus::kCriticalFailure) {
     // TODO(Brano,Adi): Gyro update. (Data format should change first.)
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
@@ -145,7 +164,7 @@ void Navigation::calibrationUpdate(ImuArray imus)
 
   if (num_gravity_samples_ > kMinNumCalibrationSamples
       && num_gyro_samples_ > kMinNumCalibrationSamples)
-    state_ = NavigationState::kReady;
+    status_ = ModuleStatus::kReady;
 }
 
 void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)
