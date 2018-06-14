@@ -96,11 +96,14 @@ class Communicator {
    */
   void quickStopAll();
   /*
-   *  @brief { Checks the critical failure flag in each controller object }
-   *
-   *  @return { True if critial failure, False otherwise }
+   *  @brief { Checks the error status and warning status in each controller object
+   *           Sets critical failure flag true if there is an error }
    */
-  bool checkFailure();
+  void healthCheck();
+  /*
+   *  @return { Critical failure flag }
+   */
+  bool getFailure();
 
  private:
   data::Data& data_;
@@ -111,6 +114,7 @@ class Communicator {
   Controller controller4_;
   MotorVelocity motor_velocity_;
   MotorTorque motor_torque_;
+  bool critical_failure_;
 };
 
 }}  // namespace hyped::motor_control

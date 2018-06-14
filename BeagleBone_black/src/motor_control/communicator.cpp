@@ -34,7 +34,8 @@ Communicator::Communicator(Logger& log)
     controller1_(log, 1),
     controller2_(log, 2),
     controller3_(log, 3),
-    controller4_(log, 4)
+    controller4_(log, 4),
+    critical_failure_(false)
 {
   log_.INFO("MOTOR", "Controllers initialised\n");
 }
@@ -54,6 +55,14 @@ void Communicator::configureControllers()
   controller2_.configure();
   controller3_.configure();
   controller4_.configure();
+  bool f1, f2, f3, f4;
+  f1 = controller1_.getFailure();
+  f2 = controller2_.getFailure();
+  f3 = controller3_.getFailure();
+  f4 = controller4_.getFailure();
+  if (f1 || f2 || f3 || f4) {
+    log_.ERR("MOTOR", "COMMUNICATION FAILURE");
+  }
   log_.INFO("MOTOR", "Motors are configured for launch");
 }
 
@@ -147,14 +156,25 @@ void Communicator::quickStopAll()
   controller4_.quickStop();
 }
 
-bool Communicator::checkFailure()
+void Communicator::healthCheck()
 {
+  controller1_.healthCheck();
+  controller2_.healthCheck();
+  controller3_.healthCheck();
+  controller4_.healthCheck();
   bool f1, f2, f3, f4;
   f1 = controller1_.getFailure();
   f2 = controller2_.getFailure();
   f3 = controller3_.getFailure();
   f4 = controller4_.getFailure();
-  return f1 || f2 || f3 || f4;
+  if (f1 || f2 || f3 || f4) {
+    critical_failure_ = true;
+  }
+}
+
+bool Communicator::getFailure()
+{
+  return critical_failure_;
 }
 
 }}  // namespace hyped::motor_control

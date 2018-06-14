@@ -137,6 +137,10 @@ class Controller : public CanProccesor {
     */
   void quickStop();
   /*
+   *  @brief { Check error and warning register in controller }
+   */
+  void healthCheck();
+  /*
    *  @brief { Return failure flag of controller }
    */
   bool getFailure();

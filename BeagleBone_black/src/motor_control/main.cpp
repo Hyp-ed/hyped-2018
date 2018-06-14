@@ -97,14 +97,6 @@ void Main::prepareMotors()
   if (!motors_ready_) {
     // TODO(Sean) Add preperation of motors
     motor_data_.module_status = data::ModuleStatus::kReady;
-    motor_data_.velocity_1 = 0;
-    motor_data_.velocity_2 = 0;
-    motor_data_.velocity_3 = 0;
-    motor_data_.velocity_4 = 0;
-    motor_data_.torque_1 = 0;
-    motor_data_.torque_2 = 0;
-    motor_data_.torque_3 = 0;
-    motor_data_.torque_4 = 0;
     data_.setMotorData(motor_data_);
     motors_ready_ = true;
     log_.INFO("MOTOR", "Motor State: Ready");
@@ -135,7 +127,8 @@ void Main::accelerateMotors()
     }
 
     // Check for motors critial failure flag
-    motor_failure_ = communicator_.checkFailure();
+    communicator_.healthCheck();
+    motor_failure_ = communicator_.getFailure();
     if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorVelocity motor_velocity = communicator_.requestActualVelocity();
@@ -189,7 +182,8 @@ void Main::decelerateMotors()
     }
 
     // Check for motors critical failure flag
-    motor_failure_ = communicator_.checkFailure();
+    communicator_.healthCheck();
+    motor_failure_ = communicator_.getFailure();
     if (motor_failure_) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorVelocity motor_velocity = communicator_.requestActualVelocity();

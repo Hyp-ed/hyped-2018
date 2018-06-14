@@ -123,6 +123,19 @@ void Controller::configure()
   sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring feedback type", node_id_);
 
+  // Set motor phase offset to -3
+  SDOMessage.data[0]   = kWRITE_1_BYTE;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x20;
+  SDOMessage.data[3]   = 0x02;
+  SDOMessage.data[4]   = 0xFF;
+  SDOMessage.data[5]   = 0xFD;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset", node_id_);
+
   // Set motor phase offset compensation to 190
   SDOMessage.data[0]   = kWRITE_2_BYTES;
   SDOMessage.data[1]   = 0x40;
@@ -134,7 +147,7 @@ void Controller::configure()
   SDOMessage.data[7]   = 0x00;
 
   sendSdoCan(SDOMessage);
-  log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset", node_id_);
+  log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset compensation", node_id_);
 
   // Set over voltage limit to 125
   SDOMessage.data[0]   = kWRITE_2_BYTES;
@@ -149,12 +162,25 @@ void Controller::configure()
   sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring over voltage limit", node_id_);
 
-  // Set under voltage minimum to 25
+  // Set under voltage limit to 25
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x55;
+  SDOMessage.data[2]   = 0x20;
+  SDOMessage.data[3]   = 0x01;
+  SDOMessage.data[4]   = 0x19;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring under voltage limit", node_id_);
+
+  // Set under voltage minimum to 20
   SDOMessage.data[0]   = kWRITE_2_BYTES;
   SDOMessage.data[1]   = 0x55;
   SDOMessage.data[2]   = 0x20;
   SDOMessage.data[3]   = 0x03;
-  SDOMessage.data[4]   = 0x19;
+  SDOMessage.data[4]   = 0x14;
   SDOMessage.data[5]   = 0x00;
   SDOMessage.data[6]   = 0x00;
   SDOMessage.data[7]   = 0x00;
@@ -200,109 +226,148 @@ void Controller::configure()
 
   sendSdoCan(SDOMessage);
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
+
+  // Set current control torque regulator P gain to 1200
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0xF6;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x01;
+  SDOMessage.data[4]   = 0xB0;
+  SDOMessage.data[5]   = 0x04;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring current control torque P gain", node_id_);
+
+  // Set current control torque regulator I gain to 600
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0xF6;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x02;
+  SDOMessage.data[4]   = 0x58;
+  SDOMessage.data[5]   = 0x02;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring current control torque I gain", node_id_);
+
+  // Set current control flux regulator P gain to 1200
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0xF6;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x03;
+  SDOMessage.data[4]   = 0xB0;
+  SDOMessage.data[5]   = 0x04;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring current control flux P gain", node_id_);
+
+  // Set current control flux regulator I gain to 600
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0xF6;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x04;
+  SDOMessage.data[4]   = 0x58;
+  SDOMessage.data[5]   = 0x02;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring current control torque I gain", node_id_);
+
+  // Set current control regulator ramp to 32000
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0xF6;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x05;
+  SDOMessage.data[4]   = 0x00;
+  SDOMessage.data[5]   = 0x7D;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Configuring current control ramp", node_id_);
 }
 
 void Controller::enterOperational()
 {
   // Enter NMT Operational
-NMTMessage.data[0]   = 0x01;
-NMTMessage.data[1]   = 0x00;
+  NMTMessage.data[0]   = 0x01;
+  NMTMessage.data[1]   = 0x00;
 
-can_.send(NMTMessage);
-log_.INFO("MOTOR", "Controller %d: NMT Operational command sent", node_id_);
+  can_.send(NMTMessage);
+  log_.INFO("MOTOR", "Controller %d: NMT Operational command sent", node_id_);
 
-// Enable velocity mode
-SDOMessage.data[0]   = kWRITE_1_BYTE;
-SDOMessage.data[1]   = 0x60;
-SDOMessage.data[2]   = 0x60;
-SDOMessage.data[3]   = 0x00;
-SDOMessage.data[4]   = 0x09;
-SDOMessage.data[5]   = 0x00;
-SDOMessage.data[6]   = 0x00;
-SDOMessage.data[7]   = 0x00;
+  // Enable velocity mode
+  SDOMessage.data[0]   = kWRITE_1_BYTE;
+  SDOMessage.data[1]   = 0x60;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x09;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
 
-sendSdoCan(SDOMessage);
-log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
 
-// Set target velocity to 0;
-this->sendTargetVelocity(0);
+  // Set target velocity to 0;
+  this->sendTargetVelocity(0);
 
-// Send shutdown message to tranition from state 1 (Switch on disabled)
-// to state 2 (Ready to switch on)
-SDOMessage.data[0]   = kWRITE_2_BYTES;
-SDOMessage.data[1]   = 0x40;
-SDOMessage.data[2]   = 0x60;
-SDOMessage.data[3]   = 0x00;
-SDOMessage.data[4]   = 0x06;
-SDOMessage.data[5]   = 0x00;
-SDOMessage.data[6]   = 0x00;
-SDOMessage.data[7]   = 0x00;
+  // Send shutdown message to tranition from state 1 (Switch on disabled)
+  // to state 2 (Ready to switch on)
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x06;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
 
-sendSdoCan(SDOMessage);
-log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
 
-while (state_ == kSwitchOnDisabled);
-this->checkStatus();
+  while (state_ == kSwitchOnDisabled);
+  this->checkStatus();
 
-// Send switch on message to transition from state 2 (Ready to switch on)
-// to state 3 (Switched on)
-SDOMessage.data[0]   = kWRITE_2_BYTES;
-SDOMessage.data[1]   = 0x40;
-SDOMessage.data[2]   = 0x60;
-SDOMessage.data[3]   = 0x00;
-SDOMessage.data[4]   = 0x07;
-SDOMessage.data[5]   = 0x00;
-SDOMessage.data[6]   = 0x00;
-SDOMessage.data[7]   = 0x00;
+  // Send switch on message to transition from state 2 (Ready to switch on)
+  // to state 3 (Switched on)
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x07;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
 
-sendSdoCan(SDOMessage);
-log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
 
-while (state_ == kReadyToSwitchOn);
-this->checkStatus();
+  while (state_ == kReadyToSwitchOn);
+  this->checkStatus();
 
-// Send enter operational message to transition from state 3 (Switched on)
-// to state 4 (Operation enabled)
-SDOMessage.data[0]   = kWRITE_2_BYTES;
-SDOMessage.data[1]   = 0x40;
-SDOMessage.data[2]   = 0x60;
-SDOMessage.data[3]   = 0x00;
-SDOMessage.data[4]   = 0x0F;
-SDOMessage.data[5]   = 0x00;
-SDOMessage.data[6]   = 0x00;
-SDOMessage.data[7]   = 0x00;
+  // Send enter operational message to transition from state 3 (Switched on)
+  // to state 4 (Operation enabled)
+  SDOMessage.data[0]   = kWRITE_2_BYTES;
+  SDOMessage.data[1]   = 0x40;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x0F;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
 
-sendSdoCan(SDOMessage);
-log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
+  sendSdoCan(SDOMessage);
+  log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
 
-while (state_ == kSwitchedOn);
-this->checkStatus();
-
-// Check warning status
-SDOMessage.data[0]   = kREAD_OBJECT;
-SDOMessage.data[1]   = 0x27;
-SDOMessage.data[2]   = 0x20;
-SDOMessage.data[3]   = 0x00;
-SDOMessage.data[4]   = 0x00;
-SDOMessage.data[5]   = 0x00;
-SDOMessage.data[6]   = 0x00;
-SDOMessage.data[7]   = 0x00;
-
-sendSdoCan(SDOMessage);
-log_.INFO("MOTOR", "Controller %d: Checking for warnings", node_id_);
-
-// Check error status
-SDOMessage.data[0]   = kREAD_OBJECT;
-SDOMessage.data[1]   = 0x3F;
-SDOMessage.data[2]   = 0x60;
-SDOMessage.data[3]   = 0x00;
-SDOMessage.data[4]   = 0x00;
-SDOMessage.data[5]   = 0x00;
-SDOMessage.data[6]   = 0x00;
-SDOMessage.data[7]   = 0x00;
-
-sendSdoCan(SDOMessage);
-log_.INFO("MOTOR", "Controller %d: Checking for errors", node_id_);
+  while (state_ == kSwitchedOn);
+  this->checkStatus();
 }
 
 void Controller::enterPreOperational()
@@ -897,14 +962,43 @@ void Controller::sendSdoCan(utils::io::can::Frame& message)
     if (sdo_frame_recieved_) {
       break;
     } else {
-      log_.DBG1("MOTOR", "Controller %d: Sending SDO frame again none recieved", node_id_);
+      log_.DBG1("MOTOR", "Controller %d: No response. Sending SDO frame again", node_id_);
     }
   }
-  // No SDO frame recieved controller must be offline/communication error
+  // No SDO frame recieved - controller must be offline/communication error
   if (!sdo_frame_recieved_) {
-    log_.ERR("MOTOR", "Controller %d: Sent SDO message %d times no response", node_id_, send_counter); //NOLINT
+    log_.ERR("MOTOR", "Controller %d: No response from controller", node_id_);
     critical_failure_ = true;
   }
+}
+
+void Controller::healthCheck()
+{
+  // Check warning status
+  SDOMessage.data[0]   = kREAD_OBJECT;
+  SDOMessage.data[1]   = 0x27;
+  SDOMessage.data[2]   = 0x20;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x00;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.INFO("MOTOR", "Controller %d: Checking for warnings", node_id_);
+
+  // Check error status
+  SDOMessage.data[0]   = kREAD_OBJECT;
+  SDOMessage.data[1]   = 0x3F;
+  SDOMessage.data[2]   = 0x60;
+  SDOMessage.data[3]   = 0x00;
+  SDOMessage.data[4]   = 0x00;
+  SDOMessage.data[5]   = 0x00;
+  SDOMessage.data[6]   = 0x00;
+  SDOMessage.data[7]   = 0x00;
+
+  sendSdoCan(SDOMessage);
+  log_.INFO("MOTOR", "Controller %d: Checking for errors", node_id_);
 }
 
 bool Controller::getFailure()
