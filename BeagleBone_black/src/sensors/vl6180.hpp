@@ -21,7 +21,7 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 
-
+#include "sensors/interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/i2c.hpp"
 
@@ -32,10 +32,16 @@ using utils::Logger;
 
 namespace sensors {
 
-class VL6180 {
+class VL6180: public ProxiInterface {
  public:
   VL6180(uint8_t i2c_addr, Logger& log);
   ~VL6180();
+
+  bool isOnline() override { return false; }   // TODO(anyone): rethink this
+  void getData(Proximity* proxi) override {
+    proxi->val = getDistance();
+  }
+
   /**
     *  @brief  Returns the distance from the nearest object the sensor is facing
     *
@@ -91,21 +97,23 @@ class VL6180 {
   bool rangeWaitDeviceReady();
   /**
     *  @brief  Reads a single byte register and returns its status
-    *
-    *  @return int Returns 0 if successful
     */
-  int readByte(uint16_t reg_add, uint8_t *data);
+  void readByte(uint16_t reg_add, uint8_t *data);
   /**
     *  @brief  Writes a byte to the register and returns its status
-    *
-    *  @return int Returns 0 if successful
     */
-  int writeByte(uint16_t reg_add, char data);
+  void writeByte(uint16_t reg_add, char data);
+  /**
+    *  @brief  Checks the status register and sets the error_status_
+    */
+  bool checkStatus();
+
   Logger& log_;
   bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_;
   I2C& i2c_;
+  bool error_status_;
 };
 
 }}  // namespace hyped::sensors

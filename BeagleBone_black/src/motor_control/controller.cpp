@@ -84,11 +84,13 @@ Controller::Controller(Logger& log, uint8_t id)
   NMTMessage.id       = kNMT_RECEIVE;
   NMTMessage.extended = false;
   NMTMessage.len      = 2;
+
+  can_.start();
 }
 
 void Controller::registerController()
 {
-  can_.registerController(this);
+  can_.registerProcessor(this);
 }
 
 void Controller::configure()
@@ -418,6 +420,14 @@ int32_t Controller::getVelocity()
 int16_t Controller::getTorque()
 {
   return actual_torque_;
+}
+
+bool Controller::hasId(uint32_t id, bool extended)
+{
+  if (kEMGY_TRANSMIT + node_id_ == id) return true;
+  if (kSDO_TRANSMIT  + node_id_ == id) return true;
+  if (kNMT_TRANSMIT  + node_id_ == id) return true;
+  return false;
 }
 
 void Controller::processNewData(utils::io::can::Frame& message)

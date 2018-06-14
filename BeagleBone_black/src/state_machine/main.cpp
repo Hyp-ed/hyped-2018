@@ -31,7 +31,12 @@ namespace hyped {
 namespace state_machine {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log), hypedMachine(log), data_(data::Data::getInstance())
+    : Thread(id, log),
+      hypedMachine(log),
+      data_(data::Data::getInstance()),
+      comms_data(data_.getCommunicationsData()),
+      nav_data(data_.getNavigationData()),
+      sm_data(data_.getStateMachineData())
 { /* EMPTY */ }
 
 /**
@@ -41,39 +46,48 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   while (1) {
-    // data::Navigation nav_data = data.getNavigationData();
-
-
-    if (hasCriticalFailure()) {
-      hypedMachine.handleEvent(kCriticalFailure);
-    }
-    if (hasReachedMaxDistance()) {
-      hypedMachine.handleEvent(kMaxDistanceReached);
-    }
     checkCommunications();
+    checkNavigation();
+    checkReady();
   }
 }
 
-bool Main::hasCriticalFailure()
+void Main::checkNavigation()
 {
-  return false;
+/**
+  *  @TODO Check if margin (20m) is appropriate
+  */
+
+if((nav_data.distance + nav_data.emergency_braking_distance) + 20 >= comms_data.run_length)
+{
+hypedMachine.handleEvent(kCriticalFailure);
 }
 
-bool Main::hasReachedMaxDistance()
+if(nav_data.state == data::NavigationState::kCriticalFailure)
 {
-  return false;
+  hypedMachine.handleEvent(kCriticalFailure);
+}
 }
 
 void Main::checkCommunications()
 {
-  data::Communications comms_data = data_.getCommunicationsData();
-
   if (comms_data.stopCommand) {
     hypedMachine.handleEvent(kCriticalFailure);
   }
 
   if (comms_data.launchCommand) {
     hypedMachine.handleEvent(kOnStart);
+  }
+
+  if (comms_data.resetCommand) {
+    hypedMachine.reset();
+  }
+}
+//  @TODO add checks for other modules' states
+void Main::checkReady()
+{
+  if (nav_data.state == data::NavigationState::kReady) {
+    hypedMachine.handleEvent(kSystemsChecked);
   }
 }
 

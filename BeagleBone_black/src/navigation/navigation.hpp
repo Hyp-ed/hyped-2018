@@ -43,6 +43,8 @@ using utils::math::Vector;
 
 namespace navigation {
 
+constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
+
 class Navigation {
  public:
   typedef std::array<Imu,       Sensors::kNumImus>        ImuArray;
@@ -52,24 +54,30 @@ class Navigation {
   Navigation();
 
   /**
-   * @brief Get the accleration value
+   * @brief Get the acceleration value
    *
-   * @return uint16_t Returns the forward component of acceleration vector (negative when
-   *                  decelerating)
+   * @return NavigationType Returns the forward component of acceleration vector (negative when
+   *                        decelerating)
    */
-  NavigationType get_accleration();
+  NavigationType getAcceleration();
   /**
    * @brief Get the velocity value
    *
-   * @return uint16_t Returns the forward component of velocity vector
+   * @return NavigationType Returns the forward component of velocity vector
    */
-  NavigationType get_velocity();
+  NavigationType getVelocity();
   /**
    * @brief Get the displacement value
    *
-   * @return uint16_t Returns the forward component of displacement vector
+   * @return NavigationType Returns the forward component of displacement vector
    */
-  NavigationType get_displacement();
+  NavigationType getDisplacement();
+  /**
+   * @brief Get the emergency braking distance in metres
+   *
+   * @return NavigationType emergency braking distance in metres
+   */
+  NavigationType getEmergencyBrakingDistance();
 
  private:
   /**
@@ -105,14 +113,14 @@ class Navigation {
    */
   void update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count);
 
-  void gyro_update(DataPoint<NavigationVector> angular_velocity);  // Point number 1
-  void acclerometer_update(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
-  void proximity_orientation_update();  // Point number 7
-  void proximity_displacement_update();  // Point number 7
-  void stripe_counter_update(uint16_t count);  // Point number 7
+  void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
+  void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
+  void proximityOrientationUpdate();  // Point number 7
+  void proximityDisplacementUpdate();  // Point number 7
+  void stripeCounterUpdate(uint16_t count);  // Point number 7
 
   // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
-  NavigationVector accleration_;
+  NavigationVector acceleration_;
   NavigationVector velocity_;
   NavigationVector displacement_;
 
