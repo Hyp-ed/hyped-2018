@@ -107,10 +107,10 @@ void Main::checkReady()
 void Main::checkInit()
 {
   if (comms_data.module_status == data::ModuleStatus::kInit
-      || nav_data.module_status == data::ModuleStatus::kInit
-      /*|| motor_data.module_status == data::ModuleStatus::kInit*/
-      || sensors_data.module_status == data::ModuleStatus::kInit
-      || batteries_data.module_status == data::ModuleStatus::kInit) {
+      && nav_data.module_status == data::ModuleStatus::kInit
+      /*&& motor_data.module_status == data::ModuleStatus::kInit*/
+      && sensors_data.module_status == data::ModuleStatus::kInit
+      && batteries_data.module_status == data::ModuleStatus::kInit) {
     hypedMachine.handleEvent(kInitialised);  // Transitions to Calibrating
   }
 }
