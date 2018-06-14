@@ -158,13 +158,11 @@ bool VL6180::isOnline()
 {
   uint8_t data;
   uint8_t status;
-  uint8_t distance;
 
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
-  distance = getDistance();
 
-  if (status == 0 && distance != 0 && distance != 255) {
+  if (status == 0) {
     return true;
   } else if (status != 0) {
     checkStatus();
