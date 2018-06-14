@@ -37,6 +37,7 @@ MAINS := \
   demo_data \
   demo_machine \
   demo_motor \
+  demo_motor_testing \
   demo_communications \
   demo_threading \
   demo_vector \
