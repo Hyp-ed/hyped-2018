@@ -34,12 +34,12 @@ Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       hypedMachine(log),
       data_(data::Data::getInstance()),
-      comms_data(data_.getCommunicationsData()),
-      nav_data(data_.getNavigationData()),
-      sm_data(data_.getStateMachineData()),
-      motor_data(data_.getMotorData()),
-      batteries_data(data_.getBatteriesData()),
-      sensors_data(data_.getSensorsData())
+      comms_data_(data_.getCommunicationsData()),
+      nav_data_(data_.getNavigationData()),
+      sm_data_(data_.getStateMachineData()),
+      motor_data_(data_.getMotorData()),
+      batteries_data_(data_.getBatteriesData()),
+      sensors_data_(data_.getSensorsData())
 { /* EMPTY */ }
 
 /**
@@ -62,12 +62,12 @@ void Main::checkNavigation()
   *  @TODO Check if margin (20m) is appropriate
   */
 
-if((nav_data.distance + nav_data.emergency_braking_distance) + 20 >= comms_data.run_length)
+if((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length)
 {
 hypedMachine.handleEvent(kCriticalFailure);
 }
 
-if(nav_data.velocity <= 0.01)
+if(nav_data_.velocity <= 0.01)
 {
   hypedMachine.handleEvent(kVelocityZeroReached);
 }
@@ -75,22 +75,22 @@ if(nav_data.velocity <= 0.01)
 
 void Main::checkCommunications()
 {
-  if (comms_data.launchCommand) {
+  if (comms_data_.launchCommand) {
     hypedMachine.handleEvent(kOnStart);
   }
 
-  if (comms_data.resetCommand) {
+  if (comms_data_.resetCommand) {
     hypedMachine.reset();
   }
 }
 
 void Main::checkFailure()
 {
-  if (comms_data.module_status == data::ModuleStatus::kCriticalFailure
-      || nav_data.module_status == data::ModuleStatus::kCriticalFailure
-      || motor_data.module_status == data::ModuleStatus::kCriticalFailure
-      || sensors_data.module_status == data::ModuleStatus::kCriticalFailure
-      || batteries_data.module_status == data::ModuleStatus::kCriticalFailure) {
+  if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure
+      || nav_data_.module_status == data::ModuleStatus::kCriticalFailure
+      || motor_data_.module_status == data::ModuleStatus::kCriticalFailure
+      || sensors_data_.module_status == data::ModuleStatus::kCriticalFailure
+      || batteries_data_.module_status == data::ModuleStatus::kCriticalFailure) {
     hypedMachine.handleEvent(kCriticalFailure);  //  Transitions to FailureStopped/EmergencyBraking
   }
 }
@@ -98,19 +98,19 @@ void Main::checkFailure()
 //  @TODO add checks for other modules' states
 void Main::checkReady()
 {
-  if (nav_data.module_status == data::ModuleStatus::kReady
-      &&  motor_data.module_status == data::ModuleStatus::kReady) {
+  if (nav_data_.module_status == data::ModuleStatus::kReady
+      &&  motor_data_.module_status == data::ModuleStatus::kReady) {
     hypedMachine.handleEvent(kSystemsChecked);  // Transitions to Ready
   }
 }
 
 void Main::checkInit()
 {
-  if (comms_data.module_status == data::ModuleStatus::kInit
-      && nav_data.module_status == data::ModuleStatus::kInit
-      && motor_data.module_status == data::ModuleStatus::kInit
-      && sensors_data.module_status == data::ModuleStatus::kInit
-      && batteries_data.module_status == data::ModuleStatus::kInit) {
+  if (comms_data_.module_status == data::ModuleStatus::kInit
+      && nav_data_.module_status == data::ModuleStatus::kInit
+      && motor_data_.module_status == data::ModuleStatus::kInit
+      && sensors_data_.module_status == data::ModuleStatus::kInit
+      && batteries_data_.module_status == data::ModuleStatus::kInit) {
     hypedMachine.handleEvent(kInitialised);  // Transitions to Calibrating
   }
 }
