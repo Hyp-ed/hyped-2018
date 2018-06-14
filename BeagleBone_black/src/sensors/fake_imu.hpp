@@ -88,7 +88,11 @@ class FakeImu : public ImuInterface {
   void setData();
 
   /*
-   * @brief     A function that reads data from file directory
+   * @brief     A function that reads data from file directory. This function also validates them
+   *            by checking if
+   *              1) The timestamp values are valid. Multiples of 250 or 150 depending on the file.
+   *              2) The file follows the format given in the comments of the constructor above.
+   *              3) The file exists.
    *
    * @param[in]    The file format is as stated in the constructor comments
    */
@@ -110,14 +114,6 @@ class FakeImu : public ImuInterface {
    */
   bool accCheckTime();
   bool gyrCheckTime();
-
-  /*
-   * @brief     This function takes in the file path of both the files and validates them by checking if
-   *              1) The timestamp values are valid. Multiples of 250 or 150 depending on the file.
-   *              2) The file follows the format given in the comments of the constructor above.
-   *              3) The file exists.
-   */
-  bool checkFile(std::string acc_file_path, std::string gyr_file_path);
 
   bool read_file;
 

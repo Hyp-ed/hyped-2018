@@ -19,6 +19,7 @@
  */
 
 #include <random>
+#include <vector>
 #include <algorithm>
 #include <fstream>
 #include <string>
@@ -40,11 +41,9 @@ namespace sensors {
 FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
     : pt_acc(0), pt_gyr(0)
 {
-  if (checkFile(acc_file_path, gyr_file_path)) {
-    read_file = true;
-    readDataFromFile(acc_file_path, gyr_file_path);
-    setData();
-  }
+  read_file = true;
+  readDataFromFile(acc_file_path, gyr_file_path);
+  setData();
 }
 
 FakeImu::FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
@@ -103,27 +102,62 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVecto
 
 void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_path)
 {
-  std::ifstream file;
-  uint32_t timestamp;
-  NavigationVector value, noise;
+  for (int i = 0; i < 2; i++) {
+    std::string file_path;
+    uint32_t timestamp;
+    std::vector<DataPoint<NavigationVector>>* val_read;
 
-  file.open(acc_file_path);
-  while (file >> timestamp >> value[0] >> value[1] >> value[2]
-              >> noise[0] >> noise[1] >> noise[2]) {
-    acc_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
-  }
+    if (i == 0) {
+      file_path = acc_file_path;
+      timestamp = kAccTimeInterval;
+      val_read  = &acc_val_read;
+    } else {
+      file_path = gyr_file_path;
+      timestamp = kGyrTimeInterval;
+      val_read  = &gyr_val_read;
+    }
 
-  if (file.is_open())
+    std::ifstream file;
+    file.open(file_path);
+    if (!file.is_open()) {
+      throw std::invalid_argument("Wrong file path for argument " + i);
+    }
+
+    NavigationVector value, noise;
+    double temp_value[10];
+    int counter = 0;
+    uint32_t temp_time;
+    std::string line;
+
+    while (getline(file, line)) {
+      std::stringstream input(line);
+      input >> temp_time;
+
+      if (temp_time != timestamp*counter) {
+        throw std::invalid_argument("Timestamp format invalid");
+      }
+
+      int value_counter = 0;
+      while (input >> temp_value[value_counter] && value_counter < 10) {
+        value_counter++;
+      }
+
+      if (value_counter != 6) {
+        throw std::invalid_argument("Incomplete values for the argument timestamp " + temp_time);
+      }
+
+      for (int i = 0; i < 3; i++)
+        value[i] = temp_value[i];
+      for (int i = 0; i < 3; i++)
+        noise[i] = temp_value[i+3];
+
+      val_read->push_back(DataPoint<NavigationVector>(temp_time, addNoiseToData(value, noise)));
+
+      counter++;
+    }
+
     file.close();
-
-  file.open(gyr_file_path);
-  while (file >> timestamp >> value[0] >> value[1] >> value[2]
-              >> noise[0] >> noise[1] >> noise[2]) {
-    gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(value, noise)));
   }
-
-  if (file.is_open())
-    file.close();
 }
 
 bool FakeImu::accCheckTime()
@@ -149,59 +183,6 @@ bool FakeImu::gyrCheckTime()
   }
 
   gyr_count = time_span.count()/kGyrTimeInterval + 1;
-  return true;
-}
-
-bool FakeImu::checkFile(std::string acc_file_path, std::string gyr_file_path)
-{
-  for (int i = 0; i < 2; i++) {
-    std::string file_path;
-    uint32_t timestamp;
-
-    if (i == 0) {
-      file_path = acc_file_path;
-      timestamp = kAccTimeInterval;
-    } else {
-      file_path = gyr_file_path;
-      timestamp = kGyrTimeInterval;
-    }
-
-    std::ifstream file;
-    file.open(file_path);
-    if (!file.is_open()) {
-      throw std::invalid_argument("Wrong file path for argument " + i);
-      return false;
-    }
-
-    double value;
-    int counter = 0;
-    uint32_t temp_time;
-    std::string line;
-
-    while (getline(file, line)) {
-      std::stringstream input(line);
-      input >> temp_time;
-
-      if (temp_time != timestamp*counter) {
-        throw std::invalid_argument("Timestamp format invalid");
-        return false;
-      }
-
-      int value_counter = 0;
-      while (input >> value) {
-        value_counter++;
-      }
-
-      if (value_counter != 6) {
-        throw std::invalid_argument("Incomplete values for the argument timestamp " + temp_time);
-        return false;
-      }
-
-      counter++;
-    }
-
-    file.close();
-  }
   return true;
 }
 
