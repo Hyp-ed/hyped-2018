@@ -160,10 +160,10 @@ void Main::run()
     sendHpTemperature(bat_.high_power_batteries.at(0));
     sendHpVoltage1(bat_.high_power_batteries.at(1));
     sendHpTemperature1(bat_.high_power_batteries.at(1));
-    sendTorqueFr(mtr_.motor_torque_2);
-    sendTorqueFl(mtr_.motor_torque_1);
-    sendTorqueBr(mtr_.motor_torque_4);
-    sendTorqueBl(mtr_.motor_torque_3);
+    sendTorqueFr(mtr_.torque_2);
+    sendTorqueFl(mtr_.torque_1);
+    sendTorqueBr(mtr_.torque_4);
+    sendTorqueBl(mtr_.torque_3);
   }
 
   receiverThread->join();
