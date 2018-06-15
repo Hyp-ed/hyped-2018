@@ -58,6 +58,7 @@ void FakeProxi::getData(Proximity* proxi)
 {
   bool update_time = checkTime();
   if (read_file && update_time) {
+    //TODO(Uday): Bug here
     reading_counter = std::min(reading_counter, (int64_t) val_read.size());
     prev_reading = val_read[reading_counter-1];
   } else if (update_time) {
