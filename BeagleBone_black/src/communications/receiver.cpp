@@ -38,7 +38,7 @@ void ReceiverThread::run()
 
     switch (command) {
       case 1:
-        cmn_data.stopCommand = true;
+        cmn_data.module_status = data::ModuleStatus::kCriticalFailure;
         break;
       case 2:
         cmn_data.launchCommand = true;
