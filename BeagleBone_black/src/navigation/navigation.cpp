@@ -134,6 +134,10 @@ void Navigation::proximityDisplacementUpdate()
 }
 
 void Navigation::stripeCounterUpdate(uint16_t count)
-{}
+{
+  // TODO(Brano): Check for errors (e.g. missed stripes)
+  // TODO(Brano): Update displacement and velocity
+  stripe_count_ = count;
+}
 
 }}  // namespace hyped::navigation
