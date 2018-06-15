@@ -70,9 +70,9 @@ class Controller : public CanProccesor {
     */
   void enterPreOperational();
   /**
-    *   @brief  { Checks controller status }
+    *   @brief  { Checks controller statusword for state }
     */
-  void checkStatus();
+  void checkState();
   /**
     *  @brief  { Set target velocity in controller object dictionary }
     *
@@ -159,7 +159,7 @@ class Controller : public CanProccesor {
   /*
    * @brief { Sends a CAN frame but waits for a reply }
    */
-  void sendSdoCan(utils::io::can::Frame& message);
+  void sendSDO(utils::io::can::Frame& message);
   /*
    * @brief { Parses error message to find the problem }
    */

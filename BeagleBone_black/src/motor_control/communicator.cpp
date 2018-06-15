@@ -36,9 +36,7 @@ Communicator::Communicator(Logger& log)
     controller3_(log, 3),
     controller4_(log, 4),
     critical_failure_(false)
-{
-  log_.INFO("MOTOR", "Controllers initialised\n");
-}
+{}
 
 void Communicator::registerControllers()
 {
@@ -61,27 +59,29 @@ void Communicator::configureControllers()
   f3 = controller3_.getFailure();
   f4 = controller4_.getFailure();
   if (f1 || f2 || f3 || f4) {
+    critical_failure_ = true;
     log_.ERR("MOTOR", "COMMUNICATION FAILURE");
+  } else {
+    log_.INFO("MOTOR", "All motors are configured");
   }
-  log_.INFO("MOTOR", "Motors are configured for launch");
 }
 
-bool Communicator::enterOperational()
+void Communicator::prepareMotors()
 {
   controller1_.enterOperational();
   controller2_.enterOperational();
   controller3_.enterOperational();
   controller4_.enterOperational();
-  if (controller1_.getControllerState() == kOperationEnabled
-      && controller1_.getControllerState() == kOperationEnabled
-      && controller1_.getControllerState() == kOperationEnabled
-      && controller1_.getControllerState() == kOperationEnabled)
-      {
-        return true;
-      } else {
-        this->enterPreOperational();
-      }
-  return false;
+  if (controller1_.getControllerState() != kOperationEnabled
+     || controller1_.getControllerState() != kOperationEnabled
+     || controller1_.getControllerState() != kOperationEnabled
+     || controller1_.getControllerState() != kOperationEnabled)
+  {
+    critical_failure_ = true;
+    log_.ERR("MOTOR", "Motors not operational");
+  } else {
+    log_.INFO("MOTOR", "Motors are ready for launch");
+  }
 }
 
 void Communicator::enterPreOperational()

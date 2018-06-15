@@ -59,10 +59,8 @@ class Communicator {
   void configureControllers();
   /**
     *   @brief  { Controllers are entered into Operational mode }
-    *
-    *   @return { Returns true if successful }
     */
-  bool enterOperational();
+  void prepareMotors();
   /**
     *   @brief  Sets controllers to pre operational mode
     */

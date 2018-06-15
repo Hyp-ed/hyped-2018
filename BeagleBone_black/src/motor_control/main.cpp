@@ -84,39 +84,40 @@ void Main::initMotors()
     communicator_.registerControllers();
     communicator_.configureControllers();
 
-    // TODO(Sean) Check motors have succesfully been initialised and configured
-    motor_data_.module_status = data::ModuleStatus::kInit;
-    data_.setMotorData(motor_data_);
-    motors_init_ = true;
-    log_.INFO("MOTOR", "Motor State: Idle");
+    if (communicator_.getFailure()) {
+      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
+      data_.setMotorData(motor_data_);
+      motors_init_ = true;  // Set boolean to true to prevent any further configuration attempts
+      log_.ERR("MOTOR", "Could not configure motors");
+    } else {
+      motor_data_.module_status = data::ModuleStatus::kInit;
+      data_.setMotorData(motor_data_);
+      motors_init_ = true;
+      log_.INFO("MOTOR", "Motor State: Idle");
+    }
   }
 }
 
 void Main::prepareMotors()
 {
   if (!motors_ready_) {
-    // TODO(Sean) Add preperation of motors
-    motor_data_.module_status = data::ModuleStatus::kReady;
-    data_.setMotorData(motor_data_);
-    motors_ready_ = true;
-    log_.INFO("MOTOR", "Motor State: Ready");
+    communicator_.prepareMotors();
+    if (communicator_.getFailure()) {
+      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
+      data_.setMotorData(motor_data_);
+      motors_ready_ = true;  // Set boolean to true to prevent any further operational attempts
+      log_.ERR("MOTOR", "Could not set motors into operational mode");
+    } else {
+      motor_data_.module_status = data::ModuleStatus::kReady;
+      data_.setMotorData(motor_data_);
+      motors_ready_ = true;
+      log_.INFO("MOTOR", "Motor State: Ready");
+    }
   }
 }
 
 void Main::accelerateMotors()
 {
-  // TODO(Sean) Move controllers to operational state in prepareMotors()
-  if (!motors_operational_) {
-    bool operational = communicator_.enterOperational();
-    if (operational) {
-      motors_operational_ = true;
-    } else {
-      log_.ERR("MOTOR", "Controllers not operational");
-      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
-      data_.setMotorData(motor_data_);
-      return;
-    }
-  }
   log_.INFO("MOTOR", "Motor State: Accelerating\n");
   while (state_.current_state == data::State::kAccelerating) {
     // Check for state machine critical failure flag
