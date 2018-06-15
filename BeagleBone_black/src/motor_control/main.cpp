@@ -38,7 +38,6 @@ Main::Main(uint8_t id, Logger& log)
       run_(true),
       motors_init_(false),
       motors_ready_(false),
-      motors_operational_(false),
       all_motors_stopped_(false)
 {
   state_      = data_.getStateMachineData();
@@ -102,11 +101,12 @@ void Main::prepareMotors()
 {
   if (!motors_ready_) {
     communicator_.prepareMotors();
+    communicator_.healthCheck();
     if (communicator_.getFailure()) {
       motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
       data_.setMotorData(motor_data_);
       motors_ready_ = true;  // Set boolean to true to prevent any further operational attempts
-      log_.ERR("MOTOR", "Could not set motors into operational mode");
+      log_.ERR("MOTOR", "CRITICAL FAILURE, MOTORS NOT OPERATIONAL");
     } else {
       motor_data_.module_status = data::ModuleStatus::kReady;
       data_.setMotorData(motor_data_);
@@ -118,6 +118,7 @@ void Main::prepareMotors()
 
 void Main::accelerateMotors()
 {
+  // TODO(Sean) Implemement navigation barrier
   log_.INFO("MOTOR", "Motor State: Accelerating\n");
   while (state_.current_state == data::State::kAccelerating) {
     // Check for state machine critical failure flag
@@ -129,9 +130,8 @@ void Main::accelerateMotors()
 
     // Check for motors critial failure flag
     communicator_.healthCheck();
-    motor_failure_ = communicator_.getFailure();
-    if (motor_failure_) {
-      log_.INFO("MOTOR", "Motor State: Motor Failure\n");
+    if (communicator_.getFailure()) {
+      log_.ERR("MOTOR", "Motor State: MOTOR FAILURE\n");
       MotorVelocity motor_velocity = communicator_.requestActualVelocity();
       MotorTorque motor_torque     = communicator_.requestActualTorque();
       // Write critical failure flag and motor data to data structure
@@ -184,8 +184,7 @@ void Main::decelerateMotors()
 
     // Check for motors critical failure flag
     communicator_.healthCheck();
-    motor_failure_ = communicator_.getFailure();
-    if (motor_failure_) {
+    if (communicator_.getFailure()) {
       log_.INFO("MOTOR", "Motor State: Motor Failure\n");
       MotorVelocity motor_velocity = communicator_.requestActualVelocity();
       MotorTorque motor_torque     = communicator_.requestActualTorque();
@@ -204,7 +203,7 @@ void Main::decelerateMotors()
       break;
     }
 
-    // Step down motor RPM
+    // Step down motor velocity
     log_.DBG2("MOTOR", "Motor State: Deccelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = decelerationVelocity(nav_.velocity);
@@ -266,6 +265,8 @@ void Main::stopMotors()
   motor_data_.torque_4 = motor_torque.torque_4;
   data_.setMotorData(motor_data_);
   log_.DBG2("MOTOR", "Motor State: Stopped\n");
+
+  communicator_.enterPreOperational();
 }
 
 int32_t Main::accelerationVelocity(NavigationType velocity)
