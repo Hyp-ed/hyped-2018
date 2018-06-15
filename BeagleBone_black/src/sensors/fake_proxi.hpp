@@ -18,6 +18,8 @@
  *    limitations under the License.
  */
 
+// TODO(Uday): Change the units
+
 #ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
 
@@ -57,7 +59,7 @@ class FakeProxi : public ProxiInterface {
   void getData(Proximity* proxi) override;
 
  private:
-  const double kProxiTimeInterval = 10000;
+  const uint8_t kProxiTimeInterval = 10;
 
   /*
    * @brief    A function to load data from file to vector. The file format of the input
