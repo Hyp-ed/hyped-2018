@@ -59,6 +59,9 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
   }
 
   log_.INFO("COMN", "TCP/IP connection established.");
+  data::Communications cmn_data;
+  cmn_data.module_status = data::ModuleStatus::kInit;
+  data_.setCommunicationsData(cmn_data);
 }
 
 Communications::~Communications()
