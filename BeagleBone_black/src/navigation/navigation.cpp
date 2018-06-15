@@ -139,7 +139,7 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists()
 {
   std::array<NavigationType, 3> arr;
   for (unsigned int i = 0; i < arr.size(); ++i)
-    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)arr.size())]
+    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
              - getDisplacement();
   return arr;
 }
