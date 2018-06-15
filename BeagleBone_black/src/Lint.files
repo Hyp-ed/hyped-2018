@@ -26,6 +26,8 @@ sensors/bms.hpp
 sensors/interface.hpp
 sensors/fake_imu.hpp
 sensors/fake_imu.cpp
+sensors/fake_proxi.hpp
+sensors/fake_proxi.cpp
 sensors/mpu9250.hpp
 sensors/mpu9250.cpp
 sensors/vl6180.hpp

@@ -16,6 +16,7 @@ SRCS := \
   sensors/vl6180.cpp \
   sensors/mpu9250.cpp \
   sensors/fake_imu.cpp \
+  sensors/fake_proxi.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
@@ -48,3 +49,4 @@ MAINS := \
   demo_statistics\
   demo_can \
   demo_mpu9250 \
+  demo_fake_imu \
