@@ -25,6 +25,7 @@
 namespace hyped {
 
 using data::Sensors;
+using data::State;
 using utils::System;
 
 namespace navigation {

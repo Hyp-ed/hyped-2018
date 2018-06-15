@@ -28,7 +28,6 @@
 namespace hyped {
 
 using data::Sensors;
-using data::State;
 using utils::concurrent::Thread;
 using utils::Logger;
 
