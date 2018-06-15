@@ -30,7 +30,7 @@
 
 #include "data/data_point.hpp"
 
-using std::chrono::microseconds;
+using std::chrono::milliseconds;
 using std::chrono::duration;
 using std::chrono::duration_cast;
 
@@ -40,6 +40,7 @@ namespace sensors {
 FakeProxi::FakeProxi(std::string file_path)
     : read_file(true), reading_counter(0)
 {
+  readDataFromFile(file_path);
   setData();
 }
 
@@ -58,7 +59,6 @@ void FakeProxi::getData(Proximity* proxi)
 {
   bool update_time = checkTime();
   if (read_file && update_time) {
-    //TODO(Uday): Bug here
     reading_counter = std::min(reading_counter, (int64_t) val_read.size());
     prev_reading = val_read[reading_counter-1];
   } else if (update_time) {
@@ -78,24 +78,32 @@ void FakeProxi::readDataFromFile(std::string file_path)
     throw std::invalid_argument("Wrong file path");
   }
 
-  int counter, time_counter = 0;
-  uint8_t temp[4];
+  int timestamp = kProxiTimeInterval;
+  int counter;
+  int time_counter = 0;
+  int temp[4];
   std::string line;
   while (getline(file, line)) {
     std::stringstream input(line);
+
     counter = 0;
-    while (input >> temp[counter] && counter < 4)
+    while (input >> temp[counter] && counter < 4) {
       counter++;
+    }
 
-    if (counter != 3)
-      throw std::invalid_argument("Incomplete values for the argument line " + time_counter);
+    if (counter != 3) {
+      throw std::invalid_argument("Incomplete values for the argument line");
+    }
 
-    if (kProxiTimeInterval*time_counter != temp[0])
-      throw std::invalid_argument("Timestamp value incorrect, line " + time_counter);
+    if (temp[0] != timestamp*time_counter) {
+      throw std::invalid_argument("Timestamp value incorrect");
+    }
 
     val_read.push_back(DataPoint<uint8_t>(temp[0], addNoiseToData(temp[1], temp[2])));
     time_counter++;
   }
+
+  file.close();
 }
 
 uint8_t FakeProxi::addNoiseToData(uint8_t value, uint8_t noise)
@@ -108,7 +116,7 @@ uint8_t FakeProxi::addNoiseToData(uint8_t value, uint8_t noise)
 bool FakeProxi::checkTime()
 {
   high_resolution_clock::time_point now = high_resolution_clock::now();
-  microseconds time_span = duration_cast<microseconds>(now - ref_time);
+  milliseconds time_span = duration_cast<milliseconds>(now - ref_time);
 
   if (time_span.count() < kProxiTimeInterval*reading_counter) {
     return false;
