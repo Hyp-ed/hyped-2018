@@ -44,7 +44,7 @@ using utils::math::Vector;
 namespace navigation {
 
 constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
-constexpr std::array<NavigationType, 41> kStripeLocations = {
+constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
       30.48,   60.96,   91.44,  121.92,  152.4,  182.88,  213.36,  243.84,  274.32,  304.8,
      335.28,  365.76,  396.24,  426.72,  457.2,  487.68,  518.16,  548.64,  579.12,  609.6,
      640.08,  670.56,  701.04,  731.52,  762.0,  792.48,  822.96,  853.44,  883.92,  914.4,

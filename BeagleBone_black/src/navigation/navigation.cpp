@@ -17,7 +17,9 @@
  */
 
 #include "navigation.hpp"
-#include <math.h>
+
+#include <algorithm>  // std::min
+#include <cmath>
 
 namespace hyped {
 namespace navigation {
@@ -78,8 +80,9 @@ void Navigation::update(ImuArray imus)
 std::array<NavigationType, 3> Navigation::getNearestStripeDists()
 {
   std::array<NavigationType, 3> arr;
-  for (unsigned int i = 0; arr.size(); ++i)
-    arr[i] = kStripeLocations[stripe_count_ + i] - getDisplacement();
+  for (unsigned int i = 0; i < arr.size(); ++i)
+    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)arr.size())]
+             - getDisplacement();
   return arr;
 }
 
