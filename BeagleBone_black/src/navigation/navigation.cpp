@@ -17,7 +17,9 @@
  */
 
 #include "navigation.hpp"
-#include <math.h>
+
+#include <algorithm>  // std::min
+#include <cmath>
 
 namespace hyped {
 namespace navigation {
@@ -133,6 +135,15 @@ void Navigation::update(ImuArray imus)
   }
 }
 
+std::array<NavigationType, 3> Navigation::getNearestStripeDists()
+{
+  std::array<NavigationType, 3> arr;
+  for (unsigned int i = 0; i < arr.size(); ++i)
+    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
+             - getDisplacement();
+  return arr;
+}
+
 void Navigation::update(ImuArray imus, ProximityArray proxis)
 {
   update(imus);
@@ -199,6 +210,10 @@ void Navigation::proximityDisplacementUpdate()
 }
 
 void Navigation::stripeCounterUpdate(uint16_t count)
-{}
+{
+  // TODO(Brano): Check for errors (e.g. missed stripes)
+  // TODO(Brano): Update displacement and velocity
+  stripe_count_ = count;
+}
 
 }}  // namespace hyped::navigation
