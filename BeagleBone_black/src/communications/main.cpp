@@ -140,6 +140,7 @@ void Main::run()
 {
   data::Communications cmn_data;
   cmn_data.module_status = data::ModuleStatus::kInit;
+  data_.setCommunicationsData(cmn_data);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
 
