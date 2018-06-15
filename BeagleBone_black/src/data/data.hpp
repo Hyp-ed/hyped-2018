@@ -113,7 +113,6 @@ struct Sensors : public Module {
   static constexpr int kNumProximities = 8;
 
   array<Imu, kNumImus> imu;
-  array<Proximity, kNumProximities> proxi;  // TODO(nav): remove after adapting to proxi_front/back
   array<Proximity, kNumProximities> proxi_front;
   array<Proximity, kNumProximities> proxi_back;
   StripeCounter stripe_counter;
