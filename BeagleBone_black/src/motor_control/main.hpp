@@ -46,7 +46,11 @@ class Main: public Thread {
   /**
     *  @brief  { Establish CAN connections with motor controllers }
     */
-  void setupMotors();
+  void initMotors();
+  /**
+    *  @brief  { Set motors into operational state }
+    */
+  void prepareMotors();
   /**
     *  @brief  { Enter controllers into pre operational state if config error occurs }
     */
@@ -97,13 +101,15 @@ class Main: public Thread {
   int16_t decelerationTorque(NavigationType velocity);
   data::Data& data_;
   data::StateMachine state_;
+  data::Motors motor_data_;
   Communicator communicator_;
   int32_t target_velocity_;
   int16_t target_torque_;
-  bool motors_set_up_;
+  bool run_;
+  bool motors_init_;
+  bool motors_ready_;
   bool motors_operational_;
   bool motor_failure_;
-  bool run_;
   bool all_motors_stopped_;
 };
 

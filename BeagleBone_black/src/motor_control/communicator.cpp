@@ -72,6 +72,7 @@ bool Communicator::enterOperational()
       } else {
         this->enterPreOperational();
       }
+  return false;
 }
 
 void Communicator::enterPreOperational()

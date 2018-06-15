@@ -152,6 +152,14 @@ class Controller : public CanProccesor {
   ControllerState getControllerState();
 
  private:
+  /*
+   * @brief { Sends a CAN frame but waits for a reply }
+   */
+  void sendSdoCan(utils::io::can::Frame& message);
+  /*
+   * @brief { Parses error message to find the problem }
+   */
+  void processErrorMessage(uint16_t error_message);
   Logger&  log_;
   Can&     can_;
   uint8_t  node_id_;
@@ -161,6 +169,7 @@ class Controller : public CanProccesor {
   utils::io::can::Frame SDOMessage;
   utils::io::can::Frame NMTMessage;
   ControllerState state_;
+  bool sdo_frame_recieved_;
 };
 
 }}  // namespace hyped::motor_control
