@@ -42,6 +42,8 @@ class Main: public Thread {
   bool imuChanged(const Sensors& old_data, const Sensors& new_data);
   bool proxiChanged(const Sensors& old_data, const Sensors& new_data);
   inline bool stripeCntChanged(const Sensors& old_data, const Sensors& new_data);
+  void updateData();
+
 
   data::Data& data_;
   Navigation nav_;

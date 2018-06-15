@@ -23,6 +23,7 @@
 #include <cstdint>
 
 #include "data/data.hpp"
+#include "utils/concurrent/barrier.hpp"
 #include "utils/math/integrator.hpp"
 #include "utils/math/kalman.hpp"
 #include "utils/math/quaternion.hpp"
@@ -34,8 +35,10 @@ using data::DataPoint;
 using data::Imu;
 using data::Proximity;
 using data::Sensors;
+using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
+using utils::concurrent::Barrier;
 using utils::math::Integrator;
 using utils::math::Kalman;
 using utils::math::Quaternion;
@@ -51,7 +54,14 @@ class Navigation {
   typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
   friend class Main;
 
-  Navigation();
+  /**
+   * @brief Construct a new Navigation object
+   *
+   * @param post_calibration_barrier Navigation module will wait on this barrier at the end of the
+   *                                 transition to 'operational' state. It is primarily meant for
+   *                                 syncing with motors module.
+   */
+  explicit Navigation(Barrier& post_calibration_barrier);
 
   /**
    * @brief Get the acceleration value
@@ -78,8 +88,30 @@ class Navigation {
    * @return NavigationType emergency braking distance in metres
    */
   NavigationType getEmergencyBrakingDistance();
+  /**
+   * @brief Get the status of the nav module
+   *
+   * @return ModuleStatus Status of the nav module
+   */
+  ModuleStatus getStatus();
+  /**
+   * @brief Starts the calibration phase if the module's status is `kInit`.
+   *
+   * @return true  Navigation module is now in the calibration phase
+   * @return false Calibration cannot be started
+   */
+  bool startCalibration();
+  /**
+   * @brief Transition the navigation module to an operational state so that it starts producing
+   *        useful output. Hits the `post_calibration_barrier` before returning `true` (to indicate
+   *        to motors that the calibration is done).
+   * @return true  Transition has been successful
+   * @return false Transition is not possible at the moment
+   */
+  bool finishCalibration();
 
  private:
+  static constexpr int kMinNumCalibrationSamples = 200000;
   /**
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
@@ -113,11 +145,23 @@ class Navigation {
    */
   void update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count);
 
+  void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate();  // Point number 7
   void proximityDisplacementUpdate();  // Point number 7
   void stripeCounterUpdate(uint16_t count);  // Point number 7
+
+  // Admin stuff
+  Barrier& post_calibration_barrier_;
+  ModuleStatus status_;
+
+  // Calibration variables
+  bool is_calibrating_;
+  int num_gravity_samples_;
+  NavigationVector g_;  // Acceleration due to gravity. Measured during calibration.
+  int num_gyro_samples_;
+  std::array<NavigationVector, Sensors::kNumImus> gyro_offsets_;  // Measured during calibration
 
   // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
   NavigationVector acceleration_;
@@ -126,7 +170,7 @@ class Navigation {
 
   // Internal data that is not published
   DataPoint<NavigationVector> prev_angular_velocity_;  // To calculate how much has the pod rotated
-  Quaternion<int16_t> orientation_;  // Pod's orientation is updated with every gyro reading
+  Quaternion<NavigationType> orientation_;  // Pod's orientation is updated with every gyro reading
 
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
