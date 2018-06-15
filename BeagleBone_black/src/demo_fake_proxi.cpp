@@ -37,7 +37,7 @@ int main()
     generator.getData(&reading);
     printf("From generator: %d @ time: null\n", reading.val);
 
-    usleep(10);
+    usleep(10000);
   }
 }
 
