@@ -84,15 +84,15 @@ class FakeProxi : public ProxiInterface {
    */
   void setData();
 
-  bool read_file;
+  bool read_file_;
 
-  uint8_t value;
-  uint8_t noise;
-  DataPoint<uint8_t> prev_reading;
+  uint8_t value_;
+  uint8_t noise_;
+  DataPoint<uint8_t> prev_reading_;
 
-  int64_t reading_counter;
-  std::vector<DataPoint<uint8_t>> val_read;
-  high_resolution_clock::time_point ref_time;
+  int64_t reading_counter_;
+  std::vector<DataPoint<uint8_t>> val_read_;
+  high_resolution_clock::time_point ref_time_;
 };
 
 }}  // namespace hyped::sensors

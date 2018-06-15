@@ -38,36 +38,36 @@ namespace hyped {
 namespace sensors {
 
 FakeProxi::FakeProxi(std::string file_path)
-    : read_file(true), reading_counter(0)
+    : read_file_(true), reading_counter_(0)
 {
   readDataFromFile(file_path);
   setData();
 }
 
 FakeProxi::FakeProxi(uint8_t value, uint8_t noise)
-    : read_file(false), value(value), noise(noise)
+    : read_file_(false), value_(value), noise_(noise)
 {
   setData();
 }
 
 void FakeProxi::setData()
 {
-  ref_time = high_resolution_clock::now();
+  ref_time_ = high_resolution_clock::now();
 }
 
 void FakeProxi::getData(Proximity* proxi)
 {
   bool update_time = checkTime();
-  if (read_file && update_time) {
-    reading_counter = std::min(reading_counter, (int64_t) val_read.size());
-    prev_reading = val_read[reading_counter-1];
+  if (read_file_ && update_time) {
+    reading_counter_ = std::min(reading_counter_, (int64_t) val_read_.size());
+    prev_reading_ = val_read_[reading_counter_-1];
   } else if (update_time) {
-    prev_reading = DataPoint<uint8_t>(kProxiTimeInterval*(reading_counter-1),
-                                      addNoiseToData(value, noise));
+    prev_reading_ = DataPoint<uint8_t>(kProxiTimeInterval*(reading_counter_-1),
+                                      addNoiseToData(value_, noise_));
   }
 
   // TODO(Anyone): Add timestamp
-  proxi->val = prev_reading.value;
+  proxi->val = prev_reading_.value;
 }
 
 void FakeProxi::readDataFromFile(std::string file_path)
@@ -99,7 +99,7 @@ void FakeProxi::readDataFromFile(std::string file_path)
       throw std::invalid_argument("Timestamp value incorrect");
     }
 
-    val_read.push_back(DataPoint<uint8_t>(temp[0], addNoiseToData(temp[1], temp[2])));
+    val_read_.push_back(DataPoint<uint8_t>(temp[0], addNoiseToData(temp[1], temp[2])));
     time_counter++;
   }
 
@@ -116,13 +116,13 @@ uint8_t FakeProxi::addNoiseToData(uint8_t value, uint8_t noise)
 bool FakeProxi::checkTime()
 {
   high_resolution_clock::time_point now = high_resolution_clock::now();
-  milliseconds time_span = duration_cast<milliseconds>(now - ref_time);
+  milliseconds time_span = duration_cast<milliseconds>(now - ref_time_);
 
-  if (time_span.count() < kProxiTimeInterval*reading_counter) {
+  if (time_span.count() < kProxiTimeInterval*reading_counter_) {
     return false;
   }
 
-  reading_counter = time_span.count()/kProxiTimeInterval + 1;
+  reading_counter_ = time_span.count()/kProxiTimeInterval + 1;
   return true;
 }
 
