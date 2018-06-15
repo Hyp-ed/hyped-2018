@@ -27,7 +27,7 @@
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
 #include "utils/io/can.hpp"
-
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -53,8 +53,7 @@ constexpr uint32_t kNumProximities = data::Sensors::kNumProximities;
  */
 class CanProxi : public ProxiInterface, public CanProccesor {
  public:
-  explicit CanProxi(uint8_t id);  // id must be < data::Sensors::kNumProximities
-  CanProxi(uint8_t id, Logger& log);
+  CanProxi(uint8_t id, Logger& log = utils::System::getLogger());
 
   // from ProxiInterface
   bool isOnline() override;
@@ -68,9 +67,9 @@ class CanProxi : public ProxiInterface, public CanProccesor {
   Logger& log_;
   uint8_t id_;
 
-  static bool    can_registered;
-  static bool    valid[kNumProximities];
-  static uint8_t data[kNumProximities];
+  static bool    can_registered_;
+  static bool    valid_[kNumProximities];
+  static uint8_t data_[kNumProximities];
 };
 
 }}  // namespace hyped::sensors
