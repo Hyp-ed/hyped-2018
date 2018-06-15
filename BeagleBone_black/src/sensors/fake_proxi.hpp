@@ -60,7 +60,10 @@ class FakeProxi : public ProxiInterface {
   const double kProxiTimeInterval = 10000;
 
   /*
-   * @brief    A function to load data from file to vector
+   * @brief    A function to load data from file to vector. The file format of the input
+   *           file has to be the following for each line
+   *
+   *              timestamp  value  noise
    */
   void readDataFromFile(std::string file_path);
 

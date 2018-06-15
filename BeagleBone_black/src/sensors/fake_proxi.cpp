@@ -56,7 +56,6 @@ void FakeProxi::setData()
 
 void FakeProxi::getData(Proximity* proxi)
 {
-  // TODO(Anyone): Update timestamp
   bool update_time = checkTime();
   if (read_file && update_time) {
     reading_counter = std::min(reading_counter, (int64_t) val_read.size());
@@ -66,6 +65,7 @@ void FakeProxi::getData(Proximity* proxi)
                                       addNoiseToData(value, noise));
   }
 
+  // TODO(Anyone): Add timestamp
   proxi->val = prev_reading.value;
 }
 
