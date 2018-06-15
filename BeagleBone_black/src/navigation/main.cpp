@@ -20,27 +20,62 @@
 
 #include <memory>
 
+#include "utils/system.hpp"
+
 namespace hyped {
 
 using data::Sensors;
+using data::State;
+using utils::System;
 
 namespace navigation {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      nav_()
-{/* EMPTY */}
+      nav_(System::getSystem().navigation_motors_sync_)
+{
+  updateData();
+}
 
 void Main::run()
 {
-  data::Navigation nav_data;
   std::unique_ptr<Sensors> last_readings(new Sensors());
   std::unique_ptr<Sensors> readings(new Sensors());
   log_.INFO("NAVIGATION", "Main started");
 
   *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
+    // State updates
+    State current_state = data_.getStateMachineData().current_state;
+    switch (current_state) {
+      case State::kIdle :
+        yield();
+        continue;
+      case State::kCalibrating :
+        if (!nav_.is_calibrating_) {
+          if (nav_.startCalibration()) {
+            log_.INFO("NAV", "Calibration started");
+          } else {
+            log_.ERR("NAV", "Calibration couldn't start");
+            yield();
+            continue;
+          }
+        }
+      case State::kReady :
+        break;
+      case State::kAccelerating :
+        if (nav_.is_calibrating_) {
+          if (nav_.finishCalibration())
+            log_.INFO("NAV", "Calibration finished");
+          else
+            log_.ERR("NAV", "Calibration couldn't finish");
+        }
+      default:
+        break;
+    }
+
+    // Data updates
     *readings = data_.getSensorsData();
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
@@ -58,11 +93,7 @@ void Main::run()
     else
       nav_.update(readings->imu);
 
-    nav_data.distance                   = nav_.getDisplacement();
-    nav_data.velocity                   = nav_.getVelocity();
-    nav_data.acceleration               = nav_.getAcceleration();
-    nav_data.emergency_braking_distance = nav_.getEmergencyBrakingDistance();
-    data_.setNavigationData(nav_data);
+    updateData();
 
     readings.swap(last_readings);
   }
@@ -91,6 +122,19 @@ bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
   return new_data.stripe_counter.count.timestamp != old_data.stripe_counter.count.timestamp;
+}
+
+void Main::updateData()
+{
+  data::Navigation nav_data;
+
+  nav_data.module_status              = nav_.getStatus();
+  nav_data.distance                   = nav_.getDisplacement();
+  nav_data.velocity                   = nav_.getVelocity();
+  nav_data.acceleration               = nav_.getAcceleration();
+  nav_data.emergency_braking_distance = nav_.getEmergencyBrakingDistance();
+
+  data_.setNavigationData(nav_data);
 }
 
 }}  // namespace hyped::navigation
