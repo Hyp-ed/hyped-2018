@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
       batteries.low_power_batteries[1].temperature);
 
     log.INFO("TEST", "");
-    Thread::sleep(1000);
+    Thread::sleep(100);
   }
 }
 
