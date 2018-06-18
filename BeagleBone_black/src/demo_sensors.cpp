@@ -27,6 +27,7 @@
 #include "sensors/vl6180.hpp"
 #include "sensors/can_proxi.hpp"
 
+#include "utils/concurrent/thread.hpp"
 #include "utils/system.hpp"
 #include "utils/logger.hpp"
 
@@ -35,9 +36,15 @@ constexpr uint8_t BMS_HP = 1;
 
 using hyped::data::Sensors;
 using hyped::data::Batteries;
+using hyped::data::Imu;
+using hyped::data::Proximity;
 
 using hyped::sensors::ProxiInterface;
+using hyped::sensors::ImuInterface;
+using hyped::sensors::BMSInterface;
+using hyped::sensors::BMS;
 
+using hyped::utils::concurrent::Thread;
 using hyped::utils::Logger;
 
 int main(int argc, char* argv[])
@@ -46,17 +53,47 @@ int main(int argc, char* argv[])
   Logger& log = hyped::utils::System::getLogger();
   log.INFO("MAIN", "system started, logger created");
 
+  // data
+  Proximity proxi;
+  Imu       imu;
+  Batteries batteries;
+
   log.INFO("MAIN", "creating sensors");
   log.INFO("MAIN", "creating VL6180");
-  ProxiInterface* proxi_here = new hyped::sensors::VL6180(0x29);
+  ProxiInterface* proxi_sensor = new hyped::sensors::VL6180(0x29);
 
-  Sensors   sensors;
-  Batteries batteries;
+  log.INFO("MAIN", "creating VL6180");
+  ImuInterface* imu_sensor = new hyped::sensors::MPU9250(log, 66, 0x08, 0x00);
+  
+
+  log.INFO("MAIN", "creating BMS");
+  BMS* bms;
+  bms = new BMS(0);
+  bms->start();
+  BMSInterface* bms1 = bms;
+  bms = new BMS(1);
+  bms->start();
+  BMSInterface* bms2 = bms;
+
   log.INFO("MAIN", "all sensors created, entering test loop");
   while (1) {
-    proxi_here->getData(&sensors.proxi_front[0]);
+    proxi_sensor->getData(&proxi);
+    imu_sensor->getData(&imu);
+    bms1->getData(&batteries.low_power_batteries[0]);
+    bms2->getData(&batteries.low_power_batteries[1]);
     log.INFO("TEST", "proxi here distance: %u",
-      sensors.proxi_front[0].val);
+      proxi.val);
+    log.INFO("TEST", "imu acc %f %f %f",
+      imu.acc.value[0], imu.acc.value[1], imu.acc.value[2]);
+    log.INFO("TEST", "imu gyr %f %f %f",
+      imu.gyr.value[0], imu.gyr.value[1], imu.gyr.value[2]);
+    log.INFO("TEST", "bms0 voltage %d",
+      batteries.low_power_batteries[0].voltage,
+      batteries.low_power_batteries[0].temperature);
+    log.INFO("TEST", "bms1 voltage %d",
+      batteries.low_power_batteries[1].voltage,
+      batteries.low_power_batteries[1].temperature);
+    Thread::sleep(1000);
   }
 }
 
