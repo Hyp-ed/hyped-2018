@@ -102,13 +102,27 @@ bool BMS::hasId(uint32_t id, bool extended)
 {
   if (!extended) return false;  // this BMS only understands extended IDs
 
-  return id_base_ <= id && id < id_base_ + bms::kIdSize;
+  if (id_base_ <= id && id < id_base_ + bms::kIdSize) return true;
+  if (id == 0x28) return true;
+
+  return false;
 }
 
 void BMS::processNewData(utils::io::can::Frame& message)
 {
   log_.DBG1("BMS", "module %u: received CAN message with id %d", id_, message.id);
-  log_.DBG2("BMS", "message data[0,1] %d %d", message.data[0], message.data[1]);
+  if (message.id == 0x28) {
+    // current reading
+    if (message.len < 3) {
+      log_.ERR("BMS", "module %u: current reading not enough data", id_);
+      return;
+    }
+
+    data_.current = (message.data[1] << 8) | (message.data[2]);
+    return;
+  }
+
+
   uint8_t offset = message.id - (bms::kIdBase + (bms::kIdIncrement * id_));
   switch (offset) {
     case 0x1:   // cells 1-4

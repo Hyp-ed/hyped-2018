@@ -121,6 +121,8 @@ struct Sensors : public Module {
 
 struct Battery {
   uint16_t  voltage;
+  uint16_t  current;
+  uint16_t  charge;
   int8_t    temperature;
 };
 
