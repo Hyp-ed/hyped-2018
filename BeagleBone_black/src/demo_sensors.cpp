@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
 
   // data
   Proximity proxi;
+  Proximity proxi2;
   Imu       imu;
   Batteries batteries;
 
@@ -75,24 +76,30 @@ int main(int argc, char* argv[])
   bms->start();
   BMSInterface* bms2 = bms;
 
+  log.INFO("MAIN", "creating can proxi");
+  ProxiInterface* proxi_can = new hyped::sensors::CanProxi(0);
+
   log.INFO("MAIN", "all sensors created, entering test loop");
   while (1) {
     proxi_sensor->getData(&proxi);
+    proxi_can->getData(&proxi2);
     imu_sensor->getData(&imu);
     bms1->getData(&batteries.low_power_batteries[0]);
     bms2->getData(&batteries.low_power_batteries[1]);
-    log.INFO("TEST", "proxi here distance: %u",
-      proxi.val);
+    log.INFO("TEST", "proxi here distance: %u", proxi.val);
+    log.INFO("TEST", "proxi can  distance: %u", proxi2.val);
     log.INFO("TEST", "imu acc %f %f %f",
       imu.acc.value[0], imu.acc.value[1], imu.acc.value[2]);
     log.INFO("TEST", "imu gyr %f %f %f",
       imu.gyr.value[0], imu.gyr.value[1], imu.gyr.value[2]);
-    log.INFO("TEST", "bms0 voltage %d",
+    log.INFO("TEST", "bms0 voltage, temp: %d %d",
       batteries.low_power_batteries[0].voltage,
       batteries.low_power_batteries[0].temperature);
-    log.INFO("TEST", "bms1 voltage %d",
+    log.INFO("TEST", "bms1 voltage, temp: %d %d",
       batteries.low_power_batteries[1].voltage,
       batteries.low_power_batteries[1].temperature);
+
+    log.INFO("TEST", "");
     Thread::sleep(1000);
   }
 }

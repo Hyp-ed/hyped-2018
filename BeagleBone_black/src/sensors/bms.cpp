@@ -29,6 +29,7 @@
 namespace hyped {
 namespace sensors {
 
+uint16_t BMS::current_ = 0;
 std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
 
 BMS::BMS(uint8_t id): BMS(id, 0, utils::System::getLogger())
@@ -118,7 +119,7 @@ void BMS::processNewData(utils::io::can::Frame& message)
       return;
     }
 
-    data_.current = (message.data[1] << 8) | (message.data[2]);
+    current_ = (message.data[1] << 8) | (message.data[2]);
     return;
   }
 

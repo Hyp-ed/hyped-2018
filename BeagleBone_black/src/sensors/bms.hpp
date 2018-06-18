@@ -66,7 +66,6 @@ struct Data {
   static constexpr uint8_t kCellNum           = 7;
   uint16_t voltage[kCellNum];
   int8_t   temperature;
-  uint16_t current;
 };
 
 }   // namespace bms
@@ -96,7 +95,7 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
     for (uint16_t v: data_.voltage) battery->voltage += v;
 
     battery->temperature = data_.temperature;
-    battery->current     = data_.current;
+    battery->current     = current_;
   }
 
   /**
@@ -129,6 +128,7 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
   uint32_t        id_base_;
   bool            running_;
 
+  static uint16_t current_;
   static std::vector<uint8_t> existing_ids_;
 };
 
