@@ -102,10 +102,12 @@ class Main: public Thread {
   data::Data& data_;
   data::StateMachine state_;
   data::Motors motor_data_;
+  Barrier post_calibration_barrier_;
   Communicator communicator_;
   int32_t target_velocity_;
   int16_t target_torque_;
   bool run_;
+  bool nav_calib_;
   bool motors_init_;
   bool motors_ready_;
   bool motors_operational_;

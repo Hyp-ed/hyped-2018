@@ -32,16 +32,28 @@ namespace motor_control {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
+      post_calibration_barrier_(System::getSystem().navigation_motors_sync_),
       communicator_(log),
       target_velocity_(0),
       target_torque_(0),
       run_(true),
+      nav_calib_(false),
       motors_init_(false),
       motors_ready_(false),
       all_motors_stopped_(false)
 {
   state_      = data_.getStateMachineData();
   motor_data_ = data_.getMotorData();
+  motor_data_.module_status = data::ModuleStatus::kStart;
+  motor_data_.velocity_1 = 0;
+  motor_data_.velocity_2 = 0;
+  motor_data_.velocity_3 = 0;
+  motor_data_.velocity_4 = 0;
+  motor_data_.torque_1 = 0;
+  motor_data_.torque_2 = 0;
+  motor_data_.torque_3 = 0;
+  motor_data_.torque_4 = 0;
+  data_.setMotorData(motor_data_);
 }
 
 void Main::run()
@@ -70,24 +82,21 @@ void Main::run()
 void Main::initMotors()
 {
   if (!motors_init_) {
-    motor_data_.module_status = data::ModuleStatus::kStart;
-    motor_data_.velocity_1 = 0;
-    motor_data_.velocity_2 = 0;
-    motor_data_.velocity_3 = 0;
-    motor_data_.velocity_4 = 0;
-    motor_data_.torque_1 = 0;
-    motor_data_.torque_2 = 0;
-    motor_data_.torque_3 = 0;
-    motor_data_.torque_4 = 0;
-    data_.setMotorData(motor_data_);
+
+    // Register controllers on CAN Bus
     communicator_.registerControllers();
+
+    // Configure controller parameters
     communicator_.configureControllers();
 
+    // If a failure occured during configuration, set motor status to critical failure
     if (communicator_.getFailure()) {
       motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
       data_.setMotorData(motor_data_);
       motors_init_ = true;  // Set boolean to true to prevent any further configuration attempts
       log_.ERR("MOTOR", "Could not configure motors");
+
+    // Otherwise update motor status to initialised
     } else {
       motor_data_.module_status = data::ModuleStatus::kInit;
       data_.setMotorData(motor_data_);
@@ -100,13 +109,21 @@ void Main::initMotors()
 void Main::prepareMotors()
 {
   if (!motors_ready_) {
+
+    // Set motors into operational mode
     communicator_.prepareMotors();
+
+    // Check for any errors and warning
     communicator_.healthCheck();
+
+    // If there is an error or warning, set motor status to critical failure
     if (communicator_.getFailure()) {
       motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
       data_.setMotorData(motor_data_);
       motors_ready_ = true;  // Set boolean to true to prevent any further operational attempts
       log_.ERR("MOTOR", "CRITICAL FAILURE, MOTORS NOT OPERATIONAL");
+
+    // Otherwise set motor status to ready
     } else {
       motor_data_.module_status = data::ModuleStatus::kReady;
       data_.setMotorData(motor_data_);
@@ -118,7 +135,12 @@ void Main::prepareMotors()
 
 void Main::accelerateMotors()
 {
-  // TODO(Sean) Implemement navigation barrier
+  // Hit the barrier to sync with navigation calibration
+  if (!nav_calib_) {
+    post_calibration_barrier_.wait();
+    nav_calib_ = true;
+  }
+
   log_.INFO("MOTOR", "Motor State: Accelerating\n");
   while (state_.current_state == data::State::kAccelerating) {
     // Check for state machine critical failure flag
