@@ -23,12 +23,14 @@
 
 #include "motor_control/communicator.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "utils/concurrent/barrier.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
 
 using data::NavigationType;
 using utils::concurrent::Thread;
+using utils::concurrent::Barrier;
 using utils::Logger;
 
 namespace motor_control {
@@ -99,6 +101,11 @@ class Main: public Thread {
     *  @return  { 16 bit integer - target torque }
     */
   int16_t decelerationTorque(NavigationType velocity);
+  /**
+    *  @brief  { Continously listen for Go/Stop Comms commands to slowly move pod }
+    */
+  void servicePropulsion();
+
   data::Data& data_;
   data::StateMachine state_;
   data::Motors motor_data_;

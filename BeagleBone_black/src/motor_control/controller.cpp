@@ -429,25 +429,21 @@ void Controller::enterOperational()
 
 void Controller::enterPreOperational()
 {
-  // Send shutdown command
-  SDOMessage.data[0]   = kWRITE_2_BYTES;
-  SDOMessage.data[1]   = 0x40;
-  SDOMessage.data[2]   = 0x60;
-  SDOMessage.data[3]   = 0x00;
-  SDOMessage.data[4]   = 0x06;
-  SDOMessage.data[5]   = 0x00;
-  SDOMessage.data[6]   = 0x00;
-  SDOMessage.data[7]   = 0x00;
+  this->checkState();
+  if (state_ != kReadyToSwitchOn) {
+    // Send shutdown command
+    SDOMessage.data[0]   = kWRITE_2_BYTES;
+    SDOMessage.data[1]   = 0x40;
+    SDOMessage.data[2]   = 0x60;
+    SDOMessage.data[3]   = 0x00;
+    SDOMessage.data[4]   = 0x06;
+    SDOMessage.data[5]   = 0x00;
+    SDOMessage.data[6]   = 0x00;
+    SDOMessage.data[7]   = 0x00;
 
-  sendSDO(SDOMessage);
-  log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
-
-  // Enter NMT Pre-operational
-  SDOMessage.data[0]   = kNMT_PREOPERATIONAL;
-  SDOMessage.data[1]   = node_id_;
-
-  can_.send(NMTMessage);
-  log_.INFO("MOTOR", "Controller %d: NMT Pre-Operational command sent", node_id_);
+    sendSDO(SDOMessage);
+    log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
+  }
 }
 
 void Controller::checkState()
