@@ -147,6 +147,8 @@ void VL6180::turnOff()
 
 uint8_t VL6180::getDistance()
 {
+  if (!on_) turnOn();
+
   if (continuous_mode_) {
     return continuousRangeDistance();
   } else {
@@ -315,8 +317,8 @@ void VL6180::readByte(uint16_t reg_add, uint8_t *data)
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
 
-  i2c_.write(i2c_addr_, buffer, 2);
-  i2c_.read(i2c_addr_, data, 1);
+  if (!i2c_.write(i2c_addr_, buffer, 2)) on_ = false;
+  if (!i2c_.read(i2c_addr_, data, 1)) on_ = false;
 }
 
 void VL6180::writeByte(uint16_t reg_add, char data)
@@ -326,7 +328,7 @@ void VL6180::writeByte(uint16_t reg_add, char data)
   buffer[1]=reg_add&0xFF;
   buffer[2]=data;
 
-  i2c_.write(i2c_addr_, buffer, 3);
+  if (!i2c_.write(i2c_addr_, buffer, 3)) on_ = false;
 }
 
 }}   // namespace hyped::sensors

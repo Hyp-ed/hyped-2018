@@ -85,26 +85,34 @@ void I2C::setSensorAddress(uint32_t addr)
   if (ret < 0) log_.ERR("I2C", "Could not set sensor address");
 }
 
-void I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
+bool I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
 {
-  if (fd_ < 0) return;  // early exit if no i2c device present
+  if (fd_ < 0) return false;  // early exit if no i2c device present
 
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::readHelper(fd_, rx, len);
-  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected",
-                           ret, len);
+  if (ret != len) {
+    log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected", ret, len);
+    return false;
+  }
+
+  return true;
 }
 
-void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
+bool I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
 {
-  if (fd_ < 0) return;  // early exit if no i2c device present
+  if (fd_ < 0) return false;  // early exit if no i2c device present
 
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::writeHelper(fd_, tx, len);
-  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected",
-                           ret, len);
+  if (ret != len) {
+    log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected", ret, len);
+    return false;
+  }
+
+  return true;
 }
 
 }}}   // namespace hyped::utils::io
