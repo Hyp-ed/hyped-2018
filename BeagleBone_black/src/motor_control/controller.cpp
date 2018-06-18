@@ -296,7 +296,8 @@ void Controller::enterOperational()
 {
   uint8_t state_count;
 
-  // Enter NMT Operational
+  // Send NMT Operational message to tranition from state 0 (Not ready to switch on)
+  // to state 1 (Switch on disabled)
   NMTMessage.data[0]   = kNMT_OPERATIONAL;
   NMTMessage.data[1]   = node_id_;
 
@@ -347,11 +348,13 @@ void Controller::enterOperational()
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
   this->checkState();
 
-  // Check state three times, if it hasn't changed then throw critical failure
+  // Check state three times,  waiting 100ms in between each check.
+  // If it hasn't changed then throw critical failure
   for (state_count = 0; state_count < 3; state_count++) {
     if (state_ == kReadyToSwitchOn) {
       break;
     } else {
+      Thread::sleep(100);
       this->checkState();
     }
   }
@@ -376,11 +379,13 @@ void Controller::enterOperational()
   log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
   this->checkState();
 
-  // Check state three times, if it hasn't changed then throw critical failure
+  // Check state three times,  waiting 100ms in between each check.
+  // If it hasn't changed then throw critical failure
   for (state_count = 0; state_count < 3; state_count++) {
     if (state_ == kSwitchedOn) {
       break;
     } else {
+      Thread::sleep(100);
       this->checkState();
     }
   }
