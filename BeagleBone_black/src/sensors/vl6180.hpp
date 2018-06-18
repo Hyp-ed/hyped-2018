@@ -24,6 +24,7 @@
 #include "sensors/interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/i2c.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -34,7 +35,7 @@ namespace sensors {
 
 class VL6180: public ProxiInterface {
  public:
-  VL6180(uint8_t i2c_addr, Logger& log);
+  VL6180(uint8_t i2c_addr, Logger& log = utils::System::getLogger());
   ~VL6180();
 
   bool isOnline() override;
