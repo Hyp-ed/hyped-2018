@@ -21,6 +21,7 @@
 #include "sensors/main.hpp"
 
 #include "sensors/bms.hpp"
+#include "sensors/can_proxi.hpp"
 #include "sensors/mpu9250.hpp"
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
@@ -52,10 +53,9 @@ Main::Main(uint8_t id, Logger& log)
     proxi_[i] = proxi;
   }
 
-  // TODO(anyone): change this to use CAN-based proxies
+  // create CAN-based proximities
   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
+    CanProxi* proxi = new CanProxi(i, log_);
     can_proxi_[i] = proxi;
   }
 
