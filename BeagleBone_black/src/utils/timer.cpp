@@ -27,10 +27,10 @@ namespace utils {
 
 uint64_t Timer::time_start_ = Timer::getTimeMicros();
 
-uint64_t Timer::getTimeMillis()
-{
-  return getTimeMicros() / 1000;
-}
+// uint64_t Timer::getTimeMillis()
+// {
+//   return getTimeMicros() / 1000;
+// }
 
 uint64_t Timer::getTimeMicros()
 {
