@@ -95,9 +95,9 @@ void Communicator::enterPreOperational()
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
   controller1_.sendTargetVelocity(target_velocity);
-  controller2_.sendTargetVelocity(target_velocity);
+  controller2_.sendTargetVelocity(-target_velocity);
   controller3_.sendTargetVelocity(target_velocity);
-  controller4_.sendTargetVelocity(target_velocity);
+  controller4_.sendTargetVelocity(-target_velocity);
 }
 
 void Communicator::sendTargetTorque(int16_t target_torque)
