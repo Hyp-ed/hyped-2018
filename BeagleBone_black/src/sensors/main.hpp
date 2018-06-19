@@ -59,14 +59,9 @@ class Main: public Thread {
   // batteries
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
 
-  // nav sensors
-  ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  ProxiInterface* can_proxi_[data::Sensors::kNumProximities];
-
-  // uint8_t         chip_select_[data::Sensors::kNumImus];
-  // ImuInterface*   imu_[data::Sensors::kNumImus];
   ImuManager imu_manager_;
-  ProxiManager proxi_manager_;
+  ProxiManager proxi_manager_front_;
+  ProxiManager proxi_manager_back_;
 };
 
 }}  // namespace hyped::sensors

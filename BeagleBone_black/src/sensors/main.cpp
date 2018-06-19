@@ -21,7 +21,6 @@
 #include "sensors/main.hpp"
 
 #include "sensors/bms.hpp"
-#include "sensors/can_proxi.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -36,36 +35,21 @@ Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
       imu_manager_(id, log),
-      proxi_manager_(id, log)
+      proxi_manager_front_(id, log, true),
+      proxi_manager_back_(id, log, false)
 {
-  // create BMS LP
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
-    bms->start();
-    bms_[i] = bms;
-  }
-
-  // // TODO(anyone): change this to use CAN-based proxies
-  // for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-  //   // initialisation of all proxi sensors
-  //   VL6180* proxi = new VL6180(0x29, log_);
-  //   proxi->setContinuousRangingMode();
-  //   can_proxi_[i] = proxi;
+  // // create BMS LP
+  // for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+  //   BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
+  //   bms->start();
+  //   bms_[i] = bms;
   // }
-
-
-  // Create Proxi manager
-  proxi_manager_.config(&sensors_.proxi);
-
-  // create CAN-based proximities
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    CanProxi* proxi = new CanProxi(i, log_);
-    can_proxi_[i] = proxi;
-  }
-
-
   // Config new IMU manager
   imu_manager_.config(&sensors_.imu);
+
+  // Create Proxi manager
+  proxi_manager_front_.config(&sensors_.proxi_front);
+  proxi_manager_back_.config(&sensors_.proxi_back);
 }
 
 void Main::run()
@@ -96,19 +80,4 @@ void Main::run()
 //
 //   sleep(100);
 // }
-
-// void Main::updateProxi()
-// {
-//   // update front cluster of proximities
-//   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-//     proxi_[i]->getData(&sensors_.proxi_front[i]);
-//   }
-//
-//   // update back cluster of proximities
-//   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-//     can_proxi_[i]->getData(&sensors_.proxi_back[i]);
-//   }
-//   sleep(10);
-// }
-
 }}  // namespace hyped::sensors

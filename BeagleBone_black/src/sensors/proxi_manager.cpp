@@ -20,6 +20,7 @@
 
 #include "sensors/proxi_manager.hpp"
 
+#include "sensors/can_proxi.hpp"
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
 
@@ -30,15 +31,22 @@ using data::Sensors;
 
 namespace sensors {
 
-ProxiManager::ProxiManager(uint8_t id, Logger& log)
+ProxiManager::ProxiManager(uint8_t id, Logger& log, bool isFront)
     : Thread(id, log),
       data_(data::Data::getInstance())
 {
-  // create Proximities
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    proxi_[i] = proxi;
+  if (isFront) {
+    // create CAN-based proximities
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      CanProxi* proxi = new CanProxi(i, log_);
+      proxi_[i] = proxi;
+    }
+  } else {
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      VL6180* proxi = new VL6180(0x29, log_);
+      proxi->setContinuousRangingMode();
+      proxi_[i] = proxi;
+    }
   }
 }
 
@@ -47,12 +55,12 @@ void ProxiManager::run()
   while (1) {
     // update front cluster of proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    proxi_[i]->getData(&((*sensors_proxi_)[i]));
+    proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
   }
 }
 
-void ProxiManager::config(array<Proximity, data::Sensors::kNumImus> *proxi)
+void ProxiManager::config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
 {
   sensors_proxi_ = proxi;
 }
