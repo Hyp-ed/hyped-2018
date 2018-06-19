@@ -17,6 +17,7 @@
  */
 
 #include "sensors/fake_imu.hpp"
+#include "utils/concurrent/thread.hpp"
 
 #include <cstdio>
 #include <unistd.h>
@@ -24,6 +25,7 @@
 using hyped::data::Imu;
 using hyped::data::NavigationVector;
 using hyped::sensors::FakeImu;
+using hyped::utils::concurrent::Thread;
 
 int main()
 {
@@ -40,6 +42,6 @@ int main()
     printf("From generator: %fm/s^2 @ %d\n", reading.acc.value[0], reading.acc.timestamp);
     printf("From generator: %frad/s @ %d\n", reading.gyr.value[0], reading.gyr.timestamp);
 
-    usleep(10);
+    Thread::sleep(10);
   }
 }

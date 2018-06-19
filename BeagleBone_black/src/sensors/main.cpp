@@ -21,7 +21,7 @@
 #include "sensors/main.hpp"
 
 #include "sensors/bms.hpp"
-#include "sensors/vl6180.hpp"
+#include "sensors/can_proxi.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -53,8 +53,16 @@ Main::Main(uint8_t id, Logger& log)
   //   can_proxi_[i] = proxi;
   // }
 
+
   // Create Proxi manager
   proxi_manager_.config(&sensors_.proxi);
+
+  // create CAN-based proximities
+  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+    CanProxi* proxi = new CanProxi(i, log_);
+    can_proxi_[i] = proxi;
+  }
+
 
   // Config new IMU manager
   imu_manager_.config(&sensors_.imu);

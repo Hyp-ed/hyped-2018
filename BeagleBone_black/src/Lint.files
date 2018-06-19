@@ -23,6 +23,8 @@ sensors/main.hpp
 sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
+sensors/can_proxi.hpp
+sensors/can_proxi.cpp
 sensors/interface.hpp
 sensors/imu_manager.hpp
 sensors/imu_manager.cpp
