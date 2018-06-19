@@ -17,6 +17,7 @@ SRCS := \
   sensors/vl6180.cpp \
   sensors/mpu9250.cpp \
   sensors/fake_imu.cpp \
+  sensors/keyence.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \

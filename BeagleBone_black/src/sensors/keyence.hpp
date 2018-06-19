@@ -1,7 +1,7 @@
 /*
- * Author: Martin Kristien
+ * Author: Ragnor Comerford
  * Organisation: HYPED
- * Date: 13/03/18
+ * Date: 19/06/18
  * Description:
  * Main manages sensor drivers, collects data from sensors and updates
  * shared Data::Sensors structure. Main is not responsible for initialisation
@@ -24,15 +24,14 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
 
 #include <cstdint>
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/keyence.hpp"
-#include "sensors/interface.hpp"
+
 
 namespace hyped {
 
@@ -41,34 +40,22 @@ using utils::Logger;
 
 namespace sensors {
 
-class CANProxi;
-class Keyence;
-class Main: public Thread {
+
+class Keyence: public Thread {
  public:
-  explicit Main(uint8_t id, Logger& log);
+  explicit Keyence(Logger& log);
   void run() override;
+  data::StripeCounter getStripeCounter();
 
  private:
-  data::Data&     data_;
 
-  // master data structures
+  // master data structure
   data::Sensors   sensors_;
-  data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  // batteries
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
+  
 
-  // nav sensors
-  ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  ProxiInterface* can_proxi_[data::Sensors::kNumProximities];
-
-  uint8_t         chip_select_[data::Sensors::kNumImus];
-  ImuInterface*   imu_[data::Sensors::kNumImus];
-
-  Keyence* keyence;
 };
-
 }}  // namespace hyped::sensors
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_

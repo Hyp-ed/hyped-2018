@@ -22,6 +22,7 @@
 
 #include "sensors/bms.hpp"
 #include "sensors/can_proxi.hpp"
+#include "sensors/keyence.hpp"
 #include "sensors/mpu9250.hpp"
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
@@ -31,6 +32,7 @@ namespace hyped {
 using data::Data;
 using data::Sensors;
 using data::Batteries;
+using data::StripeCounter;
 
 namespace sensors {
 
@@ -63,6 +65,10 @@ Main::Main(uint8_t id, Logger& log)
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
     imu_[i] = new MPU9250(log_, chip_select_[i], true, 0x0);
   }
+
+  // create Keyence
+  keyence = new Keyence(log_);
+  keyence->start();
 }
 
 void Main::run()
@@ -91,6 +97,7 @@ void Main::run()
     }
 
     data_.setSensorsData(sensors_);
+    data_.setStripeCounterData(keyence->getStripeCounter());
     data_.setBatteryData(batteries_);
     sleep(1000);
   }
