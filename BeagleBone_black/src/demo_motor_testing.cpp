@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
   controller->registerController();
   controller->configure();
-  Thread::sleep(2000);
   controller->enterOperational();
+  controller->sendTargetVelocity(500);
   Thread::sleep(10000);
 }

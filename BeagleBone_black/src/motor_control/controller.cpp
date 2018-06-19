@@ -185,7 +185,7 @@ void Controller::configure()
   SDOMessage.data[7]   = 0x00;
 
   sendSDO(SDOMessage);
-  log_.DBG1("MOTOR", "Controller %d: Configuring under voltage limit", node_id_);
+  log_.DBG1("MOTOR", "Controller %d: Configuring under voltage minimum", node_id_);
 
   // Set motor temperature sensor
   SDOMessage.data[0]   = kWRITE_1_BYTE;
@@ -874,8 +874,12 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
     log_.DBG1("MOTOR", "Controller %d: Feedback type configured", node_id_);
     return;
   }
-  if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x08) {
+  if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x02) {
     log_.DBG1("MOTOR", "Controller %d: Motor phase offset configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x40 && index_2 == 0x20 && sub_index == 0x08) {
+    log_.DBG1("MOTOR", "Controller %d: Motor phase offset compensation configured", node_id_);
     return;
   }
   if (index_1 == 0x54 && index_2 == 0x20 && sub_index == 0x00) {
@@ -883,7 +887,15 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
     return;
   }
   if (index_1 == 0x55 && index_2 == 0x20 && sub_index == 0x03) {
+    log_.DBG1("MOTOR", "Controller %d: Under voltage minimum configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x55 && index_2 == 0x20 && sub_index == 0x01) {
     log_.DBG1("MOTOR", "Controller %d: Under voltage limit configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x57 && index_2 == 0x20 && sub_index == 0x01) {
+    log_.DBG1("MOTOR", "Controller %d: Temperature sensor configured", node_id_);
     return;
   }
   if (index_1 == 0x75 && index_2 == 0x60 && sub_index == 0x00) {
@@ -892,6 +904,26 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
   }
   if (index_1 == 0x76 && index_2 == 0x60 && sub_index == 0x00) {
     log_.DBG1("MOTOR", "Controller %d: Motor rated torque configured", node_id_);
+    return;
+  }
+  if (index_1 == 0xF6 && index_2 == 0x60 && sub_index == 0x01) {
+    log_.DBG1("MOTOR", "Controller %d: Current control torque P gain configured", node_id_);
+    return;
+  }
+  if (index_1 == 0xF6 && index_2 == 0x60 && sub_index == 0x02) {
+    log_.DBG1("MOTOR", "Controller %d: Current control torque I gain configured", node_id_);
+    return;
+  }
+  if (index_1 == 0xF6 && index_2 == 0x60 && sub_index == 0x03) {
+    log_.DBG1("MOTOR", "Controller %d: Current control flux P gain configured", node_id_);
+    return;
+  }
+  if (index_1 == 0xF6 && index_2 == 0x60 && sub_index == 0x04) {
+    log_.DBG1("MOTOR", "Controller %d: Current control flux I gain configured", node_id_);
+    return;
+  }
+  if (index_1 == 0xF6 && index_2 == 0x60 && sub_index == 0x05) {
+    log_.DBG1("MOTOR", "Controller %d: Current control ramp configured", node_id_);
     return;
   }
 
