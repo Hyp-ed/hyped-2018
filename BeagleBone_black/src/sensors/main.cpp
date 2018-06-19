@@ -21,7 +21,6 @@
 #include "sensors/main.hpp"
 
 #include "sensors/bms.hpp"
-#include "sensors/mpu9250.hpp"
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
 
@@ -36,7 +35,8 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      chip_select_ {31, 50, 48, 51}
+      imu_manager_(id, log),
+      proxi_manager_(id, log)
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
@@ -45,55 +45,62 @@ Main::Main(uint8_t id, Logger& log)
     bms_[i] = bms;
   }
 
-  // create Proximities
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    proxi_[i] = proxi;
-  }
+  // // TODO(anyone): change this to use CAN-based proxies
+  // for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+  //   // initialisation of all proxi sensors
+  //   VL6180* proxi = new VL6180(0x29, log_);
+  //   proxi->setContinuousRangingMode();
+  //   can_proxi_[i] = proxi;
+  // }
 
-  // TODO(anyone): change this to use CAN-based proxies
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    can_proxi_[i] = proxi;
-  }
+  // Create Proxi manager
+  proxi_manager_.config(&sensors_.proxi);
 
-  // create IMUs, might consider using fake_imus based on input arguments
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imu_[i] = new MPU9250(log_, chip_select_[i], true, 0x0);
-  }
+  // Config new IMU manager
+  imu_manager_.config(&sensors_.imu);
 }
 
 void Main::run()
 {
+  // Create 2 seperate threads for imu and proxi data
+  // Get the data maybe a imu 1:3 proxi ratio
   while (1) {
-    // keep updating data_ based on values read from sensors
+    // Write to the data structure here
 
-    // update BMS LP
-    for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-      bms_[i]->getData(&batteries_.low_power_batteries[i]);
-    }
-
-    // update front cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      proxi_[i]->getData(&sensors_.proxi_front[i]);
-    }
-
-    // update back cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      can_proxi_[i]->getData(&sensors_.proxi_back[i]);
-    }
-
-    // update imus
-    for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imu_[i]->getData(&sensors_.imu[i]);
-    }
-
+    // Update sensor data structure
     data_.setSensorsData(sensors_);
-    data_.setBatteryData(batteries_);
-    sleep(1000);
+    yield();
   }
 }
+
+// void Main::updateBms()
+// {
+//   // keep updating data_ based on values read from sensors
+//   // update BMS LP
+//   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+//     bms_[i]->getData(&batteries_.low_power_batteries[i]);
+//   }
+//
+//   // Update battery data structure
+//   batteries_ = data_.getBatteriesData();
+//   bms_[0]->getData(&batteries.low_power_batteries[0]);
+//   data_.setBatteryData(batteries_);
+//
+//   sleep(100);
+// }
+
+// void Main::updateProxi()
+// {
+//   // update front cluster of proximities
+//   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+//     proxi_[i]->getData(&sensors_.proxi_front[i]);
+//   }
+//
+//   // update back cluster of proximities
+//   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+//     can_proxi_[i]->getData(&sensors_.proxi_back[i]);
+//   }
+//   sleep(10);
+// }
 
 }}  // namespace hyped::sensors

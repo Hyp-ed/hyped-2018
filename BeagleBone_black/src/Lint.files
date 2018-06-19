@@ -24,6 +24,10 @@ sensors/main.cpp
 sensors/bms.cpp
 sensors/bms.hpp
 sensors/interface.hpp
+sensors/imu_manager.hpp
+sensors/imu_manager.cpp
+sensors/proxi_manager.cpp
+sensors/proxi_manager.hpp
 sensors/fake_imu.hpp
 sensors/fake_imu.cpp
 sensors/mpu9250.hpp

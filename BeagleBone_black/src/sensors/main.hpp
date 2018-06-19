@@ -31,7 +31,9 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/imu_manager.hpp"
 #include "sensors/interface.hpp"
+#include "sensors/proxi_manager.hpp"
 
 namespace hyped {
 
@@ -61,8 +63,10 @@ class Main: public Thread {
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
   ProxiInterface* can_proxi_[data::Sensors::kNumProximities];
 
-  uint8_t         chip_select_[data::Sensors::kNumImus];
-  ImuInterface*   imu_[data::Sensors::kNumImus];
+  // uint8_t         chip_select_[data::Sensors::kNumImus];
+  // ImuInterface*   imu_[data::Sensors::kNumImus];
+  ImuManager imu_manager_;
+  ProxiManager proxi_manager_;
 };
 
 }}  // namespace hyped::sensors
