@@ -25,6 +25,8 @@
 namespace hyped {
 namespace utils {
 
+uint64_t Timer::time_start_ = Timer::getTimeMicros();
+
 uint64_t Timer::getTimeMillis()
 {
   return getTimeMicros() / 1000;
@@ -36,7 +38,7 @@ uint64_t Timer::getTimeMicros()
   if (gettimeofday(&tv, (struct timezone *)0) < 0) {
     return 0;
   }
-  return (static_cast<uint64_t>(tv.tv_sec)* 1000000) + tv.tv_usec;
+  return (static_cast<uint64_t>(tv.tv_sec)* 1000000) + tv.tv_usec - time_start_;
 }
 
 Timer::Timer()

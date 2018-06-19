@@ -46,6 +46,7 @@ class Timer {
   uint64_t elapsed_;
   uint64_t start_;
   uint64_t stop_;
+  static uint64_t time_start_;
   NO_COPY_ASSIGN(Timer);
 };
 
