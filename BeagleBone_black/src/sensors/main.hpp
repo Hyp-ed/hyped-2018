@@ -34,6 +34,7 @@
 #include "sensors/imu_manager.hpp"
 #include "sensors/interface.hpp"
 #include "sensors/proxi_manager.hpp"
+#include "sensors/bms_manager.hpp"
 
 namespace hyped {
 
@@ -56,12 +57,10 @@ class Main: public Thread {
   data::Sensors   sensors_;
   data::Batteries batteries_;
 
-  // batteries
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
-
   ImuManager imu_manager_;
   ProxiManager proxi_manager_front_;
   ProxiManager proxi_manager_back_;
+  BmsManager  battery_manager_lp;
 };
 
 }}  // namespace hyped::sensors

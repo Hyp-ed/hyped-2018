@@ -20,7 +20,6 @@
 
 #include "sensors/main.hpp"
 
-#include "sensors/bms.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -36,26 +35,22 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance()),
       imu_manager_(id, log),
       proxi_manager_front_(id, log, true),
-      proxi_manager_back_(id, log, false)
+      proxi_manager_back_(id, log, false),
+      battery_manager_lp(id, log)
 {
-  // // create BMS LP
-  // for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-  //   BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
-  //   bms->start();
-  //   bms_[i] = bms;
-  // }
   // Config new IMU manager
   imu_manager_.config(&sensors_.imu);
 
-  // Create Proxi manager
+  // Config Proxi manager
   proxi_manager_front_.config(&sensors_.proxi_front);
   proxi_manager_back_.config(&sensors_.proxi_back);
+
+  // Config BMS Manager
+  battery_manager_lp.config(&batteries_.low_power_batteries);
 }
 
 void Main::run()
 {
-  // Create 2 seperate threads for imu and proxi data
-  // Get the data maybe a imu 1:3 proxi ratio
   while (1) {
     // Write to the data structure here
 
@@ -64,20 +59,4 @@ void Main::run()
     yield();
   }
 }
-
-// void Main::updateBms()
-// {
-//   // keep updating data_ based on values read from sensors
-//   // update BMS LP
-//   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-//     bms_[i]->getData(&batteries_.low_power_batteries[i]);
-//   }
-//
-//   // Update battery data structure
-//   batteries_ = data_.getBatteriesData();
-//   bms_[0]->getData(&batteries.low_power_batteries[0]);
-//   data_.setBatteryData(batteries_);
-//
-//   sleep(100);
-// }
 }}  // namespace hyped::sensors
