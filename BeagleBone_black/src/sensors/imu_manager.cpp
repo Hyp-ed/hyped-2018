@@ -37,7 +37,7 @@ ImuManager::ImuManager(Logger& log)
 {
   // create IMUs, might consider using fake_imus based on input arguments
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imu_[i] = new MPU9250(log, 60, 0x08, 0x00);;
+    imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);;
   }
 }
 
