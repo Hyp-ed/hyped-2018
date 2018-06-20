@@ -76,7 +76,7 @@ void Main::run()
       old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
       old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
     }
-    
+
     // Update battery data only when there is some change
     if (updateBattery()) {
       data_.setBatteryData(batteries_);
