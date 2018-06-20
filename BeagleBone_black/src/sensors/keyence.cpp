@@ -38,20 +38,20 @@ using utils::io::GPIO;
 
 namespace sensors {
 
-Keyence::Keyence(Logger& log)
+Keyence::Keyence(Logger& log, int pin)
     : Thread(log)
 {}
 
 void Keyence::run() {
 
 namespace io = hyped::utils::io;
-GPIO pin_73(73, io::gpio::kIn);
-uint8_t val = pin_73.wait();  //Ignore first reading
+GPIO thepin(pin, io::gpio::kIn);
+uint8_t val = thepin.wait();  //Ignore first reading
 stripe_counter_.count.value = 0;
 stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
 
   while (1) {
-    val = pin_73.wait();
+    val = thepin.wait();
     if(val == 1) {
       stripe_counter_.count.value = stripe_counter_.count.value+1;
       stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();

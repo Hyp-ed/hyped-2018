@@ -66,8 +66,9 @@ Main::Main(uint8_t id, Logger& log)
     imu_[i] = new MPU9250(log_, chip_select_[i], true, 0x0);
   }
 
-  // create Keyence
-  keyence = new Keyence(log_);
+  // @TODO (Ragnor) Add second Keyence?
+  // create Keyence 
+  keyence = new Keyence(log_, 73);
   keyence->start();
 }
 
