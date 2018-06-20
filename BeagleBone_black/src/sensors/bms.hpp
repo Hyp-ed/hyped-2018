@@ -149,11 +149,12 @@ class BMSHP : public CanProccesor, public BMSInterface {
   void processNewData(utils::io::can::Frame& message) override;
 
  private:
+  Logger&         log_;
   uint16_t        id_;                // CAN id to be used
   Battery         local_data_;        // stores values from CAN
   uint64_t        last_update_time_;  // stores arrival time of CAN message
   // for making sure only one object per BMS unit exist
-  static std::vector<uint8_t> existing_ids_;
+  static std::vector<uint16_t> existing_ids_;
   NO_COPY_ASSIGN(BMSHP);
 };
 
