@@ -56,16 +56,10 @@ stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
       stripe_counter_.count.value = stripe_counter_.count.value+1;
       stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
     }    
-    
-
   }
-
-
-
 }
 
 StripeCounter Keyence::getStripeCounter() {
-
 return stripe_counter_;
 }
 }
