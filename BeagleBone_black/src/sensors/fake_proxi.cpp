@@ -106,11 +106,19 @@ void FakeProxi::readDataFromFile(std::string file_path)
   file.close();
 }
 
-uint8_t FakeProxi::addNoiseToData(uint8_t value, uint8_t noise)
+uint8_t FakeProxi::addNoiseToData(uint8_t value, double noise)
 {
   std::default_random_engine generator;
   std::normal_distribution<double> distribution(value, noise);
-  return (uint8_t) (distribution(generator));
+
+  double ans = distribution(generator);
+  if (ans > 255)
+    return 255;
+
+  if (ans < 0)
+    return 0;
+
+  return ans;
 }
 
 bool FakeProxi::checkTime()
