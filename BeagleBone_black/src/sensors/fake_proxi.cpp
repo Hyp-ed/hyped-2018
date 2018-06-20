@@ -78,9 +78,9 @@ void FakeProxi::readDataFromFile(std::string file_path)
     throw std::invalid_argument("Wrong file path");
   }
 
-  int timestamp = kProxiTimeInterval;
-  int counter;
-  int time_counter = 0;
+  int8_t timestamp = kProxiTimeInterval;
+  int8_t counter;
+  int32_t time_counter = 0;
   int temp[4];
   std::string line;
   while (getline(file, line)) {
