@@ -105,6 +105,10 @@ class Main: public Thread {
     *  @brief  { Continously listen for Go/Stop Comms commands to slowly move pod }
     */
   void servicePropulsion();
+  /**
+    *  @brief  { Updates the data structure with the velocity and torque of the motors }
+    */
+  void updateMotorVelocity();
 
   data::Data& data_;
   data::StateMachine state_;

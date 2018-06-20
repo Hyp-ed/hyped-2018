@@ -65,8 +65,10 @@ void Main::run()
     state_ = data_.getStateMachineData();
     if (state_.current_state == data::State::kIdle) {
       this->initMotors();
+      yield();
     } else if (state_.current_state == data::State::kCalibrating) {
       this->prepareMotors();
+      yield();
     } else if (state_.current_state == data::State::kAccelerating) {
       this->accelerateMotors();
     } else if (state_.current_state == data::State::kDecelerating) {
