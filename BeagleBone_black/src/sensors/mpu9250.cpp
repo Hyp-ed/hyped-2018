@@ -111,7 +111,9 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scal
     : log_(log),
     gpio_(pin, kDirection, log),
     acc_scale_(acc_scale),
-    gyro_scale_(gyro_scale)
+    gyro_scale_(gyro_scale),
+    acc_bias_ {},
+    gyro_bias_ {}
 {
   init();
   log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
@@ -121,21 +123,26 @@ void MPU9250::init()
 {
   // Set pin high
   gpio_.set();
-
-  // calibrateSensors();
+  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
+  writeByte(kMpuRegUserCtrl, 0x10);   // set I2C_IF_DIS to disable slave mode I2C bus
 
   // Test connection
   while (!whoAmI());
+  // calibrateSensors();
+  // writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
+  // writeByte(kMpuRegUserCtrl, 0x10);   // set I2C_IF_DIS to disable slave mode I2C bus
 
-  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
-  Thread::sleep(200);
-  writeByte(kMpuRegUserCtrl, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
-  writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
-  writeByte(kMpuRegConfig, 0x01);
-  writeByte(kGyroConfig, 0x00);
-  writeByte(kAccelConfig, 0x00);
-  writeByte(kAccelConfig2, 0x01);
+  // Test connection
+  // while (!whoAmI());
+
+  // Thread::sleep(200);
+  // PWR_MGMT_1, 0x03)
+  // writeByte(kMpuRegPwrMgmt1, 0x03);          // Clock Source
+  // writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
+  // writeByte(kMpuRegConfig, 0x01);
+  // writeByte(kGyroConfig, 0x00);
+  // writeByte(kAccelConfig, 0x00);
+  // writeByte(kAccelConfig2, 0x01);
   setAcclScale(acc_scale_);
   setGyroScale(gyro_scale_);
 }
@@ -187,7 +194,7 @@ void MPU9250::calibrateSensors()
   fifo_count = ( (uint16_t) data[0] << 8) | data[1];
   // How many sets of full gyro and accelerometer data for averaging
   packet_count = fifo_count/12;
-
+  log_.INFO("IMU", "packte_count %d", packet_count);
   for (ii = 0; ii < packet_count; ii++) {
     int16_t acc_temp[3] = {0, 0, 0}, gyro_temp[3]  = {0, 0, 0};
 
@@ -346,16 +353,16 @@ void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 
 void MPU9250::getAcclData()
 {
-  uint8_t response[6];
+  uint8_t response[6] = {};
   int16_t bit_data;
   float data;
   int i;
 
   readBytes(kAccelXoutH, response, 6);
   for (i = 0; i < 3; i++) {
-    bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+    bit_data = (response[i*2] << 8) | response[i*2+1];
     data = static_cast<float>(bit_data);
-    accel_data_[i] = data/acc_divider_  * 9.80665;   // - acc_bias_[i];
+    accel_data_[i] = (data/acc_divider_ - acc_bias_[i]) * 9.80665 ;
   }
 }
 
