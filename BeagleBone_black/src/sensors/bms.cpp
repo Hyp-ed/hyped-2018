@@ -31,24 +31,12 @@ namespace sensors {
 
 std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
 
-BMS::BMS(uint8_t id): BMS(id, 0, utils::System::getLogger())
-{ /* Do nothing, delegate to the other constructor */ }
-
-BMS::BMS(uint8_t id, data::Battery* battery_unit)
-    : BMS(id, battery_unit, utils::System::getLogger())
-{ /* Do nothing, delegate to the other constructor */ }
-
 BMS::BMS(uint8_t id, Logger& log)
-    : BMS(id, 0, log)
-{ /* Do nothing, delegate to the other constructor */ }
-
-BMS::BMS(uint8_t id, data::Battery* battery_unit, Logger& log)
     : Thread(log),
-      can_(Can::getInstance()),
       data_({}),
-      battery_unit_(battery_unit),
       id_(id),
       id_base_(bms::kIdBase + (bms::kIdIncrement * id_)),
+      can_(Can::getInstance()),
       running_(false)
 {
   ASSERT(id < data::Batteries::kNumLPBatteries);
@@ -132,18 +120,19 @@ void BMS::processNewData(utils::io::can::Frame& message)
   }
 }
 
-void BMS::update()
+
+bool BMS::isOnline()
 {
-  if (!battery_unit_) {
-    log_.ERR("BMS", "module %u: does not have data::Battery pointer");
-    return;
-  }
+  // TODO(anyone): rethink this
+  return false;
+}
 
-  uint16_t voltage = 0;
-  for (uint16_t v : data_.voltage) voltage += v;
+void BMS::getData(Battery* battery)
+{
+  battery->voltage = 0;
+  for (uint16_t v: data_.voltage) battery->voltage += v;
 
-  battery_unit_->voltage      = voltage;
-  battery_unit_->temperature  = data_.temperature;
+  battery->temperature = data_.temperature;
 }
 
 }}  // namespace hyped::sensors

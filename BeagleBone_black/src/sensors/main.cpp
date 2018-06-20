@@ -41,7 +41,7 @@ Main::Main(uint8_t id, Logger& log)
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
+    BMS* bms = new BMS(i, log_);
     bms->start();
     bms_[i] = bms;
   }
