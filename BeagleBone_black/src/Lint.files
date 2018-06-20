@@ -32,6 +32,8 @@ sensors/mpu9250.hpp
 sensors/mpu9250.cpp
 sensors/vl6180.hpp
 sensors/vl6180.cpp
+sensors/keyence.cpp
+sensors/keyence.hpp
 communications/main.hpp
 communications/main.cpp
 communications/communications.hpp

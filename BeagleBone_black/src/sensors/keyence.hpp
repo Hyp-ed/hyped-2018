@@ -43,19 +43,15 @@ namespace sensors {
 
 class Keyence: public Thread {
  public:
-  explicit Keyence(Logger& log);
+  explicit Keyence(Logger& log, int pin);
   void run() override;
   data::StripeCounter getStripeCounter();
 
  private:
+  int pin_;
 
-  // master data structure
-  data::Sensors   sensors_;
   data::StripeCounter stripe_counter_;
-
-  
-
 };
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_

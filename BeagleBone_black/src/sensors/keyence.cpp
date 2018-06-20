@@ -39,28 +39,28 @@ using utils::io::GPIO;
 namespace sensors {
 
 Keyence::Keyence(Logger& log, int pin)
-    : Thread(log)
+    : Thread(log), pin_(pin)
 {}
 
-void Keyence::run() {
-
-namespace io = hyped::utils::io;
-GPIO thepin(pin, io::gpio::kIn);
-uint8_t val = thepin.wait();  //Ignore first reading
-stripe_counter_.count.value = 0;
-stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
+void Keyence::run()
+{
+  GPIO thepin(pin_, utils::io::gpio::kIn);
+  uint8_t val = thepin.wait();  // Ignore first reading
+  stripe_counter_.count.value = 0;
+  stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
 
   while (1) {
     val = thepin.wait();
-    if(val == 1) {
+    if (val == 1) {
       stripe_counter_.count.value = stripe_counter_.count.value+1;
       stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
-    }    
+    }
   }
 }
 
-StripeCounter Keyence::getStripeCounter() {
-return stripe_counter_;
+StripeCounter Keyence::getStripeCounter()
+{
+  return stripe_counter_;
 }
-}
-}
+
+}}  // namespace hyped::sensors

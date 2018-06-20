@@ -67,7 +67,7 @@ Main::Main(uint8_t id, Logger& log)
   }
 
   // @TODO (Ragnor) Add second Keyence?
-  // create Keyence 
+  // create Keyence
   keyence = new Keyence(log_, 73);
   keyence->start();
 }
