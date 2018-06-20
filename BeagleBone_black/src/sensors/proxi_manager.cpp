@@ -55,7 +55,7 @@ void ProxiManager::run()
   while (1) {
     // update front cluster of proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    proxi_[i]->getData(&(sensors_proxi_->value[i]));
+      proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
     uint32_t time = utils::Timer::getTimeMicros();
     sensors_proxi_->timestamp = time;
