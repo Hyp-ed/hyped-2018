@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien
+ * Author: Martin Kristien and Jack Horsburgh
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -51,11 +51,18 @@ class Main: public Thread {
   void run() override;
 
  private:
+  bool updateImu();
+  bool updateProxi();
+  bool updateBattery();
   data::Data&     data_;
 
   // master data structures
   data::Sensors   sensors_;
   data::Batteries batteries_;
+
+  data::Sensors   old_sensors_;
+  data::Batteries old_batteries_;
+
 
   ImuManager imu_manager_;
   ProxiManager proxi_manager_front_;

@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien
+ * Author: Martin Kristien and Jack Horsburgh
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -47,16 +47,59 @@ Main::Main(uint8_t id, Logger& log)
 
   // Config BMS Manager
   battery_manager_lp.config(&batteries_.low_power_batteries);
+
+  // Used for initialisation of old sensor and old battery data
+  old_sensors_ = sensors_;
+  old_batteries_ = batteries_;
 }
 
 void Main::run()
 {
   while (1) {
-    // Write to the data structure here
+    // Write sensor data to data structure only when all the imu and proxi values are different
+    if (updateImu() || updateProxi()) {
+      data_.setSensorsData(sensors_);
+      yield();
+    }
 
-    // Update sensor data structure
-    data_.setSensorsData(sensors_);
-    yield();
+    // Update battery data only when there is some change
+    if (updateBattery()) {
+      data_.setBatteryData(batteries_);
+      yield();
+    }
   }
 }
+
+bool Main::updateImu()
+{
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    if (old_sensors_.imu[i].acc.timestamp == sensors_.imu[i].acc.timestamp) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Main::updateProxi()
+{
+    if (old_sensors_.proxi_front.timestamp == sensors_.proxi_front.timestamp) {
+      return false;
+    } else if (old_sensors_.proxi_back.timestamp == sensors_.proxi_back.timestamp) {
+      return false;
+    } else {
+      return true;
+    }
+}
+
+bool Main::updateBattery()
+{
+  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+    if (old_batteries_.low_power_batteries[i].voltage != batteries_.low_power_batteries[i].voltage
+     || old_batteries_.low_power_batteries[i].temperature != batteries_.low_power_batteries[i].temperature) { //NOLINT
+      return true;
+    }
+  }
+  return false;
+}
+
 }}  // namespace hyped::sensors
