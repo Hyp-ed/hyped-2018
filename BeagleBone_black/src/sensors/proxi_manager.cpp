@@ -23,6 +23,7 @@
 #include "sensors/can_proxi.hpp"
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
@@ -57,7 +58,10 @@ void ProxiManager::run()
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
     proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
+    uint32_t time = utils::Timer::getTimeMicros();
+    sensors_proxi_->timestamp = time;
   }
+  sleep(10);
 }
 
 void ProxiManager::config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)

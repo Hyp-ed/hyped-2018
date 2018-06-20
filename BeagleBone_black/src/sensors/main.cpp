@@ -59,12 +59,14 @@ void Main::run()
     // Write sensor data to data structure only when all the imu and proxi values are different
     if (updateImu() || updateProxi()) {
       data_.setSensorsData(sensors_);
+      old_sensors_ = sensors_;
       yield();
     }
 
     // Update battery data only when there is some change
     if (updateBattery()) {
       data_.setBatteryData(batteries_);
+      old_batteries_ = batteries_;
       yield();
     }
   }
