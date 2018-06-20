@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien
+ * Author: Martin Kristien and Jack Horsburgh
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -31,7 +31,10 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/imu_manager.hpp"
 #include "sensors/interface.hpp"
+#include "sensors/proxi_manager.hpp"
+#include "sensors/bms_manager.hpp"
 
 namespace hyped {
 
@@ -48,21 +51,25 @@ class Main: public Thread {
   void run() override;
 
  private:
+  bool updateImu();
+  bool updateProxi();
+  bool updateBattery();
   data::Data&     data_;
 
   // master data structures
   data::Sensors   sensors_;
   data::Batteries batteries_;
 
-  // batteries
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
+  // Previous data
+  uint64_t old_imu_timestamp_[data::Sensors::kNumImus];
+  uint64_t old_proxi_back_timestamp;
+  uint64_t old_proxi_front_timestamp;
+  data::Batteries old_batteries_;
 
-  // nav sensors
-  ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  ProxiInterface* can_proxi_[data::Sensors::kNumProximities];
-
-  uint8_t         chip_select_[data::Sensors::kNumImus];
-  ImuInterface*   imu_[data::Sensors::kNumImus];
+  ImuManager imu_manager_;
+  ProxiManager proxi_manager_front_;
+  ProxiManager proxi_manager_back_;
+  BmsManager  battery_manager_lp;
 };
 
 }}  // namespace hyped::sensors

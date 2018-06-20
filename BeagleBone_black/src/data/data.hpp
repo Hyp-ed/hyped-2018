@@ -114,8 +114,8 @@ struct Sensors : public Module {
 
   array<Imu, kNumImus> imu;
   array<Proximity, kNumProximities> proxi;  // TODO(nav): remove after adapting to proxi_front/back
-  array<Proximity, kNumProximities> proxi_front;
-  array<Proximity, kNumProximities> proxi_back;
+  DataPoint<array<Proximity, kNumProximities>> proxi_front;
+  DataPoint<array<Proximity, kNumProximities>> proxi_back;
   StripeCounter stripe_counter;
 };
 

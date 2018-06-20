@@ -105,8 +105,6 @@ using utils::concurrent::Thread;
 
 namespace sensors {
 
-const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
-
 MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale)
     : log_(log),
     gpio_(pin, kDirection, log),
@@ -436,7 +434,7 @@ void MPU9250::getData(Imu* imu)
   gyr[1] = gyro_data_[1];
   gyr[2] = gyro_data_[2];
 
-  uint32_t time = utils::Timer::getTimeMillis() - (time_start/1000);
+  uint32_t time = utils::Timer::getTimeMicros();
   imu->acc.timestamp = time;
   imu->gyr.timestamp = time;
 }
