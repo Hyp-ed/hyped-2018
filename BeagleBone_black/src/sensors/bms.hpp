@@ -114,8 +114,9 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
 
  private:
   bms::Data       data_;
-  uint8_t         id_;              // my BMS id in (0,..,15)
-  uint32_t        id_base_;         // my starting CAN id
+  uint8_t         id_;                // my BMS id in (0,..,15)
+  uint32_t        id_base_;           // my starting CAN id
+  uint64_t        last_update_time_;  // stores arrival time of CAN response
 
   // for request thread
   Can&            can_;
@@ -126,9 +127,35 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
   NO_COPY_ASSIGN(BMS);
 };
 
-class BMSHP {
+class BMSHP : public CanProccesor, public BMSInterface {
+  friend Can;
+
  public:
-  BMSHP(uint16_t id, Logger& log);
+  /**
+   * @brief Construct a new BMSHP object
+   * @param id  - should directly correspond to the CAN id to be used
+   * @param log - for printing nice messages
+   */
+  BMSHP(uint16_t id, Logger& log = utils::System::getLogger());
+
+  // from BMSInterface
+  bool isOnline() override;
+  void getData(Battery* battery) override;
+
+  // from CanProcessor
+  bool hasId(uint32_t id, bool extended) override;
+
+ private:
+  void processNewData(utils::io::can::Frame& message) override;
+
+ private:
+  Logger&         log_;
+  uint16_t        id_;                // CAN id to be used
+  Battery         local_data_;        // stores values from CAN
+  uint64_t        last_update_time_;  // stores arrival time of CAN message
+  // for making sure only one object per BMS unit exist
+  static std::vector<uint16_t> existing_ids_;
+  NO_COPY_ASSIGN(BMSHP);
 };
 
 }}  // namespace hyped::sensors

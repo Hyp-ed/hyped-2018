@@ -25,6 +25,7 @@
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 #include "utils/utils.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 namespace sensors {
@@ -36,6 +37,7 @@ BMS::BMS(uint8_t id, Logger& log)
       data_({}),
       id_(id),
       id_base_(bms::kIdBase + (bms::kIdIncrement * id_)),
+      last_update_time_(0),
       can_(Can::getInstance()),
       running_(false)
 {
@@ -118,13 +120,15 @@ void BMS::processNewData(utils::io::can::Frame& message)
       log_.ERR("BMS", "received invalid message, id %d, CANID %d, offset %d",
           id_, message.id, offset);
   }
+
+  last_update_time_ = utils::Timer::getTimeMicros();
 }
 
 
 bool BMS::isOnline()
 {
-  // TODO(anyone): rethink this
-  return false;
+  // consider online if the data has been updated in the last second
+  return (utils::Timer::getTimeMicros() - last_update_time_) < 1000000;
 }
 
 void BMS::getData(Battery* battery)
@@ -134,5 +138,64 @@ void BMS::getData(Battery* battery)
 
   battery->temperature = data_.temperature;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// BMSHP
+////////////////////////////////////////////////////////////////////////////////////////////////////
+std::vector<uint16_t> BMSHP::existing_ids_;   // NOLINT [build/include_what_you_use]
+
+BMSHP::BMSHP(uint16_t id, Logger& log)
+    : log_(log),
+      id_(id),
+      local_data_ {},
+      last_update_time_(0)
+{
+  // verify this BMSHP unit has not been instantiated
+  for (uint16_t i : existing_ids_) {
+    if (id_ == i) {
+      log_.ERR("BMSHP", "BMSHP %d already exists, duplicate unit instantiation", id_);
+      return;
+    }
+  }
+  existing_ids_.push_back(id);
+
+  // tell CAN about yourself
+  Can::getInstance().registerProcessor(this);
+}
+
+bool BMSHP::isOnline()
+{
+  // consider online if the data has been updated in the last second
+  return (utils::Timer::getTimeMicros() - last_update_time_) < 1000000;
+}
+
+void BMSHP::getData(Battery* battery)
+{
+  *battery = local_data_;
+}
+
+bool BMSHP::hasId(uint32_t id, bool extended)
+{
+  // only accept a single CAN message
+  return id == id_;
+}
+
+void BMSHP::processNewData(utils::io::can::Frame& message)
+{
+  // message format is expected to look like this:
+  // [current_h , current_l   , voltage_h, volatage_l ,
+  //  charge    , high_temp_h , high_temp, low_temp   ]
+  local_data_.voltage     = (message.data[2] << 8) | message.data[3];
+  local_data_.temperature = message.data[6];
+
+  log_.DBG1("BMSHP", "received voltage %u", local_data_.voltage);
+  log_.DBG1("BMSHP", "received temperature %u",
+    (message.data[5] << 8) | message.data[6]);
+
+  last_update_time_ = utils::Timer::getTimeMicros();
+}
+
+
+
 
 }}  // namespace hyped::sensors
