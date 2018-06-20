@@ -108,7 +108,11 @@ class Main: public Thread {
   /**
     *  @brief  { Updates the data structure with the velocity and torque of the motors }
     */
-  void updateMotorVelocity();
+  void updateMotorData();
+  /**
+    *  @brief  { Updates the data structure motor failure has occured }
+    */
+  void updateMotorFailure();
 
   data::Data& data_;
   data::StateMachine state_;
@@ -124,6 +128,8 @@ class Main: public Thread {
   bool motors_operational_;
   bool motor_failure_;
   bool all_motors_stopped_;
+  MotorVelocity motor_velocity_;
+  MotorTorque motor_torque_;
 };
 
 }}  // namespace hyped::motor_control

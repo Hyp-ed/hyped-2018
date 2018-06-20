@@ -42,6 +42,7 @@ Main::Main(uint8_t id, Logger& log)
       nav_calib_(false),
       motors_init_(false),
       motors_ready_(false),
+      motor_failure_(false),
       all_motors_stopped_(false)
 {
   state_      = data_.getStateMachineData();
@@ -56,6 +57,14 @@ Main::Main(uint8_t id, Logger& log)
   motor_data_.torque_3 = 0;
   motor_data_.torque_4 = 0;
   data_.setMotorData(motor_data_);
+  motor_velocity_.velocity_1 = 0;
+  motor_velocity_.velocity_2 = 0;
+  motor_velocity_.velocity_3 = 0;
+  motor_velocity_.velocity_4 = 0;
+  motor_torque_.torque_1 = 0;
+  motor_torque_.torque_2 = 0;
+  motor_torque_.torque_3 = 0;
+  motor_torque_.torque_4 = 0;
 }
 
 void Main::run()
@@ -89,7 +98,7 @@ void Main::run()
 
 void Main::initMotors()
 {
-  if (!motors_init_) {
+  if (!motors_init_ && !motor_failure_) {
     // Register controllers on CAN Bus
     communicator_.registerControllers();
 
@@ -98,11 +107,7 @@ void Main::initMotors()
 
     // If a failure occured during configuration, set motor status to critical failure
     if (communicator_.getFailure()) {
-      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
-      data_.setMotorData(motor_data_);
-      motors_init_ = true;  // Set boolean to true to prevent any further configuration attempts
-      log_.ERR("MOTOR", "Could not configure motors");
-
+      updateMotorFailure();
     // Otherwise update motor status to initialised
     } else {
       motor_data_.module_status = data::ModuleStatus::kInit;
@@ -115,7 +120,7 @@ void Main::initMotors()
 
 void Main::prepareMotors()
 {
-  if (!motors_ready_) {
+  if (!motors_ready_ && !motor_failure_) {
     // Set motors into operational mode
     communicator_.prepareMotors();
 
@@ -124,11 +129,7 @@ void Main::prepareMotors()
 
     // If there is an error or warning, set motor status to critical failure
     if (communicator_.getFailure()) {
-      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
-      data_.setMotorData(motor_data_);
-      motors_ready_ = true;  // Set boolean to true to prevent any further operational attempts
-      log_.ERR("MOTOR", "CRITICAL FAILURE, MOTORS NOT OPERATIONAL");
-
+      updateMotorFailure();
     // Otherwise set motor status to ready
     } else {
       motor_data_.module_status = data::ModuleStatus::kReady;
@@ -162,9 +163,7 @@ void Main::accelerateMotors()
     // If a failure occurs in any motor, set motor status to critical failure
     //  and stop all motors
     if (communicator_.getFailure()) {
-      log_.ERR("MOTOR", "Motor State: MOTOR FAILURE\n");
-      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
-      data_.setMotorData(motor_data_);
+      updateMotorFailure();
       this->stopMotors();
       break;
     }
@@ -176,18 +175,7 @@ void Main::accelerateMotors()
     target_torque_        = accelerationTorque(nav_.velocity);
     communicator_.sendTargetVelocity(target_velocity_);
     communicator_.sendTargetTorque(target_torque_);
-    MotorVelocity motor_velocity = communicator_.requestActualVelocity();
-    MotorTorque motor_torque     = communicator_.requestActualTorque();
-    // Write motor data to data structure
-    motor_data_.velocity_1 = motor_velocity.velocity_1;
-    motor_data_.velocity_2 = motor_velocity.velocity_2;
-    motor_data_.velocity_3 = motor_velocity.velocity_3;
-    motor_data_.velocity_4 = motor_velocity.velocity_4;
-    motor_data_.torque_1 = motor_torque.torque_1;
-    motor_data_.torque_2 = motor_torque.torque_2;
-    motor_data_.torque_3 = motor_torque.torque_3;
-    motor_data_.torque_4 = motor_torque.torque_4;
-    data_.setMotorData(motor_data_);
+    updateMotorData();
   }
 }
 
@@ -208,9 +196,7 @@ void Main::decelerateMotors()
     // If a failure occurs in any motor, set motor status to critical failure
     //  and stop all motors
     if (communicator_.getFailure()) {
-      log_.ERR("MOTOR", "Motor State: MOTOR FAILURE\n");
-      motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
-      data_.setMotorData(motor_data_);
+      updateMotorFailure();
       this->stopMotors();
       break;
     }
@@ -222,18 +208,7 @@ void Main::decelerateMotors()
     target_torque_        = decelerationTorque(nav_.velocity);
     communicator_.sendTargetVelocity(target_velocity_);
     communicator_.sendTargetTorque(target_torque_);
-    MotorVelocity motor_velocity = communicator_.requestActualVelocity();
-    MotorTorque motor_torque     = communicator_.requestActualTorque();
-    // Write motor data to data structure
-    motor_data_.velocity_1 = motor_velocity.velocity_1;
-    motor_data_.velocity_2 = motor_velocity.velocity_2;
-    motor_data_.velocity_3 = motor_velocity.velocity_3;
-    motor_data_.velocity_4 = motor_velocity.velocity_4;
-    motor_data_.torque_1 = motor_torque.torque_1;
-    motor_data_.torque_2 = motor_torque.torque_2;
-    motor_data_.torque_3 = motor_torque.torque_3;
-    motor_data_.torque_4 = motor_torque.torque_4;
-    data_.setMotorData(motor_data_);
+    updateMotorData();
   }
 }
 
@@ -243,39 +218,17 @@ void Main::stopMotors()
   // Updates the motor data while motors are stopping
   while (!all_motors_stopped_) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");
-    MotorVelocity motor_velocity = communicator_.requestActualVelocity();
-    MotorTorque motor_torque     = communicator_.requestActualTorque();
-    // Write motor data to data structure
-    motor_data_.velocity_1 = motor_velocity.velocity_1;
-    motor_data_.velocity_2 = motor_velocity.velocity_2;
-    motor_data_.velocity_3 = motor_velocity.velocity_3;
-    motor_data_.velocity_4 = motor_velocity.velocity_4;
-    motor_data_.torque_1 = motor_torque.torque_1;
-    motor_data_.torque_2 = motor_torque.torque_2;
-    motor_data_.torque_3 = motor_torque.torque_3;
-    motor_data_.torque_4 = motor_torque.torque_4;
-    data_.setMotorData(motor_data_);
+    updateMotorData();
 
-    if (motor_velocity.velocity_1 == 0 && motor_velocity.velocity_2 == 0 &&
-        motor_velocity.velocity_3 == 0 && motor_velocity.velocity_4 == 0)
+    if (motor_velocity_.velocity_1 == 0 && motor_velocity_.velocity_2 == 0 &&
+        motor_velocity_.velocity_3 == 0 && motor_velocity_.velocity_4 == 0)
     {
       all_motors_stopped_ = true;
       log_.INFO("MOTOR", "Motor State: Stopped\n");
     }
   }
 
-  MotorVelocity motor_velocity = communicator_.requestActualVelocity();
-  MotorTorque motor_torque     = communicator_.requestActualTorque();
-  // Write motor data to data structure
-  motor_data_.velocity_1 = motor_velocity.velocity_1;
-  motor_data_.velocity_2 = motor_velocity.velocity_2;
-  motor_data_.velocity_3 = motor_velocity.velocity_3;
-  motor_data_.velocity_4 = motor_velocity.velocity_4;
-  motor_data_.torque_1 = motor_torque.torque_1;
-  motor_data_.torque_2 = motor_torque.torque_2;
-  motor_data_.torque_3 = motor_torque.torque_3;
-  motor_data_.torque_4 = motor_torque.torque_4;
-  data_.setMotorData(motor_data_);
+  updateMotorData();
   log_.DBG2("MOTOR", "Motor State: Stopped\n");
 
   communicator_.enterPreOperational();
@@ -304,6 +257,30 @@ int16_t Main::decelerationTorque(NavigationType velocity)
 void Main::servicePropulsion()
 {
   // TODO(Anyone) Implement service propulsion
+}
+
+void Main::updateMotorData()
+{
+  motor_velocity_   = communicator_.requestActualVelocity();
+  motor_torque_     = communicator_.requestActualTorque();
+  // Write motor data to data structure
+  motor_data_.velocity_1 = motor_velocity_.velocity_1;
+  motor_data_.velocity_2 = motor_velocity_.velocity_2;
+  motor_data_.velocity_3 = motor_velocity_.velocity_3;
+  motor_data_.velocity_4 = motor_velocity_.velocity_4;
+  motor_data_.torque_1 = motor_torque_.torque_1;
+  motor_data_.torque_2 = motor_torque_.torque_2;
+  motor_data_.torque_3 = motor_torque_.torque_3;
+  motor_data_.torque_4 = motor_torque_.torque_4;
+  data_.setMotorData(motor_data_);
+}
+
+void Main::updateMotorFailure()
+{
+  log_.ERR("MOTOR", "Motor State: MOTOR FAILURE\n");
+  motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
+  data_.setMotorData(motor_data_);
+  motor_failure_ = true;
 }
 
 }}  // namespace hyped::motor_control
