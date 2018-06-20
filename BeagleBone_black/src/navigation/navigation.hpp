@@ -130,9 +130,9 @@ class Navigation {
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
    *
-   * @param[in] imus Array of IMU readings
+   * @param[in] datapointImus datapoint of an Array of IMU readings
    */
-  void update(ImuArray imus);
+  void update(DataPoint<ImuArray> datapointImus);
   /**
    * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
    *        proxi have been updated but there is no update from stripe counter.
@@ -140,7 +140,7 @@ class Navigation {
    * @param[in] imus   Array of IMU readings
    * @param[in] proxis Array of proximity readings
    */
-  void update(ImuArray imus, ProximityArray proxis);
+  void update(DataPoint<ImuArray> datapointImus, ProximityArray proxis);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU and stripe counter have been updated but there is no update from proximity sensors.
@@ -148,7 +148,7 @@ class Navigation {
    * @param imus         Array of IMU readings
    * @param stripe_count Stripe counter reading
    */
-  void update(ImuArray imus, DataPoint<uint32_t> stripe_count);
+  void update(DataPoint<ImuArray> datapointImus, DataPoint<uint32_t> stripe_count);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -157,7 +157,9 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param stripe_count Stripe counter reading
    */
-  void update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count);
+  void update(DataPoint<ImuArray> datapointImus,
+              ProximityArray proxis,
+              DataPoint<uint32_t> stripe_count);
 
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1

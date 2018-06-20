@@ -110,28 +110,29 @@ bool Navigation::finishCalibration()
 }
 
 
-void Navigation::update(ImuArray imus)
+void Navigation::update(DataPoint<ImuArray> datapointImus)
 {
+  ImuArray imus =  datapointImus.value;
   if (is_calibrating_) {
     calibrationUpdate(imus);
   } else if (status_ == ModuleStatus::kReady || status_ == ModuleStatus::kCriticalFailure) {
     // TODO(Brano,Adi): Gyro update. (Data format should change first.)
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
-      imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
+      imus[i].acc = acceleration_filter_[i].filter(imus[i].acc);
+      imus[i].gyr = gyro_filter_[i].filter(imus[i].gyr);
     }
 
     NavigationVector acc_avg(0), gyr_avg(0);
     for (const auto& imu : imus) {
-      acc_avg += imu.acc.value;
-      gyr_avg += imu.gyr.value;  // TODO(Brano,Adi): Check if gyro can be averaged like this
+      acc_avg += imu.acc;
+      gyr_avg += imu.gyr;  // TODO(Brano,Adi): Check if gyro can be averaged like this
     }
     acc_avg /= imus.size();
     gyr_avg /= imus.size();
 
     // TODO(Brano,Adi): Change the timestamping strategy
-    this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, acc_avg));
-    this->gyroUpdate(DataPoint<NavigationVector>(imus[0].gyr.timestamp, gyr_avg));
+    this->accelerometerUpdate(DataPoint<NavigationVector>(datapointImus.timestamp, acc_avg));
+    this->gyroUpdate(DataPoint<NavigationVector>(datapointImus.timestamp, gyr_avg));
   }
 }
 
@@ -144,22 +145,24 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists()
   return arr;
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis)
+void Navigation::update(DataPoint<ImuArray> datapointImus, ProximityArray proxis)
 {
-  update(imus);
+  update(datapointImus);
   // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
 }
 
-void Navigation::update(ImuArray imus, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> datapointImus, DataPoint<uint32_t> stripe_count)
 {
-  update(imus);
+  update(datapointImus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
   stripeCounterUpdate(stripe_count.value);
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> datapointImus,
+                        ProximityArray proxis,
+                        DataPoint<uint32_t> stripe_count)
 {
-  update(imus, proxis);
+  update(datapointImus, proxis);
   stripeCounterUpdate(stripe_count.value);
 }
 
@@ -169,8 +172,8 @@ void Navigation::calibrationUpdate(ImuArray imus)
   ++num_gyro_samples_;
   for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
     ++num_gravity_samples_;
-    g_ = g_ + (imus[i].acc.value - g_)/num_gravity_samples_;
-    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr.value - gyro_offsets_[i])/num_gyro_samples_;
+    g_ = g_ + (imus[i].acc - g_)/num_gravity_samples_;
+    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr - gyro_offsets_[i])/num_gyro_samples_;
   }
 
   if (num_gravity_samples_ > kMinNumCalibrationSamples

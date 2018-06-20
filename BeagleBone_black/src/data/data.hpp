@@ -96,8 +96,8 @@ struct Sensor {
 
 typedef Vector<NavigationType, 3> NavigationVector;
 struct Imu : public Sensor {
-  DataPoint<NavigationVector> acc;
-  DataPoint<NavigationVector> gyr;
+  NavigationVector acc;
+  NavigationVector gyr;
 };
 
 struct Proximity : public Sensor {
@@ -112,7 +112,7 @@ struct Sensors : public Module {
   static constexpr int kNumImus = 8;
   static constexpr int kNumProximities = 8;
 
-  array<Imu, kNumImus> imu;
+  DataPoint<array<Imu, kNumImus>> imu;
   array<Proximity, kNumProximities> proxi;  // TODO(nav): remove after adapting to proxi_front/back
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
@@ -202,7 +202,10 @@ class Data {
    * @brief      Should be called to update sensor data.
    */
   void setSensorsData(const Sensors& sensors_data);
-
+  /**
+   * @brief      Should be called to update sensor imu data.
+   */
+  void setSensorsImuData(const DataPoint<array<Imu, Sensors::kNumImus>>& imu);
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */

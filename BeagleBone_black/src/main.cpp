@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   while (1) {
     // Monitoring
     sens = data.getSensorsData();
-    auto& acc = sens.imu[0].acc.value;
+    auto& acc = sens.imu.value[0].acc;
     log_system.INFO("TEST", "Acceleration       (%f %f %f)"
       , acc[0]
       , acc[1]

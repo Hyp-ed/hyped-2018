@@ -38,10 +38,10 @@ class ImuManager: public Thread {
  public:
   explicit ImuManager(Logger& log);
   void run() override;
-  void config(array<Imu, data::Sensors::kNumImus> *imu);
+  void config(data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
 
  private:
-  array<Imu, data::Sensors::kNumImus> *sensors_imu_;
+  data::DataPoint<array<Imu, data::Sensors::kNumImus>> *sensors_imu_;
 
   uint8_t         chip_select_[data::Sensors::kNumImus];
   ImuInterface*   imu_[data::Sensors::kNumImus];

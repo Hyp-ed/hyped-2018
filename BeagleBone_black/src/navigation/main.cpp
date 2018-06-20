@@ -101,11 +101,8 @@ void Main::run()
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (uint8_t i = 0; i < new_data.imu.size(); ++i) {
-    if (new_data.imu[i].gyr.timestamp != old_data.imu[i].gyr.timestamp ||
-        new_data.imu[i].acc.timestamp != old_data.imu[i].acc.timestamp)
+    if (new_data.imu.timestamp != old_data.imu.timestamp)
       return true;
-  }
   return false;
 }
 

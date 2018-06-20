@@ -23,6 +23,7 @@
 
 #include "sensors/mpu9250.hpp"
 #include "data/data.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
@@ -45,12 +46,14 @@ void ImuManager::run()
 {
   while (1) {
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imu_[i]->getData(&((*sensors_imu_)[i]));
+      imu_[i]->getData(&(sensors_imu_->value[i]));
     }
+  uint32_t time = utils::Timer::getTimeMicros();
+  sensors_imu_->timestamp = time;
   }
 }
 
-void ImuManager::config(array<Imu, data::Sensors::kNumImus> *imu)
+void ImuManager::config(data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
 {
   sensors_imu_ = imu;
 }

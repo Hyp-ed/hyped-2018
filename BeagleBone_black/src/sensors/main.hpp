@@ -61,7 +61,7 @@ class Main: public Thread {
   data::Batteries batteries_;
 
   // Previous data
-  uint64_t old_imu_timestamp_[data::Sensors::kNumImus];
+  uint64_t old_imu_timestamp_;
   uint64_t old_proxi_back_timestamp;
   uint64_t old_proxi_front_timestamp;
   data::Batteries old_batteries_;

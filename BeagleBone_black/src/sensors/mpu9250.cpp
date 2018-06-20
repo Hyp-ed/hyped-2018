@@ -25,7 +25,6 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
-#include "utils/timer.hpp"
 
 // Accelerometer addresses
 constexpr uint8_t kAccelXoutH               = 0x3B;
@@ -425,18 +424,14 @@ void MPU9250::getData(Imu* imu)
 {
   getGyroData();
   getAcclData();
-  auto& acc = imu->acc.value;
-  auto& gyr = imu->gyr.value;
+  auto& acc = imu->acc;
+  auto& gyr = imu->gyr;
   acc[0] = accel_data_[0];
   acc[1] = accel_data_[1];
   acc[2] = accel_data_[2];
   gyr[0] = gyro_data_[0];
   gyr[1] = gyro_data_[1];
   gyr[2] = gyro_data_[2];
-
-  uint32_t time = utils::Timer::getTimeMicros();
-  imu->acc.timestamp = time;
-  imu->gyr.timestamp = time;
 }
 
 }}   // namespace hyped::sensors
