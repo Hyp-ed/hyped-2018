@@ -32,9 +32,8 @@ using data::Sensors;
 
 namespace sensors {
 
-ProxiManager::ProxiManager(uint8_t id, Logger& log, bool isFront)
-    : Thread(id, log),
-      data_(data::Data::getInstance())
+ProxiManager::ProxiManager(Logger& log, bool isFront)
+    : Thread(log)
 {
   if (isFront) {
     // create CAN-based proximities

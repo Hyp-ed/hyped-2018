@@ -36,16 +36,13 @@ namespace sensors {
 
 class ProxiManager: public Thread {
  public:
-  ProxiManager(uint8_t id, Logger& log, bool isFront);
+  ProxiManager(Logger& log, bool isFront);
   void run() override;
   void config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi);
 
  private:
-  data::Data&     data_;
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
-
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  // ProxiInterface* proxi_back_[data::Sensors::kNumProximities];
 };
 
 }}  // namespace hyped::sensors

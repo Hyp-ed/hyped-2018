@@ -36,12 +36,11 @@ namespace sensors {
 
 class ImuManager: public Thread {
  public:
-  explicit ImuManager(uint8_t id, Logger& log);
+  explicit ImuManager(Logger& log);
   void run() override;
   void config(array<Imu, data::Sensors::kNumImus> *imu);
 
  private:
-  data::Data&     data_;
   array<Imu, data::Sensors::kNumImus> *sensors_imu_;
 
   uint8_t         chip_select_[data::Sensors::kNumImus];

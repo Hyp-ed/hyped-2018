@@ -26,14 +26,12 @@
 
 namespace hyped {
 
-using data::Data;
 using data::Batteries;
 
 namespace sensors {
 
-BmsManager::BmsManager(uint8_t id, Logger& log)
-    : Thread(id, log),
-      data_(data::Data::getInstance())
+BmsManager::BmsManager(Logger& log)
+    : Thread(log)
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {

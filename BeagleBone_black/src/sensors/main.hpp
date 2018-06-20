@@ -60,9 +60,11 @@ class Main: public Thread {
   data::Sensors   sensors_;
   data::Batteries batteries_;
 
-  data::Sensors   old_sensors_;
+  // Previous data
+  uint64_t old_imu_timestamp_[data::Sensors::kNumImus];
+  uint64_t old_proxi_back_timestamp;
+  uint64_t old_proxi_front_timestamp;
   data::Batteries old_batteries_;
-
 
   ImuManager imu_manager_;
   ProxiManager proxi_manager_front_;

@@ -31,9 +31,8 @@ using data::Sensors;
 
 namespace sensors {
 
-ImuManager::ImuManager(uint8_t id, Logger& log)
-    : Thread(id, log),
-      data_(data::Data::getInstance()),
+ImuManager::ImuManager(Logger& log)
+    : Thread(log),
       chip_select_ {31, 50, 48, 51}
 {
   // create IMUs, might consider using fake_imus based on input arguments

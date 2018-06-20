@@ -33,10 +33,10 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      imu_manager_(id, log),
-      proxi_manager_front_(id, log, true),
-      proxi_manager_back_(id, log, false),
-      battery_manager_lp(id, log)
+      imu_manager_(log),
+      proxi_manager_front_(log, true),
+      proxi_manager_back_(log, false),
+      battery_manager_lp(log)
 {
   // Config new IMU manager
   imu_manager_.config(&sensors_.imu);
@@ -49,7 +49,11 @@ Main::Main(uint8_t id, Logger& log)
   battery_manager_lp.config(&batteries_.low_power_batteries);
 
   // Used for initialisation of old sensor and old battery data
-  old_sensors_ = sensors_;
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    old_imu_timestamp_[i] = sensors_.imu[i].acc.timestamp;
+  }
+  old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
+  old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
   old_batteries_ = batteries_;
 }
 
@@ -59,23 +63,26 @@ void Main::run()
     // Write sensor data to data structure only when all the imu and proxi values are different
     if (updateImu() || updateProxi()) {
       data_.setSensorsData(sensors_);
-      old_sensors_ = sensors_;
-      yield();
+      for (int i = 0; i < data::Sensors::kNumImus; i++) {
+        old_imu_timestamp_[i] = sensors_.imu[i].acc.timestamp;
+      }
+      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
+      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
     }
 
     // Update battery data only when there is some change
     if (updateBattery()) {
       data_.setBatteryData(batteries_);
       old_batteries_ = batteries_;
-      yield();
     }
+    yield();
   }
 }
 
 bool Main::updateImu()
 {
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    if (old_sensors_.imu[i].acc.timestamp == sensors_.imu[i].acc.timestamp) {
+    if (old_imu_timestamp_[i] == sensors_.imu[i].acc.timestamp) {
       return false;
     }
   }
@@ -84,9 +91,9 @@ bool Main::updateImu()
 
 bool Main::updateProxi()
 {
-    if (old_sensors_.proxi_front.timestamp == sensors_.proxi_front.timestamp) {
+    if (old_proxi_front_timestamp == sensors_.proxi_front.timestamp) {
       return false;
-    } else if (old_sensors_.proxi_back.timestamp == sensors_.proxi_back.timestamp) {
+    } else if (old_proxi_back_timestamp == sensors_.proxi_back.timestamp) {
       return false;
     } else {
       return true;

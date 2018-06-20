@@ -36,14 +36,12 @@ namespace sensors {
 
 class BmsManager: public Thread {
  public:
-  explicit BmsManager(uint8_t id, Logger& log);
+  explicit BmsManager(Logger& log);
   void run() override;
   void config(array<Battery, data::Batteries::kNumLPBatteries> *batteries);
 
  private:
-  data::Data&     data_;
   array<Battery, data::Batteries::kNumLPBatteries> *lp_batteries;
-
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
 };
 
