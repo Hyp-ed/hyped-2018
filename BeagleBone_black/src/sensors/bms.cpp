@@ -25,6 +25,7 @@
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 #include "utils/utils.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 namespace sensors {
@@ -36,6 +37,7 @@ BMS::BMS(uint8_t id, Logger& log)
       data_({}),
       id_(id),
       id_base_(bms::kIdBase + (bms::kIdIncrement * id_)),
+      last_update_time_(0),
       can_(Can::getInstance()),
       running_(false)
 {
@@ -118,13 +120,15 @@ void BMS::processNewData(utils::io::can::Frame& message)
       log_.ERR("BMS", "received invalid message, id %d, CANID %d, offset %d",
           id_, message.id, offset);
   }
+
+  last_update_time_ = utils::Timer::getTimeMicros();
 }
 
 
 bool BMS::isOnline()
 {
-  // TODO(anyone): rethink this
-  return false;
+  // consider online if the data has been updated in the last second
+  return (utils::Timer::getTimeMicros() - last_update_time_) < 1000000;
 }
 
 void BMS::getData(Battery* battery)
