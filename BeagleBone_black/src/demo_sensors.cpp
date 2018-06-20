@@ -92,11 +92,13 @@ int main(int argc, char* argv[])
       imu.acc.value[0], imu.acc.value[1], imu.acc.value[2]);
     log.INFO("TEST", "imu gyr %f %f %f",
       imu.gyr.value[0], imu.gyr.value[1], imu.gyr.value[2]);
-    log.INFO("TEST", "bms0 voltage, temp: %d %d",
+    log.INFO("TEST", "bms0 voltage, current, temp: %d %d %d",
       batteries.low_power_batteries[0].voltage,
+      batteries.low_power_batteries[1].current,
       batteries.low_power_batteries[0].temperature);
-    log.INFO("TEST", "bms1 voltage, temp: %d %d",
+    log.INFO("TEST", "bms1 voltage, current, temp: %d %d %d",
       batteries.low_power_batteries[1].voltage,
+      batteries.low_power_batteries[1].current,
       batteries.low_power_batteries[1].temperature);
 
     log.INFO("TEST", "");

@@ -33,17 +33,18 @@ using hyped::utils::concurrent::Thread;
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-  Logger log(true, 1);
-  MPU9250 mpu9250 = MPU9250(log, 60, 0x08, 0x00);
+  Logger log(true, 0);
+  MPU9250 mpu9250 = MPU9250(log, 66, 0x08, 0x00);
 
   log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
 
-  for (int i=0; i< 100; i++) {
+  for (int i=0; i< 1000; i++) {
     mpu9250.getAcclData();
-    log.DBG("TEST-mpu9250", "accelerometer readings x: %f", mpu9250.accel_data_[0]);
-    log.DBG("TEST-mpu9250", "accelerometer readings y: %f", mpu9250.accel_data_[1]);
-    log.DBG("TEST-mpu9250", "accelerometer readings z: %f", mpu9250.accel_data_[2]);
-    Thread::sleep(50);
+    log.DBG("TEST-mpu9250", "accelerometer readings x: %3.5f %3.5f %3.5f",
+      mpu9250.accel_data_[0],
+      mpu9250.accel_data_[1],
+      mpu9250.accel_data_[2]);
+    Thread::sleep(250);
   }
 
   for (int i=0; i< 50; i++) {
