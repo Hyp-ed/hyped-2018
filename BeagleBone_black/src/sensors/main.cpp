@@ -27,6 +27,7 @@ namespace hyped {
 using data::Data;
 using data::Sensors;
 using data::Batteries;
+using data::StripeCounter;
 
 namespace sensors {
 
@@ -52,6 +53,12 @@ Main::Main(uint8_t id, Logger& log)
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
     old_imu_timestamp_[i] = sensors_.imu[i].acc.timestamp;
   }
+
+  // @TODO (Ragnor) Add second Keyence?
+  // create Keyence
+  keyence = new Keyence(log_, 73);
+  keyence->start();
+
   old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
   old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
   old_batteries_ = batteries_;
@@ -75,6 +82,7 @@ void Main::run()
       data_.setBatteryData(batteries_);
       old_batteries_ = batteries_;
     }
+    data_.setStripeCounterData(keyence->getStripeCounter());
     yield();
   }
 }
