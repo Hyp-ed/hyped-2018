@@ -50,9 +50,7 @@ Main::Main(uint8_t id, Logger& log)
   battery_manager_lp.config(&batteries_.low_power_batteries);
 
   // Used for initialisation of old sensor and old battery data
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    old_imu_timestamp_[i] = sensors_.imu[i].acc.timestamp;
-  }
+  old_imu_timestamp_ = sensors_.imu.timestamp;
 
   // @TODO (Ragnor) Add second Keyence?
   // create Keyence
@@ -70,9 +68,7 @@ void Main::run()
     // Write sensor data to data structure only when all the imu and proxi values are different
     if (updateImu() || updateProxi()) {
       data_.setSensorsData(sensors_);
-      for (int i = 0; i < data::Sensors::kNumImus; i++) {
-        old_imu_timestamp_[i] = sensors_.imu[i].acc.timestamp;
-      }
+      old_imu_timestamp_ = sensors_.imu.timestamp;
       old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
       old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
     }
@@ -89,10 +85,8 @@ void Main::run()
 
 bool Main::updateImu()
 {
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    if (old_imu_timestamp_[i] == sensors_.imu[i].acc.timestamp) {
-      return false;
-    }
+  if (old_imu_timestamp_ == sensors_.imu.timestamp) {
+    return false;
   }
   return true;
 }

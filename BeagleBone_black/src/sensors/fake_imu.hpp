@@ -120,8 +120,8 @@ class FakeImu : public ImuInterface {
   NavigationVector acc_val, gyr_val;
   NavigationVector acc_noise, gyr_noise;
 
-  DataPoint<NavigationVector> prev_acc;
-  DataPoint<NavigationVector> prev_gyr;
+  NavigationVector prev_acc;
+  NavigationVector prev_gyr;
 
   unsigned pt_acc, pt_gyr;
   std::vector<DataPoint<NavigationVector>> acc_val_read;
