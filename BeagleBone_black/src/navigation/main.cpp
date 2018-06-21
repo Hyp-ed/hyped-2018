@@ -95,9 +95,9 @@ void Main::run()
       yield();
       continue;
     }
-    if (proxiChanged(*last_proxis, *proxis) && stripeCntChanged(*last_readings, *readings))
+    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
       nav_.update(readings->imu, *proxis, readings->stripe_counter.count);
-    else if (proxiChanged(*last_proxis, *proxis))
+    else if (proxiChanged(*last_readings, *readings))
       nav_.update(readings->imu, *proxis);
     else if (stripeCntChanged(*last_readings, *readings))
       nav_.update(readings->imu, readings->stripe_counter.count);
@@ -113,20 +113,14 @@ void Main::run()
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  if (new_data.imu.timestamp != old_data.imu.timestamp)
-    return true;
-  return false;
+  return new_data.imu.timestamp != old_data.imu.timestamp;
 }
 
-bool Main::proxiChanged(const Navigation::ProximityArray& old_data,
-                        const Navigation::ProximityArray& new_data)
+bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  for (uint8_t i = 0; i < new_data.size(); ++i) {
-    // TODO(Brano): Timestamp proxi data in data::Sensors
-    if (new_data[i]->val != old_data[i]->val)
-      return true;
-  }
-  return false;
+  // Both front and back should be always updated at the same time
+  return old_data.proxi_front.timestamp != new_data.proxi_front.timestamp &&
+         old_data.proxi_back.timestamp  != new_data.proxi_back.timestamp;
 }
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
