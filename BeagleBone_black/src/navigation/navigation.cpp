@@ -110,6 +110,15 @@ bool Navigation::finishCalibration()
 }
 
 
+std::array<NavigationType, 3> Navigation::getNearestStripeDists()
+{
+  std::array<NavigationType, 3> arr;
+  for (unsigned int i = 0; i < arr.size(); ++i)
+    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
+             - getDisplacement();
+  return arr;
+}
+
 void Navigation::update(DataPoint<ImuArray> imus)
 {
   int num_operational = 0;
@@ -126,15 +135,6 @@ void Navigation::update(DataPoint<ImuArray> imus)
 
   accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
            gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
-}
-
-std::array<NavigationType, 3> Navigation::getNearestStripeDists()
-{
-  std::array<NavigationType, 3> arr;
-  for (unsigned int i = 0; i < arr.size(); ++i)
-    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
-             - getDisplacement();
-  return arr;
 }
 
 void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
