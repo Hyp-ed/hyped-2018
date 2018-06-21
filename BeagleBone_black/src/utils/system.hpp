@@ -23,10 +23,14 @@
 
 #include <cstdint>
 
+#include "utils/concurrent/barrier.hpp"
 #include "utils/logger.hpp"
 #include "utils/utils.hpp"
 
 namespace hyped {
+
+using utils::concurrent::Barrier;
+
 namespace utils {
 
 class System {
@@ -49,6 +53,13 @@ class System {
   int8_t debug_sensor;
   int8_t debug_state;
   int8_t debug_cmn;
+
+  // barriers
+  /**
+   * @brief Barrier used by navigation and motor control modules on stm transition to accelerating
+   *        state. Navigation must finish calibration before motors start spinning.
+   */
+  Barrier navigation_motors_sync_ = Barrier(2);
 
  private:
   Logger* log_;

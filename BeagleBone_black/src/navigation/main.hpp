@@ -43,6 +43,8 @@ class Main: public Thread {
   bool proxiChanged(const Navigation::ProximityArray& old_data,
                     const Navigation::ProximityArray& new_data);
   inline bool stripeCntChanged(const Sensors& old_data, const Sensors& new_data);
+  void updateData();
+
 
   data::Data& data_;
   Navigation nav_;

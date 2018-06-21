@@ -17,24 +17,40 @@
  */
 
 #include "navigation.hpp"
-#include <math.h>
+
+#include <algorithm>  // std::min
+#include <cmath>
 
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
+Navigation::Navigation(Barrier& post_calibration_barrier)
+    : post_calibration_barrier_(post_calibration_barrier),
+      status_(ModuleStatus::kStart),
+      is_calibrating_(false),
+      num_gravity_samples_(0),
+      g_(0),
+      num_gyro_samples_(0),
+      acceleration_(0),  // TODO(Brano): Should this be g or 0?
+      velocity_(0),
+      displacement_(0),
+      prev_angular_velocity_(0 , NavigationVector()),
+      orientation_(1, 0, 0, 0)
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
-      acceleration_filter_[i].configure(NavigationVector(),
-                                        NavigationVector(),
-                                        NavigationVector());
-      gyro_filter_[i].configure(NavigationVector(),
-                                NavigationVector(),
-                                NavigationVector());
+    // TODO(Brano,Uday): Properly initialise filters (with std dev of sensors and stuff)
+    acceleration_filter_[i].configure(NavigationVector(),
+                                      NavigationVector(),
+                                      NavigationVector());
+    gyro_filter_[i].configure(NavigationVector(),
+                              NavigationVector(),
+                              NavigationVector());
   }
 
   for (auto filter: proximity_filter_)
     filter.configure(0, 0, 0);
+
+  status_ = ModuleStatus::kInit;
 }
 
 NavigationType Navigation::getAcceleration()
@@ -58,45 +74,103 @@ NavigationType Navigation::getEmergencyBrakingDistance()
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
+ModuleStatus Navigation::getStatus()
+{
+  return status_;
+}
 
-void Navigation::update(ImuArray imus)
+bool Navigation::startCalibration()
+{
+  if (is_calibrating_)
+    return true;
+  if (status_ != ModuleStatus::kInit)
+    return false;
+
+  is_calibrating_ = true;
+  return true;
+}
+
+bool Navigation::finishCalibration()
+{
+  if (!is_calibrating_ || status_ != ModuleStatus::kReady)
+    return false;
+
+  // Finalize calibration
+  g_ /= num_gravity_samples_;
+  for (NavigationVector& v : gyro_offsets_)
+    v /= num_gyro_samples_;
+
+  // Update state
+  is_calibrating_ = false;
+
+  // Hit the barrier to sync with motors
+  post_calibration_barrier_.wait();
+
+  return true;
+}
+
+
+void Navigation::update(DataPoint<ImuArray> imus)
 {
   int num_operational = 0;
-  uint32_t acc_time = 0, gyr_time = 0;  // TODO(Brano): Deal with overflows (individual and sum)
   NavigationVector acc(0), gyr(0);
-  for (int i = 0; i < imus.size(); ++i) {
-    if (imus[i].operational) {
+  for (int i = 0; i < imus.value.size(); ++i) {
+    if (imus.value[i].operational) {
       ++num_operational;
-      acc_time += imus[i].acc.timestamp;
-      acc      += acceleration_filter_[i].filter(imus[i].acc.value);
-      gyr_time += imus[i].gyr.timestamp;
-      gyr      += gyro_filter_[i].filter(imus[i].gyr.value);
+      acc += acceleration_filter_[i].filter(imus.value[i].acc);
+      gyr += gyro_filter_[i].filter(imus.value[i].gyr);
     }
   }
 
   // TODO(Brano): Check num_operational for crit. failure
 
-  accelerometerUpdate(DataPoint<NavigationVector>(acc_time/num_operational, acc/num_operational));
-           gyroUpdate(DataPoint<NavigationVector>(gyr_time/num_operational, gyr/num_operational));
+  accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
+           gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis)
+std::array<NavigationType, 3> Navigation::getNearestStripeDists()
+{
+  std::array<NavigationType, 3> arr;
+  for (unsigned int i = 0; i < arr.size(); ++i)
+    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
+             - getDisplacement();
+  return arr;
+}
+
+void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 {
   update(imus);
   // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
 }
 
-void Navigation::update(ImuArray imus, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
   stripeCounterUpdate(stripe_count.value);
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus,
+                        ProximityArray proxis,
+                        DataPoint<uint32_t> stripe_count)
 {
   update(imus, proxis);
   stripeCounterUpdate(stripe_count.value);
+}
+
+void Navigation::calibrationUpdate(ImuArray imus)
+{
+  // Online mean algorithm
+  ++num_gyro_samples_;
+  for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
+    ++num_gravity_samples_;
+    g_ = g_ + (imus[i].acc - g_)/num_gravity_samples_;
+    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr - gyro_offsets_[i])/num_gyro_samples_;
+  }
+
+  if (num_gravity_samples_ > kMinNumCalibrationSamples
+      && num_gyro_samples_ > kMinNumCalibrationSamples)
+    status_ = ModuleStatus::kReady;
 }
 
 void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)
@@ -131,6 +205,10 @@ void Navigation::proximityDisplacementUpdate()
 }
 
 void Navigation::stripeCounterUpdate(uint16_t count)
-{}
+{
+  // TODO(Brano): Check for errors (e.g. missed stripes)
+  // TODO(Brano): Update displacement and velocity
+  stripe_count_ = count;
+}
 
 }}  // namespace hyped::navigation

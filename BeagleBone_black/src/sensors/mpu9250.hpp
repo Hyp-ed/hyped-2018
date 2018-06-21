@@ -40,7 +40,7 @@ namespace sensors {
 
 class MPU9250 : public ImuInterface {
  public:
-  MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale);
+  MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale = 0x08, uint8_t gyro_scale = 0x00);
   ~MPU9250();
   /*
    *  @brief Returns if the sensor is online

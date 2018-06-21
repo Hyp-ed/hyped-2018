@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien
+ * Author: Martin Kristien and Jack Horsburgh
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -20,9 +20,6 @@
 
 #include "sensors/main.hpp"
 
-#include "sensors/bms.hpp"
-#include "sensors/mpu9250.hpp"
-#include "sensors/vl6180.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -30,70 +27,82 @@ namespace hyped {
 using data::Data;
 using data::Sensors;
 using data::Batteries;
+using data::StripeCounter;
 
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      chip_select_ {31, 50, 48, 51}
+      imu_manager_(log),
+      proxi_manager_front_(log, true),
+      proxi_manager_back_(log, false),
+      battery_manager_lp(log)
 {
-  // create BMS LP
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
-    bms->start();
-    bms_[i] = bms;
-  }
+  // Config new IMU manager
+  imu_manager_.config(&sensors_.imu);
 
-  // create Proximities
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    proxi_[i] = proxi;
-  }
+  // Config Proxi manager
+  proxi_manager_front_.config(&sensors_.proxi_front);
+  proxi_manager_back_.config(&sensors_.proxi_back);
 
-  // TODO(anyone): change this to use CAN-based proxies
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    can_proxi_[i] = proxi;
-  }
+  // Config BMS Manager
+  battery_manager_lp.config(&batteries_.low_power_batteries);
 
-  // create IMUs, might consider using fake_imus based on input arguments
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imu_[i] = new MPU9250(log_, chip_select_[i], true, 0x0);
-  }
+  // Used for initialisation of old sensor and old battery data
+  old_imu_timestamp_ = sensors_.imu.timestamp;
+
+  // @TODO (Ragnor) Add second Keyence?
+  // create Keyence
+  keyence = new Keyence(log_, 73);
+  keyence->start();
+
+  old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
+  old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
+  old_batteries_ = batteries_;
 }
 
 void Main::run()
 {
   while (1) {
-    // keep updating data_ based on values read from sensors
-
-    // update BMS LP
-    for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-      bms_[i]->getData(&batteries_.low_power_batteries[i]);
+    // Write sensor data to data structure only when all the imu and proxi values are different
+    if (updateImu() || updateProxi()) {
+      data_.setSensorsData(sensors_);
+      old_imu_timestamp_ = sensors_.imu.timestamp;
+      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
+      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
     }
 
-    // update front cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      proxi_[i]->getData(&sensors_.proxi_front[i]);
+    // Update battery data only when there is some change
+    if (updateBattery()) {
+      data_.setBatteryData(batteries_);
+      old_batteries_ = batteries_;
     }
-
-    // update back cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      can_proxi_[i]->getData(&sensors_.proxi_back[i]);
-    }
-
-    // update imus
-    for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imu_[i]->getData(&sensors_.imu[i]);
-    }
-
-    data_.setSensorsData(sensors_);
-    data_.setBatteryData(batteries_);
-    sleep(1000);
+    data_.setStripeCounterData(keyence->getStripeCounter());
+    yield();
   }
+}
+
+bool Main::updateImu()
+{
+  return old_imu_timestamp_ != sensors_.imu.timestamp;
+}
+
+bool Main::updateProxi()
+{
+  return (old_proxi_front_timestamp != sensors_.proxi_front.timestamp) &&
+         (old_proxi_back_timestamp != sensors_.proxi_back.timestamp);
+}
+
+bool Main::updateBattery()
+{
+  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+    if (old_batteries_.low_power_batteries[i].voltage != batteries_.low_power_batteries[i].voltage
+     || old_batteries_.low_power_batteries[i].temperature != batteries_.low_power_batteries[i].temperature) { //NOLINT
+      return true;
+    }
+  }
+  return false;
 }
 
 }}  // namespace hyped::sensors
