@@ -37,6 +37,17 @@ void Main::run()
   data::Navigation nav_data;
   std::unique_ptr<Sensors> last_readings(new Sensors());
   std::unique_ptr<Sensors> readings(new Sensors());
+
+  // Views of the Sensors structs
+  std::unique_ptr<Navigation::ProximityArray> last_proxis(new Navigation::ProximityArray());
+  std::unique_ptr<Navigation::ProximityArray> proxis(new Navigation::ProximityArray());
+  // Set up pointers as to unify the front and rear proxis in a single array
+  for (int i = 0; i < Sensors::kNumProximities; ++i) {
+    (*proxis)[i] = &(readings->proxi_front[i]);
+    (*proxis)[i + Sensors::kNumProximities] = &(readings->proxi_back[i]);
+    (*last_proxis)[i] = &(last_readings->proxi_front[i]);
+    (*last_proxis)[i + Sensors::kNumProximities] = &(last_readings->proxi_back[i]);
+  }
   log_.INFO("NAVIGATION", "Main started");
 
   *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
@@ -49,10 +60,10 @@ void Main::run()
       yield();
       continue;
     }
-    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->proxi, readings->stripe_counter.count);
-    else if (proxiChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->proxi);
+    if (proxiChanged(*last_proxis, *proxis) && stripeCntChanged(*last_readings, *readings))
+      nav_.update(readings->imu, *proxis, readings->stripe_counter.count);
+    else if (proxiChanged(*last_proxis, *proxis))
+      nav_.update(readings->imu, *proxis);
     else if (stripeCntChanged(*last_readings, *readings))
       nav_.update(readings->imu, readings->stripe_counter.count);
     else
@@ -65,6 +76,7 @@ void Main::run()
     data_.setNavigationData(nav_data);
 
     readings.swap(last_readings);
+    proxis.swap(last_proxis);
   }
 }
 
@@ -78,11 +90,12 @@ bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
   return false;
 }
 
-bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
+bool Main::proxiChanged(const Navigation::ProximityArray& old_data,
+                        const Navigation::ProximityArray& new_data)
 {
-  for (uint8_t i = 0; i < new_data.proxi.size(); ++i) {
+  for (uint8_t i = 0; i < new_data.size(); ++i) {
     // TODO(Brano): Timestamp proxi data in data::Sensors
-    if (new_data.proxi[i].val != old_data.proxi[i].val)
+    if (new_data[i]->val != old_data[i]->val)
       return true;
   }
   return false;

@@ -36,7 +36,7 @@ int main()
   printf("from Navigation: %f %f %f\n", nav.distance, nav.velocity, nav.acceleration);
   printf("from Sensors: %f %d %d at time %d\n",
       sens.imu[0].acc.value[0],
-      sens.proxi[0].val,
+      sens.proxi_front[0].val,
       sens.stripe_counter.count.value,
       sens.stripe_counter.count.timestamp);
   return 0;

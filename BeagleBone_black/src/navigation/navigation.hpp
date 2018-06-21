@@ -47,8 +47,8 @@ constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
 
 class Navigation {
  public:
-  typedef std::array<Imu,       Sensors::kNumImus>        ImuArray;
-  typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
+  typedef std::array<Imu,        Sensors::kNumImus>          ImuArray;
+  typedef std::array<Proximity*, 2*Sensors::kNumProximities> ProximityArray;
   friend class Main;
 
   Navigation();
@@ -131,7 +131,7 @@ class Navigation {
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;          // One for each IMU
-  std::array<Kalman<uint8_t>, Sensors::kNumProximities>   proximity_filter_;
+  std::array<Kalman<uint8_t>, 2*Sensors::kNumProximities>   proximity_filter_;
 
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement
