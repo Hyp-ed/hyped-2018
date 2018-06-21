@@ -40,8 +40,7 @@ class Main: public Thread {
 
  private:
   bool imuChanged(const Sensors& old_data, const Sensors& new_data);
-  bool proxiChanged(const Navigation::ProximityArray& old_data,
-                    const Navigation::ProximityArray& new_data);
+  bool proxiChanged(const Sensors& old_data, const Sensors& new_data);
   inline bool stripeCntChanged(const Sensors& old_data, const Sensors& new_data);
   void updateData();
 
