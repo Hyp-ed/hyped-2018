@@ -23,6 +23,7 @@
 
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include "data/data.hpp"
 #include "utils/io/can.hpp"
 
 namespace hyped {
@@ -71,6 +72,7 @@ constexpr uint8_t  kNMT_RESET_COMMS        = 0x82;
 Controller::Controller(Logger& log, uint8_t id)
   : log_(log),
     can_(Can::getInstance()),
+    data_(data::Data::getInstance()),
     node_id_(id),
     critical_failure_(false),
     actual_velocity_(0),
@@ -78,6 +80,7 @@ Controller::Controller(Logger& log, uint8_t id)
     state_(kNotReadyToSwitchOn),
     sdo_frame_recieved_(false)
 {
+  motor_data_ = data_.getMotorData();
   SDOMessage.id       = kSDO_RECEIVE + node_id_;
   SDOMessage.extended = false;
   SDOMessage.len      = 8;
@@ -562,10 +565,10 @@ void Controller::processNewData(utils::io::can::Frame& message)
 
 void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 {
-  critical_failure_ = true;
   log_.ERR("MOTOR", "Controller %d: CAN Emergency", node_id_);
-  int8_t index_1   = message.data[1];
-  int8_t index_2   = message.data[2];
+  throwCriticalFailure();
+  int8_t index_1   = message.data[0];
+  int8_t index_2   = message.data[1];
 
   if (index_2 == 0x00) {
     log_.ERR("MOTOR", "Controller %d: No emergency/error", node_id_);
@@ -774,7 +777,7 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
   // Process warning message
   if (index_1 == 0x27 && index_2 == 0x20 && sub_index == 0x00) {
     if (message.data[4] != 0 && message.data[5] != 0) {
-      critical_failure_ = true;
+      throwCriticalFailure();
       uint8_t warning_message = message.data[4];
       switch (warning_message) {
         case 0x01:
@@ -808,8 +811,8 @@ void Controller::processSDOMessage(utils::io::can::Frame& message)
   // Process error message
   if (index_1 == 0x3F && index_2 == 0x60 && sub_index == 0x00) {
     if (message.data[4] != 0 && message.data[5] != 0) {
-      critical_failure_ = true;
       uint16_t error_message = (message.data[5] << 8) | message.data[4];
+      throwCriticalFailure();
       processErrorMessage(error_message);
     }
     return;
@@ -1052,6 +1055,7 @@ void Controller::sendSDO(utils::io::can::Frame& message)
   if (!sdo_frame_recieved_) {
     critical_failure_ = true;
     log_.ERR("MOTOR", "Controller %d: No response from controller", node_id_);
+    throwCriticalFailure();
   }
 }
 
@@ -1097,6 +1101,13 @@ uint8_t Controller::getId()
 ControllerState Controller::getControllerState()
 {
   return state_;
+}
+
+void Controller::throwCriticalFailure()
+{
+  critical_failure_ = true;
+  motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
+  data_.setMotorData(motor_data_);
 }
 
 }}  // namespace hyped::motor_control

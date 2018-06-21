@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include "utils/io/can.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
 // Forward declarations
@@ -164,8 +165,15 @@ class Controller : public CanProccesor {
    * @brief { Parses error message to find the problem }
    */
   void processErrorMessage(uint16_t error_message);
+  /*
+   * @brief { Set critical failure flag to true and write failure to data structure }
+   */
+  void throwCriticalFailure();
+
   Logger&  log_;
   Can&     can_;
+  data::Data& data_;
+  data::Motors motor_data_;
   uint8_t  node_id_;
   bool     critical_failure_;
   int32_t  actual_velocity_;
