@@ -21,6 +21,9 @@
 #include "sensors/main.hpp"
 
 #include "data/data.hpp"
+#include "sensors/imu_manager.hpp"
+#include "sensors/bms_manager.hpp"
+#include "sensors/proxi_manager.hpp"
 
 namespace hyped {
 
@@ -34,20 +37,20 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      imu_manager_(log),
-      proxi_manager_front_(log, true),
-      proxi_manager_back_(log, false),
-      battery_manager_lp(log)
+      imu_manager_(new ImuManager(log)),
+      proxi_manager_front_(new ProxiManager(log, true)),
+      proxi_manager_back_(new ProxiManager(log, false)),
+      battery_manager_lp_(new BmsManager(log))
 {
   // Config new IMU manager
-  imu_manager_.config(&sensors_.imu);
+  imu_manager_->config(&sensors_.imu);
 
   // Config Proxi manager
-  proxi_manager_front_.config(&sensors_.proxi_front);
-  proxi_manager_back_.config(&sensors_.proxi_back);
+  proxi_manager_front_->config(&sensors_.proxi_front);
+  proxi_manager_back_->config(&sensors_.proxi_back);
 
   // Config BMS Manager
-  battery_manager_lp.config(&batteries_.low_power_batteries);
+  battery_manager_lp_->config(&batteries_.low_power_batteries);
 
   // Used for initialisation of old sensor and old battery data
   old_imu_timestamp_ = sensors_.imu.timestamp;
@@ -66,43 +69,22 @@ void Main::run()
 {
   while (1) {
     // Write sensor data to data structure only when all the imu and proxi values are different
-    if (updateImu() || updateProxi()) {
+    if (imu_manager_->updated()) {
       data_.setSensorsData(sensors_);
-      old_imu_timestamp_ = sensors_.imu.timestamp;
-      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
-      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
+    }
+
+    if (proxi_manager_front_->updated() && proxi_manager_back_->updated()) {
+      data_.setSensorsData(sensors_);
     }
 
     // Update battery data only when there is some change
-    if (updateBattery()) {
+    if (battery_manager_lp_->updated()) {
       data_.setBatteryData(batteries_);
       old_batteries_ = batteries_;
     }
     data_.setStripeCounterData(keyence->getStripeCounter());
     yield();
   }
-}
-
-bool Main::updateImu()
-{
-  return old_imu_timestamp_ != sensors_.imu.timestamp;
-}
-
-bool Main::updateProxi()
-{
-  return (old_proxi_front_timestamp != sensors_.proxi_front.timestamp) &&
-         (old_proxi_back_timestamp != sensors_.proxi_back.timestamp);
-}
-
-bool Main::updateBattery()
-{
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    if (old_batteries_.low_power_batteries[i].voltage != batteries_.low_power_batteries[i].voltage
-     || old_batteries_.low_power_batteries[i].temperature != batteries_.low_power_batteries[i].temperature) { //NOLINT
-      return true;
-    }
-  }
-  return false;
 }
 
 }}  // namespace hyped::sensors

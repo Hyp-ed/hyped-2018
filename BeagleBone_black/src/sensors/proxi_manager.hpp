@@ -23,6 +23,7 @@
 
 #include <cstdint>
 
+#include "sensors/manager_interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
@@ -34,15 +35,17 @@ using utils::Logger;
 
 namespace sensors {
 
-class ProxiManager: public Thread {
+class ProxiManager: public Thread, public ProxiManagerInterface {
  public:
   ProxiManager(Logger& log, bool isFront);
   void run() override;
-  void config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi);
+  void config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi) override;
+  bool updated() override;
 
  private:
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
+  uint64_t old_proxi_timestamp_;
 };
 
 }}  // namespace hyped::sensors

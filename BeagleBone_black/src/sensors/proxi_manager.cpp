@@ -33,7 +33,8 @@ using data::Sensors;
 namespace sensors {
 
 ProxiManager::ProxiManager(Logger& log, bool isFront)
-    : Thread(log)
+    : Thread(log),
+      old_proxi_timestamp_(0)
 {
   if (isFront) {
     // create CAN-based proximities
@@ -66,5 +67,14 @@ void ProxiManager::run()
 void ProxiManager::config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
 {
   sensors_proxi_ = proxi;
+}
+
+bool ProxiManager::updated()
+{
+  if (old_proxi_timestamp_ != sensors_proxi_->timestamp) {
+    old_proxi_timestamp_ = sensors_proxi_->timestamp;
+    return true;
+  }
+  return false;
 }
 }}  // namespace hyped::sensors

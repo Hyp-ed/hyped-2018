@@ -23,6 +23,7 @@
 
 #include <cstdint>
 
+#include "sensors/manager_interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
@@ -34,14 +35,15 @@ using utils::Logger;
 
 namespace sensors {
 
-class BmsManager: public Thread {
+class BmsManager: public Thread, public BmsManagerInterface  {
  public:
   explicit BmsManager(Logger& log);
   void run() override;
-  void config(array<Battery, data::Batteries::kNumLPBatteries> *batteries);
+  void config(array<Battery, data::Batteries::kNumLPBatteries> *batteries) override;
+  bool updated() override;
 
  private:
-  array<Battery, data::Batteries::kNumLPBatteries> *lp_batteries;
+  array<Battery, data::Batteries::kNumLPBatteries> *lp_batteries_;
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
 };
 
