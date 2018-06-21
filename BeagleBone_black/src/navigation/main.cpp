@@ -101,8 +101,8 @@ void Main::run()
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
 {
-    if (new_data.imu.timestamp != old_data.imu.timestamp)
-      return true;
+  if (new_data.imu.timestamp != old_data.imu.timestamp)
+    return true;
   return false;
 }
 
