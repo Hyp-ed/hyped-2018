@@ -130,34 +130,34 @@ class Navigation {
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
    *
-   * @param[in] datapointImus datapoint of an Array of IMU readings
+   * @param[in] imus Datapoint of an array of IMU readings
    */
-  void update(DataPoint<ImuArray> datapointImus);
+  void update(DataPoint<ImuArray> imus);
   /**
    * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
    *        proxi have been updated but there is no update from stripe counter.
    *
-   * @param[in] imus   Array of IMU readings
+   * @param[in] imus   Datapoint of an array of IMU readings
    * @param[in] proxis Array of proximity readings
    */
-  void update(DataPoint<ImuArray> datapointImus, ProximityArray proxis);
+  void update(DataPoint<ImuArray> imus, ProximityArray proxis);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU and stripe counter have been updated but there is no update from proximity sensors.
    *
-   * @param imus         Array of IMU readings
+   * @param imus         Datapoint of an array of IMU readings
    * @param stripe_count Stripe counter reading
    */
-  void update(DataPoint<ImuArray> datapointImus, DataPoint<uint32_t> stripe_count);
+  void update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
    *
-   * @param imus         Array of IMU readings
+   * @param imus         Datapoint of an array of IMU readings
    * @param[in] proxis   Array of proximity readings
    * @param stripe_count Stripe counter reading
    */
-  void update(DataPoint<ImuArray> datapointImus,
+  void update(DataPoint<ImuArray> imus,
               ProximityArray proxis,
               DataPoint<uint32_t> stripe_count);
 
