@@ -61,18 +61,23 @@ NavigationType Navigation::getEmergencyBrakingDistance()
 
 void Navigation::update(ImuArray imus)
 {
-  // TODO(Brano,Adi): Gyro update. (Data format should change first.)
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
-    imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
+  int num_operational = 0;
+  uint32_t acc_time = 0, gyr_time = 0;  // TODO(Brano): Deal with overflows (individual and sum)
+  NavigationVector acc(0), gyr(0);
+  for (int i = 0; i < imus.size(); ++i) {
+    if (imus[i].operational) {
+      ++num_operational;
+      acc_time += imus[i].acc.timestamp;
+      acc      += acceleration_filter_[i].filter(imus[i].acc.value);
+      gyr_time += imus[i].gyr.timestamp;
+      gyr      += gyro_filter_[i].filter(imus[i].gyr.value);
+    }
   }
 
-  NavigationVector avg(0);
-  for (const auto& imu : imus) avg += imu.acc.value;
+  // TODO(Brano): Check num_operational for crit. failure
 
-  avg /= imus.size();
-  // TODO(Brano,Adi): Change the timestamping strategy
-  this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
+  accelerometerUpdate(DataPoint<NavigationVector>(acc_time/num_operational, acc/num_operational));
+           gyroUpdate(DataPoint<NavigationVector>(gyr_time/num_operational, gyr/num_operational));
 }
 
 void Navigation::update(ImuArray imus, ProximityArray proxis)
