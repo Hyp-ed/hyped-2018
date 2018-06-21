@@ -48,10 +48,10 @@ void Main::run()
   std::unique_ptr<Navigation::ProximityArray> proxis(new Navigation::ProximityArray());
   // Set up pointers as to unify the front and rear proxis in a single array
   for (int i = 0; i < Sensors::kNumProximities; ++i) {
-    (*proxis)[i] = &(readings->proxi_front[i]);
-    (*proxis)[i + Sensors::kNumProximities] = &(readings->proxi_back[i]);
-    (*last_proxis)[i] = &(last_readings->proxi_front[i]);
-    (*last_proxis)[i + Sensors::kNumProximities] = &(last_readings->proxi_back[i]);
+    (*proxis)[i] = &(readings->proxi_front.value[i]);
+    (*proxis)[i + Sensors::kNumProximities] = &(readings->proxi_back.value[i]);
+    (*last_proxis)[i] = &(last_readings->proxi_front.value[i]);
+    (*last_proxis)[i + Sensors::kNumProximities] = &(last_readings->proxi_back.value[i]);
   }
   log_.INFO("NAVIGATION", "Main started");
 
