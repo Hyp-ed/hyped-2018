@@ -117,6 +117,18 @@ class Navigation {
   bool finishCalibration();
 
  private:
+  /**
+   * @brief Front-right, rear-right, rear-left, and front-left proxi sensor distances. This is
+   *        likely temporary and will be replaced by an array or other suitable data structure once
+   *        the algorithm using it is complete.
+   */
+  struct Proximities {
+    float fr;  // mm
+    float rr;  // mm
+    float rl;  // mm
+    float fl;  // mm
+  };
+
   static constexpr int kMinNumCalibrationSamples = 200000;
   /**
    * @brief Calculates distance to the last stripe, the next stripe and the one after that.
@@ -164,8 +176,8 @@ class Navigation {
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
-  void proximityOrientationUpdate();  // Point number 7
-  void proximityDisplacementUpdate();  // Point number 7
+  void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
+  void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(uint16_t count);  // Point number 7
 
   // Admin stuff

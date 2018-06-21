@@ -24,6 +24,17 @@
 namespace hyped {
 namespace navigation {
 
+float proxiMean(const Proximity* const a, const Proximity* const b)
+{
+  if (a->operational && b->operational)
+    return (float)(a->val + b->val)/2.0;
+  if (a->operational)
+    return a->val;
+  if (b->operational)
+    return b->val;
+  return -1;
+}
+
 Navigation::Navigation(Barrier& post_calibration_barrier)
     : post_calibration_barrier_(post_calibration_barrier),
       status_(ModuleStatus::kStart),
@@ -140,7 +151,20 @@ void Navigation::update(DataPoint<ImuArray> imus)
 void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 {
   update(imus);
-  // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
+
+  Proximities ground, rail;
+  // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
+  ground.fr = proxiMean(proxis[0],  proxis[1]);
+  ground.rr = proxiMean(proxis[2],  proxis[3]);
+  ground.rl = proxiMean(proxis[4],  proxis[5]);
+  ground.fl = proxiMean(proxis[6],  proxis[7]);
+  rail.fr   = proxiMean(proxis[8],  proxis[9]);
+  rail.rr   = proxiMean(proxis[10], proxis[11]);
+  rail.rl   = proxiMean(proxis[12], proxis[13]);
+  rail.fl   = proxiMean(proxis[14], proxis[15]);
+  // TODO(Brano): Check for crit. failure
+  proximityDisplacementUpdate(ground, rail);
+  proximityOrientationUpdate(ground, rail);
 }
 
 void Navigation::update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count)
@@ -194,12 +218,12 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
   displacement_ = velocity_integrator_.update(velocity).value;
 }
 
-void Navigation::proximityOrientationUpdate()
+void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
   // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
 }
 
-void Navigation::proximityDisplacementUpdate()
+void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
   // TODO(Adi): Calculate displacement from proximity. (Point 7)
 }
