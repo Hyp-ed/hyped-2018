@@ -90,13 +90,8 @@ bool Main::updateImu()
 
 bool Main::updateProxi()
 {
-    if (old_proxi_front_timestamp == sensors_.proxi_front.timestamp) {
-      return false;
-    } else if (old_proxi_back_timestamp == sensors_.proxi_back.timestamp) {
-      return false;
-    } else {
-      return true;
-    }
+  return (old_proxi_front_timestamp != sensors_.proxi_front.timestamp) &&
+         (old_proxi_back_timestamp != sensors_.proxi_back.timestamp);
 }
 
 bool Main::updateBattery()
