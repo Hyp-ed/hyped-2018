@@ -57,14 +57,8 @@ Main::Main(uint8_t id, Logger& log)
   motor_data_.torque_3 = 0;
   motor_data_.torque_4 = 0;
   data_.setMotorData(motor_data_);
-  motor_velocity_.velocity_1 = 0;
-  motor_velocity_.velocity_2 = 0;
-  motor_velocity_.velocity_3 = 0;
-  motor_velocity_.velocity_4 = 0;
-  motor_torque_.torque_1 = 0;
-  motor_torque_.torque_2 = 0;
-  motor_torque_.torque_3 = 0;
-  motor_torque_.torque_4 = 0;
+  motor_velocity_ = {0, 0, 0, 0};
+  motor_torque_   = {0, 0, 0, 0};
 }
 
 void Main::run()
@@ -227,10 +221,7 @@ void Main::stopMotors()
       log_.INFO("MOTOR", "Motor State: Stopped\n");
     }
   }
-
   updateMotorData();
-  log_.DBG2("MOTOR", "Motor State: Stopped\n");
-
   communicator_.enterPreOperational();
 }
 
