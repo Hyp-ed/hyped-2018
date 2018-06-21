@@ -48,8 +48,7 @@ void ImuManager::run()
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i]->getData(&(sensors_imu_->value[i]));
     }
-  uint32_t time = utils::Timer::getTimeMicros();
-  sensors_imu_->timestamp = time;
+  sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }
 }
 

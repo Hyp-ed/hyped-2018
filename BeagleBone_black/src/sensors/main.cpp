@@ -85,10 +85,7 @@ void Main::run()
 
 bool Main::updateImu()
 {
-  if (old_imu_timestamp_ == sensors_.imu.timestamp) {
-    return false;
-  }
-  return true;
+  return old_imu_timestamp_ != sensors_.imu.timestamp;
 }
 
 bool Main::updateProxi()
