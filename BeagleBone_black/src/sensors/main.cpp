@@ -85,21 +85,13 @@ void Main::run()
 
 bool Main::updateImu()
 {
-  if (old_imu_timestamp_ == sensors_.imu.timestamp) {
-    return false;
-  }
-  return true;
+  return old_imu_timestamp_ != sensors_.imu.timestamp;
 }
 
 bool Main::updateProxi()
 {
-    if (old_proxi_front_timestamp == sensors_.proxi_front.timestamp) {
-      return false;
-    } else if (old_proxi_back_timestamp == sensors_.proxi_back.timestamp) {
-      return false;
-    } else {
-      return true;
-    }
+  return (old_proxi_front_timestamp != sensors_.proxi_front.timestamp) &&
+         (old_proxi_back_timestamp != sensors_.proxi_back.timestamp);
 }
 
 bool Main::updateBattery()
