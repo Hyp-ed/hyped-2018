@@ -84,7 +84,7 @@ void Main::run()
   while (1) {
     // Write sensor data to data structure only when all the imu and proxi values are different
     if (imu_manager_->updated()) {
-      data_.setSensorsData(sensors_);
+      data_.setSensorsImuData(sensors_.imu);
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
     }
