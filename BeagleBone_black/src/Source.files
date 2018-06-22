@@ -16,7 +16,11 @@ SRCS := \
   sensors/can_proxi.cpp \
   sensors/vl6180.cpp \
   sensors/mpu9250.cpp \
+  sensors/imu_manager.cpp \
+  sensors/proxi_manager.cpp \
+  sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
+  sensors/keyence.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \

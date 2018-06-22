@@ -24,6 +24,17 @@
 namespace hyped {
 namespace navigation {
 
+float proxiMean(const Proximity* const a, const Proximity* const b)
+{
+  if (a->operational && b->operational)
+    return static_cast<float>(a->val + b->val)/2.0;
+  if (a->operational)
+    return a->val;
+  if (b->operational)
+    return b->val;
+  return -1;
+}
+
 Navigation::Navigation(Barrier& post_calibration_barrier)
     : post_calibration_barrier_(post_calibration_barrier),
       status_(ModuleStatus::kStart),
@@ -110,31 +121,6 @@ bool Navigation::finishCalibration()
 }
 
 
-void Navigation::update(ImuArray imus)
-{
-  if (is_calibrating_) {
-    calibrationUpdate(imus);
-  } else if (status_ == ModuleStatus::kReady || status_ == ModuleStatus::kCriticalFailure) {
-    // TODO(Brano,Adi): Gyro update. (Data format should change first.)
-    for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
-      imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
-    }
-
-    NavigationVector acc_avg(0), gyr_avg(0);
-    for (const auto& imu : imus) {
-      acc_avg += imu.acc.value;
-      gyr_avg += imu.gyr.value;  // TODO(Brano,Adi): Check if gyro can be averaged like this
-    }
-    acc_avg /= imus.size();
-    gyr_avg /= imus.size();
-
-    // TODO(Brano,Adi): Change the timestamping strategy
-    this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, acc_avg));
-    this->gyroUpdate(DataPoint<NavigationVector>(imus[0].gyr.timestamp, gyr_avg));
-  }
-}
-
 std::array<NavigationType, 3> Navigation::getNearestStripeDists()
 {
   std::array<NavigationType, 3> arr;
@@ -144,20 +130,53 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists()
   return arr;
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis)
+void Navigation::update(DataPoint<ImuArray> imus)
 {
-  update(imus);
-  // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
+  int num_operational = 0;
+  NavigationVector acc(0), gyr(0);
+  for (unsigned int i = 0; i < imus.value.size(); ++i) {
+    if (imus.value[i].operational) {
+      ++num_operational;
+      acc += acceleration_filter_[i].filter(imus.value[i].acc);
+      gyr += gyro_filter_[i].filter(imus.value[i].gyr);
+    }
+  }
+
+  // TODO(Brano): Check num_operational for crit. failure
+
+  accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
+           gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
 }
 
-void Navigation::update(ImuArray imus, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
+{
+  update(imus);
+
+  Proximities ground, rail;
+  // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
+  ground.fr = proxiMean(proxis[6],  proxis[7]);
+  ground.rr = proxiMean(proxis[8],  proxis[9]);
+  ground.rl = proxiMean(proxis[14], proxis[15]);
+  ground.fl = proxiMean(proxis[0],  proxis[1]);
+  rail.fr   = proxiMean(proxis[4],  proxis[5]);
+  rail.rr   = proxiMean(proxis[10], proxis[11]);
+  rail.rl   = proxiMean(proxis[12], proxis[13]);
+  rail.fl   = proxiMean(proxis[2],  proxis[3]);
+  // TODO(Brano): Check for crit. failure
+  proximityDisplacementUpdate(ground, rail);
+  proximityOrientationUpdate(ground, rail);
+}
+
+void Navigation::update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
   stripeCounterUpdate(stripe_count.value);
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus,
+                        ProximityArray proxis,
+                        DataPoint<uint32_t> stripe_count)
 {
   update(imus, proxis);
   stripeCounterUpdate(stripe_count.value);
@@ -169,8 +188,8 @@ void Navigation::calibrationUpdate(ImuArray imus)
   ++num_gyro_samples_;
   for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
     ++num_gravity_samples_;
-    g_ = g_ + (imus[i].acc.value - g_)/num_gravity_samples_;
-    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr.value - gyro_offsets_[i])/num_gyro_samples_;
+    g_ = g_ + (imus[i].acc - g_)/num_gravity_samples_;
+    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr - gyro_offsets_[i])/num_gyro_samples_;
   }
 
   if (num_gravity_samples_ > kMinNumCalibrationSamples
@@ -199,12 +218,12 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
   displacement_ = velocity_integrator_.update(velocity).value;
 }
 
-void Navigation::proximityOrientationUpdate()
+void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
   // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
 }
 
-void Navigation::proximityDisplacementUpdate()
+void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
   // TODO(Adi): Calculate displacement from proximity. (Point 7)
 }

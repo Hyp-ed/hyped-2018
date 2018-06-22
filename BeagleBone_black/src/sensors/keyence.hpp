@@ -1,7 +1,7 @@
 /*
- * Author: Martin Kristien and Jack Horsburgh
+ * Author: Ragnor Comerford
  * Organisation: HYPED
- * Date: 13/03/18
+ * Date: 19/06/18
  * Description:
  * Main manages sensor drivers, collects data from sensors and updates
  * shared Data::Sensors structure. Main is not responsible for initialisation
@@ -24,18 +24,14 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
 
 #include <cstdint>
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/keyence.hpp"
-#include "sensors/imu_manager.hpp"
-#include "sensors/interface.hpp"
-#include "sensors/proxi_manager.hpp"
-#include "sensors/bms_manager.hpp"
+
 
 namespace hyped {
 
@@ -44,37 +40,18 @@ using utils::Logger;
 
 namespace sensors {
 
-class CANProxi;
-class Keyence;
-class Main: public Thread {
+
+class Keyence: public Thread {
  public:
-  explicit Main(uint8_t id, Logger& log);
+  explicit Keyence(Logger& log, int pin);
   void run() override;
+  data::StripeCounter getStripeCounter();
 
  private:
-  bool updateImu();
-  bool updateProxi();
-  bool updateBattery();
-  data::Data&     data_;
+  int pin_;
 
-  // master data structures
-  data::Sensors   sensors_;
-  data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
-
-  // Previous data
-  uint64_t old_imu_timestamp_;
-  uint64_t old_proxi_back_timestamp;
-  uint64_t old_proxi_front_timestamp;
-  data::Batteries old_batteries_;
-
-  Keyence* keyence;
-  ImuManager imu_manager_;
-  ProxiManager proxi_manager_front_;
-  ProxiManager proxi_manager_back_;
-  BmsManager  battery_manager_lp;
 };
-
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
