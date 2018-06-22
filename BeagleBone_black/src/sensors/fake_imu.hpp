@@ -127,8 +127,8 @@ class FakeImu : public ImuInterface {
   NavigationVector prev_gyr;
 
   unsigned pt_acc, pt_gyr;
-  std::vector<DataPoint<NavigationVector>> acc_val_read;
-  std::vector<DataPoint<NavigationVector>> gyr_val_read;
+  std::vector<NavigationVector> acc_val_read;
+  std::vector<NavigationVector> gyr_val_read;
 
   int64_t acc_count, gyr_count;
   high_resolution_clock::time_point imu_ref_time;

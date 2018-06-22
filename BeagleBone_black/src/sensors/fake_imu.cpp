@@ -82,12 +82,12 @@ void FakeImu::getData(Imu* imu)
     if (accCheckTime()) {
       log_.INFO("Fake-IMU", "Passed acc check time");
       acc_count = std::min(acc_count, (int64_t) acc_val_read.size());
-      prev_acc = acc_val_read[acc_count-1].value;
+      prev_acc = acc_val_read[acc_count-1];
     }
 
     if (gyrCheckTime()) {
       gyr_count = std::min(gyr_count, (int64_t) gyr_val_read.size());
-      prev_gyr = gyr_val_read[gyr_count-1].value;
+      prev_gyr = gyr_val_read[gyr_count-1];
     }
   } else {
     if (accCheckTime()) {
@@ -98,8 +98,6 @@ void FakeImu::getData(Imu* imu)
       prev_gyr = addNoiseToData(gyr_val, gyr_noise);
     }
   }
-  // kAccTimeInterval*(acc_count-1),
-  // kGyrTimeInterval*(gyr_count-1),
   imu->acc = prev_acc;
   imu->gyr = prev_gyr;
 }
@@ -122,7 +120,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
   for (int i = 0; i < 2; i++) {
     std::string file_path;
     uint32_t timestamp;
-    std::vector<DataPoint<NavigationVector>>* val_read;
+    std::vector<NavigationVector>* val_read;
 
     if (i == 0) {
       file_path = acc_file_path;
@@ -168,7 +166,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
       for (int i = 0; i < 3; i++)
         noise[i] = temp_value[i+3];
 
-      val_read->push_back(DataPoint<NavigationVector>(temp_time, addNoiseToData(value, noise)));
+      val_read->push_back(addNoiseToData(value, noise));
 
       counter++;
     }
