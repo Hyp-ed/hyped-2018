@@ -22,49 +22,28 @@
 #define BEAGLEBONE_BLACK_SENSORS_MANAGER_INTERFACE_HPP_
 
 #include "data/data.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
 using data::Imu;
 using data::Proximity;
 using data::Battery;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
-class ManagerInterface {
+class ManagerInterface : public Thread {
  public:
   /**
    * @brief Checks if the data has been updated
    * 
    */
   virtual bool updated() = 0;
-};
-
-class ProxiManagerInterface: public ManagerInterface {
- public:
- /**
-  * @brief Configures the data so it updates main file
-  * 
-  */
-  virtual void config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi) = 0;
-};
-
-class ImuManagerInterface: public ManagerInterface {
- public:
- /**
-  * @brief Configures the data so it updates main file
-  * 
-  */
-  virtual void config(data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu) = 0;
-};
-
-class BmsManagerInterface: public ManagerInterface {
- public:
- /**
-  * @brief Configures the data so it updates main file
-  * 
-  */
-  virtual void config(array<Battery, data::Batteries::kNumLPBatteries> *batteries) = 0;
+  virtual void resetTimestamp() = 0;
+  ManagerInterface(utils::Logger& log) : Thread(log), old_timestamp_(0) {}
+ protected:
+  uint64_t old_timestamp_;
 };
 
 }}  // namespace hyped::sensors

@@ -58,17 +58,13 @@ class Main: public Thread {
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  // Previous data
-  uint64_t old_imu_timestamp_;
-  uint64_t old_proxi_back_timestamp;
-  uint64_t old_proxi_front_timestamp;
-  data::Batteries old_batteries_;
-
   Keyence* keyence;
-  std::unique_ptr<ImuManagerInterface> imu_manager_;
-  std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
-  std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;
-  std::unique_ptr<BmsManagerInterface>  battery_manager_lp_;
+  std::unique_ptr<ManagerInterface> imu_manager_;
+  std::unique_ptr<ManagerInterface> proxi_manager_front_;
+  std::unique_ptr<ManagerInterface> proxi_manager_back_;
+  std::unique_ptr<ManagerInterface> battery_manager_lp_;
+  bool sensor_init_;
+  bool battery_init_;
 };
 
 }}  // namespace hyped::sensors

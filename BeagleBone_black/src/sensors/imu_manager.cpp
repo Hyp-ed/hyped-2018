@@ -32,15 +32,16 @@ using data::Sensors;
 
 namespace sensors {
 
-ImuManager::ImuManager(Logger& log)
-    : Thread(log),
-      chip_select_ {31, 50, 48, 51},
-      old_imu_timestamp_(0)
+ImuManager::ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
+    : ManagerInterface(log),
+      chip_select_ {31, 50, 48, 51}
 {
   // create IMUs, might consider using fake_imus based on input arguments
   for (int i = 0; i < data::Sensors::kNumImus; i++) {
     imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
   }
+
+  sensors_imu_ = imu;
 }
 
 void ImuManager::run()
@@ -49,21 +50,20 @@ void ImuManager::run()
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i]->getData(&(sensors_imu_->value[i]));
     }
-  sensors_imu_->timestamp = utils::Timer::getTimeMicros();
+    sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }
-}
-
-void ImuManager::config(data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
-{
-  sensors_imu_ = imu;
 }
 
 bool ImuManager::updated()
 {
-  if (old_imu_timestamp_ != sensors_imu_->timestamp) {
-    old_imu_timestamp_ = sensors_imu_->timestamp;
+  if (old_timestamp_ != sensors_imu_->timestamp) {
     return true;
   }
   return false;
+}
+
+void ImuManager::resetTimestamp()
+{
+  old_timestamp_ = sensors_imu_->timestamp;
 }
 }}  // namespace hyped::sensors

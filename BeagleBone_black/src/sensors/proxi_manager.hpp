@@ -35,17 +35,18 @@ using utils::Logger;
 
 namespace sensors {
 
-class ProxiManager: public Thread, public ProxiManagerInterface {
+class ProxiManager: public ManagerInterface {
  public:
-  ProxiManager(Logger& log, bool isFront);
+  ProxiManager(Logger& log,
+               bool isFront,
+               data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi);
   void run() override;
-  void config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi) override;
   bool updated() override;
+  void resetTimestamp() override;
 
  private:
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  uint64_t old_proxi_timestamp_;
 };
 
 }}  // namespace hyped::sensors

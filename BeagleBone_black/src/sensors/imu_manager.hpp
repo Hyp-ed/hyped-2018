@@ -35,19 +35,18 @@ using utils::Logger;
 
 namespace sensors {
 
-class ImuManager: public Thread, public ImuManagerInterface {
+class ImuManager: public ManagerInterface {
  public:
-  explicit ImuManager(Logger& log);
+  explicit ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
   void run() override;
-  void config(data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu) override;
   bool updated() override;
+  void resetTimestamp() override;
 
  private:
   data::DataPoint<array<Imu, data::Sensors::kNumImus>> *sensors_imu_;
 
   uint8_t         chip_select_[data::Sensors::kNumImus];
   ImuInterface*   imu_[data::Sensors::kNumImus];
-  uint64_t old_imu_timestamp_;
 };
 
 }}  // namespace hyped::sensors

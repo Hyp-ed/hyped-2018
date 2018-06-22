@@ -35,16 +35,18 @@ using utils::Logger;
 
 namespace sensors {
 
-class BmsManager: public Thread, public BmsManagerInterface  {
+class BmsManager: public ManagerInterface  {
  public:
-  explicit BmsManager(Logger& log);
+  explicit BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries> *batteries);
   void run() override;
-  void config(array<Battery, data::Batteries::kNumLPBatteries> *batteries) override;
   bool updated() override;
+  void resetTimestamp() override;
 
  private:
   array<Battery, data::Batteries::kNumLPBatteries> *lp_batteries_;
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
+
+  uint64_t timestamp;
 };
 
 }}  // namespace hyped::sensors
