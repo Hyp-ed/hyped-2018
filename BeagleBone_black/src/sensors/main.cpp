@@ -64,6 +64,29 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
+  // init loop
+  while (1) {
+    if (updateImu() && updateProxi()) {
+      sensors_.module_status = data::ModuleStatus::kInit;
+      data_.setSensorsData(sensors_);
+      old_imu_timestamp_ = sensors_.imu.timestamp;
+      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
+      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
+      break;
+    }
+    yield();
+  }
+  while (1) {
+    if (updateBattery()) {
+      batteries_.module_status = data::ModuleStatus::kInit;
+      data_.setBatteryData(batteries_);
+      old_batteries_ = batteries_;
+      break;
+    }
+    yield();
+  }
+
+  // work loop
   while (1) {
     // Write sensor data to data structure only when all the imu and proxi values are different
     if (updateImu() || updateProxi()) {
