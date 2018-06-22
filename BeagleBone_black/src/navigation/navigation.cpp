@@ -27,7 +27,7 @@ namespace navigation {
 float proxiMean(const Proximity* const a, const Proximity* const b)
 {
   if (a->operational && b->operational)
-    return (float)(a->val + b->val)/2.0;
+    return static_cast<float>(a->val + b->val)/2.0;
   if (a->operational)
     return a->val;
   if (b->operational)
@@ -134,7 +134,7 @@ void Navigation::update(DataPoint<ImuArray> imus)
 {
   int num_operational = 0;
   NavigationVector acc(0), gyr(0);
-  for (int i = 0; i < imus.value.size(); ++i) {
+  for (unsigned int i = 0; i < imus.value.size(); ++i) {
     if (imus.value[i].operational) {
       ++num_operational;
       acc += acceleration_filter_[i].filter(imus.value[i].acc);
