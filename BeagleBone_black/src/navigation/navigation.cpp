@@ -142,7 +142,9 @@ void Navigation::update(DataPoint<ImuArray> imus)
     }
   }
 
-  // TODO(Brano): Check num_operational for crit. failure
+  if (num_operational < 2) {
+    status_ = ModuleStatus::kCriticalFailure;
+  }
 
   accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
            gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
