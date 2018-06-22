@@ -35,6 +35,7 @@ using utils::Logger;
 namespace sensors {
 
 class ProxiManager: public Thread {
+  static constexpr uint8_t kMultiplexerAddr = 0x70;
  public:
   ProxiManager(Logger& log, bool isFront);
   void run() override;

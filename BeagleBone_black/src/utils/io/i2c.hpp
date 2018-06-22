@@ -55,6 +55,13 @@ class I2C {
    */
   void write(uint32_t addr, uint8_t* tx, uint16_t len);
 
+  /**
+   * @brief Write 1 BYTE to sensor.
+   * @param addr  - sensor address
+   * @param rx    - BYTE to be written
+   */
+  void write(uint32_t addr, uint8_t tx);
+
  private:
   explicit I2C(Logger& log);
   ~I2C();
