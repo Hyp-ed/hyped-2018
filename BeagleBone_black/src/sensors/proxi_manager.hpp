@@ -23,6 +23,7 @@
 
 #include <cstdint>
 
+#include "sensors/manager_interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
@@ -34,11 +35,14 @@ using utils::Logger;
 
 namespace sensors {
 
-class ProxiManager: public Thread {
+class ProxiManager: public ManagerInterface {
  public:
-  ProxiManager(Logger& log, bool isFront);
+  ProxiManager(Logger& log,
+               bool isFront,
+               data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi);
   void run() override;
-  void config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi);
+  bool updated() override;
+  void resetTimestamp() override;
 
  private:
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;

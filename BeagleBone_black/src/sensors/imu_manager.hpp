@@ -23,6 +23,7 @@
 
 #include <cstdint>
 
+#include "sensors/manager_interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
@@ -34,11 +35,12 @@ using utils::Logger;
 
 namespace sensors {
 
-class ImuManager: public Thread {
+class ImuManager: public ManagerInterface {
  public:
-  explicit ImuManager(Logger& log);
+  explicit ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
   void run() override;
-  void config(data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
+  bool updated() override;
+  void resetTimestamp() override;
 
  private:
   data::DataPoint<array<Imu, data::Sensors::kNumImus>> *sensors_imu_;
