@@ -34,8 +34,10 @@ using utils::io::I2C;
 
 namespace sensors {
 
-ProxiManager::ProxiManager(Logger& log, bool isFront)
-    : Thread(log)
+ProxiManager::ProxiManager(Logger& log,
+                           bool isFront,
+                           data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
+    : ManagerInterface(log)
 {
   if (isFront) {
     // create CAN-based proximities
@@ -54,6 +56,8 @@ ProxiManager::ProxiManager(Logger& log, bool isFront)
     }
     i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
   }
+
+  sensors_proxi_ = proxi;
 }
 
 void ProxiManager::run()
@@ -69,8 +73,16 @@ void ProxiManager::run()
   sleep(10);
 }
 
-void ProxiManager::config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
+bool ProxiManager::updated()
 {
-  sensors_proxi_ = proxi;
+  if (old_timestamp_ != sensors_proxi_->timestamp) {
+    return true;
+  }
+  return false;
+}
+
+void ProxiManager::resetTimestamp()
+{
+  old_timestamp_ = sensors_proxi_->timestamp;
 }
 }}  // namespace hyped::sensors
