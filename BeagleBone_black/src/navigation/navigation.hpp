@@ -56,8 +56,8 @@ constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
 
 class Navigation {
  public:
-  typedef std::array<Imu,       Sensors::kNumImus>        ImuArray;
-  typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
+  typedef std::array<Imu,        Sensors::kNumImus>          ImuArray;
+  typedef std::array<Proximity*, 2*Sensors::kNumProximities> ProximityArray;
   friend class Main;
 
   /**
@@ -117,6 +117,18 @@ class Navigation {
   bool finishCalibration();
 
  private:
+  /**
+   * @brief Front-right, rear-right, rear-left, and front-left proxi sensor distances. This is
+   *        likely temporary and will be replaced by an array or other suitable data structure once
+   *        the algorithm using it is complete.
+   */
+  struct Proximities {
+    float fr;  // mm
+    float rr;  // mm
+    float rl;  // mm
+    float fl;  // mm
+  };
+
   static constexpr int kMinNumCalibrationSamples = 200000;
   /**
    * @brief Calculates distance to the last stripe, the next stripe and the one after that.
@@ -130,42 +142,42 @@ class Navigation {
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
    *
-   * @param[in] datapointImus datapoint of an Array of IMU readings
+   * @param[in] imus Datapoint of an array of IMU readings
    */
-  void update(DataPoint<ImuArray> datapointImus);
+  void update(DataPoint<ImuArray> imus);
   /**
    * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
    *        proxi have been updated but there is no update from stripe counter.
    *
-   * @param[in] imus   Array of IMU readings
+   * @param[in] imus   Datapoint of an array of IMU readings
    * @param[in] proxis Array of proximity readings
    */
-  void update(DataPoint<ImuArray> datapointImus, ProximityArray proxis);
+  void update(DataPoint<ImuArray> imus, ProximityArray proxis);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU and stripe counter have been updated but there is no update from proximity sensors.
    *
-   * @param imus         Array of IMU readings
+   * @param imus         Datapoint of an array of IMU readings
    * @param stripe_count Stripe counter reading
    */
-  void update(DataPoint<ImuArray> datapointImus, DataPoint<uint32_t> stripe_count);
+  void update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
    *
-   * @param imus         Array of IMU readings
+   * @param imus         Datapoint of an array of IMU readings
    * @param[in] proxis   Array of proximity readings
    * @param stripe_count Stripe counter reading
    */
-  void update(DataPoint<ImuArray> datapointImus,
+  void update(DataPoint<ImuArray> imus,
               ProximityArray proxis,
               DataPoint<uint32_t> stripe_count);
 
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
-  void proximityOrientationUpdate();  // Point number 7
-  void proximityDisplacementUpdate();  // Point number 7
+  void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
+  void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(uint16_t count);  // Point number 7
 
   // Admin stuff
@@ -192,7 +204,7 @@ class Navigation {
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;          // One for each IMU
-  std::array<Kalman<uint8_t>, Sensors::kNumProximities>   proximity_filter_;
+  std::array<Kalman<uint8_t>, 2*Sensors::kNumProximities> proximity_filter_;
 
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement

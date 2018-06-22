@@ -67,6 +67,37 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
+  // start all managers
+  imu_manager_.start();
+  proxi_manager_front_.start();
+  proxi_manager_back_.start();
+  battery_manager_lp.start();
+
+  // init loop
+  while (1) {
+    if (updateImu() && updateProxi()) {
+      sensors_.module_status = data::ModuleStatus::kInit;
+      data_.setSensorsData(sensors_);
+      old_imu_timestamp_ = sensors_.imu.timestamp;
+      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
+      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
+      break;
+    }
+    yield();
+  }
+  log_.INFO("SENSORS", "sensors data has been initialised");
+  while (1) {
+    if (updateBattery()) {
+      batteries_.module_status = data::ModuleStatus::kInit;
+      data_.setBatteryData(batteries_);
+      old_batteries_ = batteries_;
+      break;
+    }
+    yield();
+  }
+  log_.INFO("SENSORS", "batteries data has been initialised");
+
+  // work loop
   while (1) {
     // Write sensor data to data structure only when all the imu and proxi values are different
     if (imu_manager_->updated()) {
