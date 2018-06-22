@@ -64,6 +64,12 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
+  // start all managers
+  imu_manager_.start();
+  proxi_manager_front_.start();
+  proxi_manager_back_.start();
+  battery_manager_lp.start();
+
   // init loop
   while (1) {
     if (updateImu() && updateProxi()) {
@@ -76,6 +82,7 @@ void Main::run()
     }
     yield();
   }
+  log_.INFO("SENSORS", "sensors data has been initialised");
   while (1) {
     if (updateBattery()) {
       batteries_.module_status = data::ModuleStatus::kInit;
@@ -85,6 +92,7 @@ void Main::run()
     }
     yield();
   }
+  log_.INFO("SENSORS", "batteries data has been initialised");
 
   // work loop
   while (1) {
