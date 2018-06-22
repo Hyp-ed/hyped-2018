@@ -1,8 +1,8 @@
 /*
  * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 20/06/18
- * Description: BMS manager for getting battery data
+ * Date: 21/06/18
+ * Description: Main interface for the manager classes.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,37 +18,34 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_MANAGER_INTERFACE_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_MANAGER_INTERFACE_HPP_
 
-#include <cstdint>
-
-#include "sensors/manager_interface.hpp"
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/interface.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
+using data::Imu;
+using data::Proximity;
+using data::Battery;
 using utils::concurrent::Thread;
-using utils::Logger;
 
 namespace sensors {
 
-class BmsManager: public ManagerInterface  {
+class ManagerInterface : public Thread {
  public:
-  explicit BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries> *batteries);
-  void run() override;
-  bool updated() override;
-  void resetTimestamp() override;
-
- private:
-  array<Battery, data::Batteries::kNumLPBatteries> *lp_batteries_;
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
-
-  uint64_t timestamp;
+  /**
+   * @brief Checks if the data has been updated
+   * 
+   */
+  virtual bool updated() = 0;
+  virtual void resetTimestamp() = 0;
+  ManagerInterface(utils::Logger& log) : Thread(log), old_timestamp_(0) {}
+ protected:
+  uint64_t old_timestamp_;
 };
 
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_MANAGER_INTERFACE_HPP_
