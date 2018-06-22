@@ -26,6 +26,7 @@
 
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/logger.hpp"
 
 namespace hyped {
 
@@ -60,13 +61,13 @@ class FakeImu : public ImuInterface {
    * @param[in] acc_file_path    A string to the file location of the accelerometer data points
    * @param[in] gyr_file_path    A string to the file location of the gyroscope data points
    */
-  explicit FakeImu(std::string acc_file_path, std::string gyr_file_path);
+  explicit FakeImu(utils::Logger& log_, std::string acc_file_path, std::string gyr_file_path);
 
   /*
    * @brief     A constructor for the fake IMU class. This works by generating random numbers
    *            using a normal distribution with xxx_val as mean and xxx_noise as standard deviation.
    */
-  explicit FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
+  explicit FakeImu(utils::Logger& log_, NavigationVector acc_val, NavigationVector acc_noise,
                    NavigationVector gyr_val, NavigationVector gyr_noise);
 
   bool isOnline() override { return true; }
@@ -79,6 +80,8 @@ class FakeImu : public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
+  utils::Logger&       log_;
+  data::Data&   data_;
   const int64_t kAccTimeInterval = 250;
   const int64_t kGyrTimeInterval = 125;
 
@@ -106,7 +109,7 @@ class FakeImu : public ImuInterface {
    *
    * @return    Returns random data point value
    */
-  static NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
+  NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
 
   /*
    * @brief     Checks to see if sufficient time has pass for the sensor to be updated and checks if
@@ -129,6 +132,8 @@ class FakeImu : public ImuInterface {
 
   int64_t acc_count, gyr_count;
   high_resolution_clock::time_point imu_ref_time;
+  std::string acc_file_path_;
+  std::string gyr_file_path_;
 };
 
 }}  // namespace hyped::sensors

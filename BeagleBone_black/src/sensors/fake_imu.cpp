@@ -38,22 +38,34 @@ using std::chrono::duration_cast;
 namespace hyped {
 namespace sensors {
 
-FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
-    : pt_acc(0), pt_gyr(0)
+FakeImu::FakeImu(utils::Logger& log, std::string acc_file_path, std::string gyr_file_path)
+    : log_(log),
+      data_(data::Data::getInstance()),
+      pt_acc(0),
+      acc_val(0),
+      gyr_val(0),
+      acc_noise(1),
+      gyr_noise(1),
+      acc_file_path_(acc_file_path),
+      gyr_file_path_(gyr_file_path)
+
 {
   read_file = true;
-  readDataFromFile(acc_file_path, gyr_file_path);
   setData();
 }
 
-FakeImu::FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
-                 NavigationVector gyr_val, NavigationVector gyr_noise)
-    : acc_val(acc_val), gyr_val(gyr_val),
-      acc_noise(acc_noise), gyr_noise(gyr_noise)
-{
-  read_file = false;
-  setData();
-}
+// FakeImu::FakeImu(utils::Logger& log, NavigationVector acc_val, NavigationVector acc_noise,
+//                  NavigationVector gyr_val, NavigationVector gyr_noise)
+//     : log_(log),
+//       data_(data::Data::getInstance()),
+//       acc_val(acc_val),
+//       gyr_val(gyr_val),
+//       acc_noise(acc_noise),
+//       gyr_noise(gyr_noise)
+// {
+//   read_file = false;
+//   setData();
+// }
 
 void FakeImu::setData()
 {
@@ -63,7 +75,10 @@ void FakeImu::setData()
 
 void FakeImu::getData(Imu* imu)
 {
+  // data_.getStateMachineData().current_state == data::State::kAccelerating
   if (read_file == true) {
+      readDataFromFile(acc_file_path_, gyr_file_path_);
+    log_.INFO("Fake-IMU", "state: %s", data_.getStateMachineData().current_state);
     if (accCheckTime()) {
       acc_count = std::min(acc_count, (int64_t) acc_val_read.size());
       prev_acc = acc_val_read[acc_count-1].value;
@@ -74,14 +89,15 @@ void FakeImu::getData(Imu* imu)
       prev_gyr = gyr_val_read[gyr_count-1].value;
     }
   } else {
-    if (accCheckTime())
+    if (accCheckTime()) {
       prev_acc = addNoiseToData(acc_val, acc_noise);
-
-    if (gyrCheckTime())
+    }
+    if (gyrCheckTime()) {
       prev_gyr = addNoiseToData(gyr_val, gyr_noise);
+    }
   }
-  kAccTimeInterval*(acc_count-1),
-  kGyrTimeInterval*(gyr_count-1),
+  // kAccTimeInterval*(acc_count-1),
+  // kGyrTimeInterval*(gyr_count-1),
   imu->acc = prev_acc;
   imu->gyr = prev_gyr;
 }
@@ -92,10 +108,10 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVecto
   std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
-    std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
+    std::normal_distribution<NavigationType> distribution(value[i], value[i]+1);
+    log_.INFO("Fake-IMU", "Distribuition: %f", distribution);
     temp[i] = distribution(generator);
   }
-
   return temp;
 }
 
