@@ -51,6 +51,7 @@ FakeImu::FakeImu(utils::Logger& log, std::string acc_file_path, std::string gyr_
 
 {
   read_file = true;
+  readDataFromFile(acc_file_path_, gyr_file_path_);
   setData();
 }
 
@@ -77,9 +78,9 @@ void FakeImu::getData(Imu* imu)
 {
   // data_.getStateMachineData().current_state == data::State::kAccelerating
   if (read_file == true) {
-      readDataFromFile(acc_file_path_, gyr_file_path_);
-    log_.INFO("Fake-IMU", "state: %s", data_.getStateMachineData().current_state);
+    // log_.INFO("Fake-IMU", "state: %s", data_.getStateMachineData().current_state);
     if (accCheckTime()) {
+      log_.INFO("Fake-IMU", "Passed acc check time");
       acc_count = std::min(acc_count, (int64_t) acc_val_read.size());
       prev_acc = acc_val_read[acc_count-1].value;
     }
@@ -90,6 +91,7 @@ void FakeImu::getData(Imu* imu)
     }
   } else {
     if (accCheckTime()) {
+      log_.INFO("Fake-IMU", "Passed acc check time");
       prev_acc = addNoiseToData(acc_val, acc_noise);
     }
     if (gyrCheckTime()) {
@@ -108,8 +110,8 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVecto
   std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
-    std::normal_distribution<NavigationType> distribution(value[i], value[i]+1);
-    log_.INFO("Fake-IMU", "Distribuition: %f", distribution);
+    std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
+    // log_.INFO("Fake-IMU", "Distribuition: %f", distribution);
     temp[i] = distribution(generator);
   }
   return temp;
