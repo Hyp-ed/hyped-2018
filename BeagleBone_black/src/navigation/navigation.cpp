@@ -145,6 +145,7 @@ void Navigation::update(DataPoint<ImuArray> imus)
 
   if (num_operational < 2) {
     status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: num operational IMUs = %d < 2", num_operational);
   }
 
   accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
@@ -157,15 +158,28 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 
   Proximities ground, rail;
   // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
-  ground.fr = proxiMean(proxis[6],  proxis[7]);
-  ground.rr = proxiMean(proxis[8],  proxis[9]);
-  ground.rl = proxiMean(proxis[14], proxis[15]);
-  ground.fl = proxiMean(proxis[0],  proxis[1]);
+  int num_ground_fail = 0;
+  if ( (ground.fr = proxiMean(proxis[6],  proxis[7]) ) < 0 ) ++num_ground_fail;
+  if ( (ground.rr = proxiMean(proxis[8],  proxis[9]) ) < 0 ) ++num_ground_fail;
+  if ( (ground.rl = proxiMean(proxis[14], proxis[15])) < 0 ) ++num_ground_fail;
+  if ( (ground.fl = proxiMean(proxis[0],  proxis[1]) ) < 0 ) ++num_ground_fail;
   rail.fr   = proxiMean(proxis[4],  proxis[5]);
   rail.rr   = proxiMean(proxis[10], proxis[11]);
   rail.rl   = proxiMean(proxis[12], proxis[13]);
   rail.fl   = proxiMean(proxis[2],  proxis[3]);
+
   // TODO(Brano): Check for crit. failure
+  if (num_ground_fail > 1) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: num failed ground proxi points = %d", num_ground_fail);
+    return;
+  }
+  if ((rail.fr < 0 && rail.fl < 0) || (rail.rr < 0 && rail.rl < 0)) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: insufficient rail proxis");
+    return;
+  }
+
   proximityDisplacementUpdate(ground, rail);
   proximityOrientationUpdate(ground, rail);
 }
