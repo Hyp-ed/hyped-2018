@@ -53,11 +53,11 @@ class Communications
    * @pararm[in] message which contains with a command code, a value and a newline
    */
   int sendData(std::string message);
-   /**
-    * @brief Reads run length data from Server
-    *
-    * @return int Returns length of track in mm. Buffer assumes test track will be < 100,000mm
-    */
+  /**
+   * @brief Reads run length data from Server
+   *
+   * @return int Returns length of track in mm. Buffer assumes test track will be < 100,000mm
+   */
   int receiveRunLength();
   /**
    * @brief Reads data from server.

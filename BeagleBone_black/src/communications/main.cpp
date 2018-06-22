@@ -32,7 +32,7 @@ namespace communications {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log)
 {
-  const char* ipAddress = "localhost";
+  const char* ipAddress = "127.0.0.1";
   int portNo = 5695;
   baseCommunicator_ = new Communications(log, ipAddress, portNo);
 }
@@ -98,7 +98,8 @@ int Main::sendState(State state)
 
 int Main::sendHpVoltage(Battery hpBattery)
 {
-  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.voltage) + "\n");
+  // Convert voltage reading units from mV to V
+  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.voltage / 1000.0) + "\n");
 }
 
 int Main::sendHpTemperature(Battery hpBattery)
@@ -108,7 +109,8 @@ int Main::sendHpTemperature(Battery hpBattery)
 
 int Main::sendHpVoltage1(Battery hpBattery1)
 {
-  return baseCommunicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage) + "\n");
+  // Convert voltage reading units from mV to V
+  return baseCommunicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage / 1000.0) + "\n");
 }
 
 int Main::sendHpTemperature1(Battery hpBattery1)
