@@ -47,7 +47,7 @@ enum class ModuleStatus {
 };
 
 struct Module {
-  ModuleStatus module_status;
+  ModuleStatus module_status = ModuleStatus::kStart;
 };
 
 
