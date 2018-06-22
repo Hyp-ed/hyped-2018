@@ -33,7 +33,7 @@ namespace navigation {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      nav_(System::getSystem().navigation_motors_sync_)
+      nav_(System::getSystem().navigation_motors_sync_, log)
 {
   updateData();
 }

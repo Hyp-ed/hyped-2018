@@ -24,10 +24,12 @@
 
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
+#include "utils/logger.hpp"
 #include "utils/math/integrator.hpp"
 #include "utils/math/kalman.hpp"
 #include "utils/math/quaternion.hpp"
 #include "utils/math/vector.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -39,10 +41,12 @@ using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
 using utils::concurrent::Barrier;
+using utils::Logger;
 using utils::math::Integrator;
 using utils::math::Kalman;
 using utils::math::Quaternion;
 using utils::math::Vector;
+using utils::System;
 
 namespace navigation {
 
@@ -67,7 +71,7 @@ class Navigation {
    *                                 transition to 'operational' state. It is primarily meant for
    *                                 syncing with motors module.
    */
-  explicit Navigation(Barrier& post_calibration_barrier);
+  explicit Navigation(Barrier& post_calibration_barrier, Logger& log = System::getLogger());
 
   /**
    * @brief Get the acceleration value
@@ -182,7 +186,9 @@ class Navigation {
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
+  Logger& log_;
   ModuleStatus status_;
+
 
   // Calibration variables
   bool is_calibrating_;

@@ -35,8 +35,9 @@ float proxiMean(const Proximity* const a, const Proximity* const b)
   return -1;
 }
 
-Navigation::Navigation(Barrier& post_calibration_barrier)
+Navigation::Navigation(Barrier& post_calibration_barrier, Logger& log)
     : post_calibration_barrier_(post_calibration_barrier),
+      log_(log),
       status_(ModuleStatus::kStart),
       is_calibrating_(false),
       num_gravity_samples_(0),
