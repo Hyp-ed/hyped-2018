@@ -154,14 +154,14 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 
   Proximities ground, rail;
   // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
-  ground.fr = proxiMean(proxis[0],  proxis[1]);
-  ground.rr = proxiMean(proxis[2],  proxis[3]);
-  ground.rl = proxiMean(proxis[4],  proxis[5]);
-  ground.fl = proxiMean(proxis[6],  proxis[7]);
-  rail.fr   = proxiMean(proxis[8],  proxis[9]);
+  ground.fr = proxiMean(proxis[6],  proxis[7]);
+  ground.rr = proxiMean(proxis[8],  proxis[9]);
+  ground.rl = proxiMean(proxis[14], proxis[15]);
+  ground.fl = proxiMean(proxis[0],  proxis[1]);
+  rail.fr   = proxiMean(proxis[4],  proxis[5]);
   rail.rr   = proxiMean(proxis[10], proxis[11]);
   rail.rl   = proxiMean(proxis[12], proxis[13]);
-  rail.fl   = proxiMean(proxis[14], proxis[15]);
+  rail.fl   = proxiMean(proxis[2],  proxis[3]);
   // TODO(Brano): Check for crit. failure
   proximityDisplacementUpdate(ground, rail);
   proximityOrientationUpdate(ground, rail);
