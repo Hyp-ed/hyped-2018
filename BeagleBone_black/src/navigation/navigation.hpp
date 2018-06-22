@@ -204,7 +204,7 @@ class Navigation {
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;          // One for each IMU
-  std::array<Kalman<uint8_t>, 2*Sensors::kNumProximities>   proximity_filter_;
+  std::array<Kalman<uint8_t>, 2*Sensors::kNumProximities> proximity_filter_;
 
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement
