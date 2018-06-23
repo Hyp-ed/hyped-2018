@@ -66,6 +66,12 @@ VL6180::~VL6180()
   log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
+void VL6180::setAddress(uint8_t i2c_addr)
+{
+  writeByte(0x0212, i2c_addr);
+  i2c_addr_ = i2c_addr;
+}
+
 void VL6180::turnOn()
 {
   // return if already on
