@@ -96,11 +96,11 @@ void Main::run()
       continue;
     }
     if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis, readings->stripe_counter.count);
+      nav_.update(readings->imu, *proxis, readings->stripe_counter);
     else if (proxiChanged(*last_readings, *readings))
       nav_.update(readings->imu, *proxis);
     else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->stripe_counter.count);
+      nav_.update(readings->imu, readings->stripe_counter);
     else
       nav_.update(readings->imu);
 

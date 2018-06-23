@@ -184,19 +184,17 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
   proximityOrientationUpdate(ground, rail);
 }
 
-void Navigation::update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus, StripeCounter sc)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
-  stripeCounterUpdate(stripe_count.value);
+  stripeCounterUpdate(sc);
 }
 
-void Navigation::update(DataPoint<ImuArray> imus,
-                        ProximityArray proxis,
-                        DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc)
 {
   update(imus, proxis);
-  stripeCounterUpdate(stripe_count.value);
+  stripeCounterUpdate(sc);
 }
 
 void Navigation::calibrationUpdate(ImuArray imus)
@@ -245,11 +243,28 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
   // TODO(Adi): Calculate displacement from proximity. (Point 7)
 }
 
-void Navigation::stripeCounterUpdate(uint16_t count)
+void Navigation::stripeCounterUpdate(StripeCounter sc)
 {
-  // TODO(Brano): Check for errors (e.g. missed stripes)
   // TODO(Brano): Update displacement and velocity
-  stripe_count_ = count;
+
+  // TODO(Brano): Change this once 2nd Keyence is added
+  if (!sc.operational) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: stripe counter down");
+    return;
+  }
+  auto dists = getNearestStripeDists();
+  if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
+    // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
+    // definitely gone wrong.
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", 
+        "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
+        stripe_count_, sc.count.value, dists[0], dists[1], dists[2]);
+    return;
+  }
+
+  stripe_count_ = sc.count.value;
 }
 
 }}  // namespace hyped::navigation
