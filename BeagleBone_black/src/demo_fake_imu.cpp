@@ -35,12 +35,12 @@ int main()
 
   for (int i=0; i<3; i++) {
     file.getData(&reading);
-    printf("From file: %fm/s^2 @ %d\n", reading.acc.value[0], reading.acc.timestamp);
-    printf("From file: %frad/s @ %d\n", reading.gyr.value[0], reading.gyr.timestamp);
+    printf("From file: %fm/s^2\n", reading.acc[0]);
+    printf("From file: %frad/s\n", reading.gyr[0]);
 
     generator.getData(&reading);
-    printf("From generator: %fm/s^2 @ %d\n", reading.acc.value[0], reading.acc.timestamp);
-    printf("From generator: %frad/s @ %d\n", reading.gyr.value[0], reading.gyr.timestamp);
+    printf("From generator: %fm/s^2\n", reading.acc[0]);
+    printf("From generator: %frad/s\n", reading.gyr[0]);
 
     Thread::sleep(10);
   }

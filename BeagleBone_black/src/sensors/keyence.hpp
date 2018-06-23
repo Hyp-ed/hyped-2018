@@ -1,8 +1,14 @@
 /*
- * Author: Jack Horsburgh
+ * Author: Ragnor Comerford
  * Organisation: HYPED
- * Date: 20/06/18
- * Description: BMS manager for getting battery data
+ * Date: 19/06/18
+ * Description:
+ * Main manages sensor drivers, collects data from sensors and updates
+ * shared Data::Sensors structure. Main is not responsible for initialisation
+ * of supporting io drivers (i2c, spi, can). This should be done by the sensor
+ * drivers themselves.
+ * Currently supported sensors:
+ * - BMS (low powered), ids: 0
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,15 +24,14 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
 
 #include <cstdint>
 
-#include "sensors/manager_interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/interface.hpp"
+
 
 namespace hyped {
 
@@ -35,20 +40,18 @@ using utils::Logger;
 
 namespace sensors {
 
-class BmsManager: public ManagerInterface  {
+
+class Keyence: public Thread {
  public:
-  explicit BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries> *batteries);
+  explicit Keyence(Logger& log, int pin);
   void run() override;
-  bool updated() override;
-  void resetTimestamp() override;
+  data::StripeCounter getStripeCounter();
 
  private:
-  array<Battery, data::Batteries::kNumLPBatteries> *lp_batteries_;
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
+  int pin_;
 
-  uint64_t timestamp;
+  data::StripeCounter stripe_counter_;
 };
-
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_

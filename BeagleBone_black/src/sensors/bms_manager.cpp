@@ -23,6 +23,7 @@
 
 #include "sensors/bms.hpp"
 #include "data/data.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
@@ -30,8 +31,8 @@ using data::Batteries;
 
 namespace sensors {
 
-BmsManager::BmsManager(Logger& log)
-    : Thread(log)
+BmsManager::BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries> *batteries)
+    : ManagerInterface(log)
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
@@ -39,6 +40,8 @@ BmsManager::BmsManager(Logger& log)
     bms->start();
     bms_[i] = bms;
   }
+
+  lp_batteries_ = batteries;
 }
 
 void BmsManager::run()
@@ -46,14 +49,23 @@ void BmsManager::run()
   while (1) {
     // keep updating data_ based on values read from sensors
     for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-      bms_[i]->getData(&((*lp_batteries)[i]));
+      bms_[i]->getData(&((*lp_batteries_)[i]));
     }
+    timestamp = utils::Timer::getTimeMicros();
     sleep(100);
   }
 }
 
-void BmsManager::config(array<Battery, data::Batteries::kNumLPBatteries> *batteries)
+bool BmsManager::updated()
 {
-  lp_batteries = batteries;
+  if (old_timestamp_ != timestamp) {
+    return true;
+  }
+  return false;
+}
+
+void BmsManager::resetTimestamp()
+{
+  old_timestamp_ = timestamp;
 }
 }}  // namespace hyped::sensors

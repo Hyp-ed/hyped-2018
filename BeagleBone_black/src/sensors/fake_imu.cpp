@@ -66,23 +66,22 @@ void FakeImu::getData(Imu* imu)
   if (read_file == true) {
     if (accCheckTime()) {
       acc_count = std::min(acc_count, (int64_t) acc_val_read.size());
-      prev_acc = acc_val_read[acc_count-1];
+      prev_acc = acc_val_read[acc_count-1].value;
     }
 
     if (gyrCheckTime()) {
       gyr_count = std::min(gyr_count, (int64_t) gyr_val_read.size());
-      prev_gyr = gyr_val_read[gyr_count-1];
+      prev_gyr = gyr_val_read[gyr_count-1].value;
     }
   } else {
     if (accCheckTime())
-      prev_acc = DataPoint<NavigationVector>(kAccTimeInterval*(acc_count-1),
-                                                addNoiseToData(acc_val, acc_noise));
+      prev_acc = addNoiseToData(acc_val, acc_noise);
 
     if (gyrCheckTime())
-      prev_gyr = DataPoint<NavigationVector>(kGyrTimeInterval*(gyr_count-1),
-                                                addNoiseToData(gyr_val, gyr_noise));
+      prev_gyr = addNoiseToData(gyr_val, gyr_noise);
   }
-
+  kAccTimeInterval*(acc_count-1),
+  kGyrTimeInterval*(gyr_count-1),
   imu->acc = prev_acc;
   imu->gyr = prev_gyr;
 }
