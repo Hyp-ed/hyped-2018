@@ -29,7 +29,8 @@
 
 using hyped::data::Imu;
 using hyped::data::NavigationVector;
-using hyped::sensors::FakeImu;
+using hyped::sensors::FakeImuAccelerating;
+using hyped::sensors::FakeImuStationary;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::Logger;
 
@@ -38,13 +39,22 @@ int main(int argc, char* argv[])
   hyped::utils::System::parseArgs(argc, argv);
   Imu reading;
   Logger log(true, 1);
-  FakeImu file(log, "src/fake_imu_input_acc.txt", "src/fake_imu_input_gyr.txt");
+  FakeImuStationary   imuStationary(log, NavigationVector(0), NavigationVector(1), NavigationVector(0), NavigationVector(1));
 
   for (int i=0; i<20; i++) {
-    file.getData(&reading);
+    imuStationary.getData(&reading);
     printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
     printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
-      
+    // TODO(Anyone) change the state of the state machine to accelerating
+    Thread::sleep(50);
+  }
+
+  FakeImuAccelerating imuAccelerating(log, "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+                                          "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+  for (int i=0; i<20; i++) {
+    imuAccelerating.getData(&reading);
+    printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
+    printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
     // TODO(Anyone) change the state of the state machine to accelerating
     Thread::sleep(50);
   }
