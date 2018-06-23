@@ -41,11 +41,11 @@ namespace sensors {
 FakeImu::FakeImu(utils::Logger& log, std::string acc_file_path, std::string gyr_file_path)
     : log_(log),
       data_(data::Data::getInstance()),
-      pt_acc(0),
       acc_val(0),
       gyr_val(0),
       acc_noise(1),
       gyr_noise(1),
+      pt_acc(0),
       acc_file_path_(acc_file_path),
       gyr_file_path_(gyr_file_path)
 
@@ -146,7 +146,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
     std::ifstream file;
     file.open(file_path);
     if (!file.is_open()) {
-      throw std::invalid_argument("Wrong file path for argument " + i);
+      log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
     }
 
     NavigationVector value, noise;
@@ -169,7 +169,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_p
       }
 
       if (value_counter != 6) {
-        throw std::invalid_argument("Incomplete values for the argument timestamp " + temp_time);
+        log_.ERR("Fake-IMU", "Incomplete values for the argument timestamp: %d", temp_time);
       }
 
       for (int i = 0; i < 3; i++)

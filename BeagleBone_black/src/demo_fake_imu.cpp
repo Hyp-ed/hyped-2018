@@ -32,27 +32,20 @@ using hyped::data::NavigationVector;
 using hyped::sensors::FakeImu;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::Logger;
-using hyped::data::Data;
-// using hyped::state_machine::HypedMachine;
 
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-  Data& data(Data::getInstance());
   Imu reading;
   Logger log(true, 1);
-  // HypedMachine* hypedMachine = new HypedMachine(log);
   FakeImu file(log, "src/fake_imu_input_acc.txt", "src/fake_imu_input_gyr.txt");
 
   for (int i=0; i<20; i++) {
     file.getData(&reading);
     printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
     printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
-
-    // if (i == 8) {
-    //   // TODO(anyone) transition to accelerating state
-    //  // hypedMachine->handleEvent(state_machine::Event::kAcc);
-    // }
+      
+    // TODO(Anyone) change the state of the state machine to accelerating
     Thread::sleep(50);
   }
 }
