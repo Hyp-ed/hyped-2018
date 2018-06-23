@@ -323,6 +323,7 @@ void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
     select();
     spi_.write(write_reg, &write_data, 1);
     deSelect();
+    Thread::yield();
 }
 
 void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
@@ -332,13 +333,11 @@ void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
     deSelect();
 }
 
-// TODO(jack) put into one read as a buffer
 void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 {
-  int i;
-  for (i = 0; i < length; i++) {
-    readByte(read_reg + i, &read_data[i]);
-  }
+  select();
+  spi_.read(read_reg | kReadFlag, read_data, length);
+  deSelect();
 }
 
 void MPU9250::getAcclData()
