@@ -84,7 +84,7 @@ void FakeImu::getData(Imu* imu)
       acc_count = std::min(acc_count/kAccTimeInterval, (int64_t) acc_val_read.size());
       log_.INFO("fake-IMU", "acc count: %d", acc_count);
       // Check so you don't go out of bounds
-      if (acc_count == acc_val_read.size()) {
+      if (acc_count == (int64_t) acc_val_read.size()) {
         prev_acc = acc_val_read[acc_count-1];
       } else {
         prev_acc = acc_val_read[acc_count];
@@ -94,7 +94,7 @@ void FakeImu::getData(Imu* imu)
     if (gyrCheckTime()) {
       gyr_count = std::min(gyr_count/kGyrTimeInterval, (int64_t) gyr_val_read.size());
       // Check so you don't go out of bounds
-      if (gyr_count == gyr_val_read.size()) {
+      if (gyr_count ==  (int64_t) gyr_val_read.size()) {
         prev_gyr = gyr_val_read[gyr_count-1];
       } else {
         prev_gyr = gyr_val_read[gyr_count];
