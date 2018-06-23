@@ -81,13 +81,24 @@ void FakeImu::getData(Imu* imu)
     // log_.INFO("Fake-IMU", "state: %s", data_.getStateMachineData().current_state);
     if (accCheckTime()) {
       log_.INFO("Fake-IMU", "Passed acc check time");
-      acc_count = std::min(acc_count, (int64_t) acc_val_read.size());
-      prev_acc = acc_val_read[acc_count-1];
+      acc_count = std::min(acc_count/kAccTimeInterval, (int64_t) acc_val_read.size());
+      log_.INFO("fake-IMU", "acc count: %d", acc_count);
+      // Check so you don't go out of bounds
+      if (acc_count == acc_val_read.size()) {
+        prev_acc = acc_val_read[acc_count-1];
+      } else {
+        prev_acc = acc_val_read[acc_count];
+      }
     }
 
     if (gyrCheckTime()) {
-      gyr_count = std::min(gyr_count, (int64_t) gyr_val_read.size());
-      prev_gyr = gyr_val_read[gyr_count-1];
+      gyr_count = std::min(gyr_count/kGyrTimeInterval, (int64_t) gyr_val_read.size());
+      // Check so you don't go out of bounds
+      if (gyr_count == gyr_val_read.size()) {
+        prev_gyr = gyr_val_read[gyr_count-1];
+      } else {
+        prev_gyr = gyr_val_read[gyr_count];
+      }
     }
   } else {
     if (accCheckTime()) {
@@ -183,7 +194,7 @@ bool FakeImu::accCheckTime()
   if (time_span.count() < kAccTimeInterval*acc_count) {
     return false;
   }
-
+  log_.INFO("Fake-IMU", "acc count: %d", time_span.count()/kAccTimeInterval);
   acc_count = time_span.count()/kAccTimeInterval + 1;
   return true;
 }
