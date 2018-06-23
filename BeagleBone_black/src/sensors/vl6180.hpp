@@ -57,6 +57,8 @@ class VL6180: public ProxiInterface {
     */
   void setSingleShotMode();
 
+  void setAddress(uint8_t i2c_addr);
+
  private:
   /**
     *  @brief called from getDistance() for single shot ranging

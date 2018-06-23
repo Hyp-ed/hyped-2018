@@ -107,4 +107,9 @@ void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
                            ret, len);
 }
 
+void I2C::write(uint32_t addr, uint8_t tx)
+{
+  write(addr, &tx, 1);
+}
+
 }}}   // namespace hyped::utils::io
