@@ -45,17 +45,26 @@ FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
       acc_noise_(1),
       gyr_noise_(1),
       acc_file_path_(acc_file_path),
-      gyr_file_path_(gyr_file_path)
+      gyr_file_path_(gyr_file_path),
+      is_started_(false)
 
 {
   read_file_ = true;
   readDataFromFile(acc_file_path_, gyr_file_path_);
+}
+
+void FakeImuAccelerating::start()
+{
   imu_ref_time_ = utils::Timer::getTimeMicros();
   acc_count_ = gyr_count_ = 0;
 }
 
 void FakeImuAccelerating::getData(Imu* imu)
 {
+  if (!is_started_) {
+    is_started_ = true;
+    start();
+  }
   if (accCheckTime()) {
     acc_count_ = std::min(acc_count_/kAccTimeInterval, (int64_t) acc_val_read_.size());
     // Check so you don't go out of bounds

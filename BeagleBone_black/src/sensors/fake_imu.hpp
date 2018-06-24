@@ -76,11 +76,10 @@ class FakeImuAccelerating : public ImuInterface {
   utils::Logger&       log_;
   const int64_t kAccTimeInterval = 250;
   const int64_t kGyrTimeInterval = 125;
-
   /*
-   * @brief     A function that initializes the common variables
+   * @brief     A function that starts internal clock and sensor counts
    */
-  void setData();
+  void start();
 
   /*
    * @brief     A function that reads data from file directory. This function also validates them
@@ -124,6 +123,7 @@ class FakeImuAccelerating : public ImuInterface {
   uint64_t imu_ref_time_;
   std::string acc_file_path_;
   std::string gyr_file_path_;
+  bool is_started_;
 };
 
 class FakeImuStationary : public ImuInterface {
