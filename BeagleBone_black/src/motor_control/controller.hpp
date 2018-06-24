@@ -1,4 +1,4 @@
-/*
+ /*
  * Author: Sean Mullan
  * Organisation: HYPED
  * Date: 5/05/18
@@ -169,6 +169,11 @@ class Controller : public CanProccesor {
    * @brief { Set critical failure flag to true and write failure to data structure }
    */
   void throwCriticalFailure();
+  /*
+   * @brief { Checks to see if controller has transition to a new state properly
+   *          if it hasn't it will go into critical failure }
+   */
+  void checkStateTransition(ControllerState state);
 
   Logger&  log_;
   Can&     can_;

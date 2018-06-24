@@ -151,7 +151,7 @@ void Main::accelerateMotors()
       break;
     }
 
-    // Check for motors critial failure flag
+    // Check for motors critical failure flag
     communicator_.healthCheck();
 
     // If a failure occurs in any motor, set motor status to critical failure
@@ -208,7 +208,8 @@ void Main::decelerateMotors()
 
 void Main::stopMotors()
 {
-  communicator_.quickStopAll();
+  // Quick stop the motors by setting the target velocity to 0
+  communicator_.sendTargetVelocity(0);
   // Updates the motor data while motors are stopping
   while (!all_motors_stopped_) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");

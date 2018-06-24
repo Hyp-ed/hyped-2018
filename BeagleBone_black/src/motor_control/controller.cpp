@@ -229,6 +229,7 @@ void Controller::configure()
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
   sendSDO(SDOMessage);
 
+  // TODO(anyone) needs to be changed after we calibrate PI with load
   // Set current control torque regulator P gain to 1200
   SDOMessage.data[0]   = kWRITE_2_BYTES;
   SDOMessage.data[1]   = 0xF6;
@@ -297,9 +298,7 @@ void Controller::configure()
 
 void Controller::enterOperational()
 {
-  uint8_t state_count;
-
-  // Send NMT Operational message to tranition from state 0 (Not ready to switch on)
+  // Send NMT Operational message to transition from state 0 (Not ready to switch on)
   // to state 1 (Switch on disabled)
   NMTMessage.data[0]   = kNMT_OPERATIONAL;
   NMTMessage.data[1]   = node_id_;
@@ -336,7 +335,7 @@ void Controller::enterOperational()
   log_.DBG1("MOTOR", "Controller %d: Applying brake", node_id_);
   sendSDO(SDOMessage);
 
-  // Send shutdown message to tranition from state 1 (Switch on disabled)
+  // Send shutdown message to transition from state 1 (Switch on disabled)
   // to state 2 (Ready to switch on)
   SDOMessage.data[0]   = kWRITE_2_BYTES;
   SDOMessage.data[1]   = 0x40;
@@ -350,22 +349,7 @@ void Controller::enterOperational()
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
   sendSDO(SDOMessage);
   this->checkState();
-
-  // Check state three times,  waiting 100ms in between each check.
-  // If it hasn't changed then throw critical failure
-  for (state_count = 0; state_count < 3; state_count++) {
-    if (state_ == kReadyToSwitchOn) {
-      break;
-    } else {
-      Thread::sleep(100);
-      this->checkState();
-    }
-  }
-  if (state_ != kReadyToSwitchOn) {
-    critical_failure_ = true;
-    log_.ERR("MOTOR", "Controller %d, Could not transition to Ready to Switch On", node_id_);
-    return;
-  }
+  checkStateTransition(kReadyToSwitchOn);
 
   // Send switch on message to transition from state 2 (Ready to switch on)
   // to state 3 (Switched on)
@@ -381,22 +365,7 @@ void Controller::enterOperational()
   log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
   sendSDO(SDOMessage);
   this->checkState();
-
-  // Check state three times,  waiting 100ms in between each check.
-  // If it hasn't changed then throw critical failure
-  for (state_count = 0; state_count < 3; state_count++) {
-    if (state_ == kSwitchedOn) {
-      break;
-    } else {
-      Thread::sleep(100);
-      this->checkState();
-    }
-  }
-  if (state_ != kSwitchedOn) {
-    critical_failure_ = true;
-    log_.ERR("MOTOR", "Controller %d, Could not transition to Switched On", node_id_);
-    return;
-  }
+  checkStateTransition(kSwitchedOn);
 
   // Send enter operational message to transition from state 3 (Switched on)
   // to state 4 (Operation enabled)
@@ -412,22 +381,7 @@ void Controller::enterOperational()
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
   sendSDO(SDOMessage);
   this->checkState();
-
-  // This transition can take some time. Wait for maximum of three seconds,
-  // checking state each second, if it doesn't change then throw critical failure
-  for (state_count = 0; state_count < 3; state_count++) {
-    if (state_ == kOperationEnabled) {
-      break;
-    } else {
-      Thread::sleep(1000);
-      this->checkState();
-    }
-  }
-  if (state_ != kOperationEnabled) {
-    critical_failure_ = true;
-    log_.ERR("MOTOR", "Controller %d, Could not transition to Operational Enabled", node_id_);
-    return;
-  }
+  checkStateTransition(kOperationEnabled);
 }
 
 void Controller::enterPreOperational()
@@ -1053,7 +1007,7 @@ void Controller::sendSDO(utils::io::can::Frame& message)
   }
   // No SDO frame recieved - controller must be offline/communication error
   if (!sdo_frame_recieved_) {
-    critical_failure_ = true;
+    throwCriticalFailure();
     log_.ERR("MOTOR", "Controller %d: No response from controller", node_id_);
     throwCriticalFailure();
   }
@@ -1101,6 +1055,26 @@ uint8_t Controller::getId()
 ControllerState Controller::getControllerState()
 {
   return state_;
+}
+
+void Controller::checkStateTransition(ControllerState state)
+{
+  uint8_t state_count;
+  // This transition can take some time. Wait for maximum of three seconds,
+  // checking state each second, if it doesn't change then throw critical failure
+  for (state_count = 0; state_count < 3; state_count++) {
+    if (state_ == state) {
+      break;
+    } else {
+      Thread::sleep(1000);
+      this->checkState();
+    }
+  }
+  if (state_ != state) {
+    throwCriticalFailure();
+    log_.ERR("MOTOR", "Controller %d, Could not transition to %s", node_id_, state);
+    return;
+  }
 }
 
 void Controller::throwCriticalFailure()

@@ -94,6 +94,7 @@ void Communicator::enterPreOperational()
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
+  // TODO(anyone) need to check if this is correct for our set-up of motors
   controller1_.sendTargetVelocity(target_velocity);
   controller2_.sendTargetVelocity(-target_velocity);
   controller3_.sendTargetVelocity(target_velocity);
@@ -102,6 +103,7 @@ void Communicator::sendTargetVelocity(int32_t target_velocity)
 
 void Communicator::sendTargetTorque(int16_t target_torque)
 {
+  // TODO(Sean) Should torque for 2 controllers be negative?
   controller1_.sendTargetTorque(target_torque);
   controller2_.sendTargetTorque(target_torque);
   controller3_.sendTargetTorque(target_torque);
