@@ -151,7 +151,6 @@ struct Motors : public Module {
 // -------------------------------------------------------------------------------------------------
 
 struct Communications : public Module {
-  bool stopCommand;   // deprecate
   bool launchCommand;
   bool resetCommand;
   float run_length;

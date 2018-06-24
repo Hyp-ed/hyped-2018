@@ -27,6 +27,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -37,16 +38,20 @@ namespace sensors {
 
 class ImuManager: public ManagerInterface {
  public:
-  explicit ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
+  ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
   void run() override;
   bool updated() override;
   void resetTimestamp() override;
 
  private:
+  utils::System& sys_;
   data::DataPoint<array<Imu, data::Sensors::kNumImus>> *sensors_imu_;
+  data::Data&          data_;
 
   uint8_t         chip_select_[data::Sensors::kNumImus];
   ImuInterface*   imu_[data::Sensors::kNumImus];
+  ImuInterface*   imu_accelerating_[data::Sensors::kNumImus];
+  bool is_fake_;
 };
 
 }}  // namespace hyped::sensors

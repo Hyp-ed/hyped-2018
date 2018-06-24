@@ -24,31 +24,57 @@
 #include "sensors/mpu9250.hpp"
 #include "data/data.hpp"
 #include "utils/timer.hpp"
+#include "sensors/fake_imu.hpp"
 
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
+using utils::System;
 
 namespace sensors {
 
-ImuManager::ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
+ImuManager::ImuManager(Logger& log,
+                       data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
     : ManagerInterface(log),
+      sys_(System::getSystem()),
+      data_(Data::getInstance()),
       chip_select_ {31, 50, 48, 51}
 {
-  // create IMUs, might consider using fake_imus based on input arguments
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
+  is_fake_ = sys_.fake_imu;
+  if (!is_fake_) {
+    // create IMUs
+    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
+    }
+  } else {
+    // create fake IMUs
+    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      imu_[i] = new FakeImuStationary(log,
+                                      NavigationVector(0),
+                                      NavigationVector(1),
+                                      NavigationVector(0),
+                                      NavigationVector(1));
+      imu_accelerating_[i] = new FakeImuAccelerating(log,
+                                                    "../BeagleBone_black/data/in/fake_imu_input_acc.txt",  //NOLINT
+                                                    "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
+    }
   }
-
   sensors_imu_ = imu;
 }
 
 void ImuManager::run()
 {
   while (1) {
-    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    // If the state changes to accelerating use different data
+    if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kAccelerating) { //NOLINT
+      for (int i =0; i < data::Sensors::kNumImus; i++) {
+        imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
+      }
+    } else {
+      for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i]->getData(&(sensors_imu_->value[i]));
+      }
     }
     sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }
