@@ -26,6 +26,7 @@
 
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/logger.hpp"
 
 namespace hyped {
 
@@ -42,7 +43,7 @@ namespace sensors {
  *           and calling getData function multiple times at different time periods to produce
  *           reading that will be used by other classes.
  */
-class FakeImu : public ImuInterface {
+class FakeImuAccelerating : public ImuInterface {
  public:
   /*
    * @brief     A constructor for the fake IMU class by reading from file
@@ -60,14 +61,7 @@ class FakeImu : public ImuInterface {
    * @param[in] acc_file_path    A string to the file location of the accelerometer data points
    * @param[in] gyr_file_path    A string to the file location of the gyroscope data points
    */
-  explicit FakeImu(std::string acc_file_path, std::string gyr_file_path);
-
-  /*
-   * @brief     A constructor for the fake IMU class. This works by generating random numbers
-   *            using a normal distribution with xxx_val as mean and xxx_noise as standard deviation.
-   */
-  explicit FakeImu(NavigationVector acc_val, NavigationVector acc_noise,
-                   NavigationVector gyr_val, NavigationVector gyr_noise);
+  FakeImuAccelerating(utils::Logger& log_, std::string acc_file_path, std::string gyr_file_path);
 
   bool isOnline() override { return true; }
   /*
@@ -79,6 +73,7 @@ class FakeImu : public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
+  utils::Logger&       log_;
   const int64_t kAccTimeInterval = 250;
   const int64_t kGyrTimeInterval = 125;
 
@@ -106,7 +101,7 @@ class FakeImu : public ImuInterface {
    *
    * @return    Returns random data point value
    */
-  static NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
+  NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
 
   /*
    * @brief     Checks to see if sufficient time has pass for the sensor to be updated and checks if
@@ -115,20 +110,63 @@ class FakeImu : public ImuInterface {
   bool accCheckTime();
   bool gyrCheckTime();
 
-  bool read_file;
+  bool read_file_;
+  NavigationVector acc_val_, gyr_val_;
+  NavigationVector acc_noise_, gyr_noise_;
 
-  NavigationVector acc_val, gyr_val;
-  NavigationVector acc_noise, gyr_noise;
+  NavigationVector prev_acc_;
+  NavigationVector prev_gyr_;
 
-  NavigationVector prev_acc;
-  NavigationVector prev_gyr;
+  std::vector<NavigationVector> acc_val_read_;
+  std::vector<NavigationVector> gyr_val_read_;
 
-  unsigned pt_acc, pt_gyr;
-  std::vector<DataPoint<NavigationVector>> acc_val_read;
-  std::vector<DataPoint<NavigationVector>> gyr_val_read;
+  int64_t acc_count_, gyr_count_;
+  uint64_t imu_ref_time_;
+  std::string acc_file_path_;
+  std::string gyr_file_path_;
+};
 
-  int64_t acc_count, gyr_count;
-  high_resolution_clock::time_point imu_ref_time;
+class FakeImuStationary : public ImuInterface {
+ public:
+   /*
+   * @brief     A constructor for the fake IMU class. This works by generating random numbers
+   *            using a normal distribution with xxx_val as mean and xxx_noise as standard deviation.
+   */
+  FakeImuStationary(utils::Logger& log_, NavigationVector acc_val, NavigationVector acc_noise,
+                   NavigationVector gyr_val, NavigationVector gyr_noise);
+  bool isOnline() override { return true; }
+  /*
+   * @brief     A function that gets the imu data at the time of call. The function will return
+   *            the same data point if the time period since the last update isn't long enough. It
+   *            will also skip a couple of data points if the time since the last call has been
+   *            sufficiently long.
+   */
+  void getData(Imu* imu) override;
+
+ private:
+  utils::Logger&       log_;
+  const int64_t kAccTimeInterval = 250;
+  const int64_t kGyrTimeInterval = 125;
+  /*
+   * @brief     A function that adds noise to the imu data using normal distribution
+   *
+   * @param[in] value    This is the mean of the normal distribution
+   * @param[in] noise    This is the standard deviation of the normal distribution
+   *
+   * @return    Returns random data point value
+   */
+  NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
+  /*
+   * @brief     Checks to see if sufficient time has pass for the sensor to be updated and checks if
+   *            some data points need to be skipped
+   */
+  bool accCheckTime();
+  bool gyrCheckTime();
+  NavigationVector acc_val_, gyr_val_;
+  NavigationVector acc_noise_, gyr_noise_;
+  NavigationVector prev_acc_, prev_gyr_;
+  int64_t acc_count_, gyr_count_;
+  uint64_t imu_ref_time_;
 };
 
 }}  // namespace hyped::sensors
