@@ -82,7 +82,7 @@ void FakeImuAccelerating::getData(Imu* imu)
 NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
-  std::default_random_engine generator;
+  static std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
     std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
@@ -206,7 +206,7 @@ void FakeImuStationary::getData(Imu* imu)
 NavigationVector FakeImuStationary::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
-  std::default_random_engine generator;
+  static std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
     std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
