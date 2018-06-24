@@ -140,6 +140,9 @@ int Main::sendTorqueBl(float torquebl)
 
 void Main::run()
 {
+  cmn_data_ = data_.getCommunicationsData();
+  cmn_data_.run_length = 1250;
+  data_.setCommunicationsData(cmn_data_);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
 
