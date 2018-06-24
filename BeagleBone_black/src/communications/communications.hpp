@@ -68,6 +68,7 @@ class Communications
 
  private:
   int sockfd_;
+  data::Data& data_ = data::Data::getInstance();
   char buffer_[256];
   Logger& log_;
 };
