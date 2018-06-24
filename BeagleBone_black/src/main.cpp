@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 
   Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
   Thread* motor     = new hyped::motor_control::Main(1, log_motor);
-  Thread* sensors   = new hyped::sensors::Main(2, log_sensor, sys.fake_imu);
+  Thread* sensors   = new hyped::sensors::Main(2, log_sensor);
   Thread* navigation = new hyped::navigation::Main(3, log_nav);
   Thread* communications = new hyped::communications::Main(4, log_cmn);
 

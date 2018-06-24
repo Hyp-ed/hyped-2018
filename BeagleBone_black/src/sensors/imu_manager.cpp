@@ -30,17 +30,18 @@ namespace hyped {
 
 using data::Data;
 using data::Sensors;
+using utils::System;
 
 namespace sensors {
 
 ImuManager::ImuManager(Logger& log,
-                       data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu,
-                       bool is_fake)
+                       data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
     : ManagerInterface(log),
+      sys_(System::getSystem()),
       data_(Data::getInstance()),
-      chip_select_ {31, 50, 48, 51},
-      is_fake_(is_fake)
+      chip_select_ {31, 50, 48, 51}
 {
+  is_fake_ = sys_.fake_imu;
   if (!is_fake_) {
     // create IMUs
     for (int i = 0; i < data::Sensors::kNumImus; i++) {

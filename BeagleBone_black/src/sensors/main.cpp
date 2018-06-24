@@ -24,7 +24,6 @@
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
-
 namespace hyped {
 
 using data::Data;
@@ -34,10 +33,10 @@ using data::StripeCounter;
 
 namespace sensors {
 
-Main::Main(uint8_t id, Logger& log, bool is_fake)
+Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      imu_manager_(new ImuManager(log, &sensors_.imu, is_fake)),
+      imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
       battery_manager_lp_(new BmsManager(log, &batteries_.low_power_batteries)),

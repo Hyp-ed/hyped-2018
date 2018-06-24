@@ -47,7 +47,7 @@ class CANProxi;
 class Keyence;
 class Main: public Thread {
  public:
-  explicit Main(uint8_t id, Logger& log, bool is_fake);
+  explicit Main(uint8_t id, Logger& log);
   void run() override;
 
  private:
