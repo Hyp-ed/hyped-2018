@@ -108,7 +108,8 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scal
     : log_(log),
     gpio_(pin, kDirection, log),
     acc_scale_(acc_scale),
-    gyro_scale_(gyro_scale)
+    gyro_scale_(gyro_scale),
+    is_online_(false)
 {
   init();
   log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
@@ -122,7 +123,7 @@ void MPU9250::init()
   calibrateSensors();
 
   // Test connection
-  while (!whoAmI());
+  whoAmI();
 
   writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
   Thread::sleep(200);
@@ -300,16 +301,25 @@ void MPU9250::calibrateSensors()
 bool MPU9250::whoAmI()
 {
   uint8_t data;
+  int send_counter;
 
-  // Who am I checks what address the sensor is at
-  readByte(kWhoAmIMpu9250, &data);
-  log_.ERR("MPU9250", "who am I: %u", data);
-  if (data != kWhoAmIResetValue1 && data != kWhoAmIResetValue2) {
-    Thread::sleep(1000);
-     log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
-    return false;
+  for (send_counter = 0; send_counter < 3; send_counter++) {
+    // Who am I checks what address the sensor is at
+    readByte(kWhoAmIMpu9250, &data);
+    log_.ERR("MPU9250", "who am I: %u", data);
+    if (data != kWhoAmIResetValue1 && data != kWhoAmIResetValue2) {
+      log_.DBG1("MPU9250", "Cannot initialise who am I is incorrect");
+      is_online_ = false;
+      Thread::yield();
+    }
+    is_online_ = true;
+    break;
   }
-  return true;
+
+  if (!is_online_) {
+    log_.ERR("MPU9250", "Cannot initialise who am I sensor offline");
+  }
+  return is_online_;
 }
 
 
@@ -421,16 +431,22 @@ void MPU9250::deSelect()
 
 void MPU9250::getData(Imu* imu)
 {
-  getGyroData();
-  getAcclData();
-  auto& acc = imu->acc;
-  auto& gyr = imu->gyr;
-  acc[0] = accel_data_[0];
-  acc[1] = accel_data_[1];
-  acc[2] = accel_data_[2];
-  gyr[0] = gyro_data_[0];
-  gyr[1] = gyro_data_[1];
-  gyr[2] = gyro_data_[2];
+  if (is_online_) {
+    getGyroData();
+    getAcclData();
+    auto& acc = imu->acc;
+    auto& gyr = imu->gyr;
+    imu->operational = is_online_;
+    acc[0] = accel_data_[0];
+    acc[1] = accel_data_[1];
+    acc[2] = accel_data_[2];
+    gyr[0] = gyro_data_[0];
+    gyr[1] = gyro_data_[1];
+    gyr[2] = gyro_data_[2];
+  } else {
+    // Try and turn the sensor on again
+    init();
+  }
 }
 
 }}   // namespace hyped::sensors

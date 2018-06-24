@@ -22,7 +22,7 @@
 #include <cstdint>
 
 #include "utils/logger.hpp"
-
+#include "utils/concurrent/thread.hpp"
 
 
 // Register addresses
@@ -44,6 +44,7 @@ constexpr uint16_t kInterruptClearRanging              = 0x01;
 namespace hyped {
 
 using utils::io::I2C;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
@@ -53,17 +54,12 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
       continuous_mode_(false),
       i2c_addr_(i2c_addr),
       i2c_(I2C::getInstance()),
-      error_status_(false)
+      error_status_(false),
+      is_online_(false)
 {
   // Create I2C instance get register address
   turnOn();
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
-}
-
-VL6180::~VL6180()
-{
-  turnOff();
-  log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
 void VL6180::setAddress(uint8_t i2c_addr)
@@ -74,12 +70,6 @@ void VL6180::setAddress(uint8_t i2c_addr)
 
 void VL6180::turnOn()
 {
-  // return if already on
-  if (on_) {
-    log_.DBG("VL6180", "Sensor is already on\n");
-    return;
-  }
-
   // This waits for the device to be fresh out of reset (same thing as above)
   waitDeviceBooted();
 
@@ -136,7 +126,6 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
-  on_ = true;
   log_.DBG("VL6180", "Sensor is on\n");
 }
 
@@ -145,14 +134,10 @@ void VL6180::setMaxConvergenceTime(uint8_t time_ms)
   writeByte(kSysrangeMaxConvergenceTime, time_ms);
 }
 
-void VL6180::turnOff()
-{
-  on_ = false;
-  log_.DBG("VL6180", "Sensor is now off\n");
-}
-
 uint8_t VL6180::getDistance()
 {
+  // If sensor is not online try and turn on
+  if (!is_online_) turnOn();
   if (continuous_mode_) {
     return continuousRangeDistance();
   } else {
@@ -169,11 +154,12 @@ bool VL6180::isOnline()
   status = data >> 4;
 
   if (status == 0) {
-    return true;
+    is_online_ = true;
   } else if (status != 0) {
     checkStatus();
   }
-  return false;
+  is_online_ = false;
+  return is_online_;
 }
 
 void VL6180::setContinuousRangingMode()
@@ -237,10 +223,18 @@ bool VL6180::waitDeviceBooted()
 {
   // Will hold the return value of the register kSystemFreshOutOfReset
   uint8_t fresh_out_of_reset;
-  do {
+  int send_counter;
+
+  for (send_counter = 0; send_counter < 3; send_counter++) {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
-  } while (fresh_out_of_reset != 1);
-  return true;
+    if (fresh_out_of_reset == 1) {
+      return true;
+      break;
+      Thread::yield();
+    }
+  }
+  is_online_ = false;
+  return false;
 }
 
 bool VL6180::rangeWaitDeviceReady()

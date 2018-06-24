@@ -39,6 +39,7 @@ class VL6180: public ProxiInterface {
 
   bool isOnline() override;
   void getData(Proximity* proxi) override {
+    proxi->operational = isOnline();
     proxi->val = getDistance();
   }
 
@@ -116,6 +117,7 @@ class VL6180: public ProxiInterface {
   uint8_t i2c_addr_;
   I2C& i2c_;
   bool error_status_;
+  bool is_online_;
 };
 
 }}  // namespace hyped::sensors

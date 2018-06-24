@@ -99,6 +99,7 @@ class MPU9250 : public ImuInterface {
   int16_t acc_bias_[3];
   double gyro_divider_;
   int16_t gyro_bias_[3];
+  bool is_online_;
 };
 
 }}  // namespace hyped::sensors
