@@ -66,6 +66,7 @@ class Main : public Thread {
   data::Sensors sns_;
   data::StateMachine stm_;
   data::Batteries bat_;
+  data::Communications cmn_data_;
 };
 
 }}  //  namespace hyped::communications
