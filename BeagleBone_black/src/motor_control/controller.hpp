@@ -55,6 +55,12 @@ class Controller : public CanProccesor {
  public:
   Controller(Logger& log, uint8_t id);
   /**
+   *   @brief { Does this CanProcessor own the corresponding can message? }
+   *
+   *   @return  { true - iff I am the owner of this can message }
+   */
+  bool hasId(uint32_t id, bool extended) override;
+  /**
     *  @brief  { Register controller to receive and transmit messages on CAN bus }
     */
   void registerController();
@@ -102,37 +108,6 @@ class Controller : public CanProccesor {
     *  @return { Actual torque of motor }
     */
   int16_t getTorque();
-
-  /**
-   * @brief Does this CanProcessor own the corresponding can message?
-   * @return true - iff I am the owner of this can message
-   */
-  bool hasId(uint32_t id, bool extended) override;
-  /**
-   *  @brief { To be called by CAN receive side. Controller processes received CAN
-   *          message and updates its local data }
-   *
-   *  @param[in] { CAN message to be processed }
-   */
-  void processNewData(utils::io::can::Frame& message) override;
-  /**
-   *  @brief { Called by processNewData if Emergency message is detected. }
-   *
-   *  @param[in] { CAN message to be processed }
-   */
-  void processEmergencyMessage(utils::io::can::Frame& message);
-  /**
-   *  @brief { Called by processNewData if SDO message is detected. }
-   *
-   *  @param[in] { CAN message to be processed }
-   */
-  void processSDOMessage(utils::io::can::Frame& message);
-  /**
-   *  @brief { Called by processNewData if NMT message is detected. }
-   *
-   *  @param[in] { CAN message to be processed }
-   */
-  void processNMTMessage(utils::io::can::Frame& message);
   /**
     *  @brief { Sets controller into quickStop mode. Use in case of critical failure }
     */
@@ -155,38 +130,63 @@ class Controller : public CanProccesor {
    * @return { ControllerState }
    */
   ControllerState getControllerState();
+  /*
+   *  @brief { To be called by CAN receive side. Controller processes received CAN
+   *           message and updates its local data }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processNewData(utils::io::can::Frame& message) override;
 
  private:
   /*
    * @brief { Sends a CAN frame but waits for a reply }
    */
-  void sendSDO(utils::io::can::Frame& message);
-  /*
-   * @brief { Parses error message to find the problem }
-   */
-  void processErrorMessage(uint16_t error_message);
+  void sendSdoMessage(utils::io::can::Frame& message);
   /*
    * @brief { Set critical failure flag to true and write failure to data structure }
    */
   void throwCriticalFailure();
   /*
-   * @brief { Checks to see if controller has transition to a new state properly
+   * @brief { Checks to see if controller has transitioned to a new state,
    *          if it hasn't it will go into critical failure }
    */
   void checkStateTransition(ControllerState state);
+  /*
+   *  @brief { Called by processNewData if Emergency message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processEmergencyMessage(utils::io::can::Frame& message);
+  /*
+   * @brief { Parses error message to find the problem }
+   */
+  void processErrorMessage(uint16_t error_message);
+  /*
+   *  @brief { Called by processNewData if SDO message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processSdoMessage(utils::io::can::Frame& message);
+  /*
+   *  @brief { Called by processNewData if NMT message is detected. }
+   *
+   *  @param[in] { CAN message to be processed }
+   */
+  void processNmtMessage(utils::io::can::Frame& message);
 
-  Logger&  log_;
-  Can&     can_;
-  data::Data& data_;
+  Logger&      log_;
+  Can&         can_;
+  data::Data&  data_;
   data::Motors motor_data_;
+  utils::io::can::Frame sdo_message_;
+  utils::io::can::Frame nmt_message_;
+  ControllerState state_;
   uint8_t  node_id_;
   bool     critical_failure_;
   int32_t  actual_velocity_;
   int16_t  actual_torque_;
-  utils::io::can::Frame SDOMessage;
-  utils::io::can::Frame NMTMessage;
-  ControllerState state_;
-  bool sdo_frame_recieved_;
+  bool     sdo_frame_recieved_;
 };
 
 }}  // namespace hyped::motor_control
