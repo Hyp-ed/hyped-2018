@@ -168,7 +168,7 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
   rail.rl   = proxiMean(proxis[12], proxis[13]);
   rail.fl   = proxiMean(proxis[2],  proxis[3]);
 
-  // TODO(Brano): Check for crit. failure
+  // Check for crit. failure
   if (num_ground_fail > 1) {
     status_ = ModuleStatus::kCriticalFailure;
     log_.ERR("NAV", "Critical failure: num failed ground proxi points = %d", num_ground_fail);
@@ -258,7 +258,7 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
     // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
     // definitely gone wrong.
     status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV", 
+    log_.ERR("NAV",
         "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
         stripe_count_, sc.count.value, dists[0], dists[1], dists[2]);
     return;

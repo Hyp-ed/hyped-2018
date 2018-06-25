@@ -188,7 +188,6 @@ class Navigation {
   Logger& log_;
   ModuleStatus status_;
 
-
   // Calibration variables
   bool is_calibrating_;
   int num_gravity_samples_;
