@@ -318,22 +318,22 @@ MPU9250::~MPU9250()
   log_.INFO("MPU9250", "Deconstructing sensor object");
 }
 
-void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
+void  __attribute__((noinline)) MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
     select();
     spi_.write(write_reg, &write_data, 1);
     deSelect();
-    Thread::yield();
+    // Thread::yield();
 }
 
-void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
+void  __attribute__((noinline)) MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
     select();
     spi_.read(read_reg | kReadFlag, read_data, 1);
     deSelect();
 }
 
-void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
+void  __attribute__((noinline)) MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)  // NOLINT [whitespace/line_length]
 {
   select();
   spi_.read(read_reg | kReadFlag, read_data, length);
@@ -410,11 +410,11 @@ void MPU9250::setAcclScale(int scale)
   }
 }
 
-void MPU9250::select()
+void  MPU9250::select()
 {
   gpio_.clear();
 }
-void MPU9250::deSelect()
+void  MPU9250::deSelect()
 {
   gpio_.set();
 }

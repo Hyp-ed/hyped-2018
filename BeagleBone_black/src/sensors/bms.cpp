@@ -161,6 +161,7 @@ BMSHP::BMSHP(uint16_t id, Logger& log)
 
   // tell CAN about yourself
   Can::getInstance().registerProcessor(this);
+  Can::getInstance().start();
 }
 
 bool BMSHP::isOnline()
