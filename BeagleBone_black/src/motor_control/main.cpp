@@ -67,21 +67,21 @@ void Main::run()
   while (run_) {
     state_ = data_.getStateMachineData();
     if (state_.current_state == data::State::kIdle) {
-      this->initMotors();
+      initMotors();
       yield();
     } else if (state_.current_state == data::State::kCalibrating) {
-      this->prepareMotors();
+      prepareMotors();
       yield();
     } else if (state_.current_state == data::State::kAccelerating) {
-      this->accelerateMotors();
+      accelerateMotors();
     } else if (state_.current_state == data::State::kDecelerating) {
-      this->decelerateMotors();
+      decelerateMotors();
     } else if (state_.current_state == data::State::kRunComplete) {
       // Wait for state machine to transition to kExiting
     } else if (state_.current_state == data::State::kExiting) {
-      this->servicePropulsion();
+      servicePropulsion();
     } else if (state_.current_state == data::State::kEmergencyBraking) {
-      this->stopMotors();
+      stopMotors();
     } else if (state_.current_state == data::State::kFailureStopped) {
       communicator_.enterPreOperational();
     } else {
@@ -147,7 +147,7 @@ void Main::accelerateMotors()
     // Check for state machine critical failure flag
     state_ = data_.getStateMachineData();
     if (state_.critical_failure) {
-      this->stopMotors();
+      stopMotors();
       break;
     }
 
@@ -158,7 +158,7 @@ void Main::accelerateMotors()
     //  and stop all motors
     if (communicator_.getFailure()) {
       updateMotorFailure();
-      this->stopMotors();
+      stopMotors();
       break;
     }
 
@@ -180,7 +180,7 @@ void Main::decelerateMotors()
     // Check for state machine critical failure flag
     state_ = data_.getStateMachineData();
     if (state_.critical_failure) {
-      this->stopMotors();
+      stopMotors();
       break;
     }
 
@@ -191,7 +191,7 @@ void Main::decelerateMotors()
     //  and stop all motors
     if (communicator_.getFailure()) {
       updateMotorFailure();
-      this->stopMotors();
+      stopMotors();
       break;
     }
 

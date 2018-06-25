@@ -22,17 +22,18 @@
 
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
-using namespace std;
+#include <chrono>
 
 using hyped::utils::Logger;
 using hyped::utils::System;
 using hyped::utils::concurrent::Thread;
-
-using namespace hyped;
-
 using hyped::motor_control::Controller;
+
+using namespace std;
+using namespace hyped;
 
 int main(int argc, char* argv[])
 {
@@ -47,22 +48,62 @@ int main(int argc, char* argv[])
   myfile.open ("RPMvTime.txt");
   myfile << "RPM\tTime\n";
 
+  int32_t max_rpm   = atoi(argv[0]);  // Desired max rpm
+  int16_t acc_time  = atoi(argv[1]);  // Time (seconds) to max rpm
+  int16_t con_time  = atoi(argv[2]);  // Time (seconds) spent at max rpm
+  int16_t dec_time  = atoi(argv[3]);  // Time (seconds) from max rpm to 0
+  
+  int32_t target_v = 0;
+  int32_t actual_v = 0;
+  int32_t wait     = 50;                  // Wait 50ms between each target velocity update
+  
+  int acc_iterations = acc_time*20;
+  int con_iterations = con_time*20;
+  int dec_iterations = dec_time*20;
+
+  int32_t acc_updates = max_rpm/acc_iterations;
+  int32_t dec_updates = max_rpm/dec_iterations;
+  
   controller->registerController();
   controller->configure();
   controller->enterOperational();
-  int32_t target_v = 0;
-  int32_t actual_v = 0;
-  for (int i = 0; i < 250; i++) {
-    if (i < 170) {
-      controller->sendTargetVelocity(target_v);
-      target_v += 41;
-    } else {
-      controller->quickStop();
-    }
+
+  auto start = chrono::steady_clock::now();
+
+  // Acceleration period
+  for (int i = 0; i < acc_iterations; i++) {
+    target_v += acc_updates;
+    controller->sendTargetVelocity(target_v);
     controller->updateActualVelocity();
     actual_v = controller->getVelocity();
-    myfile << actual_v<<"\t"<<i<<"\n";
-    Thread::sleep(100);
+    auto now = chrono::steady_clock::now();
+    myfile << actual_v<<"\t"<<chrono::duration_cast<chrono::milliseconds>(now-start).count()<<"\n";
+    while(chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now()-start).count() < wait);
+    wait += 50;
   }
+
+  // Constant max rpm period
+  for (int i = 0; i < con_iterations; i++) {
+    controller->updateActualVelocity();
+    actual_v = controller->getVelocity();
+    auto now = chrono::steady_clock::now();
+    myfile << actual_v<<"\t"<<chrono::duration_cast<chrono::milliseconds>(now-start).count()<<"\n";
+    while(chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now()-start).count() < wait);
+    wait += 50;
+  }
+
+  // Deceleration peroid
+  for (int i = 0; i < dec_iterations; i++) {
+    target_v -= dec_updates;
+    controller->sendTargetVelocity(target_v);
+    controller->updateActualVelocity();
+    actual_v = controller->getVelocity();
+    auto now = chrono::steady_clock::now();
+    myfile << actual_v<<"\t"<<chrono::duration_cast<chrono::milliseconds>(now-start).count()<<"\n";
+    while(chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now()-start).count() < wait);
+    wait += 50;
+  }
+
+  controller->enterPreOperational();
   myfile.close();
 }
