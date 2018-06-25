@@ -38,7 +38,7 @@ namespace hyped {
 namespace sensors {
 
 FakeProxi::FakeProxi(std::string file_path)
-    : read_file_(true), reading_counter_(0)
+    : read_file_(true)
 {
   readDataFromFile(file_path);
   setData();
@@ -53,6 +53,7 @@ FakeProxi::FakeProxi(uint8_t value, uint8_t noise)
 void FakeProxi::setData()
 {
   ref_time_ = high_resolution_clock::now();
+  reading_counter_ = 0;
 }
 
 void FakeProxi::getData(Proximity* proxi)
@@ -108,15 +109,11 @@ void FakeProxi::readDataFromFile(std::string file_path)
 
 uint8_t FakeProxi::addNoiseToData(uint8_t value, double noise)
 {
-  std::default_random_engine generator;
+  static std::default_random_engine generator;
   std::normal_distribution<double> distribution(value, noise);
 
-  double ans = distribution(generator);
-  if (ans > 255)
-    return 255;
-
-  if (ans < 0)
-    return 0;
+  unsigned ans = distribution(generator);
+  ans = ans%256;
 
   return ans;
 }

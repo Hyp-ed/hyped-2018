@@ -72,7 +72,7 @@ class FakeProxi : public ProxiInterface {
   /*
    * @brief    A function to add noise to the proximity data
    */
-  static uint8_t addNoiseToData(uint8_t value, double noise);
+  uint8_t addNoiseToData(uint8_t value, double noise);
 
   /*
    * @brief    Checks to see if sufficient time has pass for the sensor to be updated
