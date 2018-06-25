@@ -310,6 +310,32 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control ramp", node_id_);
   sendSdoMessage(sdo_message_);
+
+  // Set maximum controller current to 700,000 mA
+  sdo_message_.data[0]   = kWriteFourBytes;
+  sdo_message_.data[1]   = 0x50;
+  sdo_message_.data[2]   = 0x20;
+  sdo_message_.data[3]   = 0x00;
+  sdo_message_.data[4]   = 0x60;
+  sdo_message_.data[5]   = 0xAE;
+  sdo_message_.data[6]   = 0x0A;
+  sdo_message_.data[7]   = 0x00;
+
+  log_.DBG1("MOTOR", "Controller %d: Configuring maximum controller current", node_id_);
+  sendSdoMessage(sdo_message_);
+
+  // Set secondary controller current protection to 800,000 mA
+  sdo_message_.data[0]   = kWriteFourBytes;
+  sdo_message_.data[1]   = 0x51;
+  sdo_message_.data[2]   = 0x20;
+  sdo_message_.data[3]   = 0x00;
+  sdo_message_.data[4]   = 0x00;
+  sdo_message_.data[5]   = 0x35;
+  sdo_message_.data[6]   = 0x0C;
+  sdo_message_.data[7]   = 0x00;
+
+  log_.DBG1("MOTOR", "Controller %d: Configuring secondary current protection", node_id_);
+  sendSdoMessage(sdo_message_);
 }
 
 void Controller::enterOperational()
@@ -1061,6 +1087,14 @@ void Controller::processSdoMessage(utils::io::can::Frame& message)
   }
   if (index_1 == 0xF6 && index_2 == 0x60 && sub_index == 0x05) {
     log_.DBG1("MOTOR", "Controller %d: Current control ramp configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x50 && index_2 == 0x20 && sub_index == 0x00) {
+    log_.DBG1("MOTOR", "Controller %d: Maximum current limit configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x51 && index_2 == 0x20 && sub_index == 0x00) {
+    log_.DBG1("MOTOR", "Controller %d: Secondary current protection configured", node_id_);
     return;
   }
 
