@@ -51,7 +51,9 @@ void Main::run()
   while (1) {
     checkFailure();
     checkCommunications();
-    checkNavigation();
+    if(sm_data_.current_state != data::kIdle) {
+     checkNavigation();
+    }
     checkReady();
   }
 }
