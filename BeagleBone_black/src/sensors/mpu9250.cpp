@@ -119,7 +119,7 @@ void MPU9250::init()
   // Set pin high
   gpio_.set();
 
-  calibrateSensors();
+  // calibrateSensors();
 
   // Test connection
   while (!whoAmI());
