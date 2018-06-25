@@ -17,31 +17,45 @@
  */
 
 #include "sensors/fake_imu.hpp"
-#include "utils/concurrent/thread.hpp"
 
 #include <cstdio>
 #include <unistd.h>
 
+#include "state_machine/hyped-machine.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "utils/system.hpp"
+#include "utils/logger.hpp"
+#include "data/data.hpp"
+
 using hyped::data::Imu;
 using hyped::data::NavigationVector;
-using hyped::sensors::FakeImu;
+using hyped::sensors::FakeImuAccelerating;
+using hyped::sensors::FakeImuStationary;
 using hyped::utils::concurrent::Thread;
+using hyped::utils::Logger;
 
-int main()
+int main(int argc, char* argv[])
 {
+  hyped::utils::System::parseArgs(argc, argv);
   Imu reading;
-  FakeImu generator(NavigationVector(0), NavigationVector(1), NavigationVector(0), NavigationVector(1));
-  FakeImu file("src/fake_imu_input_acc.txt", "src/fake_imu_input_gyr.txt");
+  Logger log(true, 1);
+  FakeImuStationary   imuStationary(log, NavigationVector(0), NavigationVector(1), NavigationVector(0), NavigationVector(1));
 
-  for (int i=0; i<3; i++) {
-    file.getData(&reading);
-    printf("From file: %fm/s^2\n", reading.acc[0]);
-    printf("From file: %frad/s\n", reading.gyr[0]);
+  for (int i=0; i<20; i++) {
+    imuStationary.getData(&reading);
+    printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
+    printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
+    // TODO(Anyone) change the state of the state machine to accelerating
+    Thread::sleep(50);
+  }
 
-    generator.getData(&reading);
-    printf("From generator: %fm/s^2\n", reading.acc[0]);
-    printf("From generator: %frad/s\n", reading.gyr[0]);
-
-    Thread::sleep(10);
+  FakeImuAccelerating imuAccelerating(log, "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+                                          "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+  for (int i=0; i<20; i++) {
+    imuAccelerating.getData(&reading);
+    printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
+    printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
+    // TODO(Anyone) change the state of the state machine to accelerating
+    Thread::sleep(50);
   }
 }

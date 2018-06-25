@@ -21,7 +21,9 @@
 #include "sensors/main.hpp"
 
 #include "data/data.hpp"
-
+#include "sensors/imu_manager.hpp"
+#include "sensors/bms_manager.hpp"
+#include "sensors/proxi_manager.hpp"
 namespace hyped {
 
 using data::Data;
@@ -34,60 +36,43 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      imu_manager_(log),
-      proxi_manager_front_(log, true),
-      proxi_manager_back_(log, false),
-      battery_manager_lp(log)
+      imu_manager_(new ImuManager(log, &sensors_.imu)),
+      proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
+      proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
+      battery_manager_lp_(new BmsManager(log, &batteries_.low_power_batteries)),
+      sensor_init_(false),
+      battery_init_(false)
 {
-  // Config new IMU manager
-  imu_manager_.config(&sensors_.imu);
-
-  // Config Proxi manager
-  proxi_manager_front_.config(&sensors_.proxi_front);
-  proxi_manager_back_.config(&sensors_.proxi_back);
-
-  // Config BMS Manager
-  battery_manager_lp.config(&batteries_.low_power_batteries);
-
-  // Used for initialisation of old sensor and old battery data
-  old_imu_timestamp_ = sensors_.imu.timestamp;
-
   // @TODO (Ragnor) Add second Keyence?
   // create Keyence
   keyence = new Keyence(log_, 73);
   keyence->start();
-
-  old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
-  old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
-  old_batteries_ = batteries_;
 }
 
 void Main::run()
 {
   // start all managers
-  imu_manager_.start();
-  proxi_manager_front_.start();
-  proxi_manager_back_.start();
-  battery_manager_lp.start();
+  imu_manager_->start();
+  proxi_manager_front_->start();
+  proxi_manager_back_->start();
+  battery_manager_lp_->start();
 
   // init loop
-  while (1) {
-    if (updateImu() && updateProxi()) {
+  while (!sensor_init_) {
+    if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
       sensors_.module_status = data::ModuleStatus::kInit;
       data_.setSensorsData(sensors_);
-      old_imu_timestamp_ = sensors_.imu.timestamp;
-      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
-      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
+      sensor_init_ = true;
       break;
     }
     yield();
   }
   log_.INFO("SENSORS", "sensors data has been initialised");
-  while (1) {
-    if (updateBattery()) {
+  while (!battery_init_) {
+    if (battery_manager_lp_->updated()) {
       batteries_.module_status = data::ModuleStatus::kInit;
       data_.setBatteryData(batteries_);
-      old_batteries_ = batteries_;
+      battery_init_ = true;
       break;
     }
     yield();
@@ -97,43 +82,26 @@ void Main::run()
   // work loop
   while (1) {
     // Write sensor data to data structure only when all the imu and proxi values are different
-    if (updateImu() || updateProxi()) {
+    if (imu_manager_->updated()) {
+      data_.setSensorsImuData(sensors_.imu);
+      // Update manager timestamp with a function
+      imu_manager_->resetTimestamp();
+    }
+
+    if (proxi_manager_front_->updated() && proxi_manager_back_->updated()) {
       data_.setSensorsData(sensors_);
-      old_imu_timestamp_ = sensors_.imu.timestamp;
-      old_proxi_back_timestamp = sensors_.proxi_back.timestamp;
-      old_proxi_front_timestamp = sensors_.proxi_front.timestamp;
+      proxi_manager_front_->resetTimestamp();
+      proxi_manager_back_->resetTimestamp();
     }
 
     // Update battery data only when there is some change
-    if (updateBattery()) {
+    if (battery_manager_lp_->updated()) {
       data_.setBatteryData(batteries_);
-      old_batteries_ = batteries_;
+      battery_manager_lp_->resetTimestamp();
     }
     data_.setStripeCounterData(keyence->getStripeCounter());
     yield();
   }
-}
-
-bool Main::updateImu()
-{
-  return old_imu_timestamp_ != sensors_.imu.timestamp;
-}
-
-bool Main::updateProxi()
-{
-  return (old_proxi_front_timestamp != sensors_.proxi_front.timestamp) &&
-         (old_proxi_back_timestamp != sensors_.proxi_back.timestamp);
-}
-
-bool Main::updateBattery()
-{
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    if (old_batteries_.low_power_batteries[i].voltage != batteries_.low_power_batteries[i].voltage
-     || old_batteries_.low_power_batteries[i].temperature != batteries_.low_power_batteries[i].temperature) { //NOLINT
-      return true;
-    }
-  }
-  return false;
 }
 
 }}  // namespace hyped::sensors

@@ -24,16 +24,20 @@
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
 #include "utils/timer.hpp"
+#include "utils/io/i2c.hpp"
 
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
+using utils::io::I2C;
 
 namespace sensors {
 
-ProxiManager::ProxiManager(Logger& log, bool isFront)
-    : Thread(log)
+ProxiManager::ProxiManager(Logger& log,
+                           bool isFront,
+                           data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
+    : ManagerInterface(log)
 {
   if (isFront) {
     // create CAN-based proximities
@@ -42,12 +46,18 @@ ProxiManager::ProxiManager(Logger& log, bool isFront)
       proxi_[i] = proxi;
     }
   } else {
+    I2C& i2c = I2C::getInstance();
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
       VL6180* proxi = new VL6180(0x29, log_);
       proxi->setContinuousRangingMode();
+      proxi->setAddress(0x29 + i);
       proxi_[i] = proxi;
     }
+    i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
   }
+
+  sensors_proxi_ = proxi;
 }
 
 void ProxiManager::run()
@@ -63,8 +73,16 @@ void ProxiManager::run()
   sleep(10);
 }
 
-void ProxiManager::config(data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
+bool ProxiManager::updated()
 {
-  sensors_proxi_ = proxi;
+  if (old_timestamp_ != sensors_proxi_->timestamp) {
+    return true;
+  }
+  return false;
+}
+
+void ProxiManager::resetTimestamp()
+{
+  old_timestamp_ = sensors_proxi_->timestamp;
 }
 }}  // namespace hyped::sensors

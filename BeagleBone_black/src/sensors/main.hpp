@@ -28,14 +28,13 @@
 #define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
 
 #include <cstdint>
+#include <memory>
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/keyence.hpp"
-#include "sensors/imu_manager.hpp"
 #include "sensors/interface.hpp"
-#include "sensors/proxi_manager.hpp"
-#include "sensors/bms_manager.hpp"
+#include "sensors/manager_interface.hpp"
 
 namespace hyped {
 
@@ -52,9 +51,6 @@ class Main: public Thread {
   void run() override;
 
  private:
-  bool updateImu();
-  bool updateProxi();
-  bool updateBattery();
   data::Data&     data_;
 
   // master data structures
@@ -62,17 +58,13 @@ class Main: public Thread {
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  // Previous data
-  uint64_t old_imu_timestamp_;
-  uint64_t old_proxi_back_timestamp;
-  uint64_t old_proxi_front_timestamp;
-  data::Batteries old_batteries_;
-
   Keyence* keyence;
-  ImuManager imu_manager_;
-  ProxiManager proxi_manager_front_;
-  ProxiManager proxi_manager_back_;
-  BmsManager  battery_manager_lp;
+  std::unique_ptr<ManagerInterface> imu_manager_;
+  std::unique_ptr<ManagerInterface> proxi_manager_front_;
+  std::unique_ptr<ManagerInterface> proxi_manager_back_;
+  std::unique_ptr<ManagerInterface> battery_manager_lp_;
+  bool sensor_init_;
+  bool battery_init_;
 };
 
 }}  // namespace hyped::sensors
