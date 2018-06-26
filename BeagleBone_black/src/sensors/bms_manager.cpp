@@ -31,8 +31,11 @@ using data::Batteries;
 
 namespace sensors {
 
-BmsManager::BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries> *batteries)
-    : ManagerInterface(log)
+BmsManager::BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries>* lp_batteries,
+                        array<Battery, data::Batteries::kNumLPBatteries>* hp_batteries)
+    : ManagerInterface(log),
+      lp_batteries_(lp_batteries),
+      hp_batteries_(hp_batteries)
 {
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
@@ -40,8 +43,9 @@ BmsManager::BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatter
     bms->start();
     bms_[i] = bms;
   }
-
-  lp_batteries_ = batteries;
+  for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
+    bms_[i + data::Batteries::kNumLPBatteries] = new BMSHP(i, log_);
+  }
 }
 
 void BmsManager::run()
@@ -50,6 +54,9 @@ void BmsManager::run()
     // keep updating data_ based on values read from sensors
     for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
       bms_[i]->getData(&((*lp_batteries_)[i]));
+    }
+    for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
+      bms_[i + data::Batteries::kNumLPBatteries]->getData(&(*hp_batteries_)[i]);
     }
     timestamp = utils::Timer::getTimeMicros();
     sleep(100);
