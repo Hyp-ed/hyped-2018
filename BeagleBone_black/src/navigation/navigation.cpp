@@ -282,6 +282,10 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
   }
 
   stripe_count_ = sc.count.value;
+
+  // Update x-axis (forwards) displacement
+  displacement_[0] = (1 - settings_.strp_displ_w)*displacement_[0] +
+                     settings_.strp_displ_w*stripe_count_;
 }
 
 }}  // namespace hyped::navigation
