@@ -64,6 +64,22 @@ class Main : public Thread {
   int sendImu6(bool operational);                // CMD23
   int sendImu7(bool operational);                // CMD24
   int sendImu8(bool operational);                // CMD25
+  int sendProxiFront1(bool operational);         // CMD26
+  int sendProxiFront2(bool operational);         // CMD27
+  int sendProxiFront3(bool operational);         // CMD28
+  int sendProxiFront4(bool operational);         // CMD29
+  int sendProxiFront5(bool operational);         // CMD30
+  int sendProxiFront6(bool operational);         // CMD31
+  int sendProxiFront7(bool operational);         // CMD32
+  int sendProxiFront8(bool operational);         // CMD33
+  int sendProxiRear1(bool operational);          // CMD34
+  int sendProxiRear2(bool operational);          // CMD35
+  int sendProxiRear3(bool operational);          // CMD36
+  int sendProxiRear4(bool operational);          // CMD37
+  int sendProxiRear5(bool operational);          // CMD38
+  int sendProxiRear6(bool operational);          // CMD39
+  int sendProxiRear7(bool operational);          // CMD40
+  int sendProxiRear8(bool operational);          // CMD41
 
  private:
   int stateCode_;
