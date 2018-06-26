@@ -244,7 +244,20 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
 
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
-  // TODO(Adi): Calculate displacement from proximity. (Point 7)
+  NavigationVector proxi_displ = displacement_;
+  // TODO(Brano): Make this a weighted average based on the actual positions of the 4 sensors with
+  //              respect to IMUs
+  proxi_displ[2] = (ground.fr + ground.rr + ground.rl + ground.fl) / 4.0;
+  // Change from mm to m and subtract the stationary z-axis displacement
+  // TODO(Brano): Update the z-axis displacement
+  proxi_displ[2] = proxi_displ[2]/1000.0 - 0.1;
+  // The y-axis points to the left and displacement 0 is when right and left proxis are equal
+  // TODO(Brano): Make this a weighted average based on the actual proxi positions w.r.t. IMUs
+  proxi_displ[1] = ((rail.fl - rail.fr) + (rail.rl - rail.rr)) / 2.0;
+  proxi_displ[1] = proxi_displ[1]/1000.0;
+
+  // Update displacement
+  displacement_ = (1 - settings_.prox_displ_w)*displacement_ + settings_.prox_displ_w*proxi_displ;
 }
 
 void Navigation::stripeCounterUpdate(StripeCounter sc)
