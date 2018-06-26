@@ -24,6 +24,8 @@
 // #include <unistd.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <csignal>
+
 
 #define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
@@ -200,6 +202,21 @@ Logger& System::getLogger()
 {
   System& sys = getSystem();
   return *sys.log_;
+}
+
+
+static void graceFullExit(int x)
+{
+  exit(0);
+}
+
+void System::setExitFunction()
+{
+  static bool signal_set = false;
+  if (signal_set) return;
+
+  std::signal(SIGINT, &graceFullExit);
+  signal_set = true;
 }
 
 }}  // namespace hyped::utils

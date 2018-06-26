@@ -121,17 +121,17 @@ void MPU9250::init()
 
   // calibrateSensors();
 
+  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
+  Thread::sleep(200);
   // Test connection
   while (!whoAmI());
 
-  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
-  Thread::sleep(200);
-  writeByte(kMpuRegUserCtrl, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
-  writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
+  // writeByte(kMpuRegUserCtrl, 0x30);   // set I2C_IF_DIS to disable slave mode I2C bus
+  // writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
+  // writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
   writeByte(kMpuRegConfig, 0x01);
-  writeByte(kGyroConfig, 0x00);
-  writeByte(kAccelConfig, 0x00);
+  // writeByte(kGyroConfig, 0x00);
+  // writeByte(kAccelConfig, 0x00);
   writeByte(kAccelConfig2, 0x01);
   setAcclScale(acc_scale_);
   setGyroScale(gyro_scale_);
@@ -318,26 +318,34 @@ MPU9250::~MPU9250()
   log_.INFO("MPU9250", "Deconstructing sensor object");
 }
 
-void  __attribute__((noinline)) MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
+void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
-    select();
-    spi_.write(write_reg, &write_data, 1);
-    deSelect();
-    // Thread::yield();
-}
-
-void  __attribute__((noinline)) MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
-{
-    select();
-    spi_.read(read_reg | kReadFlag, read_data, 1);
-    deSelect();
-}
-
-void  __attribute__((noinline)) MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)  // NOLINT [whitespace/line_length]
-{
-  select();
-  spi_.read(read_reg | kReadFlag, read_data, length);
+  select(),
+  spi_.write(write_reg, &write_data, 1),
   deSelect();
+}
+
+void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
+{
+  select(),
+  spi_.read(read_reg | kReadFlag, read_data, 1),
+  deSelect();
+}
+
+void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)  // NOLINT [whitespace/line_length]
+{
+  select(),
+  spi_.read(read_reg | kReadFlag, read_data, length),
+  deSelect();
+}
+
+void MPU9250::select()
+{
+  gpio_.clear();
+}
+void  MPU9250::deSelect()
+{
+  gpio_.set();
 }
 
 void MPU9250::getAcclData()
@@ -408,15 +416,6 @@ void MPU9250::setAcclScale(int scale)
       acc_divider_ = 2048;
     break;
   }
-}
-
-void  MPU9250::select()
-{
-  gpio_.clear();
-}
-void  MPU9250::deSelect()
-{
-  gpio_.set();
 }
 
 void MPU9250::getData(Imu* imu)
