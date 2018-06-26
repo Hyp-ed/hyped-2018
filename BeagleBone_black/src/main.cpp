@@ -66,11 +66,11 @@ int main(int argc, char* argv[])
   Thread* communications = new hyped::communications::Main(4, log_cmn);
 
   log_system.INFO("MAIN", "all modules created");
-  // state_machine->start();
-  // motor->start();
+  state_machine->start();
+  motor->start();
   sensors->start();
-  // navigation->start();
-  // communications->start();
+  navigation->start();
+  communications->start();
   log_system.INFO("MAIN", "all module threads started");
   Thread::sleep(1000);
   log_system.INFO("MAIN", "After 1 sec sleep");
@@ -83,10 +83,10 @@ int main(int argc, char* argv[])
     sens = data.getSensorsData();
     for (auto& imu_data : sens.imu.value) {
       auto& acc = imu_data.acc;
-      log_system.INFO("TEST", "Acceleration       (%f %f %f)"
-        , acc[0]
-        , acc[1]
-        , acc[2]);
+      log_system.INFO("TEST", "Acceleration       (%f %f %f)",
+        acc[0],
+        acc[1],
+        acc[2]);
     }
 
     navs = data.getNavigationData();

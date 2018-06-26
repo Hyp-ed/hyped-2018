@@ -205,7 +205,7 @@ Logger& System::getLogger()
 }
 
 
-static void graceFullExit(int x)
+static void gracefulExit(int x)
 {
   exit(0);
 }
@@ -215,7 +215,7 @@ void System::setExitFunction()
   static bool signal_set = false;
   if (signal_set) return;
 
-  std::signal(SIGINT, &graceFullExit);
+  std::signal(SIGINT, &gracefulExit);
   signal_set = true;
 }
 

@@ -126,6 +126,7 @@ void MPU9250::init()
   // Test connection
   while (!whoAmI());
 
+  // TODO(Jack): this seems useless, can it all go away?
   // writeByte(kMpuRegUserCtrl, 0x30);   // set I2C_IF_DIS to disable slave mode I2C bus
   // writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
   // writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
@@ -320,6 +321,8 @@ MPU9250::~MPU9250()
 
 void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
+  // ',' instead of ';' is to inform the compiler not to reorder function calls
+  // chip selects signals must have exact ordering with respect to the spi access
   select(),
   spi_.write(write_reg, &write_data, 1),
   deSelect();
@@ -332,7 +335,7 @@ void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
   deSelect();
 }
 
-void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)  // NOLINT [whitespace/line_length]
+void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 {
   select(),
   spi_.read(read_reg | kReadFlag, read_data, length),
