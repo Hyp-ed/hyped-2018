@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
     wait += 50;
   }
   
-  //controller->enterPreOperational();
+  controller->enterPreOperational();
   RPMvTime.close();
   Temperature.close();
 }
