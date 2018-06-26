@@ -63,7 +63,7 @@ constexpr uint16_t kIdSize      = 5;       // size of id-space of BMS-CAN messag
  * base = kIdBase + (kIdIncrement * id_)
  */
 
-constexpr uint16_t kHPBase      = 0x6B1;    // CAN id for high power BMSHP
+constexpr uint16_t kHPBase      = 0x6B0;    // CAN id for high power BMSHP
 
 struct Data {
   static constexpr uint8_t kTemperatureOffset = 40;

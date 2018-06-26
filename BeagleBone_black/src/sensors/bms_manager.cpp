@@ -26,13 +26,11 @@
 #include "utils/timer.hpp"
 
 namespace hyped {
-
-using data::Batteries;
-
 namespace sensors {
 
-BmsManager::BmsManager(Logger& log, array<Battery, data::Batteries::kNumLPBatteries>* lp_batteries,
-                        array<Battery, data::Batteries::kNumLPBatteries>* hp_batteries)
+BmsManager::BmsManager(Logger& log,
+                       Batteries* lp_batteries,
+                       Batteries* hp_batteries)
     : ManagerInterface(log),
       lp_batteries_(lp_batteries),
       hp_batteries_(hp_batteries)
