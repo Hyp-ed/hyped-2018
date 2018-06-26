@@ -248,7 +248,13 @@ int16_t Main::decelerationTorque(NavigationType velocity)
 
 void Main::servicePropulsion()
 {
-  // TODO(Anyone) Implement service propulsion
+  data::Communications comms_ = data_.getCommunicationsData();
+  // TODO(Anyone) Check that this is a sufficient velocity
+  if (comms_.servicePropulsionGo) {
+    communicator_.sendTargetVelocity(200);
+  } else {
+    communicator_.sendTargetVelocity(0);
+  }
 }
 
 void Main::updateMotorData()
