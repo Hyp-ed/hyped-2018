@@ -228,6 +228,7 @@ class Navigation {
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement
   Differentiator<NavigationType> stripe_differentiator_;  // Stripe cnt distance to velocity
+  Differentiator<Vector<NavigationType, 2>> proxi_differentiator_;
 };
 
 }}  // namespace hyped::navigation

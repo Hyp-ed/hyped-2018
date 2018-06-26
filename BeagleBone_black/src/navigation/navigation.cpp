@@ -258,6 +258,15 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
 
   // Update displacement
   displacement_ = (1 - settings_.prox_displ_w)*displacement_ + settings_.prox_displ_w*proxi_displ;
+
+  // Update velocity
+  DataPoint<Vector<NavigationType, 2>> dp(
+      prev_angular_velocity_.timestamp,  /* IMUs always updated */
+      Vector<NavigationType, 2>({proxi_displ[1], proxi_displ[2]}));
+  auto proxi_vel = proxi_differentiator_.update(dp).value;
+
+  velocity_[1] = (1 - settings_.prox_vel_w)*velocity_[1] + settings_.prox_vel_w*proxi_vel[0];
+  velocity_[2] = (1 - settings_.prox_vel_w)*velocity_[2] + settings_.prox_vel_w*proxi_vel[1];
 }
 
 void Navigation::stripeCounterUpdate(StripeCounter sc)
