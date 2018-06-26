@@ -90,8 +90,8 @@ int main(int argc, char* argv[])
   
   target_v        = 0;
   actual_v        = 0;
-  motor_temp      = 10;
-  controller_temp = 10;
+  motor_temp      = 0;
+  controller_temp = 0;
 
   int acc_iterations = acc_time*20;
   int con_iterations = con_time*20;
