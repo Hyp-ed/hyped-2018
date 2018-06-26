@@ -39,6 +39,11 @@ class System {
   static System& getSystem();
   static Logger& getLogger();
 
+  /**
+   * Register custom signal handler for CTRL+C to make system exit gracefully
+   */
+  static void setExitFunction();
+
   // runtime arguments to configure the whole system
   int8_t verbose;
   int8_t verbose_motor;
