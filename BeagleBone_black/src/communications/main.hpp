@@ -56,6 +56,14 @@ class Main : public Thread {
   int sendTorqueFr(float torquefr);             // CMD15
   int sendTorqueBl(float torquebl);             // CMD16
   int sendTorqueBr(float torquebr);             // CMD17
+  int sendImu1(bool operational);                // CMD18
+  int sendImu2(bool operational);                // CMD19
+  int sendImu3(bool operational);                // CMD20
+  int sendImu4(bool operational);                // CMD21
+  int sendImu5(bool operational);                // CMD22
+  int sendImu6(bool operational);                // CMD23
+  int sendImu7(bool operational);                // CMD24
+  int sendImu8(bool operational);                // CMD25
 
  private:
   int stateCode_;
@@ -67,6 +75,7 @@ class Main : public Thread {
   data::StateMachine stm_;
   data::Batteries bat_;
   data::Communications cmn_data_;
+  data::Sensors sen_;
 };
 
 }}  //  namespace hyped::communications

@@ -138,11 +138,82 @@ int Main::sendTorqueBl(float torquebl)
   return baseCommunicator_->sendData("CMD17" + std::to_string(torquebl) + "\n");
 }
 
+int Main::sendImu1(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD1801\n");
+  } else {
+  return baseCommunicator_->sendData("CMD1800\n");
+  }
+}
+
+int Main::sendImu2(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD1901\n");
+  } else {
+  return baseCommunicator_->sendData("CMD1900\n");
+  }
+}
+
+int Main::sendImu3(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD2001\n");
+  } else {
+  return baseCommunicator_->sendData("CMD2000\n");
+  }
+}
+
+int Main::sendImu4(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD2101\n");
+  } else {
+  return baseCommunicator_->sendData("CMD2100\n");
+  }
+}
+
+int Main::sendImu5(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD2201\n");
+  } else {
+  return baseCommunicator_->sendData("CMD2200\n");
+  }
+}
+
+int Main::sendImu6(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD2301\n");
+  } else {
+  return baseCommunicator_->sendData("CMD2300\n");
+  }
+}
+
+int Main::sendImu7(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD2401\n");
+  } else {
+  return baseCommunicator_->sendData("CMD2400\n");
+  }
+}
+
+int Main::sendImu8(bool operational)
+{
+  if (operational == true) {
+  return baseCommunicator_->sendData("CMD2501\n");
+  } else {
+  return baseCommunicator_->sendData("CMD2500\n");
+  }
+}
+
 void Main::run()
 {
   cmn_data_ = data_.getCommunicationsData();
   cmn_data_.run_length = 1250;
-  cmn_data_.module_status = data::ModuleStatus::kStart;
   data_.setCommunicationsData(cmn_data_);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
@@ -170,6 +241,14 @@ void Main::run()
     sendTorqueFl(mtr_.torque_1);
     sendTorqueBr(mtr_.torque_4);
     sendTorqueBl(mtr_.torque_3);
+    sendImu1(sen_.imu.value[0].operational);
+    sendImu2(sen_.imu.value[1].operational);
+    sendImu3(sen_.imu.value[2].operational);
+    sendImu4(sen_.imu.value[3].operational);
+    sendImu5(sen_.imu.value[4].operational);
+    sendImu6(sen_.imu.value[5].operational);
+    sendImu7(sen_.imu.value[6].operational);
+    sendImu8(sen_.imu.value[7].operational);
   }
 
   receiverThread->join();
