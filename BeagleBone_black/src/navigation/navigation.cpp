@@ -282,10 +282,15 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
   }
 
   stripe_count_ = sc.count.value;
+  DataPoint<NavigationType> dp(sc.count.timestamp, kStripeLocations[stripe_count_]);
 
   // Update x-axis (forwards) displacement
-  displacement_[0] = (1 - settings_.strp_displ_w)*displacement_[0] +
-                     settings_.strp_displ_w*stripe_count_;
+  displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
+                          settings_.strp_displ_w  * dp.value;
+
+  // Update x-axis velocity
+  velocity_[0] = (1 - settings_.strp_vel_w) * velocity_[0] +
+                      settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
 }
 
 }}  // namespace hyped::navigation

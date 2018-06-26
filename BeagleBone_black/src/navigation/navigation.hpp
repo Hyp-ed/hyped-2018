@@ -25,6 +25,7 @@
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
 #include "utils/logger.hpp"
+#include "utils/math/differentiator.hpp"
 #include "utils/math/integrator.hpp"
 #include "utils/math/kalman.hpp"
 #include "utils/math/quaternion.hpp"
@@ -43,6 +44,7 @@ using data::NavigationType;
 using data::NavigationVector;
 using utils::concurrent::Barrier;
 using utils::Logger;
+using utils::math::Differentiator;
 using utils::math::Integrator;
 using utils::math::Kalman;
 using utils::math::Quaternion;
@@ -225,6 +227,7 @@ class Navigation {
 
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement
+  Differentiator<NavigationType> stripe_differentiator_;  // Stripe cnt distance to velocity
 };
 
 }}  // namespace hyped::navigation
