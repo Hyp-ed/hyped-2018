@@ -87,7 +87,9 @@ Controller::Controller(Logger& log, uint8_t id)
     critical_failure_(false),
     actual_velocity_(0),
     actual_torque_(0),
-    sdo_frame_recieved_(false)
+    sdo_frame_recieved_(false),
+    motor_temperature_(0),
+    controller_temperature_(0)
 {
   sdo_message_.id       = kSdoReceive + node_id_;
   sdo_message_.extended = false;
@@ -611,6 +613,48 @@ void Controller::processNewData(utils::io::can::Frame& message)
   }
 }
 
+void Controller::updateMotorTemp()
+{
+  // Check motor temp in object dictionary
+  sdo_message_.data[0]   = kReadObject;
+  sdo_message_.data[1]   = 0x25;
+  sdo_message_.data[2]   = 0x20;
+  sdo_message_.data[3]   = 0x00;
+  sdo_message_.data[4]   = 0x00;
+  sdo_message_.data[5]   = 0x00;
+  sdo_message_.data[6]   = 0x00;
+  sdo_message_.data[7]   = 0x00;
+
+  log_.DBG2("MOTOR", "Controller %d: Reading motor temperature", node_id_);
+  sendSdoMessage(sdo_message_);
+}
+
+void Controller::updateControllerTemp()
+{
+  // Check controller temp in object dictionary
+  sdo_message_.data[0]   = kReadObject;
+  sdo_message_.data[1]   = 0x26;
+  sdo_message_.data[2]   = 0x20;
+  sdo_message_.data[3]   = 0x01;
+  sdo_message_.data[4]   = 0x00;
+  sdo_message_.data[5]   = 0x00;
+  sdo_message_.data[6]   = 0x00;
+  sdo_message_.data[7]   = 0x00;
+
+  log_.DBG2("MOTOR", "Controller %d: Reading controller temperature", node_id_);
+  sendSdoMessage(sdo_message_);
+}
+
+uint8_t Controller::getMotorTemp()
+{
+  return motor_temperature_;
+}
+
+uint8_t Controller::getControllerTemp()
+{
+  return controller_temperature_;
+}
+
 void Controller::sendSdoMessage(utils::io::can::Frame& message)
 {
   sdo_frame_recieved_ = false;
@@ -931,6 +975,16 @@ void Controller::processSdoMessage(utils::io::can::Frame& message)
   if (index_1 == 0x77 && index_2 == 0x60) {
     actual_torque_   = ((int16_t) message.data[5]) << 8 | message.data[4];
     return;
+  }
+
+  // Process motor temperature
+  if (index_1 == 0x25 && index_2 == 0x20) {
+    motor_temperature_ = message.data[4];
+  }
+
+  // Process controller temperature
+  if (index_1 == 0x26 && index_2 == 0x20 && sub_index == 0x01) {
+    controller_temperature_ = message.data[4];
   }
 
   // Process warning message

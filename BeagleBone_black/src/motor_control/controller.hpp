@@ -137,6 +137,22 @@ class Controller : public CanProccesor {
    *  @param[in] { CAN message to be processed }
    */
   void processNewData(utils::io::can::Frame& message) override;
+    /**
+    *  @brief  { Send motor temperature sensor reading request }
+    */
+  void updateMotorTemp();
+  /**
+    *  @brief  { Send controller temperature sensor reading request }
+    */
+  void updateControllerTemp();
+  /**
+    *  @return { Actual temperature of motor }
+    */
+  uint8_t getMotorTemp();
+  /**
+    *  @return { Actual temperature of controller }
+    */
+  uint8_t getControllerTemp();
 
  private:
   /*
@@ -187,6 +203,8 @@ class Controller : public CanProccesor {
   int32_t  actual_velocity_;
   int16_t  actual_torque_;
   bool     sdo_frame_recieved_;
+  uint8_t  motor_temperature_;
+  uint8_t  controller_temperature_;
 };
 
 }}  // namespace hyped::motor_control
