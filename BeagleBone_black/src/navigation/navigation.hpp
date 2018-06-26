@@ -63,6 +63,15 @@ class Navigation {
  public:
   typedef std::array<Imu,        Sensors::kNumImus>          ImuArray;
   typedef std::array<Proximity*, 2*Sensors::kNumProximities> ProximityArray;
+  struct Settings {
+    // TODO(Brano): Change the default values
+    float prox_orient_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in orientation calculation
+    float prox_displ_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in displacement calculation
+    float strp_displ_w = 1.0;  ///< Weight [0,1] of stripe count vs imu in displacement calculation
+    float prox_vel_w = 0.01;  ///< Weight (from [0,1]) of proxi vs imu in velocity calculation
+    float strp_vel_w = 0.0;  ///< Weight [0,1]  of stripe count vs imu in velocity calculation
+  };
+
   friend class Main;
 
   /**
@@ -72,7 +81,9 @@ class Navigation {
    *                                 transition to 'operational' state. It is primarily meant for
    *                                 syncing with motors module.
    */
-  explicit Navigation(Barrier& post_calibration_barrier, Logger& log = System::getLogger());
+  Navigation(Barrier& post_calibration_barrier,
+             Logger& log = System::getLogger(),
+             const Settings& settings = kDefaultSettings);
 
   /**
    * @brief Get the acceleration value
@@ -135,6 +146,7 @@ class Navigation {
   };
 
   static constexpr int kMinNumCalibrationSamples = 200000;
+  static const Settings kDefaultSettings;
   /**
    * @brief Calculates distance to the last stripe, the next stripe and the one after that.
    *
@@ -186,6 +198,7 @@ class Navigation {
   // Admin stuff
   Barrier& post_calibration_barrier_;
   Logger& log_;
+  const Settings settings_;
   ModuleStatus status_;
 
   // Calibration variables

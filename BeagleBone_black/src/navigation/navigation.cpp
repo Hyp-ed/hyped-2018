@@ -24,6 +24,7 @@
 namespace hyped {
 namespace navigation {
 
+const Navigation::Settings Navigation::kDefaultSettings;
 float proxiMean(const Proximity* const a, const Proximity* const b)
 {
   if (a->operational && b->operational)
@@ -35,9 +36,12 @@ float proxiMean(const Proximity* const a, const Proximity* const b)
   return -1;
 }
 
-Navigation::Navigation(Barrier& post_calibration_barrier, Logger& log)
+Navigation::Navigation(Barrier& post_calibration_barrier,
+                       Logger& log,
+                       const Settings& settings)
     : post_calibration_barrier_(post_calibration_barrier),
       log_(log),
+      settings_(settings),
       status_(ModuleStatus::kStart),
       is_calibrating_(false),
       num_gravity_samples_(0),
