@@ -64,15 +64,13 @@ void Main::checkNavigation()
   *  @TODO Check if margin (20m) is appropriate
   */
 
-if ((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length)
-{
-hypedMachine.handleEvent(kCriticalFailure);
-}
+  if ((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length) {
+     hypedMachine.handleEvent(kCriticalFailure);
+  }
 
-if (nav_data_.velocity <= 0.01)
-{
-  hypedMachine.handleEvent(kVelocityZeroReached);
-}
+  if (nav_data_.velocity <= 0.01) {
+    hypedMachine.handleEvent(kVelocityZeroReached);
+  }
 }
 
 void Main::checkCommunications()
