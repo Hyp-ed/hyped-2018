@@ -50,36 +50,38 @@ class Main : public Thread {
   int sendState(State state);                   // CMD09
   int sendHpVoltage(Battery hpBattery);         // CMD10
   int sendHpTemperature(Battery hpBattery);     // CMD11
-  int sendHpVoltage1(Battery hpBattery1);       // CMD12
-  int sendHpTemperature1(Battery hpBattery1);   // CMD13
-  int sendTorqueFl(float torquefl);             // CMD14
-  int sendTorqueFr(float torquefr);             // CMD15
-  int sendTorqueBl(float torquebl);             // CMD16
-  int sendTorqueBr(float torquebr);             // CMD17
-  int sendImu1(bool operational);                // CMD18
-  int sendImu2(bool operational);                // CMD19
-  int sendImu3(bool operational);                // CMD20
-  int sendImu4(bool operational);                // CMD21
-  int sendImu5(bool operational);                // CMD22
-  int sendImu6(bool operational);                // CMD23
-  int sendImu7(bool operational);                // CMD24
-  int sendImu8(bool operational);                // CMD25
-  int sendProxiFront1(bool operational);         // CMD26
-  int sendProxiFront2(bool operational);         // CMD27
-  int sendProxiFront3(bool operational);         // CMD28
-  int sendProxiFront4(bool operational);         // CMD29
-  int sendProxiFront5(bool operational);         // CMD30
-  int sendProxiFront6(bool operational);         // CMD31
-  int sendProxiFront7(bool operational);         // CMD32
-  int sendProxiFront8(bool operational);         // CMD33
-  int sendProxiRear1(bool operational);          // CMD34
-  int sendProxiRear2(bool operational);          // CMD35
-  int sendProxiRear3(bool operational);          // CMD36
-  int sendProxiRear4(bool operational);          // CMD37
-  int sendProxiRear5(bool operational);          // CMD38
-  int sendProxiRear6(bool operational);          // CMD39
-  int sendProxiRear7(bool operational);          // CMD40
-  int sendProxiRear8(bool operational);          // CMD41
+  int sendHpCharge(Battery hpBattery);          // CMD12
+  int sendHpVoltage1(Battery hpBattery1);       // CMD13
+  int sendHpTemperature1(Battery hpBattery1);   // CMD14
+  int sendHpCharge1(Battery hpBattery1);        // CMD15
+  int sendTorqueFl(float torquefl);             // CMD16
+  int sendTorqueFr(float torquefr);             // CMD17
+  int sendTorqueBl(float torquebl);             // CMD18
+  int sendTorqueBr(float torquebr);             // CMD19
+  int sendImu1(bool operational);               // CMD20
+  int sendImu2(bool operational);               // CMD21
+  int sendImu3(bool operational);               // CMD22
+  int sendImu4(bool operational);               // CMD23
+  int sendImu5(bool operational);               // CMD24
+  int sendImu6(bool operational);               // CMD25
+  int sendImu7(bool operational);               // CMD26
+  int sendImu8(bool operational);               // CMD27
+  int sendProxiFront1(bool operational);        // CMD28
+  int sendProxiFront2(bool operational);        // CMD29
+  int sendProxiFront3(bool operational);        // CMD30
+  int sendProxiFront4(bool operational);        // CMD31
+  int sendProxiFront5(bool operational);        // CMD32
+  int sendProxiFront6(bool operational);        // CMD33
+  int sendProxiFront7(bool operational);        // CMD34
+  int sendProxiFront8(bool operational);        // CMD35
+  int sendProxiRear1(bool operational);         // CMD36
+  int sendProxiRear2(bool operational);         // CMD37
+  int sendProxiRear3(bool operational);         // CMD38
+  int sendProxiRear4(bool operational);         // CMD39
+  int sendProxiRear5(bool operational);         // CMD40
+  int sendProxiRear6(bool operational);         // CMD41
+  int sendProxiRear7(bool operational);         // CMD42
+  int sendProxiRear8(bool operational);         // CMD43
 
  private:
   int stateCode_;
