@@ -216,7 +216,7 @@ int Main::sendImu8(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD2701\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD2700\n");
 }
 
@@ -225,7 +225,7 @@ int Main::sendProxiFront1(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD2801\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD2800\n");
 }
 
@@ -252,7 +252,7 @@ int Main::sendProxiFront4(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3101\n");
   }
-   
+
   return baseCommunicator_->sendData("CMD3100\n");
 }
 
@@ -261,7 +261,7 @@ int Main::sendProxiFront5(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3201\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD3200\n");
 }
 
@@ -270,7 +270,7 @@ int Main::sendProxiFront6(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3301\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD3300\n");
 }
 
@@ -279,7 +279,7 @@ int Main::sendProxiFront7(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3401\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD3400\n");
 }
 
@@ -288,7 +288,7 @@ int Main::sendProxiFront8(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3501\n");
   }
-    
+
   return baseCommunicator_->sendData("CMD3500\n");
 }
 
@@ -297,7 +297,7 @@ int Main::sendProxiRear1(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3601\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD3600\n");
 }
 
@@ -306,7 +306,7 @@ int Main::sendProxiRear2(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3701\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD3700\n");
 }
 
@@ -324,7 +324,7 @@ int Main::sendProxiRear4(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD3901\n");
   }
-   
+
   return baseCommunicator_->sendData("CMD3900\n");
 }
 
@@ -333,7 +333,7 @@ int Main::sendProxiRear5(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD4001\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD4000\n");
 }
 
@@ -360,7 +360,7 @@ int Main::sendProxiRear8(bool operational)
   if (operational) {
     return baseCommunicator_->sendData("CMD4301\n");
   }
-  
+
   return baseCommunicator_->sendData("CMD4300\n");
 }
 
