@@ -28,7 +28,7 @@
 #define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
 
 #include <cstdint>
-#include <memory>
+// #include <memory>
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
@@ -58,7 +58,7 @@ class Main: public Thread {
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  Keyence* keyence;
+  std::unique_ptr<Keyence>          keyence;
   std::unique_ptr<ManagerInterface> imu_manager_;
   std::unique_ptr<ManagerInterface> proxi_manager_front_;
   std::unique_ptr<ManagerInterface> proxi_manager_back_;
