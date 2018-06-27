@@ -89,7 +89,6 @@ class Main : public Thread {
   data::Data& data_ = data::Data::getInstance();
   data::Navigation nav_;
   data::Motors mtr_;
-  data::Sensors sns_;
   data::StateMachine stm_;
   data::Batteries bat_;
   data::Communications cmn_data_;
