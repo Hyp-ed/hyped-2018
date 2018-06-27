@@ -109,7 +109,7 @@ class VL6180: public ProxiInterface {
   /**
     *  @brief  Checks the status register and sets the error_status_
     */
-  bool checkStatus();
+  void checkStatus();
 
   Logger& log_;
   bool on_;

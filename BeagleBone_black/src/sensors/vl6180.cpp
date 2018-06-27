@@ -126,6 +126,7 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
+  is_online_ = true;
   log_.DBG("VL6180", "Sensor is on\n");
 }
 
@@ -173,6 +174,7 @@ void VL6180::setContinuousRangingMode()
   uint8_t inter_measurement_time = 1;
   writeByte(kSysrangeIntermeasurementPeriod, inter_measurement_time);
   continuous_mode_ = true;
+  log_.INFO("VL6180", "Sensor is in continuous ranging mode\n");
 }
 
 uint8_t VL6180::continuousRangeDistance()
@@ -180,6 +182,7 @@ uint8_t VL6180::continuousRangeDistance()
   uint8_t data;
   data = 1;
   readByte(kResultRangeVal, &data);   // read the sampled data
+  log_.DBG3("VL6180", "Sensor continuous range: %f\n", data);
   return data;
 }
 
@@ -192,6 +195,7 @@ void VL6180::setSingleShotMode()
     // Write to sensor and set to single shot ranging mode
     writeByte(kSysrangeStart, kModeStartStop | kModeSingleShot);
     continuous_mode_ = false;
+    log_.INFO("VL6180", "Sensor is in single-shot ranging mode\n");
   }
 }
 
@@ -216,6 +220,7 @@ uint8_t VL6180::singleRangeDistance()
 
   writeByte(kSystemInterruptClear, kInterruptClearRanging);
   readByte(kResultRangeVal, &data);
+  log_.DBG3("VL6180", "Sensor single-shot range: %f\n", data);
   return data;
 }
 
@@ -225,14 +230,15 @@ bool VL6180::waitDeviceBooted()
   uint8_t fresh_out_of_reset;
   int send_counter;
 
-  for (send_counter = 0; send_counter < 3; send_counter++) {
+  for (send_counter = 0; send_counter < 10; send_counter++) {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
     if (fresh_out_of_reset == 1) {
+      log_.DBG("VL6180", "Sensor out of reset");
       return true;
-      break;
-      Thread::yield();
     }
+    Thread::yield();
   }
+  log_.DBG("VL6180", "Sensor failed to get of reset");
   is_online_ = false;
   return false;
 }
@@ -242,14 +248,14 @@ bool VL6180::rangeWaitDeviceReady()
   uint8_t data;
   while (true) {
     readByte(kResultRangeStatus, &data);
-    data= data & kRangeDeviceReadyMask;
+    data = data & kRangeDeviceReadyMask;
     if (data)
       return true;
   }
   return false;
 }
 
-bool VL6180::checkStatus()
+void VL6180::checkStatus()
 {
   uint8_t data;
   uint8_t status;
@@ -257,12 +263,8 @@ bool VL6180::checkStatus()
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
 
-  if (status == 0) {
-    error_status_ = false;
-  } else {
-    error_status_ = true;
     // Parse the error
-    switch (status) {
+  switch (status) {
     case 1:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
     break;
@@ -304,9 +306,7 @@ bool VL6180::checkStatus()
     break;
     default:
           log_.ERR("VL6180", "Unidentified error");
-    }
   }
-  return error_status_;
 }
 
 void VL6180::readByte(uint16_t reg_add, uint8_t *data)
