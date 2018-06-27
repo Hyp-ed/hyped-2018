@@ -49,6 +49,14 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   while (1) {
+    data_ = data::Data::getInstance();
+    comms_data_ = data_.getCommunicationsData();
+    nav_data_ = data_.getNavigationData();
+    sm_data_ = data_.getStateMachineData();
+    motor_data_ = data_.getMotorData();
+    batteries_data_ = data_.getBatteriesData();
+    sensors_data_ = data_.getSensorsData();
+
     checkFailure();
     checkCommunications();
     if (sm_data_.current_state != data::kIdle) {
