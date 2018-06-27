@@ -76,6 +76,10 @@ void Main::checkNavigation()
      hypedMachine.handleEvent(kCriticalFailure);
   }
 
+  if ((nav_data_.distance + nav_data_.braking_distance) + 20 >= comms_data_.run_length) {
+     hypedMachine.handleEvent(kMaxDistanceReached);
+  }
+
   if (nav_data_.velocity <= 0.01) {
     hypedMachine.handleEvent(kVelocityZeroReached);
   }
