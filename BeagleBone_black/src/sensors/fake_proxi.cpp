@@ -44,7 +44,7 @@ FakeProxi::FakeProxi(std::string file_path)
   setData();
 }
 
-FakeProxi::FakeProxi(uint8_t value, uint8_t noise)
+FakeProxi::FakeProxi(uint8_t value, double noise)
     : read_file_(false), value_(value), noise_(noise)
 {
   setData();

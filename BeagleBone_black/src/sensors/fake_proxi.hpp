@@ -46,7 +46,7 @@ class FakeProxi : public ProxiInterface {
   /*
    * @brief    A constructor for the fake proximity class by generating random data
    */
-  explicit FakeProxi(uint8_t value, uint8_t noise);
+  explicit FakeProxi(uint8_t value, double noise);
 
   /*
    * @brief    A function to check if the proximity sensor is online
@@ -87,7 +87,7 @@ class FakeProxi : public ProxiInterface {
   bool read_file_;
 
   uint8_t value_;
-  uint8_t noise_;
+  double noise_;
   DataPoint<uint8_t> prev_reading_;
 
   int64_t reading_counter_;
