@@ -109,7 +109,7 @@ struct StripeCounter : public Sensor {
 };
 
 struct Sensors : public Module {
-  static constexpr int kNumImus = 8;
+  static constexpr int kNumImus = 4;
   static constexpr int kNumProximities = 8;
 
   DataPoint<array<Imu, kNumImus>> imu;
@@ -119,8 +119,10 @@ struct Sensors : public Module {
 };
 
 struct Battery {
-  uint16_t  voltage;
-  int8_t    temperature;
+  uint16_t  voltage;      // in mV
+  uint16_t  current;      // in mA
+  uint8_t   charge;       // in % (from 0 to 100)
+  int8_t    temperature;  // in C
 };
 
 struct Batteries : public Module {

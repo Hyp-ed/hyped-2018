@@ -18,42 +18,32 @@
  *    limitations under the License.
  */
 
-
-#include "sensors/mpu9250.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "sensors/bms.hpp"
+#include "data/data.hpp"
 
-using hyped::sensors::MPU9250;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
 
-
+using hyped::data::Battery;
+using hyped::sensors::BMSHP;
 
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-  Logger log(true, 0);
-  MPU9250 mpu9250 = MPU9250(log, 66, 0x08, 0x00);
+  Logger& log = hyped::utils::System::getLogger();
+  BMSHP bms(0x6b1);
 
-  log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
-
-  for (int i=0; i< 100; i++) {
-    mpu9250.getAcclData();
-    log.DBG("TEST-mpu9250", "accelerometer readings x: %f", mpu9250.accel_data_[0]);
-    log.DBG("TEST-mpu9250", "accelerometer readings y: %f", mpu9250.accel_data_[1]);
-    log.DBG("TEST-mpu9250", "accelerometer readings z: %f\n", mpu9250.accel_data_[2]);
-    Thread::sleep(500);
+  Battery b;
+  while (1) {
+    bms.getData(&b);
+    log.INFO("TEST", "volatege, temp, current, charge: %d %d"
+      , b.voltage
+      , b.temperature);
+    Thread::sleep(1000);
   }
 
-  for (int i=0; i< 50; i++) {
-    mpu9250.getGyroData();
-    log.DBG("TEST-mpu9250", "gyroscope readings x: %f", mpu9250.gyro_data_[0]);
-    log.DBG("TEST-mpu9250", "gyroscope readings y: %f", mpu9250.gyro_data_[1]);
-    log.DBG("TEST-mpu9250", "gyroscope readings z: %f\n", mpu9250.gyro_data_[2]);
-    Thread::sleep(500);
-  }
-
-
- 	return 0;
+  return 0;
 }

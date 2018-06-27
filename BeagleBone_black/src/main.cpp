@@ -65,6 +65,7 @@ int main(int argc, char* argv[])
   Thread* navigation = new hyped::navigation::Main(3, log_nav);
   Thread* communications = new hyped::communications::Main(4, log_cmn);
 
+  log_system.INFO("MAIN", "all modules created");
   state_machine->start();
   motor->start();
   sensors->start();
@@ -80,11 +81,13 @@ int main(int argc, char* argv[])
   while (1) {
     // Monitoring
     sens = data.getSensorsData();
-    auto& acc = sens.imu.value[0].acc;
-    log_system.INFO("TEST", "Acceleration       (%f %f %f)"
-      , acc[0]
-      , acc[1]
-      , acc[2]);
+    for (auto& imu_data : sens.imu.value) {
+      auto& acc = imu_data.acc;
+      log_system.INFO("TEST", "Acceleration       (%f %f %f)",
+        acc[0],
+        acc[1],
+        acc[2]);
+    }
 
     navs = data.getNavigationData();
     log_system.INFO("TEST", "Distance, Velocity (%f, %f)\n"
@@ -92,17 +95,16 @@ int main(int argc, char* argv[])
       , navs.velocity);
     Thread::sleep(500);
   }
-  state_machine->join();
-  motor->join();
-  sensors->join();
-  navigation->join();
-  communications->join();
+  // state_machine->join();
+  // motor->join();
+  // sensors->join();
+  // navigation->join();
+  // communications->join();
 
-  delete state_machine;
-  delete sensors;
-  delete motor;
-  delete navigation;
-  delete communications;
-
+  // delete state_machine;
+  // delete sensors;
+  // delete motor;
+  // delete navigation;
+  // delete communications;
   return 0;
 }

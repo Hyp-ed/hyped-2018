@@ -24,10 +24,12 @@
 
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
+#include "utils/logger.hpp"
 #include "utils/math/integrator.hpp"
 #include "utils/math/kalman.hpp"
 #include "utils/math/quaternion.hpp"
 #include "utils/math/vector.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -35,14 +37,17 @@ using data::DataPoint;
 using data::Imu;
 using data::Proximity;
 using data::Sensors;
+using data::StripeCounter;
 using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
 using utils::concurrent::Barrier;
+using utils::Logger;
 using utils::math::Integrator;
 using utils::math::Kalman;
 using utils::math::Quaternion;
 using utils::math::Vector;
+using utils::System;
 
 namespace navigation {
 
@@ -67,7 +72,7 @@ class Navigation {
    *                                 transition to 'operational' state. It is primarily meant for
    *                                 syncing with motors module.
    */
-  explicit Navigation(Barrier& post_calibration_barrier);
+  explicit Navigation(Barrier& post_calibration_barrier, Logger& log = System::getLogger());
 
   /**
    * @brief Get the acceleration value
@@ -158,30 +163,29 @@ class Navigation {
    *        IMU and stripe counter have been updated but there is no update from proximity sensors.
    *
    * @param imus         Datapoint of an array of IMU readings
-   * @param stripe_count Stripe counter reading
+   * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus, DataPoint<uint32_t> stripe_count);
+  void update(DataPoint<ImuArray> imus, StripeCounter sc);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
    *
    * @param imus         Datapoint of an array of IMU readings
    * @param[in] proxis   Array of proximity readings
-   * @param stripe_count Stripe counter reading
+   * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus,
-              ProximityArray proxis,
-              DataPoint<uint32_t> stripe_count);
+  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc);
 
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
-  void stripeCounterUpdate(uint16_t count);  // Point number 7
+  void stripeCounterUpdate(StripeCounter sc);  // Point number 7
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
+  Logger& log_;
   ModuleStatus status_;
 
   // Calibration variables

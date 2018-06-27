@@ -110,6 +110,9 @@ SPI::SPI(Logger& log)
   if (ioctl(spi_fd_, SPI_IOC_WR_LSB_FIRST, &order) < 0) {
     log_.ERR("SPI", "could not set bit order");
   }
+
+  System::setExitFunction();
+  log_.INFO("SPI", "spi instance created, exit function registered with the system");
 }
 
 void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)
