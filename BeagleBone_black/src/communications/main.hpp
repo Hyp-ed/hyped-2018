@@ -42,46 +42,47 @@ class Main : public Thread {
   int sendDistance(NavigationType distance);    // CMD01
   int sendVelocity(NavigationType speed);       // CMD02
   int sendAcceleration(NavigationType accel);   // CMD03
-  int sendStripeCount(int stripes);             // CMD04
-  int sendRpmFl(float rpmfl);                   // CMD05
-  int sendRpmFr(float rpmfr);                   // CMD06
-  int sendRpmBl(float rpmBl);                   // CMD07
-  int sendRpmBr(float rpmBr);                   // CMD08
-  int sendState(State state);                   // CMD09
-  int sendHpVoltage(Battery hpBattery);         // CMD10
-  int sendHpTemperature(Battery hpBattery);     // CMD11
-  int sendHpCharge(Battery hpBattery);          // CMD12
-  int sendHpVoltage1(Battery hpBattery1);       // CMD13
-  int sendHpTemperature1(Battery hpBattery1);   // CMD14
-  int sendHpCharge1(Battery hpBattery1);        // CMD15
-  int sendTorqueFl(float torquefl);             // CMD16
-  int sendTorqueFr(float torquefr);             // CMD17
-  int sendTorqueBl(float torquebl);             // CMD18
-  int sendTorqueBr(float torquebr);             // CMD19
-  int sendImu1(bool operational);               // CMD20
-  int sendImu2(bool operational);               // CMD21
-  int sendImu3(bool operational);               // CMD22
-  int sendImu4(bool operational);               // CMD23
-  int sendImu5(bool operational);               // CMD24
-  int sendImu6(bool operational);               // CMD25
-  int sendImu7(bool operational);               // CMD26
-  int sendImu8(bool operational);               // CMD27
-  int sendProxiFront1(bool operational);        // CMD28
-  int sendProxiFront2(bool operational);        // CMD29
-  int sendProxiFront3(bool operational);        // CMD30
-  int sendProxiFront4(bool operational);        // CMD31
-  int sendProxiFront5(bool operational);        // CMD32
-  int sendProxiFront6(bool operational);        // CMD33
-  int sendProxiFront7(bool operational);        // CMD34
-  int sendProxiFront8(bool operational);        // CMD35
-  int sendProxiRear1(bool operational);         // CMD36
-  int sendProxiRear2(bool operational);         // CMD37
-  int sendProxiRear3(bool operational);         // CMD38
-  int sendProxiRear4(bool operational);         // CMD39
-  int sendProxiRear5(bool operational);         // CMD40
-  int sendProxiRear6(bool operational);         // CMD41
-  int sendProxiRear7(bool operational);         // CMD42
-  int sendProxiRear8(bool operational);         // CMD43
+  int sendRpmFl(float rpmfl);                   // CMD04
+  int sendRpmFr(float rpmfr);                   // CMD05
+  int sendRpmBl(float rpmBl);                   // CMD06
+  int sendRpmBr(float rpmBr);                   // CMD07
+  int sendState(State state);                   // CMD08
+  int sendHpVoltage(Battery hpBattery);         // CMD09
+  int sendHpTemperature(Battery hpBattery);     // CMD10
+  int sendHpCharge(Battery hpBattery);          // CMD11
+  int sendHpVoltage1(Battery hpBattery1);       // CMD12
+  int sendHpTemperature1(Battery hpBattery1);   // CMD13
+  int sendHpCharge1(Battery hpBattery1);        // CMD14
+  int sendLpCharge(Battery lpBattery);          // CMD15
+  int sendLpCharge1(Battery lpBattery1);        // CMD16
+  int sendTorqueFl(float torquefl);             // CMD17
+  int sendTorqueFr(float torquefr);             // CMD18
+  int sendTorqueBl(float torquebl);             // CMD19
+  int sendTorqueBr(float torquebr);             // CMD20
+  int sendImu1(bool operational);               // CMD21
+  int sendImu2(bool operational);               // CMD22
+  int sendImu3(bool operational);               // CMD23
+  int sendImu4(bool operational);               // CMD24
+  int sendImu5(bool operational);               // CMD25
+  int sendImu6(bool operational);               // CMD26
+  int sendImu7(bool operational);               // CMD27
+  int sendImu8(bool operational);               // CMD28
+  int sendProxiFront1(bool operational);        // CMD29
+  int sendProxiFront2(bool operational);        // CMD30
+  int sendProxiFront3(bool operational);        // CMD31
+  int sendProxiFront4(bool operational);        // CMD32
+  int sendProxiFront5(bool operational);        // CMD33
+  int sendProxiFront6(bool operational);        // CMD34
+  int sendProxiFront7(bool operational);        // CMD35
+  int sendProxiFront8(bool operational);        // CMD36
+  int sendProxiRear1(bool operational);         // CMD37
+  int sendProxiRear2(bool operational);         // CMD38
+  int sendProxiRear3(bool operational);         // CMD39
+  int sendProxiRear4(bool operational);         // CMD40
+  int sendProxiRear5(bool operational);         // CMD41
+  int sendProxiRear6(bool operational);         // CMD42
+  int sendProxiRear7(bool operational);         // CMD43
+  int sendProxiRear8(bool operational);         // CMD44
 
  private:
   int stateCode_;
@@ -89,7 +90,6 @@ class Main : public Thread {
   data::Data& data_ = data::Data::getInstance();
   data::Navigation nav_;
   data::Motors mtr_;
-  data::Sensors sns_;
   data::StateMachine stm_;
   data::Batteries bat_;
   data::Communications cmn_data_;

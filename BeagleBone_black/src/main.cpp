@@ -95,16 +95,16 @@ int main(int argc, char* argv[])
       , navs.velocity);
     Thread::sleep(500);
   }
-  // state_machine->join();
-  // motor->join();
-  // sensors->join();
-  // navigation->join();
-  // communications->join();
+  state_machine->join();
+  motor->join();
+  sensors->join();
+  navigation->join();
+  communications->join();
 
-  // delete state_machine;
-  // delete sensors;
-  // delete motor;
-  // delete navigation;
-  // delete communications;
+  delete state_machine;
+  delete sensors;
+  delete motor;
+  delete navigation;
+  delete communications;
   return 0;
 }
