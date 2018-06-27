@@ -59,17 +59,17 @@ int main(int argc, char* argv[])
   log_system.DBG2("MAIN", "DBG2");
   log_system.DBG3("MAIN", "DBG3");
 
-  Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
-  Thread* motor     = new hyped::motor_control::Main(1, log_motor);
-  Thread* sensors   = new hyped::sensors::Main(2, log_sensor);
-  Thread* navigation = new hyped::navigation::Main(3, log_nav);
+  // Thread* state_machine   = new hyped::state_machine::Main(0, log_state);
+  // Thread* motor     = new hyped::motor_control::Main(1, log_motor);
+  // Thread* sensors   = new hyped::sensors::Main(2, log_sensor);
+  // Thread* navigation = new hyped::navigation::Main(3, log_nav);
   Thread* communications = new hyped::communications::Main(4, log_cmn);
 
   log_system.INFO("MAIN", "all modules created");
-  state_machine->start();
-  motor->start();
-  sensors->start();
-  navigation->start();
+  // state_machine->start();
+  // motor->start();
+  // sensors->start();
+  // navigation->start();
   communications->start();
   log_system.INFO("MAIN", "all module threads started");
   Thread::sleep(1000);
@@ -99,12 +99,12 @@ int main(int argc, char* argv[])
   // motor->join();
   // sensors->join();
   // navigation->join();
-  // communications->join();
+  communications->join();
 
   // delete state_machine;
   // delete sensors;
   // delete motor;
   // delete navigation;
-  // delete communications;
+  delete communications;
   return 0;
 }
