@@ -381,7 +381,7 @@ void Main::run()
   while (1) {
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
-    sns_ = data_.getSensorsData();
+    sen_ = data_.getSensorsData();
     stm_ = data_.getStateMachineData();
     bat_ = data_.getBatteriesData();
     sendDistance(nav_.distance);
