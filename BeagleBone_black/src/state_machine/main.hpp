@@ -47,11 +47,15 @@ class Main: public Thread {
   void checkNavigation();
   void checkCommunications();
   void checkReady();
-
+  void checkFailure();
+  void checkInit();
   data::Data& data_;
-  data::Communications comms_data;
-  data::Navigation nav_data;
-  data::StateMachine sm_data;
+  data::Communications comms_data_;
+  data::Navigation nav_data_;
+  data::StateMachine sm_data_;
+  data::Motors motor_data_;
+  data::Batteries batteries_data_;
+  data::Sensors sensors_data_;
 };
 
 }}  // namespace hyped::motor_control

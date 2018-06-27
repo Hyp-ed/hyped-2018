@@ -23,12 +23,14 @@
 
 #include "motor_control/communicator.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "utils/concurrent/barrier.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
 
 using data::NavigationType;
 using utils::concurrent::Thread;
+using utils::concurrent::Barrier;
 using utils::Logger;
 
 namespace motor_control {
@@ -46,7 +48,11 @@ class Main: public Thread {
   /**
     *  @brief  { Establish CAN connections with motor controllers }
     */
-  void setupMotors();
+  void initMotors();
+  /**
+    *  @brief  { Set motors into operational state }
+    */
+  void prepareMotors();
   /**
     *  @brief  { Enter controllers into pre operational state if config error occurs }
     */
@@ -95,16 +101,35 @@ class Main: public Thread {
     *  @return  { 16 bit integer - target torque }
     */
   int16_t decelerationTorque(NavigationType velocity);
+  /**
+    *  @brief  { Continously listen for Go/Stop Comms commands to slowly move pod }
+    */
+  void servicePropulsion();
+  /**
+    *  @brief  { Updates the data structure with the velocity and torque of the motors }
+    */
+  void updateMotorData();
+  /**
+    *  @brief  { Updates the data structure motor failure has occured }
+    */
+  void updateMotorFailure();
+
   data::Data& data_;
   data::StateMachine state_;
+  data::Motors motor_data_;
+  Barrier post_calibration_barrier_;
   Communicator communicator_;
   int32_t target_velocity_;
   int16_t target_torque_;
-  bool motors_set_up_;
+  bool run_;
+  bool nav_calib_;
+  bool motors_init_;
+  bool motors_ready_;
   bool motors_operational_;
   bool motor_failure_;
-  bool run_;
   bool all_motors_stopped_;
+  MotorVelocity motor_velocity_;
+  MotorTorque motor_torque_;
 };
 
 }}  // namespace hyped::motor_control

@@ -19,133 +19,234 @@
  */
 
 #include <random>
+#include <vector>
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <stdexcept>
+#include <iostream>
 
 #include "data/data.hpp"
 #include "data/data_point.hpp"
 #include "sensors/fake_imu.hpp"
+#include "utils/timer.hpp"
 
-using std::chrono::duration;
-using std::chrono::duration_cast;
 
 namespace hyped {
 namespace sensors {
 
-FakeImu::FakeImu(std::string acc_file_path, std::string gyr_file_path)
-    : pt_acc(0), pt_gyr(0)
+FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
+                                         std::string acc_file_path,
+                                         std::string gyr_file_path)
+    : log_(log),
+      acc_val_(0),
+      gyr_val_(0),
+      acc_noise_(1),
+      gyr_noise_(1),
+      acc_file_path_(acc_file_path),
+      gyr_file_path_(gyr_file_path),
+      is_started_(false)
+
 {
-  read_file = true;
-  readDataFromFile(acc_file_path, gyr_file_path);
-  setData();
+  read_file_ = true;
+  readDataFromFile(acc_file_path_, gyr_file_path_);
 }
 
-FakeImu::FakeImu(NavigationVector acc_val, NavigationType acc_noise,
-                 NavigationVector gyr_val, NavigationType gyr_noise)
-    : acc_val(acc_val), gyr_val(gyr_val),
-      acc_noise(acc_noise), gyr_noise(gyr_noise)
+void FakeImuAccelerating::start()
 {
-  read_file = false;
-  setData();
+  imu_ref_time_ = utils::Timer::getTimeMicros();
+  acc_count_ = gyr_count_ = 0;
 }
 
-void FakeImu::setData()
+void FakeImuAccelerating::getData(Imu* imu)
 {
-  imu_ref_time = high_resolution_clock::now();
-  acc_count = gyr_count = 0;
-}
-
-void FakeImu::getData(Imu* imu)
-{
-  if (read_file == true) {
-    if (accCheckTime()) {
-      prev_acc = acc_val_read[pt_acc];
-      pt_acc++;
-      pt_acc = std::min(pt_acc, unsigned(acc_val_read.size()-1));
+  if (!is_started_) {
+    is_started_ = true;
+    start();
+  }
+  if (accCheckTime()) {
+    acc_count_ = std::min(acc_count_/kAccTimeInterval, (int64_t) acc_val_read_.size());
+    // Check so you don't go out of bounds
+    if (acc_count_ == (int64_t) acc_val_read_.size()) {
+      prev_acc_ = acc_val_read_[acc_count_-1];
+    } else {
+      prev_acc_ = acc_val_read_[acc_count_];
     }
-
-    if (gyrCheckTime()) {
-      prev_gyr = gyr_val_read[pt_gyr];
-      pt_gyr++;
-      pt_gyr = std::min(pt_gyr, unsigned(gyr_val_read.size()-1));
-    }
-  } else {
-    if (accCheckTime())
-      prev_acc = DataPoint<NavigationVector>(kAccTimeInterval*(acc_count-1),
-                                                addNoiseToData(acc_val, acc_noise));
-
-    if (gyrCheckTime())
-      prev_gyr = DataPoint<NavigationVector>(kGyrTimeInterval*(gyr_count-1),
-                                                addNoiseToData(gyr_val, gyr_noise));
   }
 
-  imu->acc = prev_acc;
-  imu->gyr = prev_gyr;
+  if (gyrCheckTime()) {
+    gyr_count_ = std::min(gyr_count_/kGyrTimeInterval, (int64_t) gyr_val_read_.size());
+    // Check so you don't go out of bounds
+    if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
+      prev_gyr_ = gyr_val_read_[gyr_count_-1];
+    } else {
+      prev_gyr_ = gyr_val_read_[gyr_count_];
+    }
+  }
+  imu->acc = prev_acc_;
+  imu->gyr = prev_gyr_;
 }
 
-NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationType noise)
+NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
-  std::default_random_engine generator;
+  static std::default_random_engine generator;
 
   for (int i = 0; i < 3; i++) {
-    std::normal_distribution<NavigationType> distribution(value[i], noise);
+    std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
     temp[i] = distribution(generator);
   }
-
   return temp;
 }
 
-void FakeImu::readDataFromFile(std::string acc_file_path, std::string gyr_file_path)
+void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::string gyr_file_path)
 {
-  std::ifstream file;
-  uint32_t timestamp;
-  NavigationVector temp;
+  for (int i = 0; i < 2; i++) {
+    std::string file_path;
+    uint32_t timestamp;
+    std::vector<NavigationVector>* val_read;
 
-  file.open(acc_file_path);
+    if (i == 0) {
+      file_path = acc_file_path;
+      timestamp = kAccTimeInterval;
+      val_read  = &acc_val_read_;
+    } else {
+      file_path = gyr_file_path;
+      timestamp = kGyrTimeInterval;
+      val_read  = &gyr_val_read_;
+    }
 
-  file >> acc_noise;
-  while (file.is_open() && !file.eof()) {
-    file >> timestamp >> temp[0] >> temp[1] >> temp[2];
-    acc_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(temp, acc_noise)));
-  }
+    std::ifstream file;
+    file.open(file_path);
+    if (!file.is_open()) {
+      log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
+    }
 
-  if (file.is_open())
+    NavigationVector value, noise;
+    double temp_value[10];
+    int counter = 0;
+    uint32_t temp_time;
+    std::string line;
+
+    while (getline(file, line)) {
+      std::stringstream input(line);
+      input >> temp_time;
+
+      if (temp_time != timestamp*counter) {
+        throw std::invalid_argument("Timestamp format invalid");
+      }
+
+      int value_counter = 0;
+      while (input >> temp_value[value_counter] && value_counter < 10) {
+        value_counter++;
+      }
+
+      if (value_counter != 6) {
+        log_.ERR("Fake-IMU", "Incomplete values for the argument timestamp: %d", temp_time);
+      }
+
+      for (int i = 0; i < 3; i++)
+        value[i] = temp_value[i];
+      for (int i = 0; i < 3; i++)
+        noise[i] = temp_value[i+3];
+
+      val_read->push_back(addNoiseToData(value, noise));
+
+      counter++;
+    }
+
     file.close();
-
-  file.open(gyr_file_path);
-  file >> gyr_noise;
-  while (file.is_open() && !file.eof()) {
-    file >> timestamp >> temp[0] >> temp[1] >> temp[2];
-    gyr_val_read.push_back(DataPoint<NavigationVector>(timestamp, addNoiseToData(temp, gyr_noise)));
   }
 }
 
-bool FakeImu::accCheckTime()
+bool FakeImuAccelerating::accCheckTime()
 {
-    high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
+  uint64_t now = utils::Timer::getTimeMicros();
+  uint64_t time_span = now - imu_ref_time_;
 
-    if (time_span.count() < 0.000250*acc_count) {
-        return false;
-    }
-
-    acc_count++;
-    return true;
+  if (time_span < kAccTimeInterval*acc_count_) {
+    return false;
+  }
+  acc_count_ = time_span/kAccTimeInterval + 1;
+  return true;
 }
 
-bool FakeImu::gyrCheckTime()
+bool FakeImuAccelerating::gyrCheckTime()
 {
-    high_resolution_clock::time_point now = high_resolution_clock::now();
-    duration<double> time_span = duration_cast<duration<double>>(now - imu_ref_time);
+  uint64_t now = utils::Timer::getTimeMicros();
+  uint64_t time_span = now - imu_ref_time_;
 
-    if (time_span.count() < 0.000125*gyr_count) {
-        return false;
-    }
+  if (time_span < kGyrTimeInterval*gyr_count_) {
+    return false;
+  }
 
-    gyr_count++;
-    return true;
+  gyr_count_ = time_span/kGyrTimeInterval + 1;
+  return true;
+}
+
+FakeImuStationary::FakeImuStationary(utils::Logger& log,
+                                     NavigationVector acc_val,
+                                     NavigationVector acc_noise,
+                                     NavigationVector gyr_val,
+                                     NavigationVector gyr_noise)
+    : log_(log),
+      acc_val_(acc_val),
+      gyr_val_(gyr_val),
+      acc_noise_(acc_noise),
+      gyr_noise_(gyr_noise)
+{
+  imu_ref_time_ = utils::Timer::getTimeMicros();
+  acc_count_ = gyr_count_ = 0;
+}
+
+void FakeImuStationary::getData(Imu* imu)
+{
+  if (accCheckTime()) {
+    prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
+  }
+  if (gyrCheckTime()) {
+    prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
+  }
+  imu->acc = prev_acc_;
+  imu->gyr = prev_gyr_;
+}
+
+NavigationVector FakeImuStationary::addNoiseToData(NavigationVector value, NavigationVector noise)
+{
+  NavigationVector temp;
+  static std::default_random_engine generator;
+
+  for (int i = 0; i < 3; i++) {
+    std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
+    temp[i] = distribution(generator);
+  }
+  return temp;
+}
+
+bool FakeImuStationary::accCheckTime()
+{
+  uint64_t now = utils::Timer::getTimeMicros();
+  uint64_t time_span = now - imu_ref_time_;
+
+  if (time_span < kAccTimeInterval*acc_count_) {
+    return false;
+  }
+  acc_count_ = time_span/kAccTimeInterval + 1;
+  return true;
+}
+
+bool FakeImuStationary::gyrCheckTime()
+{
+  uint64_t now = utils::Timer::getTimeMicros();
+  uint64_t time_span = now - imu_ref_time_;
+
+  if (time_span < kGyrTimeInterval*gyr_count_) {
+    return false;
+  }
+
+  gyr_count_ = time_span/kGyrTimeInterval + 1;
+  return true;
 }
 
 }}  // namespace hyped::sensors

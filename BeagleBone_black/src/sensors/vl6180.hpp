@@ -37,7 +37,7 @@ class VL6180: public ProxiInterface {
   VL6180(uint8_t i2c_addr, Logger& log);
   ~VL6180();
 
-  bool isOnline() override { return false; }   // TODO(anyone): rethink this
+  bool isOnline() override;
   void getData(Proximity* proxi) override {
     proxi->val = getDistance();
   }
@@ -56,6 +56,8 @@ class VL6180: public ProxiInterface {
     *  @brief  Sets the the ranging mode to single shot
     */
   void setSingleShotMode();
+
+  void setAddress(uint8_t i2c_addr);
 
  private:
   /**

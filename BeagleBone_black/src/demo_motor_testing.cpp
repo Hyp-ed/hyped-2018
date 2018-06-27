@@ -22,6 +22,9 @@
 
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include <iostream>
+#include <fstream>
+using namespace std;
 
 using hyped::utils::Logger;
 using hyped::utils::System;
@@ -40,9 +43,26 @@ int main(int argc, char* argv[])
   Logger log(true, 1);
   Controller* controller = new Controller(log,1);
 
+  ofstream myfile;
+  myfile.open ("RPMvTime.txt");
+  myfile << "RPM\tTime\n";
+
   controller->registerController();
   controller->configure();
-  Thread::sleep(2000);
   controller->enterOperational();
-  Thread::sleep(10000);
+  int32_t target_v = 0;
+  int32_t actual_v = 0;
+  for (int i = 0; i < 250; i++) {
+    if (i < 170) {
+      controller->sendTargetVelocity(target_v);
+      target_v += 41;
+    } else {
+      controller->quickStop();
+    }
+    controller->updateActualVelocity();
+    actual_v = controller->getVelocity();
+    myfile << actual_v<<"\t"<<i<<"\n";
+    Thread::sleep(100);
+  }
+  myfile.close();
 }

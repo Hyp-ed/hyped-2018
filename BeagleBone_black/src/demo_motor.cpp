@@ -44,14 +44,16 @@ int main(int argc, char* argv[])
   Thread* motor  = new hyped::motor_control::Main(1, log);
   motor->start();
 
+  Thread::sleep(5000);
+  hypedMachine->handleEvent(state_machine::Event::kInitialised);
+  Thread::sleep(5000);
+  hypedMachine->handleEvent(state_machine::Event::kSystemsChecked);
   hypedMachine->handleEvent(state_machine::Event::kOnStart);
-  Thread::sleep(3000);
+  Thread::sleep(10000);
   hypedMachine->handleEvent(state_machine::Event::kMaxDistanceReached);
-  Thread::sleep(250);
-  hypedMachine->handleEvent(state_machine::Event::kCriticalFailure);
-  Thread::sleep(50);
+  Thread::sleep(5000);
   hypedMachine->handleEvent(state_machine::Event::kVelocityZeroReached);
-  Thread::sleep(100);
+  hypedMachine->handleEvent(state_machine::Event::kOnExit);
 
   motor->join();
 

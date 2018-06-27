@@ -25,13 +25,13 @@ namespace hyped {
 namespace state_machine {
 
 enum Event {
+  kInitialised,
   kSystemsChecked,
   kOnStart,
   kCriticalFailure,
   kMaxDistanceReached,
-  kEndOfRunReached,
   kOnExit,
-  kEndOfTubeReached,
+  kFinish,
   kVelocityZeroReached
 };
 

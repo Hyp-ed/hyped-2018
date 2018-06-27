@@ -92,8 +92,9 @@ void I2C::read(uint32_t addr, uint8_t* rx, uint16_t len)
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::readHelper(fd_, rx, len);
-  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected",
-                           ret, len);
+  // TOD(anyone): do better error handling, return error status and use it
+  // if (ret != len) log_.ERR("I2C", "Incorrect number of bytes read: %d actual vs %d expected",
+  //                          ret, len);
 }
 
 void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
@@ -103,8 +104,14 @@ void I2C::write(uint32_t addr, uint8_t* tx, uint16_t len)
   if (sensor_addr_ != addr) setSensorAddress(addr);
 
   int ret = i2c::writeHelper(fd_, tx, len);
-  if (ret != len) log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected",
-                           ret, len);
+  // TOD(anyone): do better error handling, return error status and use it
+  // if (ret != len) log_.ERR("I2C", "Incorrect number of bytes written: %d actual vs %d expected",
+  //                          ret, len);
+}
+
+void I2C::write(uint32_t addr, uint8_t tx)
+{
+  write(addr, &tx, 1);
 }
 
 }}}   // namespace hyped::utils::io

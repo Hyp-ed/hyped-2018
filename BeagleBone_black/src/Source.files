@@ -13,10 +13,15 @@ SRCS := \
   navigation/navigation.cpp \
   sensors/main.cpp \
   sensors/bms.cpp \
+  sensors/can_proxi.cpp \
   sensors/vl6180.cpp \
   sensors/mpu9250.cpp \
+  sensors/imu_manager.cpp \
+  sensors/proxi_manager.cpp \
+  sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
   sensors/fake_proxi.cpp \
+  sensors/keyence.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
@@ -49,3 +54,4 @@ MAINS := \
   demo_statistics\
   demo_can \
   demo_mpu9250 \
+  demo_fake_imu \

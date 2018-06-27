@@ -25,7 +25,6 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
-#include "utils/timer.hpp"
 
 // Accelerometer addresses
 constexpr uint8_t kAccelXoutH               = 0x3B;
@@ -105,8 +104,6 @@ using utils::concurrent::Thread;
 
 namespace sensors {
 
-const uint64_t MPU9250::time_start = utils::Timer::getTimeMicros();
-
 MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale)
     : log_(log),
     gpio_(pin, kDirection, log),
@@ -122,19 +119,20 @@ void MPU9250::init()
   // Set pin high
   gpio_.set();
 
-  calibrateSensors();
-
-  // Test connection
-  while (!whoAmI());
+  // calibrateSensors();
 
   writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
   Thread::sleep(200);
-  writeByte(kMpuRegUserCtrl, 0x20);   // set I2C_IF_DIS to disable slave mode I2C bus
-  writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
-  writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
+  // Test connection
+  while (!whoAmI());
+
+  // TODO(Jack): this seems useless, can it all go away?
+  // writeByte(kMpuRegUserCtrl, 0x30);   // set I2C_IF_DIS to disable slave mode I2C bus
+  // writeByte(kMpuRegPwrMgmt1, 0x01);          // Clock Source
+  // writeByte(kMpuRegPwrMgmt2, 0x00);          // Enable Acc & Gyro
   writeByte(kMpuRegConfig, 0x01);
-  writeByte(kGyroConfig, 0x00);
-  writeByte(kAccelConfig, 0x00);
+  // writeByte(kGyroConfig, 0x00);
+  // writeByte(kAccelConfig, 0x00);
   writeByte(kAccelConfig2, 0x01);
   setAcclScale(acc_scale_);
   setGyroScale(gyro_scale_);
@@ -323,25 +321,34 @@ MPU9250::~MPU9250()
 
 void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
-    select();
-    spi_.write(write_reg, &write_data, 1);
-    deSelect();
+  // ',' instead of ';' is to inform the compiler not to reorder function calls
+  // chip selects signals must have exact ordering with respect to the spi access
+  select(),
+  spi_.write(write_reg, &write_data, 1),
+  deSelect();
 }
 
 void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
-    select();
-    spi_.read(read_reg | kReadFlag, read_data, 1);
-    deSelect();
+  select(),
+  spi_.read(read_reg | kReadFlag, read_data, 1),
+  deSelect();
 }
 
-// TODO(jack) put into one read as a buffer
 void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 {
-  int i;
-  for (i = 0; i < length; i++) {
-    readByte(read_reg + i, &read_data[i]);
-  }
+  select(),
+  spi_.read(read_reg | kReadFlag, read_data, length),
+  deSelect();
+}
+
+void MPU9250::select()
+{
+  gpio_.clear();
+}
+void  MPU9250::deSelect()
+{
+  gpio_.set();
 }
 
 void MPU9250::getAcclData()
@@ -414,31 +421,18 @@ void MPU9250::setAcclScale(int scale)
   }
 }
 
-void MPU9250::select()
-{
-  gpio_.clear();
-}
-void MPU9250::deSelect()
-{
-  gpio_.set();
-}
-
 void MPU9250::getData(Imu* imu)
 {
   getGyroData();
   getAcclData();
-  auto& acc = imu->acc.value;
-  auto& gyr = imu->gyr.value;
+  auto& acc = imu->acc;
+  auto& gyr = imu->gyr;
   acc[0] = accel_data_[0];
   acc[1] = accel_data_[1];
   acc[2] = accel_data_[2];
   gyr[0] = gyro_data_[0];
   gyr[1] = gyro_data_[1];
   gyr[2] = gyro_data_[2];
-
-  uint32_t time = utils::Timer::getTimeMillis() - (time_start/1000);
-  imu->acc.timestamp = time;
-  imu->gyr.timestamp = time;
 }
 
 }}   // namespace hyped::sensors

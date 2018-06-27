@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien
+ * Author: Martin Kristien and Jack Horsburgh
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -28,10 +28,13 @@
 #define BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_
 
 #include <cstdint>
+// #include <memory>
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/keyence.hpp"
 #include "sensors/interface.hpp"
+#include "sensors/manager_interface.hpp"
 
 namespace hyped {
 
@@ -41,7 +44,7 @@ using utils::Logger;
 namespace sensors {
 
 class CANProxi;
-
+class Keyence;
 class Main: public Thread {
  public:
   explicit Main(uint8_t id, Logger& log);
@@ -53,16 +56,15 @@ class Main: public Thread {
   // master data structures
   data::Sensors   sensors_;
   data::Batteries batteries_;
+  data::StripeCounter stripe_counter_;
 
-  // batteries
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries];
-
-  // nav sensors
-  ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  ProxiInterface* can_proxi_[data::Sensors::kNumProximities];
-
-  uint8_t         chip_select_[data::Sensors::kNumImus];
-  ImuInterface*   imu_[data::Sensors::kNumImus];
+  std::unique_ptr<Keyence>          keyence;
+  std::unique_ptr<ManagerInterface> imu_manager_;
+  std::unique_ptr<ManagerInterface> proxi_manager_front_;
+  std::unique_ptr<ManagerInterface> proxi_manager_back_;
+  std::unique_ptr<ManagerInterface> battery_manager_lp_;
+  bool sensor_init_;
+  bool battery_init_;
 };
 
 }}  // namespace hyped::sensors

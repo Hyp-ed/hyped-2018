@@ -17,24 +17,52 @@
  */
 
 #include "navigation.hpp"
-#include <math.h>
+
+#include <algorithm>  // std::min
+#include <cmath>
 
 namespace hyped {
 namespace navigation {
 
-Navigation::Navigation() : prev_angular_velocity_(0 , NavigationVector())
+float proxiMean(const Proximity* const a, const Proximity* const b)
+{
+  if (a->operational && b->operational)
+    return static_cast<float>(a->val + b->val)/2.0;
+  if (a->operational)
+    return a->val;
+  if (b->operational)
+    return b->val;
+  return -1;
+}
+
+Navigation::Navigation(Barrier& post_calibration_barrier, Logger& log)
+    : post_calibration_barrier_(post_calibration_barrier),
+      log_(log),
+      status_(ModuleStatus::kStart),
+      is_calibrating_(false),
+      num_gravity_samples_(0),
+      g_(0),
+      num_gyro_samples_(0),
+      acceleration_(0),  // TODO(Brano): Should this be g or 0?
+      velocity_(0),
+      displacement_(0),
+      prev_angular_velocity_(0 , NavigationVector()),
+      orientation_(1, 0, 0, 0)
 {
   for (int i = 0; i < Sensors::kNumImus; i++) {
-      acceleration_filter_[i].configure(NavigationVector(),
-                                        NavigationVector(),
-                                        NavigationVector());
-      gyro_filter_[i].configure(NavigationVector(),
-                                NavigationVector(),
-                                NavigationVector());
+    // TODO(Brano,Uday): Properly initialise filters (with std dev of sensors and stuff)
+    acceleration_filter_[i].configure(NavigationVector(),
+                                      NavigationVector(),
+                                      NavigationVector());
+    gyro_filter_[i].configure(NavigationVector(),
+                              NavigationVector(),
+                              NavigationVector());
   }
 
   for (auto filter: proximity_filter_)
     filter.configure(0, 0, 0);
+
+  status_ = ModuleStatus::kInit;
 }
 
 NavigationType Navigation::getAcceleration()
@@ -58,40 +86,130 @@ NavigationType Navigation::getEmergencyBrakingDistance()
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
-
-void Navigation::update(ImuArray imus)
+ModuleStatus Navigation::getStatus()
 {
-  // TODO(Brano,Adi): Gyro update. (Data format should change first.)
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imus[i].acc.value = acceleration_filter_[i].filter(imus[i].acc.value);
-    imus[i].gyr.value = gyro_filter_[i].filter(imus[i].gyr.value);
+  return status_;
+}
+
+bool Navigation::startCalibration()
+{
+  if (is_calibrating_)
+    return true;
+  if (status_ != ModuleStatus::kInit)
+    return false;
+
+  is_calibrating_ = true;
+  return true;
+}
+
+bool Navigation::finishCalibration()
+{
+  if (!is_calibrating_ || status_ != ModuleStatus::kReady)
+    return false;
+
+  // Finalize calibration
+  g_ /= num_gravity_samples_;
+  for (NavigationVector& v : gyro_offsets_)
+    v /= num_gyro_samples_;
+
+  // Update state
+  is_calibrating_ = false;
+
+  // Hit the barrier to sync with motors
+  post_calibration_barrier_.wait();
+
+  return true;
+}
+
+
+std::array<NavigationType, 3> Navigation::getNearestStripeDists()
+{
+  std::array<NavigationType, 3> arr;
+  for (unsigned int i = 0; i < arr.size(); ++i)
+    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
+             - getDisplacement();
+  return arr;
+}
+
+void Navigation::update(DataPoint<ImuArray> imus)
+{
+  int num_operational = 0;
+  NavigationVector acc(0), gyr(0);
+  for (unsigned int i = 0; i < imus.value.size(); ++i) {
+    if (imus.value[i].operational) {
+      ++num_operational;
+      acc += acceleration_filter_[i].filter(imus.value[i].acc);
+      gyr += gyro_filter_[i].filter(imus.value[i].gyr);
+    }
   }
 
-  NavigationVector avg(0);
-  for (const auto& imu : imus) avg += imu.acc.value;
+  if (num_operational < 2) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: num operational IMUs = %d < 2", num_operational);
+  }
 
-  avg /= imus.size();
-  // TODO(Brano,Adi): Change the timestamping strategy
-  this->accelerometerUpdate(DataPoint<NavigationVector>(imus[0].acc.timestamp, avg));
+  accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
+           gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis)
+void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 {
   update(imus);
-  // TODO(Brano,Adi): Proximity updates. (Data format needs to be changed first.)
+
+  Proximities ground, rail;
+  // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
+  int num_ground_fail = 0;
+  if ( (ground.fr = proxiMean(proxis[6],  proxis[7]) ) < 0 ) ++num_ground_fail;
+  if ( (ground.rr = proxiMean(proxis[8],  proxis[9]) ) < 0 ) ++num_ground_fail;
+  if ( (ground.rl = proxiMean(proxis[14], proxis[15])) < 0 ) ++num_ground_fail;
+  if ( (ground.fl = proxiMean(proxis[0],  proxis[1]) ) < 0 ) ++num_ground_fail;
+  rail.fr   = proxiMean(proxis[4],  proxis[5]);
+  rail.rr   = proxiMean(proxis[10], proxis[11]);
+  rail.rl   = proxiMean(proxis[12], proxis[13]);
+  rail.fl   = proxiMean(proxis[2],  proxis[3]);
+
+  // Check for crit. failure
+  if (num_ground_fail > 1) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: num failed ground proxi points = %d", num_ground_fail);
+    return;
+  }
+  if ((rail.fr < 0 && rail.fl < 0) || (rail.rr < 0 && rail.rl < 0)) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: insufficient rail proxis");
+    return;
+  }
+
+  proximityDisplacementUpdate(ground, rail);
+  proximityOrientationUpdate(ground, rail);
 }
 
-void Navigation::update(ImuArray imus, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus, StripeCounter sc)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
-  stripeCounterUpdate(stripe_count.value);
+  stripeCounterUpdate(sc);
 }
 
-void Navigation::update(ImuArray imus, ProximityArray proxis, DataPoint<uint32_t> stripe_count)
+void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc)
 {
   update(imus, proxis);
-  stripeCounterUpdate(stripe_count.value);
+  stripeCounterUpdate(sc);
+}
+
+void Navigation::calibrationUpdate(ImuArray imus)
+{
+  // Online mean algorithm
+  ++num_gyro_samples_;
+  for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
+    ++num_gravity_samples_;
+    g_ = g_ + (imus[i].acc - g_)/num_gravity_samples_;
+    gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr - gyro_offsets_[i])/num_gyro_samples_;
+  }
+
+  if (num_gravity_samples_ > kMinNumCalibrationSamples
+      && num_gyro_samples_ > kMinNumCalibrationSamples)
+    status_ = ModuleStatus::kReady;
 }
 
 void Navigation::gyroUpdate(DataPoint<NavigationVector> angular_velocity)
@@ -115,17 +233,38 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
   displacement_ = velocity_integrator_.update(velocity).value;
 }
 
-void Navigation::proximityOrientationUpdate()
+void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
   // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
 }
 
-void Navigation::proximityDisplacementUpdate()
+void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
   // TODO(Adi): Calculate displacement from proximity. (Point 7)
 }
 
-void Navigation::stripeCounterUpdate(uint16_t count)
-{}
+void Navigation::stripeCounterUpdate(StripeCounter sc)
+{
+  // TODO(Brano): Update displacement and velocity
+
+  // TODO(Brano): Change this once 2nd Keyence is added
+  if (!sc.operational) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: stripe counter down");
+    return;
+  }
+  auto dists = getNearestStripeDists();
+  if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
+    // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
+    // definitely gone wrong.
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV",
+        "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
+        stripe_count_, sc.count.value, dists[0], dists[1], dists[2]);
+    return;
+  }
+
+  stripe_count_ = sc.count.value;
+}
 
 }}  // namespace hyped::navigation

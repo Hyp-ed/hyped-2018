@@ -32,19 +32,29 @@ ReceiverThread::ReceiverThread(Communications* baseCommunicator)
 void ReceiverThread::run()
 {
   data::Communications cmn_data;
+  cmn_data = data_.getCommunicationsData();
 
   while (1) {
     int command = baseCommunicator_->receiveMessage();
 
     switch (command) {
       case 1:
-        cmn_data.stopCommand = true;
+        cmn_data.module_status = data::ModuleStatus::kCriticalFailure;
         break;
       case 2:
         cmn_data.launchCommand = true;
         break;
       case 3:
         cmn_data.resetCommand = true;
+        break;
+      case 4:
+        cmn_data.run_length = static_cast<float>(baseCommunicator_->receiveRunLength())/1000;
+        break;
+      case 5:
+        cmn_data.servicePropulsionGo = true;
+        break;
+      case 6:
+        cmn_data.servicePropulsionGo = false;
         break;
     }
 

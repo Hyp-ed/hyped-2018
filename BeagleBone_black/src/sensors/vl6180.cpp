@@ -66,6 +66,12 @@ VL6180::~VL6180()
   log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
+void VL6180::setAddress(uint8_t i2c_addr)
+{
+  writeByte(0x0212, i2c_addr);
+  i2c_addr_ = i2c_addr;
+}
+
 void VL6180::turnOn()
 {
   // return if already on
@@ -75,7 +81,8 @@ void VL6180::turnOn()
   }
 
   // This waits for the device to be fresh out of reset (same thing as above)
-  waitDeviceBooted();
+  // TODO(anyone): redo so that creating is not blocking in case there is not sensor
+  // waitDeviceBooted();
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
@@ -154,6 +161,21 @@ uint8_t VL6180::getDistance()
   }
 }
 
+bool VL6180::isOnline()
+{
+  uint8_t data;
+  uint8_t status;
+
+  readByte(kResultRangeStatus, &data);
+  status = data >> 4;
+
+  if (status == 0) {
+    return true;
+  } else if (status != 0) {
+    checkStatus();
+  }
+  return false;
+}
 
 void VL6180::setContinuousRangingMode()
 {

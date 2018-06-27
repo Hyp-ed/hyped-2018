@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien
+ * Author: Martin Kristien and Jack Horsburgh
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -20,79 +20,88 @@
 
 #include "sensors/main.hpp"
 
-#include "sensors/bms.hpp"
-#include "sensors/mpu9250.hpp"
-#include "sensors/vl6180.hpp"
 #include "data/data.hpp"
-
+#include "sensors/imu_manager.hpp"
+#include "sensors/bms_manager.hpp"
+#include "sensors/proxi_manager.hpp"
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
 using data::Batteries;
+using data::StripeCounter;
 
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      chip_select_ {31, 50, 48, 51}
+      keyence(new Keyence(log_, 73)),
+      imu_manager_(new ImuManager(log, &sensors_.imu)),
+      proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
+      proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
+      battery_manager_lp_(new BmsManager(log,
+                                         &batteries_.low_power_batteries,
+                                         &batteries_.high_power_batteries)),
+      sensor_init_(false),
+      battery_init_(false)
 {
-  // create BMS LP
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    BMS* bms = new BMS(i, &batteries_.low_power_batteries[i], log_);
-    bms->start();
-    bms_[i] = bms;
-  }
-
-  // create Proximities
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    proxi_[i] = proxi;
-  }
-
-  // TODO(anyone): change this to use CAN-based proxies
-  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-    VL6180* proxi = new VL6180(0x29, log_);
-    proxi->setContinuousRangingMode();
-    can_proxi_[i] = proxi;
-  }
-
-  // create IMUs, might consider using fake_imus based on input arguments
-  for (int i = 0; i < data::Sensors::kNumImus; i++) {
-    imu_[i] = new MPU9250(log_, chip_select_[i], true, 0x0);
-  }
+  // @TODO (Ragnor) Add second Keyence?
 }
 
 void Main::run()
 {
+  // start all managers
+  keyence->start();
+  imu_manager_->start();
+  proxi_manager_front_->start();
+  proxi_manager_back_->start();
+  battery_manager_lp_->start();
+
+  // init loop
+  while (!sensor_init_) {
+    if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
+      sensors_.module_status = data::ModuleStatus::kInit;
+      data_.setSensorsData(sensors_);
+      sensor_init_ = true;
+      break;
+    }
+    yield();
+  }
+  log_.INFO("SENSORS", "sensors data has been initialised");
+  while (!battery_init_) {
+    if (battery_manager_lp_->updated()) {
+      batteries_.module_status = data::ModuleStatus::kInit;
+      data_.setBatteryData(batteries_);
+      battery_init_ = true;
+      break;
+    }
+    yield();
+  }
+  log_.INFO("SENSORS", "batteries data has been initialised");
+
+  // work loop
   while (1) {
-    // keep updating data_ based on values read from sensors
-
-    // update BMS LP
-    for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-      bms_[i]->getData(&batteries_.low_power_batteries[i]);
+    // Write sensor data to data structure only when all the imu and proxi values are different
+    if (imu_manager_->updated()) {
+      data_.setSensorsImuData(sensors_.imu);
+      // Update manager timestamp with a function
+      imu_manager_->resetTimestamp();
     }
 
-    // update front cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      proxi_[i]->getData(&sensors_.proxi_front[i]);
+    if (proxi_manager_front_->updated() && proxi_manager_back_->updated()) {
+      data_.setSensorsData(sensors_);
+      proxi_manager_front_->resetTimestamp();
+      proxi_manager_back_->resetTimestamp();
     }
 
-    // update back cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      can_proxi_[i]->getData(&sensors_.proxi_back[i]);
+    // Update battery data only when there is some change
+    if (battery_manager_lp_->updated()) {
+      data_.setBatteryData(batteries_);
+      battery_manager_lp_->resetTimestamp();
     }
-
-    // update imus
-    for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imu_[i]->getData(&sensors_.imu[i]);
-    }
-
-    data_.setSensorsData(sensors_);
-    data_.setBatteryData(batteries_);
-    sleep(1000);
+    data_.setStripeCounterData(keyence->getStripeCounter());
+    yield();
   }
 }
 

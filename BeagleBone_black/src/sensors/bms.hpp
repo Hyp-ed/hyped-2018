@@ -31,6 +31,8 @@
 #include "sensors/interface.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/can.hpp"
+#include "utils/system.hpp"
+#include "utils/utils.hpp"
 #include "data/data.hpp"
 
 namespace hyped {
@@ -61,6 +63,8 @@ constexpr uint16_t kIdSize      = 5;       // size of id-space of BMS-CAN messag
  * base = kIdBase + (kIdIncrement * id_)
  */
 
+constexpr uint16_t kHPBase      = 0x6B0;    // CAN id for high power BMSHP
+
 struct Data {
   static constexpr uint8_t kTemperatureOffset = 40;
   static constexpr uint8_t kCellNum           = 7;
@@ -74,35 +78,26 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
   friend Can;
 
  public:
-  explicit BMS(uint8_t id);
-  BMS(uint8_t id, data::Battery* battery_unit);
-  BMS(uint8_t id, Logger& log);
-  BMS(uint8_t id, data::Battery* battery_unit, Logger& log);
+  /**
+   * @brief Construct a new BMS object
+   * @param id  - should correspond to the id sessing on the actual BMS unit
+   * @param log - for printing nice messages
+   */
+  BMS(uint8_t id, Logger& log = utils::System::getLogger());
 
   ~BMS();
 
   /**
    * @brief Implement virtual run() from Thread
+   * This is used to periodically send request CAN messages
    */
   void run() override;
 
-  bms::Data getData() const { return data_; }
-  bms::Data* getDataPointer() { return &data_; }
+  // From BMSInterface
+  bool isOnline() override;
+  void getData(Battery* battery) override;
 
-  bool isOnline() { return false; }   // TODO(anyone): rethink this
-  void getData(Battery* battery) override {
-    battery->voltage = 0;
-    for (uint16_t v: data_.voltage) battery->voltage += v;
-
-    battery->temperature = data_.temperature;
-  }
-
-  /**
-   * @brief Process raw data, check voltage values, assert
-   * out of range flags
-   */
-  void update();
-
+  // From CanProcessor interface
   bool hasId(uint32_t id, bool extended) override;
 
  private:
@@ -120,14 +115,49 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
   void processNewData(utils::io::can::Frame& message) override;
 
  private:
-  Can&            can_;
   bms::Data       data_;
-  data::Battery*  battery_unit_;
-  uint8_t         id_;
-  uint32_t        id_base_;
+  uint8_t         id_;                // my BMS id in (0,..,15)
+  uint32_t        id_base_;           // my starting CAN id
+  uint64_t        last_update_time_;  // stores arrival time of CAN response
+
+  // for request thread
+  Can&            can_;
   bool            running_;
 
+  // for making sure only one object per BMS unit exist
   static std::vector<uint8_t> existing_ids_;
+  NO_COPY_ASSIGN(BMS);
+};
+
+class BMSHP : public CanProccesor, public BMSInterface {
+  friend Can;
+
+ public:
+  /**
+   * @brief Construct a new BMSHP object
+   * @param id  - should directly correspond to the CAN id to be used
+   * @param log - for printing nice messages
+   */
+  BMSHP(uint16_t id, Logger& log = utils::System::getLogger());
+
+  // from BMSInterface
+  bool isOnline() override;
+  void getData(Battery* battery) override;
+
+  // from CanProcessor
+  bool hasId(uint32_t id, bool extended) override;
+
+ private:
+  void processNewData(utils::io::can::Frame& message) override;
+
+ private:
+  Logger&         log_;
+  uint16_t        id_;                // CAN id to be used
+  Battery         local_data_;        // stores values from CAN
+  uint64_t        last_update_time_;  // stores arrival time of CAN message
+  // for making sure only one object per BMS unit exist
+  static std::vector<uint16_t> existing_ids_;
+  NO_COPY_ASSIGN(BMSHP);
 };
 
 }}  // namespace hyped::sensors
