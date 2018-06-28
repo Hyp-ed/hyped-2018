@@ -40,7 +40,7 @@ constexpr uint8_t kAccelConfig              = 0x1C;
 constexpr uint8_t kAccelConfig2             = 0x1D;
 
 // gyroscope addresses
-constexpr uint8_t  kGyroXoutH               = 0x43;
+// constexpr uint8_t  kGyroXoutH               = 0x43;  TODO(jack) add back in if needed
 
 constexpr uint8_t kMpuXgOffsetUsrh          = 0x13;
 constexpr uint8_t kMpuXgOffsetUsrl          = 0x14;
@@ -108,10 +108,11 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scal
     : log_(log),
     gpio_(pin, kDirection, log),
     acc_scale_(acc_scale),
-    gyro_scale_(gyro_scale)
+    gyro_scale_(gyro_scale),
+    is_online_(false)
 {
   init();
-  log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
+  log_.DBG("MPU9250", "Creating IMU sensor");
 }
 
 void MPU9250::init()
@@ -124,7 +125,7 @@ void MPU9250::init()
   writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
   Thread::sleep(200);
   // Test connection
-  while (!whoAmI());
+  whoAmI();
 
   // TODO(Jack): this seems useless, can it all go away?
   // writeByte(kMpuRegUserCtrl, 0x30);   // set I2C_IF_DIS to disable slave mode I2C bus
@@ -136,6 +137,7 @@ void MPU9250::init()
   writeByte(kAccelConfig2, 0x01);
   setAcclScale(acc_scale_);
   setGyroScale(gyro_scale_);
+  log_.INFO("MPU9250", "IMU sensor created. Initialisation complete");
 }
 
 void MPU9250::calibrateSensors()
@@ -301,16 +303,26 @@ void MPU9250::calibrateSensors()
 bool MPU9250::whoAmI()
 {
   uint8_t data;
+  int send_counter;
 
-  // Who am I checks what address the sensor is at
-  readByte(kWhoAmIMpu9250, &data);
-  log_.ERR("MPU9250", "who am I: %u", data);
-  if (data != kWhoAmIResetValue1 && data != kWhoAmIResetValue2) {
-    Thread::sleep(1000);
-     log_.ERR("MPU9250", "Cannot initialise who am I is incorrect");
-    return false;
+  for (send_counter = 0; send_counter < 5; send_counter++) {
+    // Who am I checks what address the sensor is at
+    readByte(kWhoAmIMpu9250, &data);
+    if (data == kWhoAmIResetValue1 || data == kWhoAmIResetValue2) {
+      log_.INFO("MPU9250", "IMU connected to SPI");
+      is_online_ = true;
+      break;
+    } else {
+      log_.DBG1("MPU9250", "Cannot initialise. Who am I is incorrect");
+      is_online_ = false;
+      Thread::yield();
+    }
   }
-  return true;
+
+  if (!is_online_) {
+    log_.ERR("MPU9250", "Cannot initialise who am I. Sensor offline");
+  }
+  return is_online_;
 }
 
 
@@ -349,36 +361,6 @@ void MPU9250::select()
 void  MPU9250::deSelect()
 {
   gpio_.set();
-}
-
-void MPU9250::getAcclData()
-{
-  uint8_t response[6];
-  int16_t bit_data;
-  float data;
-  int i;
-
-  readBytes(kAccelXoutH, response, 6);
-  for (i = 0; i < 3; i++) {
-    bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    data = static_cast<float>(bit_data);
-    accel_data_[i] = data/acc_divider_  * 9.80665;   // - acc_bias_[i];
-  }
-}
-
-void MPU9250::getGyroData()
-{
-  uint8_t response[6];
-  int16_t bit_data;
-  float data;
-  int i;
-
-  readBytes(kGyroXoutH, response, 6);
-  for (i = 0; i < 3; i++) {
-    bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-    data = static_cast<float>(bit_data);
-    gyro_data_[i] = data/gyro_divider_;    // - gyro_bias_[i];
-  }
 }
 
 void MPU9250::setGyroScale(int scale)
@@ -423,16 +405,38 @@ void MPU9250::setAcclScale(int scale)
 
 void MPU9250::getData(Imu* imu)
 {
-  getGyroData();
-  getAcclData();
-  auto& acc = imu->acc;
-  auto& gyr = imu->gyr;
-  acc[0] = accel_data_[0];
-  acc[1] = accel_data_[1];
-  acc[2] = accel_data_[2];
-  gyr[0] = gyro_data_[0];
-  gyr[1] = gyro_data_[1];
-  gyr[2] = gyro_data_[2];
+  if (is_online_) {
+    auto& acc = imu->acc;
+    auto& gyr = imu->gyr;
+    uint8_t response[14];
+    int16_t bit_data;
+    float data;
+    int i;
+    float accel_data[3];
+    float gyro_data[3];
+
+    readBytes(kAccelXoutH, response, 14);
+    for (i = 0; i < 3; i++) {
+      bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+      data = static_cast<float>(bit_data);
+      accel_data[i] = data/acc_divider_  * 9.80665;   // - acc_bias_[i];
+
+      bit_data = ((int16_t) response[i*2 + 8] << 8) | response[i*2+9];
+      data = static_cast<float>(bit_data);
+      gyro_data[i] = data/gyro_divider_;
+    }
+    imu->operational = is_online_;
+    acc[0] = accel_data[0];
+    acc[1] = accel_data[1];
+    acc[2] = accel_data[2];
+    gyr[0] = gyro_data[0];
+    gyr[1] = gyro_data[1];
+    gyr[2] = gyro_data[2];
+  } else {
+    // Try and turn the sensor on again
+    log_.DBG("MPU9250", "Sensor offline, trying to turn on sensor");
+    init();
+  }
 }
 
 }}   // namespace hyped::sensors
