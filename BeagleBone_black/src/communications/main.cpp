@@ -159,14 +159,14 @@ int Main::sendImu(bool op, bool op1, bool op2,
 bool op3, bool op4, bool op5, bool op6, bool op7)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
-  sen = op ? 1 : 2;
-  sen1 = op1 ? 1 : 2;
-  sen2 = op2 ? 1 : 2;
-  sen3 = op3 ? 1 : 2;
-  sen4 = op4 ? 1 : 2;
-  sen5 = op5 ? 1 : 2;
-  sen6 = op6 ? 1 : 2;
-  sen7 = op7 ? 1 : 2;
+  sen = op ? "1" : "2";
+  sen1 = op1 ? "1" : "2";
+  sen2 = op2 ? "1" : "2";
+  sen3 = op3 ? "1" : "2";
+  sen4 = op4 ? "1" : "2";
+  sen5 = op5 ? "1" : "2";
+  sen6 = op6 ? "1" : "2";
+  sen7 = op7 ? "1" : "2";
   return baseCommunicator_->sendData("CMD21" + sen + sen1 +
   sen2 + sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
@@ -175,14 +175,14 @@ int Main::sendProxiFront(bool op, bool op1, bool op2,
 bool op3, bool op4, bool op5, bool op6, bool op7)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
-  sen = op ? 1 : 2;
-  sen1 = op1 ? 1 : 2;
-  sen2 = op2 ? 1 : 2;
-  sen3 = op3 ? 1 : 2;
-  sen4 = op4 ? 1 : 2;
-  sen5 = op5 ? 1 : 2;
-  sen6 = op6 ? 1 : 2;
-  sen7 = op7 ? 1 : 2;
+  sen = op ? "1" : "2";
+  sen1 = op1 ? "1" : "2";
+  sen2 = op2 ? "1" : "2";
+  sen3 = op3 ? "1" : "2";
+  sen4 = op4 ? "1" : "2";
+  sen5 = op5 ? "1" : "2";
+  sen6 = op6 ? "1" : "2";
+  sen7 = op7 ? "1" : "2";
   return baseCommunicator_->sendData("CMD22" + sen + sen1 +
   sen2 + sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
@@ -191,14 +191,14 @@ int Main::sendProxiRear(bool op, bool op1, bool op2,
 bool op3, bool op4, bool op5, bool op6, bool op7)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
-  sen = op ? 1 : 2;
-  sen1 = op1 ? 1 : 2;
-  sen2 = op2 ? 1 : 2;
-  sen3 = op3 ? 1 : 2;
-  sen4 = op4 ? 1 : 2;
-  sen5 = op5 ? 1 : 2;
-  sen6 = op6 ? 1 : 2;
-  sen7 = op7 ? 1 : 2;
+  sen = op ? "1" : "2";
+  sen1 = op1 ? "1" : "2";
+  sen2 = op2 ? "1" : "2";
+  sen3 = op3 ? "1" : "2";
+  sen4 = op4 ? "1" : "2";
+  sen5 = op5 ? "1" : "2";
+  sen6 = op6 ? "1" : "2";
+  sen7 = op7 ? "1" : "2";
   return baseCommunicator_->sendData("CMD23" + sen + sen1 +
   sen2 + sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
