@@ -46,7 +46,7 @@ class Differentiator {
 };
 
 template <typename T>
-Differentiator<T>::Differentiator() : prev_point_(0, 0)
+Differentiator<T>::Differentiator() : prev_point_(0, T(0))
 {}
 
 template <typename T>

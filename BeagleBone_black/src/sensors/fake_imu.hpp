@@ -34,7 +34,6 @@ using data::Imu;
 using data::DataPoint;
 using data::NavigationType;
 using data::NavigationVector;
-using std::chrono::high_resolution_clock;
 
 namespace sensors {
 
