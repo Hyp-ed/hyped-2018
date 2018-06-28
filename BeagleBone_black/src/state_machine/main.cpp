@@ -58,11 +58,12 @@ void Main::run()
     sensors_data_ = data_.getSensorsData();
 
     checkFailure();
-    checkCommunications();
+    checkReady();
     if (sm_data_.current_state != data::kIdle) {
       checkNavigation();
+      checkCommunications();
     }
-    checkReady();
+    
   }
 }
 
