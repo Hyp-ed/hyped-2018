@@ -679,6 +679,7 @@ void Controller::sendSdoMessage(utils::io::can::Frame& message)
 void Controller::throwCriticalFailure()
 {
   critical_failure_ = true;
+  motor_data_ = data_.getMotorData();
   motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
   data_.setMotorData(motor_data_);
 }
