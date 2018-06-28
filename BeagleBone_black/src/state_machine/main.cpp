@@ -60,7 +60,7 @@ void Main::run()
     checkFailure();
     checkCommunications();
     if (sm_data_.current_state != data::kIdle) {
-     checkNavigation();
+      checkNavigation();
     }
     checkReady();
   }
@@ -73,11 +73,11 @@ void Main::checkNavigation()
   */
 
   if ((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length) {
-     hypedMachine.handleEvent(kCriticalFailure);
+    hypedMachine.handleEvent(kCriticalFailure);
   }
 
   if ((nav_data_.distance + nav_data_.braking_distance) + 20 >= comms_data_.run_length) {
-     hypedMachine.handleEvent(kMaxDistanceReached);
+    hypedMachine.handleEvent(kMaxDistanceReached);
   }
 
   if (nav_data_.velocity <= 0.01) {
