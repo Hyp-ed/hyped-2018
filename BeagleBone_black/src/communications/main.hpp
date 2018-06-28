@@ -59,30 +59,12 @@ class Main : public Thread {
   int sendTorqueFr(float torquefr);             // CMD18
   int sendTorqueBl(float torquebl);             // CMD19
   int sendTorqueBr(float torquebr);             // CMD20
-  int sendImu1(bool operational);               // CMD21
-  int sendImu2(bool operational);               // CMD22
-  int sendImu3(bool operational);               // CMD23
-  int sendImu4(bool operational);               // CMD24
-  int sendImu5(bool operational);               // CMD25
-  int sendImu6(bool operational);               // CMD26
-  int sendImu7(bool operational);               // CMD27
-  int sendImu8(bool operational);               // CMD28
-  int sendProxiFront1(bool operational);        // CMD29
-  int sendProxiFront2(bool operational);        // CMD30
-  int sendProxiFront3(bool operational);        // CMD31
-  int sendProxiFront4(bool operational);        // CMD32
-  int sendProxiFront5(bool operational);        // CMD33
-  int sendProxiFront6(bool operational);        // CMD34
-  int sendProxiFront7(bool operational);        // CMD35
-  int sendProxiFront8(bool operational);        // CMD36
-  int sendProxiRear1(bool operational);         // CMD37
-  int sendProxiRear2(bool operational);         // CMD38
-  int sendProxiRear3(bool operational);         // CMD39
-  int sendProxiRear4(bool operational);         // CMD40
-  int sendProxiRear5(bool operational);         // CMD41
-  int sendProxiRear6(bool operational);         // CMD42
-  int sendProxiRear7(bool operational);         // CMD43
-  int sendProxiRear8(bool operational);         // CMD44
+  int sendImu(bool op, bool op1, bool o2, bool op3,
+  bool op4, bool op5, bool op6, bool op7);      // CMD21
+  int sendProxiFront(bool op, bool op1, bool o2, bool op3,
+  bool op4, bool op5, bool op6, bool op7);      // CMD22
+  int sendProxiRear(bool op, bool op1, bool op2, bool op3,
+  bool op4, bool op5, bool op6, bool op7);      // CMD23
 
  private:
   int stateCode_;
