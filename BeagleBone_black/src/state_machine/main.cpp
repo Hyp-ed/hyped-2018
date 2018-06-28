@@ -63,7 +63,6 @@ void Main::run()
       checkNavigation();
       checkCommunications();
     }
-    
   }
 }
 
