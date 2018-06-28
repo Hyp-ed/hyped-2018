@@ -169,7 +169,6 @@ System::System(int argc, char* argv[])
   if (verbose_sensor  == DEFAULT_VERBOSE) verbose_sensor  = verbose;
   if (verbose_state   == DEFAULT_VERBOSE) verbose_state   = verbose;
   if (verbose_cmn     == DEFAULT_VERBOSE) verbose_cmn     = verbose;
-  if (fake_imu        == DEFAULT_IMU)     fake_imu        = fake_imu;
 
   if (debug_motor   == DEFAULT_DEBUG) debug_motor   = debug;
   if (debug_nav     == DEFAULT_DEBUG) debug_nav     = debug;
