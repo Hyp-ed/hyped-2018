@@ -59,9 +59,15 @@ class Main : public Thread {
   int sendTorqueFr(float torquefr);             // CMD18
   int sendTorqueBl(float torquebl);             // CMD19
   int sendTorqueBr(float torquebr);             // CMD20
-  int sendImu(bool operational, bool operational1, bool operational2, bool operational3, bool operational4, bool operational5, bool operational6, bool operational7);              // CMD21
-  int sendProxiFront(bool operational, bool operational1, bool operational2, bool operational3, bool operational4, bool operational5, boo operational6, bool operational7);        // CMD22
-  int sendProxiRear(bool operational, bool operational1, bool operational2, bool operational3, bool operational4, bool operational5, boo operational6, bool operational7);         // CMD23
+  int sendImu(bool operational, bool operational1, bool operational2,
+  bool operational3, bool operational4, bool operational5,
+  bool operational6, bool operational7);        // CMD21
+  int sendProxiFront(bool operational, bool operational1, bool operational2,
+  bool operational3, bool operational4, bool operational5,
+  bool operational6, bool operational7);        // CMD22
+  int sendProxiRear(bool operational, bool operational1, bool operational2,
+  bool operational3, bool operational4, bool operational5,
+  bool operational6, bool operational7);        // CMD23
 
  private:
   int stateCode_;

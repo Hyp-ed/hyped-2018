@@ -20,6 +20,8 @@
 
 #include "communications/main.hpp"
 
+#include <string>
+
 #include <sstream>
 
 namespace hyped {
@@ -153,19 +155,52 @@ int Main::sendTorqueBl(float torquebl)
   return baseCommunicator_->sendData("CMD20" + std::to_string(torquebl) + "\n");
 }
 
-int Main::sendImu(bool operational, bool operational1, bool operational2, bool operational3, bool operational4, bool operational5, bool operational6, bool operational7)
+int Main::sendImu(bool operational, bool operational1, bool operational2,
+bool operational3, bool operational4, bool operational5, bool operational6, bool operational7)
 {
-  return baseCommunicator_->sendData("CMD21" + if(operational){"1"}else{"2"} + if(operational1){"1"}else{"2"} + if(operational2){"1"}else{"2"} + if(operational3){"1"}else{"2"} + if(operational4){"1"}else{"2"} + if(operational5){"1"}else{"2"} + if(operational6){"1"}else{"2"} + if(operational7){"1"}else{"2"} + "\n");
+  std::string sns1, sns2, sns3, sns4, sns5, sns6, sns7, sns8;
+  if (operational) {sns1 = "1";} else {sns1 = "2";}
+  if (operational1) {sns2 = "1";} else {sns2 = "2";}
+  if (operational2) {sns3 = "1";} else {sns3 = "2";}
+  if (operational3) {sns4 = "1";} else {sns4 = "2";}
+  if (operational4) {sns5 = "1";} else {sns5 = "2";}
+  if (operational5) {sns6 = "1";} else {sns6 = "2";}
+  if (operational6) {sns7 = "1";} else {sns7 = "2";}
+  if (operational7) {sns8 = "1";} else {sns8 = "2";}
+  return baseCommunicator_->sendData("CMD21" + sns1 + sns2 +
+  sns3 + sns4 + sns5 + sns6 + sns7 + sns8 + "\n");
 }
 
-int Main::sendProxiFront(bool operational, bool operational1, bool operational2, bool operational3, bool operational4, bool operational5, boo operational6, bool operational7)
+int Main::sendProxiFront(bool operational, bool operational1, bool operational2,
+bool operational3, bool operational4, bool operational5, bool operational6, bool operational7)
 {
-  return baseCommunicator_->sendData("CMD22" + if(operational){"1"}else{"2"} + if(operational1){"1"}else{"2"} + if(operational2){"1"}else{"2"} + if(operational3){"1"}else{"2"} + if(operational4){"1"}else{"2"} + if(operational5){"1"}else{"2"} + if(operational6){"1"}else{"2"} + if(operational7){"1"}else{"2"} + "\n");
+  std::string sns1, sns2, sns3, sns4, sns5, sns6, sns7, sns8;
+  if (operational) {sns1 = "1";} else {sns1 = "2";}
+  if (operational1) {sns2 = "1";} else {sns2 = "2";}
+  if (operational2) {sns3 = "1";} else {sns3 = "2";}
+  if (operational3) {sns4 = "1";} else {sns4 = "2";}
+  if (operational4) {sns5 = "1";} else {sns5 = "2";}
+  if (operational5) {sns6 = "1";} else {sns6 = "2";}
+  if (operational6) {sns7 = "1";} else {sns7 = "2";}
+  if (operational7) {sns8 = "1";} else {sns8 = "2";}
+  return baseCommunicator_->sendData("CMD22" + sns1 + sns2 +
+  sns3 + sns4 + sns5 + sns6 + sns7 + sns8 + "\n");
 }
 
-int Main::sendProxiRear(bool operational, bool operational1, bool operational2, bool operational3, bool operational4, bool operational5, boo operational6, bool operational7)
+int Main::sendProxiRear(bool operational, bool operational1, bool operational2,
+bool operational3, bool operational4, bool operational5, bool operational6, bool operational7)
 {
-  return baseCommunicator_->sendData("CMD23" + if(operational){"1"}else{"2"} + if(operational1){"1"}else{"2"} + if(operational2){"1"}else{"2"} + if(operational3){"1"}else{"2"} + if(operational4){"1"}else{"2"} + if(operational5){"1"}else{"2"} + if(operational6){"1"}else{"2"} + if(operational7){"1"}else{"2"} + "\n");
+  std::string sns1, sns2, sns3, sns4, sns5, sns6, sns7, sns8;
+  if (operational) {sns1 = "1";} else {sns1 = "2";}
+  if (operational1) {sns2 = "1";} else {sns2 = "2";}
+  if (operational2) {sns3 = "1";} else {sns3 = "2";}
+  if (operational3) {sns4 = "1";} else {sns4 = "2";}
+  if (operational4) {sns5 = "1";} else {sns5 = "2";}
+  if (operational5) {sns6 = "1";} else {sns6 = "2";}
+  if (operational6) {sns7 = "1";} else {sns7 = "2";}
+  if (operational7) {sns8 = "1";} else {sns8 = "2";}
+  return baseCommunicator_->sendData("CMD23" + sns1 + sns2 +
+  sns3 + sns4 + sns5 + sns6 + sns7 + sns8 + "\n");
 }
 
 void Main::run()
@@ -203,8 +238,18 @@ void Main::run()
     sendTorqueFl(mtr_.torque_1);
     sendTorqueBr(mtr_.torque_4);
     sendTorqueBl(mtr_.torque_3);
-    sendImu(sen_.imu.value[0].operational,sen_.imu.value[1].operational,sen_.imu.value[2].operational,sen_.imu.value[3].operational,sen_.imu.value[4].operational,sen_.imu.value[5].operational,sen_.imu.value[6].operational,sen_.imu.value[7].operational);
-    sendProxiFront(sen_.proxi_front.value[0].operational,sen_.proxi_front.value[1].operational,sen_.proxi_front.value[2].operational,sen_.proxi_front.value[3].operational,sen_.proxi_front.value[4].operational,sen_.proxi_front.value[5].operational,sen_.proxi_front.value[6].operational,sen_.proxi_front.value[7].operational);
+    sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
+    sen_.imu.value[2].operational, sen_.imu.value[3].operational,
+    sen_.imu.value[4].operational, sen_.imu.value[5].operational,
+    sen_.imu.value[6].operational, sen_.imu.value[7].operational);
+    sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,
+    sen_.proxi_front.value[2].operational, sen_.proxi_front.value[3].operational,
+    sen_.proxi_front.value[4].operational, sen_.proxi_front.value[5].operational,
+    sen_.proxi_front.value[6].operational, sen_.proxi_front.value[7].operational);
+    sendProxiRear(sen_.proxi_back.value[0].operational, sen_.proxi_back.value[1].operational,
+    sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
+    sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
+    sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
   }
 
   receiverThread->join();
