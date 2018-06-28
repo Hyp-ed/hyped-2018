@@ -56,6 +56,8 @@ void ReceiverThread::run()
       case 6:
         cmn_data.servicePropulsionGo = false;
         break;
+      default:
+        break;
     }
 
     data_.setCommunicationsData(cmn_data);

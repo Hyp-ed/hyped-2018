@@ -130,6 +130,8 @@ int Communications::receiveMessage()
     case 6:
       log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
       break;
+    default:
+      break;
   }
 
   return command;
