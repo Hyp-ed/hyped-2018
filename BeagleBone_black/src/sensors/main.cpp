@@ -24,7 +24,6 @@
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
-
 namespace hyped {
 
 using data::Data;

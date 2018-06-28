@@ -1,4 +1,4 @@
-/*
+ /*
  * Author: Sean Mullan
  * Organisation: HYPED
  * Date: 5/05/18
@@ -23,6 +23,7 @@
 
 #include <cstdint>
 #include "utils/io/can.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
 // Forward declarations
@@ -70,9 +71,9 @@ class Controller : public CanProccesor {
     */
   void enterPreOperational();
   /**
-    *   @brief  { Checks controller status }
+    *   @brief  { Checks controller statusword for state }
     */
-  void checkStatus();
+  void checkState();
   /**
     *  @brief  { Set target velocity in controller object dictionary }
     *
@@ -137,6 +138,10 @@ class Controller : public CanProccesor {
     */
   void quickStop();
   /*
+   *  @brief { Check error and warning register in controller }
+   */
+  void healthCheck();
+  /*
    *  @brief { Return failure flag of controller }
    */
   bool getFailure();
@@ -155,13 +160,25 @@ class Controller : public CanProccesor {
   /*
    * @brief { Sends a CAN frame but waits for a reply }
    */
-  void sendSdoCan(utils::io::can::Frame& message);
+  void sendSDO(utils::io::can::Frame& message);
   /*
    * @brief { Parses error message to find the problem }
    */
   void processErrorMessage(uint16_t error_message);
+  /*
+   * @brief { Set critical failure flag to true and write failure to data structure }
+   */
+  void throwCriticalFailure();
+  /*
+   * @brief { Checks to see if controller has transition to a new state properly
+   *          if it hasn't it will go into critical failure }
+   */
+  void checkStateTransition(ControllerState state);
+
   Logger&  log_;
   Can&     can_;
+  data::Data& data_;
+  data::Motors motor_data_;
   uint8_t  node_id_;
   bool     critical_failure_;
   int32_t  actual_velocity_;

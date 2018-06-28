@@ -34,10 +34,9 @@ Communicator::Communicator(Logger& log)
     controller1_(log, 1),
     controller2_(log, 2),
     controller3_(log, 3),
-    controller4_(log, 4)
-{
-  log_.INFO("MOTOR", "Controllers initialised\n");
-}
+    controller4_(log, 4),
+    critical_failure_(false)
+{}
 
 void Communicator::registerControllers()
 {
@@ -54,25 +53,35 @@ void Communicator::configureControllers()
   controller2_.configure();
   controller3_.configure();
   controller4_.configure();
-  log_.INFO("MOTOR", "Motors are configured for launch");
+  bool f1, f2, f3, f4;
+  f1 = controller1_.getFailure();
+  f2 = controller2_.getFailure();
+  f3 = controller3_.getFailure();
+  f4 = controller4_.getFailure();
+  if (f1 || f2 || f3 || f4) {
+    critical_failure_ = true;
+    log_.ERR("MOTOR", "COMMUNICATION FAILURE");
+  } else {
+    log_.INFO("MOTOR", "All motors are configured");
+  }
 }
 
-bool Communicator::enterOperational()
+void Communicator::prepareMotors()
 {
   controller1_.enterOperational();
   controller2_.enterOperational();
   controller3_.enterOperational();
   controller4_.enterOperational();
-  if (controller1_.getControllerState() == kOperationEnabled
-      && controller1_.getControllerState() == kOperationEnabled
-      && controller1_.getControllerState() == kOperationEnabled
-      && controller1_.getControllerState() == kOperationEnabled)
-      {
-        return true;
-      } else {
-        this->enterPreOperational();
-      }
-  return false;
+  if (controller1_.getControllerState() != kOperationEnabled
+     || controller1_.getControllerState() != kOperationEnabled
+     || controller1_.getControllerState() != kOperationEnabled
+     || controller1_.getControllerState() != kOperationEnabled)
+  {
+    critical_failure_ = true;
+    log_.ERR("MOTOR", "Motors not operational");
+  } else {
+    log_.INFO("MOTOR", "Motors are ready for launch");
+  }
 }
 
 void Communicator::enterPreOperational()
@@ -85,14 +94,16 @@ void Communicator::enterPreOperational()
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
+  // TODO(anyone) need to check if this is correct for our set-up of motors
   controller1_.sendTargetVelocity(target_velocity);
-  controller2_.sendTargetVelocity(target_velocity);
+  controller2_.sendTargetVelocity(-target_velocity);
   controller3_.sendTargetVelocity(target_velocity);
-  controller4_.sendTargetVelocity(target_velocity);
+  controller4_.sendTargetVelocity(-target_velocity);
 }
 
 void Communicator::sendTargetTorque(int16_t target_torque)
 {
+  // TODO(Sean) Should torque for 2 controllers be negative?
   controller1_.sendTargetTorque(target_torque);
   controller2_.sendTargetTorque(target_torque);
   controller3_.sendTargetTorque(target_torque);
@@ -147,14 +158,25 @@ void Communicator::quickStopAll()
   controller4_.quickStop();
 }
 
-bool Communicator::checkFailure()
+void Communicator::healthCheck()
 {
+  controller1_.healthCheck();
+  controller2_.healthCheck();
+  controller3_.healthCheck();
+  controller4_.healthCheck();
   bool f1, f2, f3, f4;
   f1 = controller1_.getFailure();
   f2 = controller2_.getFailure();
   f3 = controller3_.getFailure();
   f4 = controller4_.getFailure();
-  return f1 || f2 || f3 || f4;
+  if (f1 || f2 || f3 || f4) {
+    critical_failure_ = true;
+  }
+}
+
+bool Communicator::getFailure()
+{
+  return critical_failure_;
 }
 
 }}  // namespace hyped::motor_control

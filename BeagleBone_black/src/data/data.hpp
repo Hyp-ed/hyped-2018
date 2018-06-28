@@ -109,7 +109,7 @@ struct StripeCounter : public Sensor {
 };
 
 struct Sensors : public Module {
-  static constexpr int kNumImus = 8;
+  static constexpr int kNumImus = 4;
   static constexpr int kNumProximities = 8;
 
   DataPoint<array<Imu, kNumImus>> imu;
