@@ -249,12 +249,15 @@ bool VL6180::waitDeviceBooted()
 bool VL6180::rangeWaitDeviceReady()
 {
   uint8_t data;
-  while (true) {
+  for (int i = 0; i < 10; i++) {
     readByte(kResultRangeStatus, &data);
     data = data & kRangeDeviceReadyMask;
     if (data)
       return true;
+    Thread::yield();
   }
+  log_.ERR("VL6180", "Sensor took too long to wait for data");
+  is_online_ = false;
   return false;
 }
 
