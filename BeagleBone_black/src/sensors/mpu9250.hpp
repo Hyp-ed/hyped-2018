@@ -67,10 +67,6 @@ class MPU9250 : public ImuInterface {
    *  @return 3Dvector Returns gyroscope readings
    */
   void getGyroData();
-  // In ms^(-2)
-  float accel_data_[3];
-  // In degrees per second
-  float gyro_data_[3];
 
  private:
   /*
@@ -99,6 +95,7 @@ class MPU9250 : public ImuInterface {
   int16_t acc_bias_[3];
   double gyro_divider_;
   int16_t gyro_bias_[3];
+  bool is_online_;
 };
 
 }}  // namespace hyped::sensors

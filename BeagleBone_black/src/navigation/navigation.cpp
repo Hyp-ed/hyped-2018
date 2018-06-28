@@ -24,6 +24,7 @@
 namespace hyped {
 namespace navigation {
 
+const Navigation::Settings Navigation::kDefaultSettings;
 float proxiMean(const Proximity* const a, const Proximity* const b)
 {
   if (a->operational && b->operational)
@@ -35,9 +36,12 @@ float proxiMean(const Proximity* const a, const Proximity* const b)
   return -1;
 }
 
-Navigation::Navigation(Barrier& post_calibration_barrier, Logger& log)
+Navigation::Navigation(Barrier& post_calibration_barrier,
+                       Logger& log,
+                       const Settings& settings)
     : post_calibration_barrier_(post_calibration_barrier),
       log_(log),
+      settings_(settings),
       status_(ModuleStatus::kStart),
       is_calibrating_(false),
       num_gravity_samples_(0),
@@ -240,7 +244,29 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
 
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
-  // TODO(Adi): Calculate displacement from proximity. (Point 7)
+  NavigationVector proxi_displ = displacement_;
+  // TODO(Brano): Make this a weighted average based on the actual positions of the 4 sensors with
+  //              respect to IMUs
+  proxi_displ[2] = (ground.fr + ground.rr + ground.rl + ground.fl) / 4.0;
+  // Change from mm to m and subtract the stationary z-axis displacement
+  // TODO(Brano): Update the z-axis displacement
+  proxi_displ[2] = proxi_displ[2]/1000.0 - 0.1;
+  // The y-axis points to the left and displacement 0 is when right and left proxis are equal
+  // TODO(Brano): Make this a weighted average based on the actual proxi positions w.r.t. IMUs
+  proxi_displ[1] = ((rail.fl - rail.fr) + (rail.rl - rail.rr)) / 2.0;
+  proxi_displ[1] = proxi_displ[1]/1000.0;
+
+  // Update displacement
+  displacement_ = (1 - settings_.prox_displ_w)*displacement_ + settings_.prox_displ_w*proxi_displ;
+
+  // Update velocity
+  DataPoint<Vector<NavigationType, 2>> dp(
+      prev_angular_velocity_.timestamp,  /* IMUs always updated */
+      Vector<NavigationType, 2>({proxi_displ[1], proxi_displ[2]}));
+  auto proxi_vel = proxi_differentiator_.update(dp).value;
+
+  velocity_[1] = (1 - settings_.prox_vel_w)*velocity_[1] + settings_.prox_vel_w*proxi_vel[0];
+  velocity_[2] = (1 - settings_.prox_vel_w)*velocity_[2] + settings_.prox_vel_w*proxi_vel[1];
 }
 
 void Navigation::stripeCounterUpdate(StripeCounter sc)
@@ -265,6 +291,15 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
   }
 
   stripe_count_ = sc.count.value;
+  DataPoint<NavigationType> dp(sc.count.timestamp, kStripeLocations[stripe_count_]);
+
+  // Update x-axis (forwards) displacement
+  displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
+                          settings_.strp_displ_w  * dp.value;
+
+  // Update x-axis velocity
+  velocity_[0] = (1 - settings_.strp_vel_w) * velocity_[0] +
+                      settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
 }
 
 }}  // namespace hyped::navigation
