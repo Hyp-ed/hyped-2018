@@ -146,7 +146,7 @@ std::vector<uint16_t> BMSHP::existing_ids_;   // NOLINT [build/include_what_you_
 
 BMSHP::BMSHP(uint16_t id, Logger& log)
     : log_(log),
-      id_(id),
+      id_(id + bms::kHPBase),
       local_data_ {},
       last_update_time_(0)
 {
@@ -161,6 +161,7 @@ BMSHP::BMSHP(uint16_t id, Logger& log)
 
   // tell CAN about yourself
   Can::getInstance().registerProcessor(this);
+  Can::getInstance().start();
 }
 
 bool BMSHP::isOnline()
@@ -183,14 +184,18 @@ bool BMSHP::hasId(uint32_t id, bool extended)
 void BMSHP::processNewData(utils::io::can::Frame& message)
 {
   // message format is expected to look like this:
-  // [current_h , current_l   , voltage_h, volatage_l ,
-  //  charge    , high_temp_h , high_temp, low_temp   ]
-  local_data_.voltage     = (message.data[2] << 8) | message.data[3];
-  local_data_.temperature = message.data[6];
+  // [current   , volage      , charge   , high_temp,
+  //  mean_temp , relay_state , isolation_threshold, failsafe_satate   ] - these are not used
+  local_data_.current     = message.data[0] * 1000;   // convert to mA
+  local_data_.voltage     = message.data[1] * 1000;   // convert to mV
+  local_data_.charge      = message.data[2];          // in %, 0 to 100
+  local_data_.temperature = message.data[3];          // in C
 
-  log_.DBG1("BMSHP", "received voltage %u", local_data_.voltage);
-  log_.DBG1("BMSHP", "received temperature %u",
-    (message.data[5] << 8) | message.data[6]);
+  log_.DBG1("BMSHP", "received data Volt,Curr,Char,Temp %u,%u,%u,%d",
+    local_data_.voltage,
+    local_data_.current,
+    local_data_.charge,
+    local_data_.temperature);
 
   last_update_time_ = utils::Timer::getTimeMicros();
 }
