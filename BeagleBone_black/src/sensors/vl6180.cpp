@@ -151,6 +151,8 @@ bool VL6180::isOnline()
   uint8_t data;
   uint8_t status;
 
+  // TODO(anyone) Check to see if i2c transaction is working
+
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
 
