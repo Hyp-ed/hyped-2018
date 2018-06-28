@@ -161,8 +161,8 @@ bool VL6180::isOnline()
     is_online_ = true;
   } else if (status != 0) {
     checkStatus();
+    is_online_ = false;
   }
-  is_online_ = false;
   return is_online_;
 }
 

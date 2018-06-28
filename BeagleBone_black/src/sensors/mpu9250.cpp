@@ -305,17 +305,18 @@ bool MPU9250::whoAmI()
   uint8_t data;
   int send_counter;
 
-  for (send_counter = 0; send_counter < 3; send_counter++) {
+  for (send_counter = 0; send_counter < 5; send_counter++) {
     // Who am I checks what address the sensor is at
     readByte(kWhoAmIMpu9250, &data);
-    if (data != kWhoAmIResetValue1 && data != kWhoAmIResetValue2) {
+    if (data == kWhoAmIResetValue1 || data == kWhoAmIResetValue2) {
+      log_.INFO("MPU9250", "IMU connected to SPI");
+      is_online_ = true;
+      break;
+    } else {
       log_.DBG1("MPU9250", "Cannot initialise. Who am I is incorrect");
       is_online_ = false;
       Thread::yield();
     }
-    log_.INFO("MPU9250", "IMU connected to SPI");
-    is_online_ = true;
-    break;
   }
 
   if (!is_online_) {
