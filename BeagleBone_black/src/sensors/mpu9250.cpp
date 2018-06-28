@@ -40,7 +40,7 @@ constexpr uint8_t kAccelConfig              = 0x1C;
 constexpr uint8_t kAccelConfig2             = 0x1D;
 
 // gyroscope addresses
-constexpr uint8_t  kGyroXoutH               = 0x43;
+// constexpr uint8_t  kGyroXoutH               = 0x43;  TODO(jack) add back in if needed
 
 constexpr uint8_t kMpuXgOffsetUsrh          = 0x13;
 constexpr uint8_t kMpuXgOffsetUsrl          = 0x14;
@@ -112,7 +112,7 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scal
     is_online_(false)
 {
   init();
-  log_.INFO("MPU9250", "Creating a sensor with id: %d", 1);
+  log_.DBG("MPU9250", "Creating IMU sensor");
 }
 
 void MPU9250::init()
@@ -137,6 +137,7 @@ void MPU9250::init()
   writeByte(kAccelConfig2, 0x01);
   setAcclScale(acc_scale_);
   setGyroScale(gyro_scale_);
+  log_.INFO("MPU9250", "IMU sensor created. Initialisation complete");
 }
 
 void MPU9250::calibrateSensors()
@@ -307,18 +308,18 @@ bool MPU9250::whoAmI()
   for (send_counter = 0; send_counter < 3; send_counter++) {
     // Who am I checks what address the sensor is at
     readByte(kWhoAmIMpu9250, &data);
-    log_.ERR("MPU9250", "who am I: %u", data);
     if (data != kWhoAmIResetValue1 && data != kWhoAmIResetValue2) {
-      log_.DBG1("MPU9250", "Cannot initialise who am I is incorrect");
+      log_.DBG1("MPU9250", "Cannot initialise. Who am I is incorrect");
       is_online_ = false;
       Thread::yield();
     }
+    log_.INFO("MPU9250", "IMU connected to SPI");
     is_online_ = true;
     break;
   }
 
   if (!is_online_) {
-    log_.ERR("MPU9250", "Cannot initialise who am I sensor offline");
+    log_.ERR("MPU9250", "Cannot initialise who am I. Sensor offline");
   }
   return is_online_;
 }
@@ -432,6 +433,7 @@ void MPU9250::getData(Imu* imu)
     gyr[2] = gyro_data[2];
   } else {
     // Try and turn the sensor on again
+    log_.DBG("MPU9250", "Sensor offline, trying to turn on sensor");
     init();
   }
 }
