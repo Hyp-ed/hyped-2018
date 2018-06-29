@@ -34,7 +34,7 @@ HypedMachine::HypedMachine(utils::Logger& log)
 
 void HypedMachine::handleEvent(Event event)
 {
-  log_.INFO("STATE", "Raised event %d", event);
+  log_.DBG1("STATE", "Raised event %d", event);
   current_state_->react(*this, event);
 }
 
