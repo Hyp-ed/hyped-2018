@@ -57,7 +57,7 @@ void ReceiverThread::run()
         cmn_data.servicePropulsionGo = false;
         break;
       default:
-        log_.INFO("COMN", "Should not reach here");
+        log_.ERR("COMN", "Received %d (Should not reach here)", command);
         break;
     }
 

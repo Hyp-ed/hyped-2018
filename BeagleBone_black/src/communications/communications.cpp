@@ -131,7 +131,7 @@ int Communications::receiveMessage()
       log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
       break;
     default:
-      log_.INFO("COMN", "Should not reach here");
+      log_.ERR("COMN", "Received %d (Should not reach here)", command);
       break;
   }
 
