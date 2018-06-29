@@ -239,7 +239,28 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
 
 void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
-  // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
+  // Ground points
+  NavigationVector a = kGroundProxiRR;     a[2] -= ground.rr;
+  NavigationVector b = kGroundProxiFR;     b[2] -= ground.fr;
+  NavigationVector c = kGroundProxiFL;     c[2] -= ground.fl;
+  NavigationVector d = kGroundProxiRL;     d[2] -= ground.rl;
+
+  // Rail points
+  NavigationVector e_l = kRailProxiRL;     e_l[1] -= rail.rl;
+  NavigationVector e_r = kRailProxiRR;     e_r[1] += rail.rr;
+  NavigationVector f_l = kRailProxiFL;     f_l[1] -= rail.fl;
+  NavigationVector f_r = kRailProxiFR;     f_r[1] += rail.fr;
+
+  // Vector EF in the vertical plane of the I beam
+  NavigationVector r = (f_l - f_r)/2 - (e_l + e_r)/2;
+
+  // Calculate the normal n of the ground plane given by a, b, c, and d
+
+  // Calculate rejection of r on n and use cross product to complete the basis of tube ref. frame
+
+  // Calculate orientation quaternion
+
+  // SLERP
 }
 
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
