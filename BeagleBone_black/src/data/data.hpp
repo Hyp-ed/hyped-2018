@@ -225,7 +225,7 @@ class Data {
   /**
    * @brief      Should be called to update sensor calibration data
    */
-  void setCalibrationData(const SensorCalibration sensor_calbration_data);
+  void setCalibrationData(const SensorCalibration sensor_calibration_data);
   /**
    * @brief      Retrieves data from the calibrated sensors
    */
