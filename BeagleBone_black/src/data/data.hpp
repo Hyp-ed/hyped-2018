@@ -119,6 +119,12 @@ struct Sensors : public Module {
   StripeCounter stripe_counter;
 };
 
+struct SensorCalibration {
+  array<float, Sensors::kNumProximities> proxi_front_variance;
+  array<float, Sensors::kNumProximities> proxi_back_variance;
+  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;
+};
+
 struct Battery {
   uint16_t  voltage;      // in mV
   uint16_t  current;      // in mA
@@ -216,6 +222,14 @@ class Data {
    * @brief       Should be called to update StripeCount part in Sensors data
    */
   void setStripeCounterData(const StripeCounter& stripe_counter);
+  /**
+   * @brief      Should be called to update sensor calibration data
+   */
+  void setCalibrationData(const SensorCalibration sensor_calbration_data);
+  /**
+   * @brief      Retrieves data from the calibrated sensors
+   */
+  SensorCalibration getCalibrationData();
 
   /**
    * @brief      Retrieves data from the batteries.
@@ -254,6 +268,8 @@ class Data {
   Motors motors_;
   Batteries batteries_;
   Communications communications_;
+  SensorCalibration calibration_data_;
+
 
   // locks for data substructures
   Lock lock_state_machine_;
@@ -263,6 +279,7 @@ class Data {
 
   Lock lock_communications_;
   Lock lock_batteries_;
+  Lock lock_calibration_data_;
 };
 
 }}  // namespace data::hyped

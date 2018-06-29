@@ -70,6 +70,12 @@ class FakeImuAccelerating : public ImuInterface {
    *            sufficiently long.
    */
   void getData(Imu* imu) override;
+  /**
+   * @brief Calculates the variance for the data structure
+   *
+   * @return float value of the variance for the sensor
+   */
+  array<NavigationVector, 2> calcCalibrationData() override;
 
  private:
   utils::Logger&       log_;
@@ -141,6 +147,12 @@ class FakeImuStationary : public ImuInterface {
    *            sufficiently long.
    */
   void getData(Imu* imu) override;
+  /**
+   * @brief Calculates the variance for the data structure
+   *
+   * @return float value of the variance for the sensor
+   */
+  array<NavigationVector, 2> calcCalibrationData() override;
 
  private:
   utils::Logger&       log_;

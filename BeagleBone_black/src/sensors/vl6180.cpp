@@ -23,9 +23,11 @@
 
 #include "utils/logger.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "utils/math/statistics.hpp"
 
 
 // Register addresses
+constexpr uint16_t kIdentificationModelId              = 0x000;
 constexpr uint16_t kSystemInterruptClear               = 0x0015;
 constexpr uint16_t kSystemFreshOutOfReset              = 0x0016;
 constexpr uint16_t kSysrangeStart                      = 0x0018;
@@ -45,6 +47,7 @@ namespace hyped {
 
 using utils::io::I2C;
 using utils::concurrent::Thread;
+using utils::math::OnlineStatistics;
 
 namespace sensors {
 
@@ -127,8 +130,23 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
-  is_online_ = true;
+  is_online_ = isOnline();
   log_.DBG("VL6180", "Sensor is on\n");
+}
+
+float VL6180::calcCalibrationData()
+{
+  if (is_online_) {
+    OnlineStatistics<float> stats = OnlineStatistics<float>();
+    for (int i = 0; i < 100; i++) {
+      stats.update(getDistance());
+      Thread::sleep(9);
+    }
+    return stats.getVariance();
+  } else {
+    log_.ERR("VL6180", "Could not calibrate proxi, sensor not operational");
+    return -1.0;
+  }
 }
 
 void VL6180::setMaxConvergenceTime(uint8_t time_ms)
@@ -152,8 +170,6 @@ bool VL6180::isOnline()
   uint8_t data;
   uint8_t status;
 
-  // TODO(anyone) Check to see if i2c transaction is working
-
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
 
@@ -161,6 +177,15 @@ bool VL6180::isOnline()
     is_online_ = true;
   } else if (status != 0) {
     checkStatus();
+    is_online_ = false;
+  }
+
+  // Check to see if i2c transaction is working by checking model ID
+  readByte(kIdentificationModelId, &data);
+
+  // Value should be 0xB4 after reset
+  if (data != 0xB4) {
+    log_.ERR("VL6180", "Data should of been: %d, but was %d", 0xB4, data);
     is_online_ = false;
   }
   return is_online_;

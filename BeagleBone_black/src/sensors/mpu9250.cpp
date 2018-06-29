@@ -25,6 +25,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
+#include "utils/math/statistics.hpp"
 
 // Accelerometer addresses
 constexpr uint8_t kAccelXoutH               = 0x3B;
@@ -101,6 +102,8 @@ namespace hyped {
 
 utils::io::gpio::Direction kDirection = utils::io::gpio::kOut;
 using utils::concurrent::Thread;
+using utils::math::OnlineStatistics;
+using data::NavigationVector;
 
 namespace sensors {
 
@@ -325,6 +328,32 @@ bool MPU9250::whoAmI()
   return is_online_;
 }
 
+array<NavigationVector, 2> MPU9250::calcCalibrationData()
+{
+  array<NavigationVector, 2> stats;
+  if (is_online_) {
+    OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
+    OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
+    for (int i = 0; i < 1000; i++) {
+      Imu imu;
+      getData(&imu);
+      stats_acc.update(imu.acc);
+      stats_gyr.update(imu.gyr);
+    }
+    stats[0] = stats_acc.getVariance();
+    stats[1] = stats_gyr.getVariance();
+    return stats;
+  } else {
+    log_.ERR("VL6180", "Could not calibrate proxi, sensor not operational");
+    array<NavigationVector, 2> stats;
+    for (int i = 0; i < 2; i++) {
+      for (int j =0; j < 3; j++) {
+        stats[i][j] = -1.0;
+      }
+    }
+    return stats;
+  }
+}
 
 MPU9250::~MPU9250()
 {

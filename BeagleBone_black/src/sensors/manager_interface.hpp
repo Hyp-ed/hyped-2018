@@ -30,6 +30,7 @@ using data::Imu;
 using data::Proximity;
 using data::Battery;
 using utils::concurrent::Thread;
+using data::NavigationVector;
 
 namespace sensors {
 
@@ -44,6 +45,18 @@ class ManagerInterface : public Thread {
   ManagerInterface(utils::Logger& log) : Thread(log), old_timestamp_(0) {}
  protected:
   uint64_t old_timestamp_;
+};
+
+class ImuManagerInterface : public ManagerInterface {
+ public:
+  ImuManagerInterface(utils::Logger& log) : ManagerInterface(log) {}
+  virtual array<array<NavigationVector, 2>, data::Sensors::kNumImus> getCalibrationData() = 0;
+};
+
+class ProxiManagerInterface : public ManagerInterface {
+ public:
+  ProxiManagerInterface(utils::Logger& log) : ManagerInterface(log) {}
+  virtual array<float, data::Sensors::kNumProximities> getCalibrationData() = 0;
 };
 
 }}  // namespace hyped::sensors

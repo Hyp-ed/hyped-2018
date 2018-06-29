@@ -31,9 +31,11 @@
 #include "data/data_point.hpp"
 #include "sensors/fake_imu.hpp"
 #include "utils/timer.hpp"
+#include "utils/math/statistics.hpp"
 
 
 namespace hyped {
+using utils::math::OnlineStatistics;
 namespace sensors {
 
 FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
@@ -87,6 +89,22 @@ void FakeImuAccelerating::getData(Imu* imu)
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
+}
+
+array<NavigationVector, 2> FakeImuAccelerating::calcCalibrationData()
+{
+  array<NavigationVector, 2> stats;
+    OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
+    OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
+    for (int i = 0; i < 1000; i++) {
+      Imu imu;
+      getData(&imu);
+      stats_acc.update(imu.acc);
+      stats_gyr.update(imu.gyr);
+    }
+    stats[0] = stats_acc.getVariance();
+    stats[1] = stats_gyr.getVariance();
+    return stats;
 }
 
 NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, NavigationVector noise)
@@ -212,6 +230,22 @@ void FakeImuStationary::getData(Imu* imu)
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
+}
+
+array<NavigationVector, 2> FakeImuStationary::calcCalibrationData()
+{
+  array<NavigationVector, 2> stats;
+    OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
+    OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
+    for (int i = 0; i < 1000; i++) {
+      Imu imu;
+      getData(&imu);
+      stats_acc.update(imu.acc);
+      stats_gyr.update(imu.gyr);
+    }
+    stats[0] = stats_acc.getVariance();
+    stats[1] = stats_gyr.getVariance();
+    return stats;
 }
 
 NavigationVector FakeImuStationary::addNoiseToData(NavigationVector value, NavigationVector noise)

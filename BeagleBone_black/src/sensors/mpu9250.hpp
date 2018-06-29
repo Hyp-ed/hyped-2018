@@ -35,6 +35,7 @@ namespace hyped {
 using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
+using data::NavigationVector;
 
 namespace sensors {
 
@@ -54,6 +55,12 @@ class MPU9250 : public ImuInterface {
    *  @brief Get the IMU data and update the pointer
    */
   void getData(Imu* imu) override;
+  /**
+   * @brief Calculates the variance for the data structure
+   *
+   * @return float value of the variance for the sensor
+   */
+  array<NavigationVector, 2> calcCalibrationData() override;
   // Below methods and variables are used for demo_file
   /*
    *  @brief Returns the most recent Accelerometer readings
