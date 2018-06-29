@@ -31,7 +31,8 @@ using data::Battery;
 namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
+    : Thread(id, log),
+      data_(data::Data::getInstance())
 {
   const char* ipAddress = "127.0.0.1";
   int portNo = 5695;
