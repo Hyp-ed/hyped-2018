@@ -34,7 +34,7 @@ HypedMachine::HypedMachine(utils::Logger& log)
 
 void HypedMachine::handleEvent(Event event)
 {
-  log_.DBG1("STATE", "Raised event %d", event);
+  log_.INFO("STATE", "Raised event %d", event);
   current_state_->react(*this, event);
 }
 
@@ -43,7 +43,7 @@ void HypedMachine::transition(State *state)
   // NOTE, no use of argument state, as all react() functions allocate all new
   // states directly to current_state_ variable through common State::alloc_ pointer
   current_state_->entry();
-  log_.DBG1("STATE", "Transitioning to %s"
+  log_.INFO("STATE", "Transitioned to %s"
     , data::states[current_state_->state_]);
   state_machine_.current_state = current_state_->state_;
 
