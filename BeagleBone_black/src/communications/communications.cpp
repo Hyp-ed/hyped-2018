@@ -106,7 +106,7 @@ int Communications::receiveMessage()
     return 1;
   }
 
-  int command = atoi(buffer_);
+  int command = buffer_[0]-'0';
 
   switch (command) {
     case 0:
@@ -131,6 +131,7 @@ int Communications::receiveMessage()
       log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
       break;
     default:
+      log_.INFO("COMN", "Should not reach here");
       break;
   }
 

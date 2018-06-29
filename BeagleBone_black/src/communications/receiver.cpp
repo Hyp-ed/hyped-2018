@@ -57,6 +57,7 @@ void ReceiverThread::run()
         cmn_data.servicePropulsionGo = false;
         break;
       default:
+        return false;
         break;
     }
 
