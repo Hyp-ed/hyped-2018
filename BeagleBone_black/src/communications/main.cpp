@@ -213,6 +213,7 @@ void Main::run()
   receiverThread->start();
 
   while (1) {
+    sleep(0.2);
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
     sen_ = data_.getSensorsData();
