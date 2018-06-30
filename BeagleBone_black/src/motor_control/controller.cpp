@@ -708,8 +708,8 @@ void Controller::processEmergencyMessage(utils::io::can::Frame& message)
 {
   log_.ERR("MOTOR", "Controller %d: CAN Emergency", node_id_);
   throwCriticalFailure();
-  int8_t index_1   = message.data[0];
-  int8_t index_2   = message.data[1];
+  uint8_t index_1   = message.data[0];
+  uint8_t index_2   = message.data[1];
 
   if (index_2 == 0x00) {
     log_.ERR("MOTOR", "Controller %d: No emergency/error", node_id_);
@@ -959,9 +959,9 @@ void Controller::processErrorMessage(uint16_t error_message)
 void Controller::processSdoMessage(utils::io::can::Frame& message)
 {
   sdo_frame_recieved_ = true;
-  int8_t index_1   = message.data[1];
-  int8_t index_2   = message.data[2];
-  int8_t sub_index = message.data[3];
+  uint8_t index_1   = message.data[1];
+  uint8_t index_2   = message.data[2];
+  uint8_t sub_index = message.data[3];
 
   // Process actual velocity
   if (index_1 == 0x6C && index_2 == 0x60) {
