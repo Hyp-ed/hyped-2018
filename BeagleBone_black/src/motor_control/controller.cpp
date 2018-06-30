@@ -67,15 +67,15 @@ constexpr uint32_t kNmtTransmit           = 0x700;
 constexpr uint8_t  kReadObject            = 0x40;
 constexpr uint8_t  kWriteOneByte          = 0x2F;
 constexpr uint8_t  kWriteTwoBytes         = 0x2B;
-constexpr uint8_t  kWriteThreeBytes       = 0x27;
+// constexpr uint8_t  kWriteThreeBytes       = 0x27;  // TODO(anyone) add back in if needed
 constexpr uint8_t  kWriteFourBytes        = 0x23;
 
 // Network management commands
 constexpr uint8_t  kNmtOperational        = 0x01;
-constexpr uint8_t  kNmtStop               = 0x02;
-constexpr uint8_t  kNmtPreOperational     = 0x80;
-constexpr uint8_t  kNmtResetNode          = 0x81;
-constexpr uint8_t  kNmtResetComms         = 0x82;
+// constexpr uint8_t  kNmtStop               = 0x02;  // TODO(anyone) add back in if needed
+// constexpr uint8_t  kNmtPreOperational     = 0x80;  // TODO(anyone) add back in if needed
+// constexpr uint8_t  kNmtResetNode          = 0x81;  // TODO(anyone) add back in if needed
+// constexpr uint8_t  kNmtResetComms         = 0x82;  // TODO(anyone) add back in if needed
 
 Controller::Controller(Logger& log, uint8_t id)
   : log_(log),

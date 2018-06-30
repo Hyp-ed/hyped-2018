@@ -125,7 +125,7 @@ class Main: public Thread {
   bool nav_calib_;
   bool motors_init_;
   bool motors_ready_;
-  bool motors_operational_;
+  // bool motors_operational_;  // TODO(anyone) add back in if needed
   bool motor_failure_;
   bool all_motors_stopped_;
   MotorVelocity motor_velocity_;
