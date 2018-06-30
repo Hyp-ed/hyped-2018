@@ -56,6 +56,9 @@ void ReceiverThread::run()
       case 6:
         cmn_data.servicePropulsionGo = false;
         break;
+      default:
+        log_.ERR("COMN", "Received %d (Should not reach here)", command);
+        break;
     }
 
     data_.setCommunicationsData(cmn_data);
