@@ -61,19 +61,6 @@ class MPU9250 : public ImuInterface {
    * @return float value of the variance for the sensor
    */
   array<NavigationVector, 2> calcCalibrationData() override;
-  // Below methods and variables are used for demo_file
-  /*
-   *  @brief Returns the most recent Accelerometer readings
-   *
-   *  @return 3Dvector Returns accelerometer readings
-   */
-  void getAcclData();
-  /*
-   *  @brief Returns the most recent gyroscope readings
-   *
-   *  @return 3Dvector Returns gyroscope readings
-   */
-  void getGyroData();
 
  private:
   /*
@@ -89,7 +76,6 @@ class MPU9250 : public ImuInterface {
   void select();
   void deSelect();
   bool whoAmI();
-  void calibrateSensors();
   void writeByte(uint8_t write_reg, uint8_t write_data);
   void readByte(uint8_t read_reg, uint8_t *read_data);
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
@@ -99,9 +85,7 @@ class MPU9250 : public ImuInterface {
   uint8_t acc_scale_;
   uint8_t gyro_scale_;
   double acc_divider_;
-  int16_t acc_bias_[3];
   double gyro_divider_;
-  int16_t gyro_bias_[3];
   bool is_online_;
 };
 

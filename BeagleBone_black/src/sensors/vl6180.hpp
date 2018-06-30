@@ -118,11 +118,9 @@ class VL6180: public ProxiInterface {
   void checkStatus();
 
   Logger& log_;
-  bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_;
   I2C& i2c_;
-  bool error_status_;
   bool is_online_;
 };
 

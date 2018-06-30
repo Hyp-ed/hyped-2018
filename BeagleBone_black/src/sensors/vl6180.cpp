@@ -53,11 +53,9 @@ namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, Logger& log)
     : log_(log),
-      on_(false),
       continuous_mode_(false),
       i2c_addr_(i2c_addr),
       i2c_(I2C::getInstance()),
-      error_status_(false),
       is_online_(false)
 {
   // Create I2C instance get register address
@@ -73,9 +71,8 @@ void VL6180::setAddress(uint8_t i2c_addr)
 
 void VL6180::turnOn()
 {
-  // This waits for the device to be fresh out of reset (same thing as above)
-  // TODO(anyone): redo so that creating is not blocking in case there is not sensor
-  // waitDeviceBooted();
+  // This waits for the device to be fresh out of reset
+  waitDeviceBooted();
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
@@ -130,8 +127,11 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
-  is_online_ = isOnline();
-  log_.DBG("VL6180", "Sensor is on\n");
+  if (isOnline()) {
+    log_.INFO("VL6180", "Sensor is online");
+  } else {
+    log_.ERR("VL6180", "Sensor is not operational");
+  }
 }
 
 float VL6180::calcCalibrationData()
@@ -142,6 +142,7 @@ float VL6180::calcCalibrationData()
       stats.update(getDistance());
       Thread::sleep(9);
     }
+    log_.INFO("VL6180", "Sensor has calculated the variance");
     return stats.getVariance();
   } else {
     log_.ERR("VL6180", "Could not calibrate proxi, sensor not operational");
@@ -181,6 +182,7 @@ bool VL6180::isOnline()
   }
 
   // Check to see if i2c transaction is working by checking model ID
+  // TODO(jack) check to see if this works
   readByte(kIdentificationModelId, &data);
 
   // Value should be 0xB4 after reset
@@ -266,7 +268,7 @@ bool VL6180::waitDeviceBooted()
     }
     Thread::yield();
   }
-  log_.DBG("VL6180", "Sensor failed to get of reset");
+  log_.ERR("VL6180", "Sensor failed to get of reset");
   is_online_ = false;
   return false;
 }
