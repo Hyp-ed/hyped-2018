@@ -19,6 +19,8 @@
 #include "motor_control/main.hpp"
 
 #include <cstdint>
+#include <fstream>
+#include <string>
 
 #include "motor_control/communicator.hpp"
 #include "data/data.hpp"
@@ -111,6 +113,14 @@ void Main::initMotors()
   }
 }
 
+void Main::calculateSlip()
+{
+  std::ifstream acceleration ("..BeagleBone_black/configuration/AccelerationSlip.txt");
+  std::string line;
+  while (std::getline(acceleration,line)) {
+    
+  }
+}
 void Main::prepareMotors()
 {
   if (!motors_ready_ && !motor_failure_) {

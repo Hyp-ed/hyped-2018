@@ -20,6 +20,7 @@
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
 
 #include <cstdint>
+#include <vector>
 
 #include "motor_control/communicator.hpp"
 #include "utils/concurrent/thread.hpp"
@@ -49,6 +50,13 @@ class Main: public Thread {
     *  @brief  { Establish CAN connections with motor controllers }
     */
   void initMotors();
+  /**
+   *   @brief  { Reads slip and translational velocity data from acceleration and 
+   *             deceleration text files, calculates RPM's for appropriate slip at each
+   *             translational velocity and stores the values in a 2D array containing 
+   *             translational velocity and RPM }
+   */ 
+  void calculateSlip();
   /**
     *  @brief  { Set motors into operational state }
     */
@@ -119,6 +127,8 @@ class Main: public Thread {
   data::Motors motor_data_;
   Barrier post_calibration_barrier_;
   Communicator* communicator_;
+  std::vector<std::vector<double>> acceleration_slip_;
+  std::vector<std::vector<double>> deceleration_slip_;
   int32_t target_velocity_;
   int16_t target_torque_;
   bool run_;
