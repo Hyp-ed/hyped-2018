@@ -112,9 +112,7 @@ uint8_t FakeProxi::addNoiseToData(uint8_t value, double noise)
   static std::default_random_engine generator;
   std::normal_distribution<double> distribution(value, noise);
 
-  unsigned ans = distribution(generator);
-  ans = ans%256;
-
+  uint8_t ans = distribution(generator);
   return ans;
 }
 
