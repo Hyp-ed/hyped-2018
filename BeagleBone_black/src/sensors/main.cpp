@@ -108,7 +108,7 @@ void Main::run()
       data_.setBatteryData(batteries_);
       battery_manager_lp_->resetTimestamp();
     }
-    data_.setStripeCounterData(keyence->getStripeCounter());
+    data_.setKeyenceStripeCounterData(keyence->getStripeCounter());
     yield();
   }
 }

@@ -1,8 +1,8 @@
 /*
- * Author: Ragnor Comerford
+ * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 186/18
- * Description: Main interface for IMU class.
+ * Date: 02/07/18
+ * Description: Driver for the OPB720B-12Z optical encoder
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@
 #include "utils/io/gpio.hpp"
 #include "utils/system.hpp"
 #include "utils/timer.hpp"
-#include "sensors/keyence.hpp"
+#include "sensors/optical_encoder.hpp"
 
 
 
@@ -35,11 +35,11 @@ using utils::io::GPIO;
 
 namespace sensors {
 
-Keyence::Keyence(Logger& log, int pin)
+OpticalEncoder::OpticalEncoder(Logger& log, int pin)
     : Thread(log), pin_(pin)
 {}
 
-void Keyence::run()
+void OpticalEncoder::run()
 {
   GPIO thepin(pin_, utils::io::gpio::kIn);
   uint8_t val = thepin.wait();  // Ignore first reading
@@ -55,7 +55,7 @@ void Keyence::run()
   }
 }
 
-StripeCounter Keyence::getStripeCounter()
+StripeCounter OpticalEncoder::getStripeCounter()
 {
   return stripe_counter_;
 }
