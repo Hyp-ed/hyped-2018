@@ -22,6 +22,7 @@
 #include <cstdint>
 
 #include "utils/logger.hpp"
+#include "utils/timer.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/math/statistics.hpp"
 
@@ -210,13 +211,39 @@ void VL6180::setContinuousRangingMode()
   continuous_mode_ = true;
   log_.INFO("VL6180", "Sensor is in continuous ranging mode\n");
 }
+  // uint16_t millis_start = millis();
+  // while ((readReg(RESULT__INTERRUPT_STATUS_GPIO) & 0x04) == 0)
+  // {
+  //   if (io_timeout > 0 && ((uint16_t)millis() - millis_start) > io_timeout)
+  //   {
+  //     did_timeout = true;
+  //     return 255;
+  //   }
+  // }
 
+  // uint8_t range = readReg(RESULT__RANGE_VAL);
+  // writeReg(SYSTEM__INTERRUPT_CLEAR, 0x01);
+
+  // return range;
 uint8_t VL6180::continuousRangeDistance()
 {
-  uint8_t data;
-  data = 1;
+  uint64_t start = utils::Timer::getTimeMicros();
+  uint8_t data = 1;
+  uint8_t interrupt = 1;
+  uint64_t timeout = 50;   // ms
+  readByte(kResultInterruptStatusGpio, &interrupt);
+
+  while ((interrupt & 0x04) == 0) {
+    readByte(kResultInterruptStatusGpio, &interrupt);
+    if ((start - utils::Timer::getTimeMicros()) > timeout) {
+      return 255;
+      is_online_ = false;
+    }
+  }
+
   readByte(kResultRangeVal, &data);   // read the sampled data
   log_.DBG3("VL6180", "Sensor continuous range: %f\n", data);
+  writeByte(kSystemInterruptClear, 0x01);
   return data;
 }
 
