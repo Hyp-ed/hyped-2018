@@ -21,6 +21,7 @@ SRCS := \
   sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
   sensors/keyence.cpp \
+  sensors/optical_encoder.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \

@@ -40,6 +40,8 @@ sensors/vl6180.hpp
 sensors/vl6180.cpp
 sensors/keyence.cpp
 sensors/keyence.hpp
+sensors/optical_encoder.cpp
+sensors/optical_encoder.hpp
 communications/main.hpp
 communications/main.cpp
 communications/communications.hpp

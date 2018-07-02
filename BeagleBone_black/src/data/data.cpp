@@ -97,6 +97,18 @@ void Data::setKeyenceStripeCounterData(const StripeCounter& stripe_counter)
   sensors_.keyence_stripe_counter = stripe_counter;
 }
 
+StripeCounter Data::getOpticalEncoderStripeCounterData()
+{
+  ScopedLock L(&lock_sensors_);
+  return sensors_.optical_stripe_counter;
+}
+
+void Data::setOpticalEncoderStripeCounterData(const StripeCounter& stripe_counter)
+{
+  ScopedLock L(&lock_sensors_);
+  sensors_.optical_stripe_counter = stripe_counter;
+}
+
 void Data::setCalibrationData(const SensorCalibration sensor_calibration_data)
 {
   ScopedLock L(&lock_calibration_data_);

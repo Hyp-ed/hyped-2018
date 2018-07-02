@@ -24,6 +24,7 @@
 #include <cstdint>
 
 #include "utils/concurrent/thread.hpp"
+#include "utils/logger.hpp"
 #include "data/data.hpp"
 
 
@@ -34,12 +35,11 @@ using utils::Logger;
 
 namespace sensors {
 
-
 class OpticalEncoder: public Thread {
  public:
-  explicit OpticalEncoder(Logger& log, int pin);
+  OpticalEncoder(Logger& log, int pin);
   void run() override;
-  data::StripeCounter getStripeCounter();
+  data::StripeCounter getOptStripeCounter();
 
  private:
   int pin_;

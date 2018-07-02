@@ -17,18 +17,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+#include "sensors/optical_encoder.hpp"
 
 #include <stdio.h>
+
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/gpio.hpp"
 #include "utils/system.hpp"
 #include "utils/timer.hpp"
-#include "sensors/optical_encoder.hpp"
-
 
 
 namespace hyped {
-
 using data::StripeCounter;
 using utils::concurrent::Thread;
 using utils::io::GPIO;
@@ -55,7 +54,7 @@ void OpticalEncoder::run()
   }
 }
 
-StripeCounter OpticalEncoder::getStripeCounter()
+StripeCounter OpticalEncoder::getOptStripeCounter()
 {
   return stripe_counter_;
 }
