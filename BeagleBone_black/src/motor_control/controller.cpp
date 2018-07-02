@@ -129,6 +129,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor poles", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set feedback type to SSI
   sdo_message_.data[0]   = kWriteOneByte;
@@ -142,6 +145,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring feedback type", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set motor phase offset to -3
   sdo_message_.data[0]   = kWriteOneByte;
@@ -155,6 +161,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set motor phase offset compensation to 190
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -168,6 +177,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset compensation", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set over voltage limit to 125
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -181,6 +193,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring over voltage limit", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set under voltage limit to 25
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -194,6 +209,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring under voltage limit", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set under voltage minimum to 20
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -207,6 +225,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring under voltage minimum", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set motor temperature sensor
   sdo_message_.data[0]   = kWriteOneByte;
@@ -220,6 +241,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor temperature sensor", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set motor rated current to 80,000 mA
   sdo_message_.data[0]   = kWriteFourBytes;
@@ -233,6 +257,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated current", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set motor rated torque to 80N
   sdo_message_.data[0]   = kWriteFourBytes;
@@ -246,6 +273,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // TODO(anyone) needs to be changed after we calibrate PI with load
   // Set current control torque regulator P gain to 1200
@@ -260,6 +290,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control torque P gain", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set current control torque regulator I gain to 600
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -273,6 +306,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control torque I gain", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set current control flux regulator P gain to 1200
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -286,6 +322,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control flux P gain", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set current control flux regulator I gain to 600
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -299,6 +338,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control torque I gain", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set current control regulator ramp to 32000
   sdo_message_.data[0]   = kWriteTwoBytes;
@@ -312,6 +354,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control ramp", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set maximum controller current to 700,000 mA
   sdo_message_.data[0]   = kWriteFourBytes;
@@ -325,6 +370,9 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring maximum controller current", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set secondary controller current protection to 800,000 mA
   sdo_message_.data[0]   = kWriteFourBytes;
@@ -338,6 +386,11 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring secondary current protection", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
+
+  log_.INFO("MOTOR", "Controller %d: Configured", node_id_);
 }
 
 void Controller::enterOperational()
@@ -362,6 +415,9 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Set target velocity to 0;
   sendTargetVelocity(0);
@@ -378,6 +434,9 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Applying brake", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Send shutdown message to transition from state 1 (Switch on disabled)
   // to state 2 (Ready to switch on)
@@ -392,6 +451,9 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }  
   checkState();
   checkStateTransition(kReadyToSwitchOn);
 
@@ -408,6 +470,9 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
   checkState();
   checkStateTransition(kSwitchedOn);
 
@@ -424,6 +489,9 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
   checkState();
   checkStateTransition(kOperationEnabled);
 }
@@ -444,6 +512,9 @@ void Controller::enterPreOperational()
 
     log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
     sendSdoMessage(sdo_message_);
+    if(critical_failure_) {
+      return;
+    }
   }
 }
 
@@ -461,6 +532,9 @@ void Controller::checkState()
 
   log_.DBG1("MOTOR", "Controller %d: Checking status", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 }
 
 void Controller::sendTargetVelocity(int32_t target_velocity)
@@ -569,6 +643,9 @@ void Controller::healthCheck()
 
   log_.INFO("MOTOR", "Controller %d: Checking for warnings", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 
   // Check error status
   sdo_message_.data[0]   = kReadObject;
@@ -582,6 +659,9 @@ void Controller::healthCheck()
 
   log_.INFO("MOTOR", "Controller %d: Checking for errors", node_id_);
   sendSdoMessage(sdo_message_);
+  if(critical_failure_) {
+    return;
+  }
 }
 
 bool Controller::getFailure()
@@ -661,7 +741,7 @@ void Controller::sendSdoMessage(utils::io::can::Frame& message)
   int8_t send_counter = 0;
   for (send_counter = 0; send_counter < 3; send_counter++) {
     can_.send(message);
-    Thread::sleep(15);
+    Thread::yield();
     if (sdo_frame_recieved_) {
       break;
     } else {
@@ -670,7 +750,6 @@ void Controller::sendSdoMessage(utils::io::can::Frame& message)
   }
   // No SDO frame recieved - controller must be offline/communication error
   if (!sdo_frame_recieved_) {
-    throwCriticalFailure();
     log_.ERR("MOTOR", "Controller %d: No response from controller", node_id_);
     throwCriticalFailure();
   }
@@ -699,7 +778,7 @@ void Controller::checkStateTransition(ControllerState state)
   }
   if (state_ != state) {
     throwCriticalFailure();
-    log_.ERR("MOTOR", "Controller %d, Could not transition to %s", node_id_, state);
+    log_.ERR("MOTOR", "Controller %d, Could not transition to state %d", node_id_, state);
     return;
   }
 }
