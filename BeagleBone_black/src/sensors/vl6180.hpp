@@ -42,6 +42,12 @@ class VL6180: public ProxiInterface {
     proxi->operational = isOnline();
     proxi->val = getDistance();
   }
+  /**
+   * @brief Calculates the variance for the data structure
+   *
+   * @return float value of the variance for the sensor
+   */
+  float calcCalibrationData() override;
 
   /**
     *  @brief  Returns the distance from the nearest object the sensor is facing
@@ -112,11 +118,9 @@ class VL6180: public ProxiInterface {
   void checkStatus();
 
   Logger& log_;
-  bool on_;
   bool continuous_mode_;
   uint8_t i2c_addr_;
   I2C& i2c_;
-  bool error_status_;
   bool is_online_;
 };
 

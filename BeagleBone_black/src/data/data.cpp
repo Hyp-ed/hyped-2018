@@ -97,6 +97,18 @@ void Data::setStripeCounterData(const StripeCounter& stripe_counter)
   sensors_.stripe_counter = stripe_counter;
 }
 
+void Data::setCalibrationData(const SensorCalibration sensor_calibration_data)
+{
+  ScopedLock L(&lock_calibration_data_);
+  calibration_data_ = sensor_calibration_data;
+}
+
+SensorCalibration Data::getCalibrationData()
+{
+  ScopedLock L(&lock_calibration_data_);
+  return calibration_data_;
+}
+
 Batteries Data::getBatteriesData()
 {
   ScopedLock L(&lock_batteries_);

@@ -35,7 +35,7 @@ using utils::Logger;
 
 namespace sensors {
 
-class ProxiManager: public ManagerInterface {
+class ProxiManager: public ProxiManagerInterface {
   static constexpr uint8_t kMultiplexerAddr = 0x70;
  public:
   ProxiManager(Logger& log,
@@ -44,10 +44,12 @@ class ProxiManager: public ManagerInterface {
   void run() override;
   bool updated() override;
   void resetTimestamp() override;
+  array<float, data::Sensors::kNumProximities> getCalibrationData() override;
 
  private:
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
+  array<float, data::Sensors::kNumProximities> proxi_calibration_;
 };
 
 }}  // namespace hyped::sensors

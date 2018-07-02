@@ -23,8 +23,14 @@
 
 
 #include "utils/system.hpp"
+#include "utils/math/statistics.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
+
+using utils::math::OnlineStatistics;
+using utils::concurrent::Thread;
+
 namespace sensors {
 
 
@@ -57,6 +63,23 @@ bool CanProxi::isOnline()
 void CanProxi::getData(Proximity* proxi)
 {
   proxi->val = data_[id_];
+}
+
+float CanProxi::calcCalibrationData()
+{
+  if (isOnline()) {
+    Proximity proxi;
+    OnlineStatistics<float> stats = OnlineStatistics<float>();
+    for (int i = 0; i < 100; i++) {
+      getData(&proxi);
+      stats.update(proxi.val);
+      Thread::sleep(10);
+    }
+    return stats.getVariance();
+  } else {
+    log_.ERR("VL6180", "Could not calibrate proxi, sensor not operational");
+    return -1.0;
+  }
 }
 
 // ---------------------------------------------------------------------
