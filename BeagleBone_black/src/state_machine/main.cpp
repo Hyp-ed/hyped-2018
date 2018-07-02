@@ -57,7 +57,7 @@ void Main::run()
     motor_data_ = data_.getMotorData();
     batteries_data_ = data_.getBatteriesData();
     sensors_data_ = data_.getSensorsData();
-    
+
     if (!modules_init_) {
       checkInit();
     }

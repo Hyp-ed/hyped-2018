@@ -129,7 +129,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor poles", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -145,7 +145,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring feedback type", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -161,7 +161,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -177,7 +177,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor phase offset compensation", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -193,7 +193,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring over voltage limit", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -209,7 +209,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring under voltage limit", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -225,7 +225,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring under voltage minimum", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -241,7 +241,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor temperature sensor", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -257,7 +257,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated current", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -273,7 +273,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -290,7 +290,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control torque P gain", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -306,7 +306,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control torque I gain", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -322,7 +322,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control flux P gain", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -338,7 +338,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control torque I gain", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -354,7 +354,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring current control ramp", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -370,7 +370,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring maximum controller current", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -386,7 +386,7 @@ void Controller::configure()
 
   log_.DBG1("MOTOR", "Controller %d: Configuring secondary current protection", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -415,7 +415,7 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Enabling velocity mode", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -434,7 +434,7 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Applying brake", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -451,9 +451,9 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
-  }  
+  }
   checkState();
   checkStateTransition(kReadyToSwitchOn);
 
@@ -470,7 +470,7 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
   checkState();
@@ -489,7 +489,7 @@ void Controller::enterOperational()
 
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
   checkState();
@@ -512,7 +512,7 @@ void Controller::enterPreOperational()
 
     log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
     sendSdoMessage(sdo_message_);
-    if(critical_failure_) {
+    if (critical_failure_) {
       return;
     }
   }
@@ -532,7 +532,7 @@ void Controller::checkState()
 
   log_.DBG1("MOTOR", "Controller %d: Checking status", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 }
@@ -643,7 +643,7 @@ void Controller::healthCheck()
 
   log_.INFO("MOTOR", "Controller %d: Checking for warnings", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 
@@ -659,7 +659,7 @@ void Controller::healthCheck()
 
   log_.INFO("MOTOR", "Controller %d: Checking for errors", node_id_);
   sendSdoMessage(sdo_message_);
-  if(critical_failure_) {
+  if (critical_failure_) {
     return;
   }
 }
