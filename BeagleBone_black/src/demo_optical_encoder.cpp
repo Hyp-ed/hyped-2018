@@ -34,13 +34,16 @@ int main(int argc, char* argv[]) {
   System::parseArgs(argc, argv);
   Logger log(true, 1);
 
-  GPIO the_pin(66, io::gpio::kOut);  // P8_7
+  GPIO the_pin(60, io::gpio::kIn);
   uint8_t val = the_pin.wait();
-  uint64_t count = 0;
+  int count = 0;
+  log.INFO("Opt-En", "Starting optical encoder");
 
   while (1) {
       val = the_pin.wait();
-      if (val == 1) count = count + 1;
+      if (val == 1) {
+        count++;
       log.INFO("Opt-En", "count: %d", count);
+      }
   }
 }
