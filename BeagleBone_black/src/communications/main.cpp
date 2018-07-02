@@ -205,9 +205,16 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
 
 void Main::run()
 {
-  cmn_data_ = data_.getCommunicationsData();
+  cmn_data_.launchCommand = false;
+  cmn_data_.resetCommand = false;
+  cmn_data_.servicePropulsionGo = false;
   cmn_data_.run_length = 1250;
-  cmn_data_.module_status = data::ModuleStatus::kStart;
+  if (baseCommunicator_->connectionEstablished()) {
+    cmn_data_.module_status = data::ModuleStatus::kInit;
+  } else {
+    cmn_data_.module_status = data::ModuleStatus::kCriticalFailure;
+  }
+  data_.setCommunicationsData(cmn_data_);
   data_.setCommunicationsData(cmn_data_);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
