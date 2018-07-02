@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   Logger log(true, 1);
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
   uint8_t kMultiplexerAddr = 0x70;
-  uint8_t kNumOfProxis = 2;
+  uint8_t kNumOfProxis = 1;
   ProxiInterface* proxi_[kNumOfProxis];
 
   // i2c.write(kMultiplexerAddr, 0xFF);
