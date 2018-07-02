@@ -35,7 +35,7 @@ namespace sensors {
 class VL6180: public ProxiInterface {
  public:
   VL6180(uint8_t i2c_addr, Logger& log);
-  ~VL6180();
+  ~VL6180() {}
 
   bool isOnline() override;
   void getData(Proximity* proxi) override {
@@ -64,7 +64,7 @@ class VL6180: public ProxiInterface {
     */
   void setSingleShotMode();
 
-  void setAddress(uint8_t i2c_addr);
+  void setAddress(uint32_t i2c_addr);
 
  private:
   /**
@@ -119,7 +119,7 @@ class VL6180: public ProxiInterface {
 
   Logger& log_;
   bool continuous_mode_;
-  uint8_t i2c_addr_;
+  uint32_t i2c_addr_;
   I2C& i2c_;
   bool is_online_;
 };

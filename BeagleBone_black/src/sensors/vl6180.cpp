@@ -63,7 +63,7 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
 
-void VL6180::setAddress(uint8_t i2c_addr)
+void VL6180::setAddress(uint32_t i2c_addr)
 {
   writeByte(0x0212, i2c_addr);
   i2c_addr_ = i2c_addr;
@@ -127,11 +127,11 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
-  // if (isOnline()) {
-  //   log_.INFO("VL6180", "Sensor is online");
-  // } else {
-  //   log_.ERR("VL6180", "Sensor is not operational");
-  // }
+  if (isOnline()) {
+    log_.INFO("VL6180", "Sensor is online");
+  } else {
+    log_.ERR("VL6180", "Sensor is not operational");
+  }
 }
 
 float VL6180::calcCalibrationData()
@@ -158,39 +158,43 @@ void VL6180::setMaxConvergenceTime(uint8_t time_ms)
 uint8_t VL6180::getDistance()
 {
   // If sensor is not online try and turn on
-  if (!is_online_) turnOn();
-  if (continuous_mode_) {
-    return continuousRangeDistance();
+  if (!is_online_) {
+    turnOn();
   } else {
-    return singleRangeDistance();
+    if (continuous_mode_) {
+      return continuousRangeDistance();
+    } else {
+      return singleRangeDistance();
+    }
   }
 }
 
 bool VL6180::isOnline()
 {
-  // uint8_t data;
-  // uint8_t status;
+  uint8_t data;
+  uint8_t status;
 
-  // readByte(kResultRangeStatus, &data);
-  // status = data >> 4;
+  readByte(kResultRangeStatus, &data);
+  status = data >> 4;
 
-  // if (status == 0) {
-  //   is_online_ = true;
-  // } else if (status != 0) {
-  //   checkStatus();
-  //   is_online_ = false;
-  // }
+  if (status == 0) {
+    is_online_ = true;
+  } else if (status != 0) {
+    checkStatus();
+    is_online_ = false;
+  }
 
-  // // Check to see if i2c transaction is working by checking model ID
-  // // TODO(jack) check to see if this works
-  // readByte(kIdentificationModelId, &data);
+  // Check to see if i2c transaction is working by checking model ID
+  // TODO(jack) check to see if this works
+  readByte(kIdentificationModelId, &data);
 
-  // // Value should be 0xB4 after reset
-  // if (data != 0xB4) {
-  //   log_.ERR("VL6180", "Data should of been: %d, but was %d", 0xB4, data);
-  //   is_online_ = false;
-  // }
-  return true;
+  // Value should be 0xB4 after reset
+  if (data != 0xB4) {
+    log_.ERR("VL6180", "Data should of been: %d, but was %d", 0xB4, data);
+    is_online_ = false;
+  }
+  log_.INFO("TEST", "data: %d", data);
+  return is_online_;
 }
 
 void VL6180::setContinuousRangingMode()
@@ -260,13 +264,13 @@ bool VL6180::waitDeviceBooted()
   uint8_t fresh_out_of_reset;
   int send_counter;
 
-  for (send_counter = 0; send_counter < 10; send_counter++) {
+  for (send_counter = 0; send_counter < 3; send_counter++) {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
     if (fresh_out_of_reset == 1) {
       log_.DBG("VL6180", "Sensor out of reset");
       return true;
     }
-    Thread::yield();
+    Thread::sleep(100);
   }
   log_.ERR("VL6180", "Sensor failed to get of reset");
   is_online_ = false;
