@@ -32,9 +32,9 @@ ReceiverThread::ReceiverThread(Communications* baseCommunicator)
 void ReceiverThread::run()
 {
   data::Communications cmn_data;
-  cmn_data = data_.getCommunicationsData();
 
   while (1) {
+    cmn_data = data_.getCommunicationsData();
     int command = baseCommunicator_->receiveMessage();
 
     switch (command) {
