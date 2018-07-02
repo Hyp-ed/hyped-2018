@@ -38,7 +38,7 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence(new Keyence(log_, 73)),
+      keyence_(new Keyence(log_, 73)),
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
@@ -54,7 +54,7 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   // start all managers
-  keyence->start();
+  keyence_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
   proxi_manager_back_->start();
@@ -108,7 +108,7 @@ void Main::run()
       data_.setBatteryData(batteries_);
       battery_manager_lp_->resetTimestamp();
     }
-    data_.setStripeCounterData(keyence->getStripeCounter());
+    data_.setStripeCounterData(keyence_->getStripeCounter());
     yield();
   }
 }
