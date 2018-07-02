@@ -27,6 +27,8 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+#include <ctime>
+#include <cstdlib>
 
 #include "data/data_point.hpp"
 
@@ -54,6 +56,7 @@ void FakeProxi::setData()
 {
   ref_time_ = high_resolution_clock::now();
   reading_counter_ = 0;
+  srand(time(NULL));
 }
 
 void FakeProxi::getData(Proximity* proxi)
@@ -109,10 +112,7 @@ void FakeProxi::readDataFromFile(std::string file_path)
 
 uint8_t FakeProxi::addNoiseToData(uint8_t value, double noise)
 {
-  static std::default_random_engine generator;
-  std::normal_distribution<double> distribution(value, noise);
-
-  uint8_t ans = distribution(generator);
+  uint8_t ans = rand() % 256;
   return ans;
 }
 
