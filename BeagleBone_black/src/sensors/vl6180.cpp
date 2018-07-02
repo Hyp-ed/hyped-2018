@@ -161,14 +161,13 @@ uint8_t VL6180::getDistance()
   // If sensor is not online try and turn on
   if (!is_online_) {
     turnOn();
+  } else if (continuous_mode_) {
+    return continuousRangeDistance();
   } else {
-    if (continuous_mode_) {
-      return continuousRangeDistance();
-    } else {
-      return singleRangeDistance();
-    }
+    return singleRangeDistance();
   }
 }
+
 
 bool VL6180::isOnline()
 {
