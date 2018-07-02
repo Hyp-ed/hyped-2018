@@ -211,20 +211,7 @@ void VL6180::setContinuousRangingMode()
   continuous_mode_ = true;
   log_.INFO("VL6180", "Sensor is in continuous ranging mode\n");
 }
-  // uint16_t millis_start = millis();
-  // while ((readReg(RESULT__INTERRUPT_STATUS_GPIO) & 0x04) == 0)
-  // {
-  //   if (io_timeout > 0 && ((uint16_t)millis() - millis_start) > io_timeout)
-  //   {
-  //     did_timeout = true;
-  //     return 255;
-  //   }
-  // }
 
-  // uint8_t range = readReg(RESULT__RANGE_VAL);
-  // writeReg(SYSTEM__INTERRUPT_CLEAR, 0x01);
-
-  // return range;
 uint8_t VL6180::continuousRangeDistance()
 {
   uint64_t start = utils::Timer::getTimeMicros();
