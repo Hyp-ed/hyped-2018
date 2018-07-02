@@ -137,13 +137,18 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists()
 
 void Navigation::update(DataPoint<ImuArray> imus)
 {
+  for (unsigned int i = 0; i < imus.value.size(); ++i) {
+    imus.value[i].acc = acceleration_filter_[i].filter(imus.value[i].acc);
+    imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
+  }
+
   int num_operational = 0;
   NavigationVector acc(0), gyr(0);
   for (unsigned int i = 0; i < imus.value.size(); ++i) {
     if (imus.value[i].operational) {
       ++num_operational;
-      acc += acceleration_filter_[i].filter(imus.value[i].acc);
-      gyr += gyro_filter_[i].filter(imus.value[i].gyr);
+      acc += imus.value[i].acc;
+      gyr += imus.value[i].gyr;
     }
   }
 
@@ -152,8 +157,12 @@ void Navigation::update(DataPoint<ImuArray> imus)
     log_.ERR("NAV", "Critical failure: num operational IMUs = %d < 2", num_operational);
   }
 
-  accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
-           gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
+  if (is_calibrating_) {
+    calibrationUpdate(imus.value);
+  } else {
+    accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
+             gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
+  }
 }
 
 void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
