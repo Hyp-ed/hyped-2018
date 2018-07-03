@@ -34,15 +34,17 @@ int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
   Logger& log = hyped::utils::System::getLogger();
-  BMSHP bms(0x6b1);
+  BMSHP bms(1, log);
 
   Battery b;
   while (1) {
     bms.getData(&b);
-    log.INFO("TEST", "volatege, temp, current, charge: %d %d"
-      , b.voltage
-      , b.temperature);
-    Thread::sleep(1000);
+    log.INFO("TEST", "volatage: %d, temp: %d, current: %d, charge: %d", 
+      b.voltage,
+      b.temperature,
+      b.current,
+      b.charge);
+    Thread::sleep(100);
   }
 
   return 0;
