@@ -56,7 +56,7 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
-    //if connect does not complete successfully it returns -1
+    // if connect does not complete successfully it returns -1
   } else {
     log_.INFO("COMN", "TCP/IP connection established.");
     connected_ = true;
