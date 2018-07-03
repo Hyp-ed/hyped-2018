@@ -33,15 +33,17 @@ namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
+using data::NavigationVector;
 
 namespace sensors {
 
-class ImuManager: public ManagerInterface {
+class ImuManager: public ImuManagerInterface {
  public:
   ImuManager(Logger& log, data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu);
   void run() override;
   bool updated() override;
   void resetTimestamp() override;
+  array<array<NavigationVector, 2>, data::Sensors::kNumImus> getCalibrationData() override;
 
  private:
   utils::System& sys_;
@@ -51,6 +53,7 @@ class ImuManager: public ManagerInterface {
   uint8_t         chip_select_[data::Sensors::kNumImus];
   ImuInterface*   imu_[data::Sensors::kNumImus];
   ImuInterface*   imu_accelerating_[data::Sensors::kNumImus];
+  array<array<NavigationVector, 2>, data::Sensors::kNumImus> imu_calibrations_;
   bool is_fake_;
 };
 

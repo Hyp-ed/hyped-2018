@@ -22,10 +22,12 @@
 #include <cstdint>
 
 #include "utils/logger.hpp"
-
+#include "utils/concurrent/thread.hpp"
+#include "utils/math/statistics.hpp"
 
 
 // Register addresses
+constexpr uint16_t kIdentificationModelId              = 0x000;
 constexpr uint16_t kSystemInterruptClear               = 0x0015;
 constexpr uint16_t kSystemFreshOutOfReset              = 0x0016;
 constexpr uint16_t kSysrangeStart                      = 0x0018;
@@ -44,26 +46,21 @@ constexpr uint16_t kInterruptClearRanging              = 0x01;
 namespace hyped {
 
 using utils::io::I2C;
+using utils::concurrent::Thread;
+using utils::math::OnlineStatistics;
 
 namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, Logger& log)
     : log_(log),
-      on_(false),
       continuous_mode_(false),
       i2c_addr_(i2c_addr),
       i2c_(I2C::getInstance()),
-      error_status_(false)
+      is_online_(false)
 {
   // Create I2C instance get register address
   turnOn();
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
-}
-
-VL6180::~VL6180()
-{
-  turnOff();
-  log_.INFO("VL6180", "Deconstructing sensor object");
 }
 
 void VL6180::setAddress(uint8_t i2c_addr)
@@ -74,15 +71,8 @@ void VL6180::setAddress(uint8_t i2c_addr)
 
 void VL6180::turnOn()
 {
-  // return if already on
-  if (on_) {
-    log_.DBG("VL6180", "Sensor is already on\n");
-    return;
-  }
-
-  // This waits for the device to be fresh out of reset (same thing as above)
-  // TODO(anyone): redo so that creating is not blocking in case there is not sensor
-  // waitDeviceBooted();
+  // This waits for the device to be fresh out of reset
+  waitDeviceBooted();
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
@@ -137,8 +127,27 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
-  on_ = true;
-  log_.DBG("VL6180", "Sensor is on\n");
+  if (isOnline()) {
+    log_.INFO("VL6180", "Sensor is online");
+  } else {
+    log_.ERR("VL6180", "Sensor is not operational");
+  }
+}
+
+float VL6180::calcCalibrationData()
+{
+  if (is_online_) {
+    OnlineStatistics<float> stats = OnlineStatistics<float>();
+    for (int i = 0; i < 100; i++) {
+      stats.update(getDistance());
+      Thread::sleep(9);
+    }
+    log_.INFO("VL6180", "Sensor has calculated the variance");
+    return stats.getVariance();
+  } else {
+    log_.ERR("VL6180", "Could not calibrate proxi, sensor not operational");
+    return -1.0;
+  }
 }
 
 void VL6180::setMaxConvergenceTime(uint8_t time_ms)
@@ -146,14 +155,10 @@ void VL6180::setMaxConvergenceTime(uint8_t time_ms)
   writeByte(kSysrangeMaxConvergenceTime, time_ms);
 }
 
-void VL6180::turnOff()
-{
-  on_ = false;
-  log_.DBG("VL6180", "Sensor is now off\n");
-}
-
 uint8_t VL6180::getDistance()
 {
+  // If sensor is not online try and turn on
+  if (!is_online_) turnOn();
   if (continuous_mode_) {
     return continuousRangeDistance();
   } else {
@@ -170,11 +175,22 @@ bool VL6180::isOnline()
   status = data >> 4;
 
   if (status == 0) {
-    return true;
+    is_online_ = true;
   } else if (status != 0) {
     checkStatus();
+    is_online_ = false;
   }
-  return false;
+
+  // Check to see if i2c transaction is working by checking model ID
+  // TODO(jack) check to see if this works
+  readByte(kIdentificationModelId, &data);
+
+  // Value should be 0xB4 after reset
+  if (data != 0xB4) {
+    log_.ERR("VL6180", "Data should of been: %d, but was %d", 0xB4, data);
+    is_online_ = false;
+  }
+  return is_online_;
 }
 
 void VL6180::setContinuousRangingMode()
@@ -188,6 +204,7 @@ void VL6180::setContinuousRangingMode()
   uint8_t inter_measurement_time = 1;
   writeByte(kSysrangeIntermeasurementPeriod, inter_measurement_time);
   continuous_mode_ = true;
+  log_.INFO("VL6180", "Sensor is in continuous ranging mode\n");
 }
 
 uint8_t VL6180::continuousRangeDistance()
@@ -195,6 +212,7 @@ uint8_t VL6180::continuousRangeDistance()
   uint8_t data;
   data = 1;
   readByte(kResultRangeVal, &data);   // read the sampled data
+  log_.DBG3("VL6180", "Sensor continuous range: %f\n", data);
   return data;
 }
 
@@ -207,6 +225,7 @@ void VL6180::setSingleShotMode()
     // Write to sensor and set to single shot ranging mode
     writeByte(kSysrangeStart, kModeStartStop | kModeSingleShot);
     continuous_mode_ = false;
+    log_.INFO("VL6180", "Sensor is in single-shot ranging mode\n");
   }
 }
 
@@ -231,6 +250,7 @@ uint8_t VL6180::singleRangeDistance()
 
   writeByte(kSystemInterruptClear, kInterruptClearRanging);
   readByte(kResultRangeVal, &data);
+  log_.DBG3("VL6180", "Sensor single-shot range: %f\n", data);
   return data;
 }
 
@@ -238,25 +258,37 @@ bool VL6180::waitDeviceBooted()
 {
   // Will hold the return value of the register kSystemFreshOutOfReset
   uint8_t fresh_out_of_reset;
-  do {
+  int send_counter;
+
+  for (send_counter = 0; send_counter < 10; send_counter++) {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
-  } while (fresh_out_of_reset != 1);
-  return true;
+    if (fresh_out_of_reset == 1) {
+      log_.DBG("VL6180", "Sensor out of reset");
+      return true;
+    }
+    Thread::yield();
+  }
+  log_.ERR("VL6180", "Sensor failed to get of reset");
+  is_online_ = false;
+  return false;
 }
 
 bool VL6180::rangeWaitDeviceReady()
 {
   uint8_t data;
-  while (true) {
+  for (int i = 0; i < 10; i++) {
     readByte(kResultRangeStatus, &data);
-    data= data & kRangeDeviceReadyMask;
+    data = data & kRangeDeviceReadyMask;
     if (data)
       return true;
+    Thread::yield();
   }
+  log_.ERR("VL6180", "Sensor took too long to wait for data");
+  is_online_ = false;
   return false;
 }
 
-bool VL6180::checkStatus()
+void VL6180::checkStatus()
 {
   uint8_t data;
   uint8_t status;
@@ -264,12 +296,8 @@ bool VL6180::checkStatus()
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
 
-  if (status == 0) {
-    error_status_ = false;
-  } else {
-    error_status_ = true;
     // Parse the error
-    switch (status) {
+  switch (status) {
     case 1:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
     break;
@@ -311,9 +339,7 @@ bool VL6180::checkStatus()
     break;
     default:
           log_.ERR("VL6180", "Unidentified error");
-    }
   }
-  return error_status_;
 }
 
 void VL6180::readByte(uint16_t reg_add, uint8_t *data)

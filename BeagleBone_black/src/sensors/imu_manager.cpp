@@ -31,12 +31,13 @@ namespace hyped {
 using data::Data;
 using data::Sensors;
 using utils::System;
+using data::NavigationVector;
 
 namespace sensors {
 
 ImuManager::ImuManager(Logger& log,
                        data::DataPoint<array<Imu, data::Sensors::kNumImus>> *imu)
-    : ManagerInterface(log),
+    : ImuManagerInterface(log),
       sys_(System::getSystem()),
       data_(Data::getInstance()),
       chip_select_ {31, 50, 48, 51}
@@ -46,6 +47,7 @@ ImuManager::ImuManager(Logger& log,
     // create IMUs
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
+      imu_calibrations_[i] = imu_[i]->calcCalibrationData();
     }
   } else {
     // create fake IMUs
@@ -55,9 +57,11 @@ ImuManager::ImuManager(Logger& log,
                                       NavigationVector(1),
                                       NavigationVector(0),
                                       NavigationVector(1));
+      imu_calibrations_[i] = imu_[i]->calcCalibrationData();
       imu_accelerating_[i] = new FakeImuAccelerating(log,
                                                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",  //NOLINT
                                                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
+      // TODO(anyone) add fake calcCalibrationData()
     }
   }
   sensors_imu_ = imu;
@@ -78,6 +82,11 @@ void ImuManager::run()
     }
     sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }
+}
+
+array<array<NavigationVector, 2>, data::Sensors::kNumImus> ImuManager::getCalibrationData()
+{
+  return imu_calibrations_;
 }
 
 bool ImuManager::updated()

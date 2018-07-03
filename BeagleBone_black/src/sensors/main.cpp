@@ -24,12 +24,14 @@
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
+
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
 using data::Batteries;
 using data::StripeCounter;
+using data::SensorCalibration;
 
 namespace sensors {
 
@@ -63,6 +65,12 @@ void Main::run()
     if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
       sensors_.module_status = data::ModuleStatus::kInit;
       data_.setSensorsData(sensors_);
+
+      SensorCalibration sensor_calibration_data;
+      sensor_calibration_data.proxi_front_variance = proxi_manager_front_->getCalibrationData();
+      sensor_calibration_data.proxi_back_variance  = proxi_manager_back_->getCalibrationData();
+      sensor_calibration_data.imu_variance         = imu_manager_->getCalibrationData();
+      data_.setCalibrationData(sensor_calibration_data);
       sensor_init_ = true;
       break;
     }

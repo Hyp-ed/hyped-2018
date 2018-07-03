@@ -1,8 +1,8 @@
 /*
  * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 16/05/18
- * Description: Demo for VL6180 sensor
+ * Date: 29/06/18
+ * Description: Demo for the multiplexer with proxisensors
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,35 +23,47 @@
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 #include "utils/concurrent/thread.hpp"
-#include "utils/io/i2c.hpp"
+#include "sensors/interface.hpp"
 
 using hyped::sensors::VL6180;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
+using hyped::utils::io::I2C;
+using hyped::sensors::ProxiInterface;
 
 Logger log(true, 1);
 
+// 
+    
+//     i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-  VL6180 vl6180 = VL6180(0x29, log);
-
+  I2C& i2c = I2C::getInstance();
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
+  uint8_t kMultiplexerAddr = 0x70;
+  uint8_t kNumOfProxis = 2;
+  ProxiInterface* proxi_[hyped::data::Sensors::kNumProximities];
 
-  vl6180.setContinuousRangingMode();
-  for (int i=0; i< 500; i++) {
-    double distance = vl6180.getDistance();
-    log.INFO("TEST-vl6180", "Continuous Distance: %f", distance);
-    Thread::sleep(20);
+  for (int i = 0; i < kNumOfProxis; i++) {
+      i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
+      VL6180* proxi = new VL6180(0x29, log);
+      proxi->setContinuousRangingMode();
+      proxi->setAddress(0x29 + i);
+      proxi_[i] = proxi;
+    }
+
+  for (int i = 0; i < 300; i++) {
+    // update front cluster of proximities
+    for (int i = 0; i < kNumOfProxis; i++) {
+      hyped::data::Proximity proxi;
+      proxi_[i%kNumOfProxis]->getData(&proxi);
+      log.INFO("Multiplexer-test", "Sensor %d, reading %d", i%kNumOfProxis, proxi.val);
+      Thread::sleep(3);
+    }
+
   }
-
-  vl6180.setSingleShotMode();
-  for (int i=0; i< 100; i++) {
-    double distance = vl6180.getDistance();
-    log.INFO("TEST-vl6180", "Single-shot Distance: %f", distance);
-    Thread::sleep(7);
-  }
-
+  Thread::sleep(10);
 
  	return 0;
 }
