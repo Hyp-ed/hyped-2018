@@ -43,6 +43,7 @@ constexpr uint16_t kModeContinuous                     = 0x02;
 constexpr uint16_t kModeSingleShot                     = 0x00;
 constexpr uint16_t kResultInterruptStatusGpio          = 0x4F;
 constexpr uint16_t kInterruptClearRanging              = 0x01;
+constexpr uint16_t kSystemInterruptConfigGpio          = 0x014;
 
 namespace hyped {
 
@@ -123,6 +124,8 @@ void VL6180::turnOn()
 
   // Perform a single recalibration
   writeByte(kSysrangeVhvRecalibrate, 0x01);
+
+  writeByte(kSystemInterruptConfigGpio, 0x24);
 
   // Set max convergence time (Recommended default 50ms)
   uint8_t time_ms = 50;  // changes here
@@ -217,7 +220,7 @@ uint8_t VL6180::continuousRangeDistance()
   uint64_t start = utils::Timer::getTimeMicros();
   uint8_t data = 1;
   uint8_t interrupt = 1;
-  uint64_t timeout = 50;   // ms
+  uint64_t timeout = 50000;   // micro s
   readByte(kResultInterruptStatusGpio, &interrupt);
 
   while ((interrupt & 0x04) == 0) {
