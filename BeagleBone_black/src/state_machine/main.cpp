@@ -49,10 +49,20 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   while (1) {
+    data_ = data::Data::getInstance();
+    comms_data_ = data_.getCommunicationsData();
+    nav_data_ = data_.getNavigationData();
+    sm_data_ = data_.getStateMachineData();
+    motor_data_ = data_.getMotorData();
+    batteries_data_ = data_.getBatteriesData();
+    sensors_data_ = data_.getSensorsData();
+
     checkFailure();
-    checkCommunications();
-    checkNavigation();
     checkReady();
+    if (sm_data_.current_state != data::kIdle) {
+      checkNavigation();
+      checkCommunications();
+    }
   }
 }
 
@@ -62,15 +72,17 @@ void Main::checkNavigation()
   *  @TODO Check if margin (20m) is appropriate
   */
 
-if((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length)
-{
-hypedMachine.handleEvent(kCriticalFailure);
-}
+  if ((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length) {
+    hypedMachine.handleEvent(kCriticalFailure);
+  }
 
-if(nav_data_.velocity <= 0.01)
-{
-  hypedMachine.handleEvent(kVelocityZeroReached);
-}
+  if ((nav_data_.distance + nav_data_.braking_distance) + 20 >= comms_data_.run_length) {
+    hypedMachine.handleEvent(kMaxDistanceReached);
+  }
+
+  if (nav_data_.velocity <= 0.01) {
+    hypedMachine.handleEvent(kVelocityZeroReached);
+  }
 }
 
 void Main::checkCommunications()

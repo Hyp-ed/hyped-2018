@@ -32,12 +32,14 @@ ReceiverThread::ReceiverThread(Communications* baseCommunicator)
 void ReceiverThread::run()
 {
   data::Communications cmn_data;
-  cmn_data = data_.getCommunicationsData();
 
   while (1) {
+    cmn_data = data_.getCommunicationsData();
     int command = baseCommunicator_->receiveMessage();
 
     switch (command) {
+      case 0:
+        break;
       case 1:
         cmn_data.module_status = data::ModuleStatus::kCriticalFailure;
         break;
@@ -55,6 +57,9 @@ void ReceiverThread::run()
         break;
       case 6:
         cmn_data.servicePropulsionGo = false;
+        break;
+      default:
+        log_.ERR("COMN", "Received %d (Should not reach here)", command);
         break;
     }
 

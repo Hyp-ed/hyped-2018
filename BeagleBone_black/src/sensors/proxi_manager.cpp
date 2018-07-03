@@ -37,13 +37,14 @@ namespace sensors {
 ProxiManager::ProxiManager(Logger& log,
                            bool isFront,
                            data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
-    : ManagerInterface(log)
+    : ProxiManagerInterface(log)
 {
   if (isFront) {
     // create CAN-based proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       CanProxi* proxi = new CanProxi(i, log_);
       proxi_[i] = proxi;
+      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
   } else {
     I2C& i2c = I2C::getInstance();
@@ -55,6 +56,10 @@ ProxiManager::ProxiManager(Logger& log,
       proxi_[i] = proxi;
     }
     i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
+
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
+    }
   }
 
   sensors_proxi_ = proxi;
@@ -67,10 +72,14 @@ void ProxiManager::run()
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
-    uint32_t time = utils::Timer::getTimeMicros();
-    sensors_proxi_->timestamp = time;
+    sensors_proxi_->timestamp = utils::Timer::getTimeMicros();;
   }
   sleep(10);
+}
+
+array<float, data::Sensors::kNumProximities> ProxiManager::getCalibrationData()
+{
+  return proxi_calibration_;
 }
 
 bool ProxiManager::updated()

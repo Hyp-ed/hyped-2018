@@ -58,6 +58,7 @@ class CanProxi : public ProxiInterface, public CanProccesor {
   // from ProxiInterface
   bool isOnline() override;
   void getData(Proximity* proxi) override;
+  float calcCalibrationData() override;
 
   // from CanProcessor
   void processNewData(Frame& message) override;

@@ -42,56 +42,44 @@ class Main : public Thread {
   int sendDistance(NavigationType distance);    // CMD01
   int sendVelocity(NavigationType speed);       // CMD02
   int sendAcceleration(NavigationType accel);   // CMD03
-  int sendStripeCount(int stripes);             // CMD04
-  int sendRpmFl(float rpmfl);                   // CMD05
-  int sendRpmFr(float rpmfr);                   // CMD06
-  int sendRpmBl(float rpmBl);                   // CMD07
-  int sendRpmBr(float rpmBr);                   // CMD08
-  int sendState(State state);                   // CMD09
-  int sendHpVoltage(Battery hpBattery);         // CMD10
-  int sendHpTemperature(Battery hpBattery);     // CMD11
+  int sendRpmFl(float rpmfl);                   // CMD04
+  int sendRpmFr(float rpmfr);                   // CMD05
+  int sendRpmBl(float rpmBl);                   // CMD06
+  int sendRpmBr(float rpmBr);                   // CMD07
+  int sendState(State state);                   // CMD08
+  int sendHpVoltage(Battery hpBattery);         // CMD09
+  int sendHpTemperature(Battery hpBattery);     // CMD10
+  int sendHpCharge(Battery hpBattery);          // CMD11
   int sendHpVoltage1(Battery hpBattery1);       // CMD12
   int sendHpTemperature1(Battery hpBattery1);   // CMD13
-  int sendTorqueFl(float torquefl);             // CMD14
-  int sendTorqueFr(float torquefr);             // CMD15
-  int sendTorqueBl(float torquebl);             // CMD16
-  int sendTorqueBr(float torquebr);             // CMD17
-  int sendImu1(bool operational);                // CMD18
-  int sendImu2(bool operational);                // CMD19
-  int sendImu3(bool operational);                // CMD20
-  int sendImu4(bool operational);                // CMD21
-  int sendImu5(bool operational);                // CMD22
-  int sendImu6(bool operational);                // CMD23
-  int sendImu7(bool operational);                // CMD24
-  int sendImu8(bool operational);                // CMD25
-  int sendProxiFront1(bool operational);         // CMD26
-  int sendProxiFront2(bool operational);         // CMD27
-  int sendProxiFront3(bool operational);         // CMD28
-  int sendProxiFront4(bool operational);         // CMD29
-  int sendProxiFront5(bool operational);         // CMD30
-  int sendProxiFront6(bool operational);         // CMD31
-  int sendProxiFront7(bool operational);         // CMD32
-  int sendProxiFront8(bool operational);         // CMD33
-  int sendProxiRear1(bool operational);          // CMD34
-  int sendProxiRear2(bool operational);          // CMD35
-  int sendProxiRear3(bool operational);          // CMD36
-  int sendProxiRear4(bool operational);          // CMD37
-  int sendProxiRear5(bool operational);          // CMD38
-  int sendProxiRear6(bool operational);          // CMD39
-  int sendProxiRear7(bool operational);          // CMD40
-  int sendProxiRear8(bool operational);          // CMD41
+  int sendHpCharge1(Battery hpBattery1);        // CMD14
+  int sendLpCharge(Battery lpBattery);          // CMD15
+  int sendLpCharge1(Battery lpBattery1);        // CMD16
+  int sendTorqueFl(float torquefl);             // CMD17
+  int sendTorqueFr(float torquefr);             // CMD18
+  int sendTorqueBl(float torquebl);             // CMD19
+  int sendTorqueBr(float torquebr);             // CMD20
+  int sendImu(bool op, bool op1, bool o2,
+              bool op3);                        // CMD21
+  int sendProxiFront(bool op, bool op1,
+                     bool op2, bool op3,
+                     bool op4, bool op5,
+                     bool op6, bool op7);       // CMD22
+  int sendProxiRear(bool op, bool op1,
+                    bool op2, bool op3,
+                    bool op4, bool op5,
+                    bool op6, bool op7);        // CMD23
 
  private:
   int stateCode_;
   Communications* baseCommunicator_;
-  data::Data& data_ = data::Data::getInstance();
-  data::Navigation nav_;
-  data::Motors mtr_;
-  data::Sensors sns_;
+  data::Data& data_;
   data::StateMachine stm_;
-  data::Batteries bat_;
-  data::Communications cmn_data_;
+  data::Motors mtr_;
   data::Sensors sen_;
+  data::Batteries bat_;
+  data::Navigation nav_;
+  data::Communications cmn_data_;
 };
 
 }}  //  namespace hyped::communications

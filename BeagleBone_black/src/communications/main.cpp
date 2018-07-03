@@ -20,6 +20,7 @@
 
 #include "communications/main.hpp"
 
+#include <string>
 #include <sstream>
 
 namespace hyped {
@@ -30,7 +31,8 @@ using data::Battery;
 namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log)
+    : Thread(id, log),
+      data_(data::Data::getInstance())
 {
   const char* ipAddress = "127.0.0.1";
   int portNo = 5695;
@@ -52,29 +54,24 @@ int Main::sendAcceleration(NavigationType accel)
   return baseCommunicator_->sendData("CMD03" + std::to_string(accel) + "\n");
 }
 
-int Main::sendStripeCount(int stripes)
-{
-  return baseCommunicator_->sendData("CMD04" + std::to_string(stripes) + "\n");
-}
-
 int Main::sendRpmFl(float rpmfl)
 {
-  return baseCommunicator_->sendData("CMD05" + std::to_string(rpmfl) + "\n");
+  return baseCommunicator_->sendData("CMD04" + std::to_string(rpmfl) + "\n");
 }
 
 int Main::sendRpmFr(float rpmfr)
 {
-  return baseCommunicator_->sendData("CMD06" + std::to_string(rpmfr) + "\n");
+  return baseCommunicator_->sendData("CMD05" + std::to_string(rpmfr) + "\n");
 }
 
 int Main::sendRpmBl(float rpmbl)
 {
-  return baseCommunicator_->sendData("CMD07" + std::to_string(rpmbl) + "\n");
+  return baseCommunicator_->sendData("CMD06" + std::to_string(rpmbl) + "\n");
 }
 
 int Main::sendRpmBr(float rpmbr)
 {
-  return baseCommunicator_->sendData("CMD08" + std::to_string(rpmbr) + "\n");
+  return baseCommunicator_->sendData("CMD07" + std::to_string(rpmbr) + "\n");
 }
 
 int Main::sendState(State state)
@@ -93,18 +90,23 @@ int Main::sendState(State state)
     default: break;
   }
 
-  return baseCommunicator_->sendData("CMD09" + std::to_string(stateCode_) + "\n");
+  return baseCommunicator_->sendData("CMD08" + std::to_string(stateCode_) + "\n");
 }
 
 int Main::sendHpVoltage(Battery hpBattery)
 {
   // Convert voltage reading units from mV to V
-  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.voltage / 1000.0) + "\n");
+  return baseCommunicator_->sendData("CMD09" + std::to_string(hpBattery.voltage / 1000.0) + "\n");
 }
 
 int Main::sendHpTemperature(Battery hpBattery)
 {
-  return baseCommunicator_->sendData("CMD11" + std::to_string(hpBattery.temperature) + "\n");
+  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.temperature) + "\n");
+}
+
+int Main::sendHpCharge(Battery hpBattery)
+{
+  return baseCommunicator_->sendData("CMD11" + std::to_string(hpBattery.charge) + "\n");
 }
 
 int Main::sendHpVoltage1(Battery hpBattery1)
@@ -118,261 +120,110 @@ int Main::sendHpTemperature1(Battery hpBattery1)
   return baseCommunicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
 }
 
+int Main::sendHpCharge1(Battery hpBattery1)
+{
+  return baseCommunicator_->sendData("CMD14" + std::to_string(hpBattery1.charge) + "\n");
+}
+
+int Main::sendLpCharge(Battery lpBattery)
+{
+  return baseCommunicator_->sendData("CMD15" + std::to_string(lpBattery.charge) + "\n");
+}
+
+int Main::sendLpCharge1(Battery lpBattery1)
+{
+  return baseCommunicator_->sendData("CMD16" + std::to_string(lpBattery1.charge) + "\n");
+}
+
 int Main::sendTorqueFr(float torquefr)
 {
-  return baseCommunicator_->sendData("CMD14" + std::to_string(torquefr) + "\n");
+  return baseCommunicator_->sendData("CMD17" + std::to_string(torquefr) + "\n");
 }
 
 int Main::sendTorqueFl(float torquefl)
 {
-  return baseCommunicator_->sendData("CMD15" + std::to_string(torquefl) + "\n");
+  return baseCommunicator_->sendData("CMD18" + std::to_string(torquefl) + "\n");
 }
 
 int Main::sendTorqueBr(float torquebr)
 {
-  return baseCommunicator_->sendData("CMD16" + std::to_string(torquebr) + "\n");
+  return baseCommunicator_->sendData("CMD19" + std::to_string(torquebr) + "\n");
 }
 
 int Main::sendTorqueBl(float torquebl)
 {
-  return baseCommunicator_->sendData("CMD17" + std::to_string(torquebl) + "\n");
+  return baseCommunicator_->sendData("CMD20" + std::to_string(torquebl) + "\n");
 }
 
-int Main::sendImu1(bool operational)
+int Main::sendImu(bool op, bool op1, bool op2, bool op3)
 {
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD1801\n");
-  } else {
-  return baseCommunicator_->sendData("CMD1800\n");
-  }
+  std::string sen, sen1, sen2, sen3;
+  sen = op ? "1" : "2";
+  sen1 = op1 ? "1" : "2";
+  sen2 = op2 ? "1" : "2";
+  sen3 = op3 ? "1" : "2";
+  return baseCommunicator_->sendData("CMD21" + sen + sen1 + sen2 +
+                                     sen3 + "\n");
 }
 
-int Main::sendImu2(bool operational)
+int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
+                         bool op4, bool op5, bool op6, bool op7)
 {
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD1901\n");
-  } else {
-  return baseCommunicator_->sendData("CMD1900\n");
-  }
+  std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
+  sen = op ? "1" : "2";
+  sen1 = op1 ? "1" : "2";
+  sen2 = op2 ? "1" : "2";
+  sen3 = op3 ? "1" : "2";
+  sen4 = op4 ? "1" : "2";
+  sen5 = op5 ? "1" : "2";
+  sen6 = op6 ? "1" : "2";
+  sen7 = op7 ? "1" : "2";
+  return baseCommunicator_->sendData("CMD22" + sen + sen1 + sen2 +
+                                     sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
-int Main::sendImu3(bool operational)
+int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
+                        bool op4, bool op5, bool op6, bool op7)
 {
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2001\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2000\n");
-  }
-}
-
-int Main::sendImu4(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2101\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2100\n");
-  }
-}
-
-int Main::sendImu5(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2201\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2200\n");
-  }
-}
-
-int Main::sendImu6(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2301\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2300\n");
-  }
-}
-
-int Main::sendImu7(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2401\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2400\n");
-  }
-}
-
-int Main::sendImu8(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2501\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2500\n");
-  }
-}
-
-int Main::sendProxiFront1(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2601\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2600\n");
-  }
-}
-
-int Main::sendProxiFront2(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2701\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2700\n");
-  }
-}
-
-int Main::sendProxiFront3(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2801\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2800\n");
-  }
-}
-
-int Main::sendProxiFront4(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD2901\n");
-  } else {
-  return baseCommunicator_->sendData("CMD2900\n");
-  }
-}
-
-int Main::sendProxiFront5(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3001\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3000\n");
-  }
-}
-
-int Main::sendProxiFront6(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3101\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3100\n");
-  }
-}
-
-int Main::sendProxiFront7(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3201\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3200\n");
-  }
-}
-
-int Main::sendProxiFront8(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3301\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3300\n");
-  }
-}
-
-int Main::sendProxiRear1(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3401\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3400\n");
-  }
-}
-
-int Main::sendProxiRear2(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3501\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3500\n");
-  }
-}
-
-int Main::sendProxiRear3(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3601\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3600\n");
-  }
-}
-
-int Main::sendProxiRear4(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3701\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3700\n");
-  }
-}
-
-int Main::sendProxiRear5(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3801\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3800\n");
-  }
-}
-
-int Main::sendProxiRear6(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD3901\n");
-  } else {
-  return baseCommunicator_->sendData("CMD3900\n");
-  }
-}
-
-int Main::sendProxiRear7(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD4001\n");
-  } else {
-  return baseCommunicator_->sendData("CMD4000\n");
-  }
-}
-
-int Main::sendProxiRear8(bool operational)
-{
-  if (operational == true) {
-  return baseCommunicator_->sendData("CMD4101\n");
-  } else {
-  return baseCommunicator_->sendData("CMD4100\n");
-  }
+  std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
+  sen = op ? "1" : "2";
+  sen1 = op1 ? "1" : "2";
+  sen2 = op2 ? "1" : "2";
+  sen3 = op3 ? "1" : "2";
+  sen4 = op4 ? "1" : "2";
+  sen5 = op5 ? "1" : "2";
+  sen6 = op6 ? "1" : "2";
+  sen7 = op7 ? "1" : "2";
+  return baseCommunicator_->sendData("CMD23" + sen + sen1 + sen2 +
+                                     sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
 void Main::run()
 {
-  cmn_data_ = data_.getCommunicationsData();
+  cmn_data_.launchCommand = false;
+  cmn_data_.resetCommand = false;
+  cmn_data_.servicePropulsionGo = false;
   cmn_data_.run_length = 1250;
-  cmn_data_.module_status = data::ModuleStatus::kStart;
+  if (baseCommunicator_->connectionEstablished()) {
+    cmn_data_.module_status = data::ModuleStatus::kInit;
+  } else {
+    cmn_data_.module_status = data::ModuleStatus::kCriticalFailure;
+  }
+  data_.setCommunicationsData(cmn_data_);
   data_.setCommunicationsData(cmn_data_);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
 
   while (1) {
+    sleep(0.2);
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
-    sns_ = data_.getSensorsData();
+    sen_ = data_.getSensorsData();
     stm_ = data_.getStateMachineData();
     bat_ = data_.getBatteriesData();
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
-    sendStripeCount(sns_.stripe_counter.count.value);
     sendRpmFl(mtr_.velocity_1);
     sendRpmFr(mtr_.velocity_2);
     sendRpmBl(mtr_.velocity_3);
@@ -380,36 +231,26 @@ void Main::run()
     sendState(stm_.current_state);
     sendHpVoltage(bat_.high_power_batteries.at(0));
     sendHpTemperature(bat_.high_power_batteries.at(0));
+    sendHpCharge(bat_.high_power_batteries.at(0));
     sendHpVoltage1(bat_.high_power_batteries.at(1));
     sendHpTemperature1(bat_.high_power_batteries.at(1));
+    sendHpCharge1(bat_.high_power_batteries.at(1));
+    sendLpCharge(bat_.low_power_batteries.at(0));
+    sendLpCharge1(bat_.low_power_batteries.at(1));
     sendTorqueFr(mtr_.torque_2);
     sendTorqueFl(mtr_.torque_1);
     sendTorqueBr(mtr_.torque_4);
     sendTorqueBl(mtr_.torque_3);
-    sendImu1(sen_.imu.value[0].operational);
-    sendImu2(sen_.imu.value[1].operational);
-    sendImu3(sen_.imu.value[2].operational);
-    sendImu4(sen_.imu.value[3].operational);
-    sendImu5(sen_.imu.value[4].operational);
-    sendImu6(sen_.imu.value[5].operational);
-    sendImu7(sen_.imu.value[6].operational);
-    sendImu8(sen_.imu.value[7].operational);
-    sendProxiFront1(sen_.proxi_front.value[0].operational);
-    sendProxiFront2(sen_.proxi_front.value[1].operational);
-    sendProxiFront3(sen_.proxi_front.value[2].operational);
-    sendProxiFront4(sen_.proxi_front.value[3].operational);
-    sendProxiFront5(sen_.proxi_front.value[4].operational);
-    sendProxiFront6(sen_.proxi_front.value[5].operational);
-    sendProxiFront7(sen_.proxi_front.value[6].operational);
-    sendProxiFront8(sen_.proxi_front.value[7].operational);
-    sendProxiRear1(sen_.proxi_back.value[0].operational);
-    sendProxiRear2(sen_.proxi_back.value[1].operational);
-    sendProxiRear3(sen_.proxi_back.value[2].operational);
-    sendProxiRear4(sen_.proxi_back.value[3].operational);
-    sendProxiRear5(sen_.proxi_back.value[4].operational);
-    sendProxiRear6(sen_.proxi_back.value[5].operational);
-    sendProxiRear7(sen_.proxi_back.value[6].operational);
-    sendProxiRear8(sen_.proxi_back.value[7].operational);
+    sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
+            sen_.imu.value[2].operational, sen_.imu.value[3].operational);
+    sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,
+                   sen_.proxi_front.value[2].operational, sen_.proxi_front.value[3].operational,
+                   sen_.proxi_front.value[4].operational, sen_.proxi_front.value[5].operational,
+                   sen_.proxi_front.value[6].operational, sen_.proxi_front.value[7].operational);
+    sendProxiRear(sen_.proxi_back.value[0].operational, sen_.proxi_back.value[1].operational,
+                  sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
+                  sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
+                  sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
   }
 
   receiverThread->join();

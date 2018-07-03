@@ -51,7 +51,6 @@ class System {
   int8_t verbose_sensor;
   int8_t verbose_state;
   int8_t verbose_cmn;
-  bool fake_imu;
 
   int8_t debug;
   int8_t debug_motor;
@@ -59,6 +58,8 @@ class System {
   int8_t debug_sensor;
   int8_t debug_state;
   int8_t debug_cmn;
+
+  bool fake_imu;
 
   // barriers
   /**
