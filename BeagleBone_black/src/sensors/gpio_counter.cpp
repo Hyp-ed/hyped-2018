@@ -51,12 +51,17 @@ void GpioCounter::run()
     if (val == 1) {
       stripe_counter_.count.value = stripe_counter_.count.value+1;
       stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
+      stripe_counter_.operational = true;
     }
   }
 }
 
 StripeCounter GpioCounter::getStripeCounter()
 {
+  // If it hasn't read anything in 1 sec it is not operational
+  if ((utils::Timer::getTimeMicros() - stripe_counter_.count.timestamp) > 2000000) {
+    stripe_counter_.operational = false;
+  }
   return stripe_counter_;
 }
 

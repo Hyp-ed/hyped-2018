@@ -25,6 +25,7 @@
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
 
+constexpr float kWheelRadius = 1.1;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
 
 using data::Data;
@@ -112,7 +113,7 @@ void Main::run()
       battery_manager_lp_->resetTimestamp();
     }
     data_.setKeyenceStripeCounterData(keyence->getStripeCounter());
-    data_.setOpticalEncoderStripeCounterData(optical_encoder_->getStripeCounter());
+    data_.setOpticalEncoderDistance(optical_encoder_->getStripeCounter().count.value * kWheelRadius);  // NOLINT
     yield();
   }
 }

@@ -117,7 +117,7 @@ struct Sensors : public Module {
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
   StripeCounter keyence_stripe_counter;
-  StripeCounter optical_stripe_counter;
+  float optical_enc_distance;
 };
 
 struct SensorCalibration {
@@ -225,11 +225,11 @@ class Data {
    /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
-  StripeCounter getOpticalEncoderStripeCounterData();
+  float getOpticalEncoderDistance();
   /**
    * @brief       Should be called to update StripeCount part in Sensors data
    */
-  void setOpticalEncoderStripeCounterData(const StripeCounter& stripe_counter);
+  void setOpticalEncoderDistance(const float& distance);
   /**
    * @brief      Should be called to update sensor calibration data
    */
