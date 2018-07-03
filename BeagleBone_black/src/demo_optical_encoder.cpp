@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
   GPIO the_pin(60, io::gpio::kIn);
   uint8_t val = the_pin.wait();
   int count = 0;
-  log.INFO("Opt-En", "Starting optical encoder");
+  log.INFO("Opt-En", "Starting optical encoder / keyence");
 
   while (1) {
       val = the_pin.wait();

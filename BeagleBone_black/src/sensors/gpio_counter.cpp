@@ -23,7 +23,7 @@
 #include "utils/io/gpio.hpp"
 #include "utils/system.hpp"
 #include "utils/timer.hpp"
-#include "sensors/keyence.hpp"
+#include "sensors/gpio_counter.hpp"
 
 
 
@@ -35,11 +35,11 @@ using utils::io::GPIO;
 
 namespace sensors {
 
-Keyence::Keyence(Logger& log, int pin)
+GpioCounter::GpioCounter(Logger& log, int pin)
     : Thread(log), pin_(pin)
 {}
 
-void Keyence::run()
+void GpioCounter::run()
 {
   GPIO thepin(pin_, utils::io::gpio::kIn);
   uint8_t val = thepin.wait();  // Ignore first reading
@@ -55,7 +55,7 @@ void Keyence::run()
   }
 }
 
-StripeCounter Keyence::getStripeCounter()
+StripeCounter GpioCounter::getStripeCounter()
 {
   return stripe_counter_;
 }

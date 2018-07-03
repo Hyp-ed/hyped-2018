@@ -38,14 +38,14 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence(new Keyence(log, 73)),
+      keyence(new GpioCounter(log, 73)),
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
       battery_manager_lp_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
-      optical_encoder_(new OpticalEncoder(log, 60)),  //TODO(anyone) choose pin for optical encoder  //NOLINT
+      optical_encoder_(new GpioCounter(log, 60)),  //TODO(anyone) choose pin for optical encoder  //NOLINT
       sensor_init_(false),
       battery_init_(false)
 {
@@ -112,7 +112,7 @@ void Main::run()
       battery_manager_lp_->resetTimestamp();
     }
     data_.setKeyenceStripeCounterData(keyence->getStripeCounter());
-    data_.setOpticalEncoderStripeCounterData(optical_encoder_->getOptStripeCounter());
+    data_.setOpticalEncoderStripeCounterData(optical_encoder_->getStripeCounter());
     yield();
   }
 }

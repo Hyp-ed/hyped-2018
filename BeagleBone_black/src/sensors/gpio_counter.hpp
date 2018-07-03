@@ -1,8 +1,14 @@
 /*
- * Author: Jack Horsburgh
+ * Author: Ragnor Comerford
  * Organisation: HYPED
- * Date: 02/07/18
- * Description: Driver for the OPB720B-12Z optical encoder
+ * Date: 19/06/18
+ * Description:
+ * Main manages sensor drivers, collects data from sensors and updates
+ * shared Data::Sensors structure. Main is not responsible for initialisation
+ * of supporting io drivers (i2c, spi, can). This should be done by the sensor
+ * drivers themselves.
+ * Currently supported sensors:
+ * - BMS (low powered), ids: 0
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +24,12 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_OPTICAL_ENCODER_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_OPTICAL_ENCODER_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
 
 #include <cstdint>
 
 #include "utils/concurrent/thread.hpp"
-#include "utils/logger.hpp"
 #include "data/data.hpp"
 
 
@@ -35,11 +40,12 @@ using utils::Logger;
 
 namespace sensors {
 
-class OpticalEncoder: public Thread {
+
+class GpioCounter: public Thread {
  public:
-  OpticalEncoder(Logger& log, int pin);
+  explicit GpioCounter(Logger& log, int pin);
   void run() override;
-  data::StripeCounter getOptStripeCounter();
+  data::StripeCounter getStripeCounter();
 
  private:
   int pin_;
@@ -48,4 +54,4 @@ class OpticalEncoder: public Thread {
 };
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_OPTICAL_ENCODER_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
