@@ -43,7 +43,7 @@ Main::Main(uint8_t id, Logger& log)
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
-      battery_manager_lp_(new BmsManager(log,
+      battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
       optical_encoder_(new GpioCounter(log, 60)),  //TODO(anyone) choose pin for optical encoder  //NOLINT
@@ -61,7 +61,7 @@ void Main::run()
   imu_manager_->start();
   proxi_manager_front_->start();
   proxi_manager_back_->start();
-  battery_manager_lp_->start();
+  battery_manager_->start();
 
   // init loop
   while (!sensor_init_) {
@@ -82,7 +82,7 @@ void Main::run()
   }
   log_.INFO("SENSORS", "sensors data has been initialised");
   while (!battery_init_) {
-    if (battery_manager_lp_->updated()) {
+    if (battery_manager_->updated()) {
       batteries_.module_status = data::ModuleStatus::kInit;
       data_.setBatteryData(batteries_);
       battery_init_ = true;
@@ -108,9 +108,9 @@ void Main::run()
     }
 
     // Update battery data only when there is some change
-    if (battery_manager_lp_->updated()) {
+    if (battery_manager_->updated()) {
       data_.setBatteryData(batteries_);
-      battery_manager_lp_->resetTimestamp();
+      battery_manager_->resetTimestamp();
     }
     data_.setKeyenceStripeCounterData(keyence->getStripeCounter());
     data_.setOpticalEncoderDistance(optical_encoder_->getStripeCounter().count.value * kWheelRadius);  // NOLINT
