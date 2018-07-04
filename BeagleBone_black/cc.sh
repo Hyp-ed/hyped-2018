@@ -6,8 +6,8 @@
 
 getopts "m:" flag
 MAIN=""
-if [ $flag -eq "m" ]; then
-    MAIN = "MAIN=$OPTARG"
+if [ "$flag" = "m" ]; then
+    MAIN="MAIN=$OPTARG"
 fi
 echo $MAIN
 
