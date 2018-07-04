@@ -12,7 +12,7 @@ fi
 echo $MAIN
 
 printf "Uploading src/ directory... "
-#scp -r src/ hyped@35.177.87.64:/home/hyped/Code/hyped-2018/BeagleBone_black > /dev/null
+scp -r src/ hyped@35.177.87.64:/home/hyped/Code/hyped-2018/BeagleBone_black > /dev/null
 printf "DONE\n\n"
 
 printf "Compiling...\n"
