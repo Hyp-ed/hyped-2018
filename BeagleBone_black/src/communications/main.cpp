@@ -210,7 +210,6 @@ void Main::run()
     cmn_data_.module_status = data::ModuleStatus::kCriticalFailure;
   }
   data_.setCommunicationsData(cmn_data_);
-  data_.setCommunicationsData(cmn_data_);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
 
