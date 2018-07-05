@@ -34,6 +34,7 @@ namespace hyped {
 
 using data::NavigationType;
 using utils::System;
+using utils::Timer;
 
 namespace motor_control {
 
@@ -45,8 +46,11 @@ Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
       post_calibration_barrier_(System::getSystem().navigation_motors_sync_),
+      prev_velocity_(0),
+      time_of_update(0),
       target_velocity_(0),
       target_torque_(0),
+      prev_index(0),
       run_(true),
       nav_calib_(false),
       motors_init_(false),
@@ -317,7 +321,47 @@ void Main::stopMotors()
 
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
-  return target_velocity_ += 100;  // dummy calculation to increase rpm
+  // Starting acceleration. TODO(Sean) Check with sims on this value
+  if (velocity == 0) {
+    prev_velocity_ = velocity;
+    timer.start();
+    time_of_update = timer.getTimeMicros();
+    return 250;
+  }
+
+  // If the current velocity has not exceeded the previous velocity by at least
+  // 0.2 m/s in 40 milliseconds, then it is likely that the slip is too low, so
+  // we manually increase the RPM.
+  if (timer.getTimeMicros() - time_of_update > 40000) {
+    if (velocity - prev_velocity_ < 0.2) {
+      prev_velocity_ = velocity;
+      prev_index++;
+      time_of_update = timer.getTimeMicros();
+      return acceleration_slip_[1][prev_index];
+    }
+  }
+
+  // If current velocity is less than previous velocity during acceleration, then
+  // it is likely that the slip is too high, so we manually decrease the RPM.
+  if (velocity < prev_velocity_) {
+    prev_velocity_ = velocity;
+    prev_index--;
+    time_of_update = timer.getTimeMicros();
+    return acceleration_slip_[1][prev_index];
+  }
+
+  // Otherwise, perform upper bound binary search to find the first element in the vector
+  // of translational velocities that evaluates to greater than current velocity
+  auto upper_bound = std::upper_bound(acceleration_slip_[0].begin(),
+                                      acceleration_slip_[0].end(),
+                                      velocity);
+
+  // Use index to find corresponding RPM
+  int index      = upper_bound - acceleration_slip_[0].begin();
+  prev_velocity_ = velocity;
+  prev_index     = index;
+  time_of_update = timer.getTimeMicros();
+  return acceleration_slip_[1][index];
 }
 
 int32_t Main::decelerationVelocity(NavigationType velocity)

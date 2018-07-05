@@ -27,6 +27,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "utils/concurrent/barrier.hpp"
 #include "data/data.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
@@ -34,6 +35,7 @@ using data::NavigationType;
 using utils::concurrent::Thread;
 using utils::concurrent::Barrier;
 using utils::Logger;
+using utils::Timer;
 
 namespace motor_control {
 
@@ -134,10 +136,14 @@ class Main: public Thread {
   data::Motors motor_data_;
   Barrier post_calibration_barrier_;
   Communicator* communicator_;
+  Timer timer;
   std::vector<std::vector<double>> acceleration_slip_;
   std::vector<std::vector<double>> deceleration_slip_;
-  int32_t target_velocity_;
-  int16_t target_torque_;
+  NavigationType prev_velocity_;
+  uint64_t time_of_update;
+  int32_t  target_velocity_;
+  int16_t  target_torque_;
+  int32_t  prev_index;
   bool run_;
   bool nav_calib_;
   bool motors_init_;
