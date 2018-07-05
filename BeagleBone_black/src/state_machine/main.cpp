@@ -39,8 +39,7 @@ Main::Main(uint8_t id, Logger& log)
       sm_data_(data_.getStateMachineData()),
       motor_data_(data_.getMotorData()),
       batteries_data_(data_.getBatteriesData()),
-      sensors_data_(data_.getSensorsData()),
-      modules_init_(false)
+      sensors_data_(data_.getSensorsData())
 { /* EMPTY */ }
 
 /**
@@ -58,7 +57,7 @@ void Main::run()
     batteries_data_ = data_.getBatteriesData();
     sensors_data_ = data_.getSensorsData();
 
-    if (!modules_init_) {
+    if (sm_data_.current_state == data::kIdle) {
       checkInit();
     }
     checkFailure();
@@ -127,7 +126,6 @@ void Main::checkInit()
       && motor_data_.module_status == data::ModuleStatus::kInit
       && sensors_data_.module_status == data::ModuleStatus::kInit
       && batteries_data_.module_status == data::ModuleStatus::kInit) {
-    modules_init_ = true;
     hypedMachine.handleEvent(kInitialised);  // Transitions to Calibrating
   }
 }
