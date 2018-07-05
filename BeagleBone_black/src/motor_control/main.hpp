@@ -59,6 +59,12 @@ class Main: public Thread {
    */
   void calculateSlip(std::string filepath);
   /**
+   *  @brief   { Returns the transposed 2D vector containing acceleration slip and deceleration
+   *             slip values. This makes it easier to pass the translational velocity
+   *             vector into binary search }
+   */
+  std::vector<std::vector<double>> transpose(std::vector<std::vector<double>> data);
+  /**
     *  @brief  { Set motors into operational state }
     */
   void prepareMotors();

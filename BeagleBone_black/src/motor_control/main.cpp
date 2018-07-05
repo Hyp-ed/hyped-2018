@@ -24,6 +24,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include "motor_control/communicator.hpp"
 #include "data/data.hpp"
@@ -181,10 +182,23 @@ void Main::calculateSlip(std::string filepath)
 
     // If both containers have been populated, set bool to true
     if (!acceleration_slip_.empty() && !deceleration_slip_.empty()) {
+      acceleration_slip_ = transpose(acceleration_slip_);
+      deceleration_slip_ = transpose(deceleration_slip_);
       slip_calculated_ = true;
       log_.INFO("MOTOR", "All slip values calculated");
     }
   }
+}
+
+std::vector<std::vector<double>> Main::transpose(std::vector<std::vector<double>> data)
+{
+  std::vector<std::vector<double>> transpose(2, std::vector<double>(data.size(), 1));
+  for (uint16_t i = 0; i < data.size(); ++i) {
+    for (uint16_t j = 0; j < 2; ++j) {
+      transpose[j][i] = data[i][j];
+    }
+  }
+  return transpose;
 }
 
 void Main::prepareMotors()
