@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 #include "motor_control/communicator.hpp"
 #include "utils/concurrent/thread.hpp"
@@ -51,12 +52,12 @@ class Main: public Thread {
     */
   void initMotors();
   /**
-   *   @brief  { Reads slip and translational velocity data from acceleration and 
+   *   @brief  { Reads slip and translational velocity data from acceleration and
    *             deceleration text files, calculates RPM's for appropriate slip at each
-   *             translational velocity and stores the values in a 2D array containing 
+   *             translational velocity and stores the values in a 2D array containing
    *             translational velocity and RPM }
-   */ 
-  void calculateSlip();
+   */
+  void calculateSlip(std::string filepath);
   /**
     *  @brief  { Set motors into operational state }
     */
@@ -135,7 +136,7 @@ class Main: public Thread {
   bool nav_calib_;
   bool motors_init_;
   bool motors_ready_;
-  // bool motors_operational_;  // TODO(anyone) add back in if needed
+  bool slip_calculated_;
   bool motor_failure_;
   bool all_motors_stopped_;
   MotorVelocity motor_velocity_;

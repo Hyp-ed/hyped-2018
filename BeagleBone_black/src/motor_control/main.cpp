@@ -18,9 +18,12 @@
 
 #include "motor_control/main.hpp"
 
+#include <math.h>
 #include <cstdint>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <vector>
 
 #include "motor_control/communicator.hpp"
 #include "data/data.hpp"
@@ -33,6 +36,10 @@ using utils::System;
 
 namespace motor_control {
 
+constexpr double  kHalbachRadius    = 0.148;
+const std::string kAccelerationData = "../BeagleBone_black/data/configuration/AccelerationSlip.txt";
+const std::string kDecelerationData = "../BeagleBone_black/data/configuration/DecelerationSlip.txt";
+
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
@@ -43,6 +50,7 @@ Main::Main(uint8_t id, Logger& log)
       nav_calib_(false),
       motors_init_(false),
       motors_ready_(false),
+      slip_calculated_(false),
       motor_failure_(false),
       all_motors_stopped_(false)
 {
@@ -71,6 +79,8 @@ void Main::run()
       initMotors();
       yield();
     } else if (state_.current_state == data::State::kCalibrating) {
+      calculateSlip(kAccelerationData);
+      calculateSlip(kDecelerationData);
       prepareMotors();
       yield();
     } else if (state_.current_state == data::State::kAccelerating) {
@@ -113,14 +123,70 @@ void Main::initMotors()
   }
 }
 
-void Main::calculateSlip()
+void Main::calculateSlip(std::string filepath)
 {
-  std::ifstream acceleration ("..BeagleBone_black/configuration/AccelerationSlip.txt");
-  std::string line;
-  while (std::getline(acceleration,line)) {
-    
+  /* Units:
+   * Slip - Difference between rotational velocity of wheel and translational velocity of pod.
+   *        Positive if rotational velocity > translational velocity,
+   *        Negative if rotational velocity < translational velocity,
+   *        Zero otherwise.
+   *
+   * Translational velocity - m/s
+   * Angular velocity       - rad/s
+   * Radius                 - metres
+   */
+  if (!slip_calculated_) {
+    double slip, translational_velocity, angular_velocity, rpm;
+    std::ifstream data;
+    data.open(filepath);
+
+    if (!data.is_open()) {
+      log_.ERR("MOTOR", "Could not open file: %s", filepath);
+      updateMotorFailure();
+      return;
+    } else if (filepath == kAccelerationData) {
+      log_.INFO("MOTOR", "Calculating acceleration slip...");
+    } else {
+      log_.INFO("MOTOR", "Calculating deceleration slip...");
+    }
+
+    std::string line;
+    while (std::getline(data, line)) {
+      std::string split_line;
+      std::vector<double> temp_vec;
+      std::stringstream ss(line);
+      while (std::getline(ss, split_line, '\t')) {
+        temp_vec.push_back(std::move(stod(split_line)));
+      }
+
+      // Calculate angular velocity from slip, translational velocity and halbach wheel radius
+      slip = temp_vec[0];
+      translational_velocity = temp_vec[1];
+      angular_velocity = (slip + translational_velocity) / kHalbachRadius;
+
+      // Calculate RPM given calculated angular velocity
+      rpm = (angular_velocity * 60) / (2*M_PI);
+
+      // Use temporary vector to hold translational velocity and rpm
+      temp_vec[0] = translational_velocity;
+      temp_vec[1] = rpm;
+
+      // Add data to appropriate container
+      if (filepath == kAccelerationData) {
+        acceleration_slip_.push_back(temp_vec);
+      } else {
+        deceleration_slip_.push_back(temp_vec);
+      }
+    }
+
+    // If both containers have been populated, set bool to true
+    if (!acceleration_slip_.empty() && !deceleration_slip_.empty()) {
+      slip_calculated_ = true;
+      log_.INFO("MOTOR", "All slip values calculated");
+    }
   }
 }
+
 void Main::prepareMotors()
 {
   if (!motors_ready_ && !motor_failure_) {
