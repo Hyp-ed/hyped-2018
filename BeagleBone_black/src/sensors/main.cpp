@@ -20,6 +20,8 @@
 
 #include "sensors/main.hpp"
 
+#include <math.h>
+
 #include "data/data.hpp"
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
@@ -113,7 +115,8 @@ void Main::run()
       battery_manager_->resetTimestamp();
     }
     data_.setKeyenceStripeCounterData(keyence->getStripeCounter());
-    data_.setOpticalEncoderDistance(optical_encoder_->getStripeCounter().count.value * kWheelRadius);  // NOLINT
+    data_.setOpticalEncoderDistance(optical_encoder_->getStripeCounter().count.value *
+                                    M_PI*2*kWheelRadius);  // NOLINT
     yield();
   }
 }
