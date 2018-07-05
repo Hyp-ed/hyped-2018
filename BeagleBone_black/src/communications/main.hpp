@@ -60,8 +60,7 @@ class Main : public Thread {
   int sendTorqueBl(float torquebl);             // CMD19
   int sendTorqueBr(float torquebr);             // CMD20
   int sendImu(bool op, bool op1, bool o2,
-              bool op3, bool op4, bool op5,
-              bool op6, bool op7);              // CMD21
+              bool op3);                        // CMD21
   int sendProxiFront(bool op, bool op1,
                      bool op2, bool op3,
                      bool op4, bool op5,

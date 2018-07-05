@@ -21,6 +21,7 @@ SRCS := \
   sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
   sensors/gpio_counter.cpp \
+  sensors/fake_proxi.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
