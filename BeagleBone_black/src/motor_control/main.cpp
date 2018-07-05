@@ -141,7 +141,7 @@ void Main::calculateSlip(std::string filepath)
     data.open(filepath);
 
     if (!data.is_open()) {
-      log_.ERR("MOTOR", "Could not open file: %s", filepath);
+      log_.ERR("MOTOR", "Could not open file: %s", filepath.c_str());
       updateMotorFailure();
       return;
     } else if (filepath == kAccelerationData) {
