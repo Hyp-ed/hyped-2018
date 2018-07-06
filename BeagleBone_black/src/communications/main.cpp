@@ -155,20 +155,15 @@ int Main::sendTorqueBl(float torquebl)
   return baseCommunicator_->sendData("CMD20" + std::to_string(torquebl) + "\n");
 }
 
-int Main::sendImu(bool op, bool op1, bool op2, bool op3,
-                  bool op4, bool op5, bool op6, bool op7)
+int Main::sendImu(bool op, bool op1, bool op2, bool op3)
 {
-  std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
+  std::string sen, sen1, sen2, sen3;
   sen = op ? "1" : "2";
   sen1 = op1 ? "1" : "2";
   sen2 = op2 ? "1" : "2";
   sen3 = op3 ? "1" : "2";
-  sen4 = op4 ? "1" : "2";
-  sen5 = op5 ? "1" : "2";
-  sen6 = op6 ? "1" : "2";
-  sen7 = op7 ? "1" : "2";
   return baseCommunicator_->sendData("CMD21" + sen + sen1 + sen2 +
-                                     sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
+                                     sen3 + "\n");
 }
 
 int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
@@ -205,9 +200,15 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
 
 void Main::run()
 {
-  cmn_data_ = data_.getCommunicationsData();
+  cmn_data_.launchCommand = false;
+  cmn_data_.resetCommand = false;
+  cmn_data_.servicePropulsionGo = false;
   cmn_data_.run_length = 1250;
-  cmn_data_.module_status = data::ModuleStatus::kStart;
+  if (baseCommunicator_->connectionEstablished()) {
+    cmn_data_.module_status = data::ModuleStatus::kInit;
+  } else {
+    cmn_data_.module_status = data::ModuleStatus::kCriticalFailure;
+  }
   data_.setCommunicationsData(cmn_data_);
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
@@ -240,9 +241,7 @@ void Main::run()
     sendTorqueBr(mtr_.torque_4);
     sendTorqueBl(mtr_.torque_3);
     sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
-            sen_.imu.value[2].operational, sen_.imu.value[3].operational,
-            sen_.imu.value[4].operational, sen_.imu.value[5].operational,
-            sen_.imu.value[6].operational, sen_.imu.value[7].operational);
+            sen_.imu.value[2].operational, sen_.imu.value[3].operational);
     sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,
                    sen_.proxi_front.value[2].operational, sen_.proxi_front.value[3].operational,
                    sen_.proxi_front.value[4].operational, sen_.proxi_front.value[5].operational,

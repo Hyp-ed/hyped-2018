@@ -20,6 +20,7 @@ SRCS := \
   sensors/proxi_manager.cpp \
   sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
+  sensors/fake_proxi.cpp \
   sensors/keyence.cpp \
   communications/main.cpp \
   communications/communications.cpp \
