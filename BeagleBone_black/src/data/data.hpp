@@ -141,6 +141,11 @@ struct Batteries : public Module {
   array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
+struct EmergencyBrakes {
+  bool leftbrakes;        // true if left facing emergency brakes deploy
+  bool rightbrakes;       // true if right facing emergency brakes deploy
+}
+
 // -------------------------------------------------------------------------------------------------
 // Motor data
 // -------------------------------------------------------------------------------------------------
