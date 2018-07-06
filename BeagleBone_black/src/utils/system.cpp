@@ -72,7 +72,8 @@ System::System(int argc, char* argv[])
       debug_sensor(DEFAULT_DEBUG),
       debug_state(DEFAULT_DEBUG),
       debug_cmn(DEFAULT_DEBUG),
-      fake_imu(false)
+      fake_imu(false),
+      fake_proxi(false)
 {
   int c;
   int option_index = 0;
@@ -92,6 +93,7 @@ System::System(int argc, char* argv[])
       {"debug_cmn", optional_argument, 0, 'g'},
       {"help", no_argument, 0, 'h'},
       {"fake_imu", optional_argument, 0, 'i'},
+      {"fake_proxi", optional_argument, 0, 'I'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -156,6 +158,9 @@ System::System(int argc, char* argv[])
         if (optarg) fake_imu = atoi(optarg);
         else        fake_imu = 0;
         break;
+      case 'I':
+        if (optarg) fake_proxi = atoi(optarg);
+        else        fake_proxi = 0;
       default:
         printUsage();
         exit(1);

@@ -31,23 +31,34 @@
 #include <cstdlib>
 
 #include "data/data_point.hpp"
+#include "utils/math/statistics.hpp"
+#include "utils/concurrent/thread.hpp"
 
 using std::chrono::milliseconds;
 using std::chrono::duration;
 using std::chrono::duration_cast;
 
 namespace hyped {
+
+using utils::math::OnlineStatistics;
+using utils::concurrent::Thread;
+using utils::Logger;
+
 namespace sensors {
 
-FakeProxi::FakeProxi(std::string file_path)
-    : read_file_(true)
+FakeProxi::FakeProxi(Logger& log, std::string file_path)
+    : read_file_(true),
+      log_(log)
 {
   readDataFromFile(file_path);
   setData();
 }
 
-FakeProxi::FakeProxi(uint8_t value, double noise)
-    : read_file_(false), value_(value), noise_(noise)
+FakeProxi::FakeProxi(Logger& log, uint8_t value, float noise)
+    : read_file_(false),
+      value_(value),
+      noise_(noise),
+      log_(log)
 {
   setData();
 }
@@ -110,10 +121,15 @@ void FakeProxi::readDataFromFile(std::string file_path)
   file.close();
 }
 
-uint8_t FakeProxi::addNoiseToData(uint8_t value, double noise)
+uint8_t FakeProxi::addNoiseToData(uint8_t value, float noise)
 {
-  uint8_t ans = rand() % 256;
-  return ans;
+  float temp;
+  static std::default_random_engine generator;
+
+  std::normal_distribution<float> distribution(static_cast<float>(value), noise);
+  temp = distribution(generator);
+
+  return static_cast<uint8_t>(temp);
 }
 
 bool FakeProxi::checkTime()
@@ -127,6 +143,19 @@ bool FakeProxi::checkTime()
 
   reading_counter_ = time_span.count()/kProxiTimeInterval + 1;
   return true;
+}
+
+float FakeProxi::calcCalibrationData()
+{
+  Proximity proxi;
+  OnlineStatistics<float> stats = OnlineStatistics<float>();
+  for (int i = 0; i < 100; i++) {
+    getData(&proxi);
+    stats.update(proxi.val);
+    Thread::sleep(10);
+  }
+  log_.INFO("VL6180", "Sensor has calculated the variance");
+  return stats.getVariance();
 }
 
 }}   // namespace hyped::sensors

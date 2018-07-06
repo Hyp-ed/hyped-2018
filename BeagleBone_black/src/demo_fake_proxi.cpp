@@ -21,23 +21,38 @@
 #include <cstdio>
 #include <unistd.h>
 
+#include "utils/logger.hpp"
+#include "utils/concurrent/thread.hpp"
+
 using hyped::data::Proximity;
 using hyped::sensors::FakeProxi;
+using hyped::utils::Logger;
+using hyped::utils::concurrent::Thread;
 
 int main()
 {
+  Logger log(1, true);
   Proximity reading;
-  FakeProxi generator(0, 1);
-  FakeProxi file("src/fake_proxi_input.txt");
+  FakeProxi generator(log, 23, 1);
+  FakeProxi file(log, "../BeagleBone_black/data/in/fake_proxi_input.txt");
 
+  log.INFO("Fake-Proxi", "From file....");
   for (int i = 0; i < 3; i++) {
     file.getData(&reading);
-    printf("From file: %d @ time: null\n", reading.val);
-
-    generator.getData(&reading);
-    printf("From generator: %d @ time: null\n", reading.val);
-
-    usleep(10000);
+    log.INFO("Fake-Proxi", "From file: %d", reading.val);
+    Thread::sleep(10);
   }
+
+  log.INFO("Fake-Proxi", "From generator....");
+  for (int i = 0; i < 3; i++) {
+    generator.getData(&reading);
+    log.INFO("Fake-Proxi", "From generator: %d", reading.val);
+    Thread::sleep(10);
+  }
+  log.INFO("Fake-Proxi", "From generator calibration data: %f", generator.calcCalibrationData());
+  
+
+  
+
 }
 

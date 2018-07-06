@@ -27,6 +27,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -47,9 +48,11 @@ class ProxiManager: public ProxiManagerInterface {
   array<float, data::Sensors::kNumProximities> getCalibrationData() override;
 
  private:
+  utils::System& sys_;
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
   array<float, data::Sensors::kNumProximities> proxi_calibration_;
+  bool is_fake_;
 };
 
 }}  // namespace hyped::sensors

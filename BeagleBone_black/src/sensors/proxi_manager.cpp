@@ -25,11 +25,14 @@
 #include "data/data.hpp"
 #include "utils/timer.hpp"
 #include "utils/io/i2c.hpp"
+#include "sensors/fake_proxi.hpp"
 
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
+using utils::System;
+using sensors::FakeProxi;
 using utils::io::I2C;
 
 namespace sensors {
@@ -37,28 +40,38 @@ namespace sensors {
 ProxiManager::ProxiManager(Logger& log,
                            bool isFront,
                            data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
-    : ProxiManagerInterface(log)
+    : ProxiManagerInterface(log),
+      sys_(System::getSystem())
 {
-  if (isFront) {
-    // create CAN-based proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      CanProxi* proxi = new CanProxi(i, log_);
-      proxi_[i] = proxi;
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
+  is_fake_ = sys_.fake_proxi;
+  if (!is_fake_) {
+    if (isFront) {
+      // create CAN-based proximities
+      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+        CanProxi* proxi = new CanProxi(i, log_);
+        proxi_[i] = proxi;
+        proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
+      }
+    } else {
+      I2C& i2c = I2C::getInstance();
+      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+        i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
+        VL6180* proxi = new VL6180(0x29, log_);
+        proxi->setContinuousRangingMode();
+        proxi->setAddress(0x29 + i);
+        proxi_[i] = proxi;
+      }
+      i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
+
+      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+        proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
+      }
     }
   } else {
-    I2C& i2c = I2C::getInstance();
+    // TODO(anyone) add read to file after
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
-      VL6180* proxi = new VL6180(0x29, log_);
-      proxi->setContinuousRangingMode();
-      proxi->setAddress(0x29 + i);
+      FakeProxi* proxi = new FakeProxi(log_, 23, 1.5);
       proxi_[i] = proxi;
-    }
-    i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
-
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
   }
 
