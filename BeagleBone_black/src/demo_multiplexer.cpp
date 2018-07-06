@@ -33,7 +33,7 @@ using hyped::utils::io::I2C;
 using hyped::sensors::ProxiInterface;
 using hyped::utils::math::RollingStatistics;
 
- constexpr uint8_t kNumOfProxis = 3;
+ constexpr uint8_t kNumOfProxis = 1;
 
 int main(int argc, char* argv[])
 {
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
   uint8_t kMultiplexerAddr = 0x70;
   VL6180* proxi_[kNumOfProxis];
-  array<RollingStatistics<float>, kNumOfProxis> stats = {RollingStatistics<float>(10), RollingStatistics<float>(10), RollingStatistics<float>(10)};
+  // array<RollingStatistics<float>, kNumOfProxis> stats = {RollingStatistics<float>(10), RollingStatistics<float>(10), RollingStatistics<float>(10)};
 
   // i2c.write(kMultiplexerAddr, 0xFF);
   for (int i = 0; i < kNumOfProxis; i++) {
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
       proxi->setAddress(0x29 + i);
       proxi_[i] = proxi;
     }
-   // i2c.write(kMultiplexerAddr, 0xFF);
+   i2c.write(kMultiplexerAddr, 0xFF);
 
   for (int i = 0; i < 300; i++) {
     // update front cluster of proximities
@@ -62,16 +62,11 @@ int main(int argc, char* argv[])
       i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
-      stats[j].update(static_cast<float>(proxi.val));
-      if (stats[j].getVariance() == 0.0) {
-        log.ERR("Variance", "0!");
-      }
       log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
       Thread::sleep(10);
     }
     Thread::sleep(500);
   }
-  //i2c.write(kMultiplexerAddr, 1 << 5);
   Thread::sleep(10);
 
  	return 0;
