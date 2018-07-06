@@ -20,11 +20,14 @@
 
 #include "sensors/main.hpp"
 
+#include <math.h>
+
 #include "data/data.hpp"
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
 
+constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
 
 using data::Data;
@@ -38,13 +41,14 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence_(new Keyence(log_, 73)),
+      keyence_(new GpioCounter(log, 73)),  // Pins for keynece GPIO_73 and GPIO_75
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
       battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
+      optical_encoder_(new GpioCounter(log, 76)),  // Pins for optical encoder GPIO_76 and GPIO_77
       sensor_init_(false),
       battery_init_(false)
 {
@@ -55,6 +59,7 @@ void Main::run()
 {
   // start all managers
   keyence_->start();
+  optical_encoder_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
   proxi_manager_back_->start();
@@ -66,12 +71,14 @@ void Main::run()
       sensors_.module_status = data::ModuleStatus::kInit;
       data_.setSensorsData(sensors_);
 
+      // Get calibration data
       SensorCalibration sensor_calibration_data;
       sensor_calibration_data.proxi_front_variance = proxi_manager_front_->getCalibrationData();
       sensor_calibration_data.proxi_back_variance  = proxi_manager_back_->getCalibrationData();
       sensor_calibration_data.imu_variance         = imu_manager_->getCalibrationData();
       data_.setCalibrationData(sensor_calibration_data);
       sensor_init_ = true;
+
       break;
     }
     yield();
@@ -90,9 +97,13 @@ void Main::run()
 
   // work loop
   while (1) {
-    // Write sensor data to data structure only when all the imu and proxi values are different
+    // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
-      data_.setSensorsImuData(sensors_.imu);
+      sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
+      sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
+                                      M_PI *
+                                      kWheelDiameter;
+      data_.setSensorsData(sensors_);
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
     }
@@ -108,7 +119,6 @@ void Main::run()
       data_.setBatteryData(batteries_);
       battery_manager_->resetTimestamp();
     }
-    data_.setStripeCounterData(keyence_->getStripeCounter());
     yield();
   }
 }
