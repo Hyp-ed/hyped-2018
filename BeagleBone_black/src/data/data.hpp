@@ -144,7 +144,7 @@ struct Batteries : public Module {
 struct EmergencyBrakes {
   bool leftbrakes;        // true if left facing emergency brakes deploy
   bool rightbrakes;       // true if right facing emergency brakes deploy
-}
+};
 
 // -------------------------------------------------------------------------------------------------
 // Motor data
