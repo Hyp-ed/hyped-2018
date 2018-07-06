@@ -27,7 +27,7 @@
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
 
-constexpr float kWheelRadius = 1.1;   // TODO(anyone) Get wheel radius for optical encoder
+constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
 
 using data::Data;
@@ -41,14 +41,14 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence(new GpioCounter(log, 73)),
+      keyence(new GpioCounter(log, 73)),  // Pins for keynece GPIO_73 and GPIO_75
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
       battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
-      optical_encoder_(new GpioCounter(log, 60)),  //TODO(anyone) choose pin for optical encoder  //NOLINT
+      optical_encoder_(new GpioCounter(log, 76)),  // Pins for optical encoder GPIO_76 and GPIO_77
       sensor_init_(false),
       battery_init_(false)
 {
@@ -78,6 +78,7 @@ void Main::run()
       sensor_calibration_data.imu_variance         = imu_manager_->getCalibrationData();
       data_.setCalibrationData(sensor_calibration_data);
       sensor_init_ = true;
+
       break;
     }
     yield();
@@ -96,9 +97,13 @@ void Main::run()
 
   // work loop
   while (1) {
-    // Write sensor data to data structure only when all the imu and proxi values are different
+    // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
-      data_.setSensorsImuData(sensors_.imu);
+      sensors_.keyence_stripe_counter = keyence->getStripeCounter();
+      sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
+                                      M_PI *
+                                      kWheelDiameter;
+      data_.setSensorsData(sensors_);
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
     }
@@ -114,9 +119,6 @@ void Main::run()
       data_.setBatteryData(batteries_);
       battery_manager_->resetTimestamp();
     }
-    data_.setKeyenceStripeCounterData(keyence->getStripeCounter());
-    data_.setOpticalEncoderDistance(optical_encoder_->getStripeCounter().count.value *
-                                    M_PI*2*kWheelRadius);  // NOLINT
     yield();
   }
 }

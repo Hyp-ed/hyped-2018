@@ -219,18 +219,6 @@ class Data {
    */
   StripeCounter getKeyenceStripeCounterData();
   /**
-   * @brief       Should be called to update StripeCount part in Sensors data
-   */
-  void setKeyenceStripeCounterData(const StripeCounter& stripe_counter);
-   /**
-   * @brief       Retrieves only StripeCount part from Sensors data
-   */
-  float getOpticalEncoderDistance();
-  /**
-   * @brief       Should be called to update StripeCount part in Sensors data
-   */
-  void setOpticalEncoderDistance(const float& distance);
-  /**
    * @brief      Should be called to update sensor calibration data
    */
   void setCalibrationData(const SensorCalibration sensor_calibration_data);
