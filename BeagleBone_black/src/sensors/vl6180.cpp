@@ -55,14 +55,20 @@ namespace sensors {
 
 VL6180::VL6180(uint8_t i2c_addr, Logger& log)
     : log_(log),
-      continuous_mode_(false),
       i2c_addr_(i2c_addr),
       i2c_(I2C::getInstance()),
-      is_online_(false)
+      is_online_(false),
+      timeout_(false)
 {
   // Create I2C instance get register address
   turnOn();
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
+}
+
+VL6180::~VL6180()
+{
+  // turn off ranging
+  writeByte(kSysrangeStart, kModeStartStop | kModeContinuous);
 }
 
 void VL6180::setAddress(uint32_t i2c_addr)
@@ -73,8 +79,14 @@ void VL6180::setAddress(uint32_t i2c_addr)
 
 void VL6180::turnOn()
 {
+  uint8_t fresh_out_of_reset;
+  log_.INFO("VL6180", "Trying to turn sensor on");
+
+  Thread::sleep(100);
+
   // This waits for the device to be fresh out of reset
-  waitDeviceBooted();
+  readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
+  log_.INFO("VL6180", "Fresh out of reset: %d", fresh_out_of_reset);
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
@@ -131,8 +143,21 @@ void VL6180::turnOn()
   uint8_t time_ms = 50;  // changes here
   setMaxConvergenceTime(time_ms);
 
+  // Clear interrupt
+  writeByte(kSystemInterruptClear, 0x01);
+
+  // writeByte(kSystemFreshOutOfReset, 0x00);
+
   if (isOnline()) {
     log_.INFO("VL6180", "Sensor is online");
+    Proximity proxi;
+    getData(&proxi);
+    getData(&proxi);
+    Thread::sleep(100);
+    if (timeout_) setContinuousRangingMode();
+    Thread::sleep(100);
+    getData(&proxi);
+    if (timeout_) setContinuousRangingMode();
   } else {
     log_.ERR("VL6180", "Sensor is not operational");
   }
@@ -142,9 +167,11 @@ float VL6180::calcCalibrationData()
 {
   if (is_online_) {
     OnlineStatistics<float> stats = OnlineStatistics<float>();
+    Proximity proxi;
     for (int i = 0; i < 100; i++) {
-      stats.update(getDistance());
-      Thread::sleep(9);
+      getData(&proxi);
+      if (proxi.operational) stats.update(proxi.val);
+      Thread::sleep(10);
     }
     log_.INFO("VL6180", "Sensor has calculated the variance");
     return stats.getVariance();
@@ -159,17 +186,10 @@ void VL6180::setMaxConvergenceTime(uint8_t time_ms)
   writeByte(kSysrangeMaxConvergenceTime, time_ms);
 }
 
-uint8_t VL6180::getDistance()
+void VL6180::getData(Proximity* proxi)
 {
-  // If sensor is not online try and turn on
-  if (!is_online_) {
-    turnOn();
-    return 0;
-  } else if (continuous_mode_) {
-    return continuousRangeDistance();
-  } else {
-    return singleRangeDistance();
-  }
+  proxi->val = continuousRangeDistance();
+  proxi->operational = is_online_;
 }
 
 
@@ -189,7 +209,6 @@ bool VL6180::isOnline()
   }
 
   // Check to see if i2c transaction is working by checking model ID
-  // TODO(jack) check to see if this works
   readByte(kIdentificationModelId, &data);
 
   // Value should be 0xB4 after reset
@@ -197,22 +216,17 @@ bool VL6180::isOnline()
     log_.ERR("VL6180", "Data should of been: %d, but was %d", 0xB4, data);
     is_online_ = false;
   }
-  log_.INFO("TEST", "data: %d", data);
   return is_online_;
 }
 
 void VL6180::setContinuousRangingMode()
 {
-  if (continuous_mode_) {
-    log_.DBG("VL6180", "Sensor already in continuous ranging mode\n");
-    return;
-  }
   // Write to sensor and set to continuous ranging mode
   writeByte(kSysrangeStart, kModeStartStop | kModeContinuous);
   uint8_t inter_measurement_time = 1;
   writeByte(kSysrangeIntermeasurementPeriod, inter_measurement_time);
-  continuous_mode_ = true;
   log_.INFO("VL6180", "Sensor is in continuous ranging mode\n");
+  timeout_ = false;
 }
 
 uint8_t VL6180::continuousRangeDistance()
@@ -221,92 +235,23 @@ uint8_t VL6180::continuousRangeDistance()
   uint8_t data = 1;
   uint8_t interrupt = 1;
   uint64_t timeout = 50000;   // micro s
+  // Make sure we are in continuous ranging mode
   readByte(kResultInterruptStatusGpio, &interrupt);
 
-  while ((interrupt & 0x04) == 0) {
+  while (((interrupt & 0xC7) & 0x04) == 0) {
     readByte(kResultInterruptStatusGpio, &interrupt);
-    if ((start - utils::Timer::getTimeMicros()) > timeout) {
-      return 255;
+    if ((utils::Timer::getTimeMicros() - start) > timeout) {
+      log_.ERR("Vl6180", "TIMEOUT");
       is_online_ = false;
+      timeout_ = true;
+      return 255;
     }
   }
-
+  isOnline();
   readByte(kResultRangeVal, &data);   // read the sampled data
   log_.DBG3("VL6180", "Sensor continuous range: %f\n", data);
   writeByte(kSystemInterruptClear, 0x01);
   return data;
-}
-
-void VL6180::setSingleShotMode()
-{
-  if (!continuous_mode_) {
-    log_.DBG("VL6180", "Sensor already in single shot mode\n");
-    return;
-  } else {
-    // Write to sensor and set to single shot ranging mode
-    writeByte(kSysrangeStart, kModeStartStop | kModeSingleShot);
-    continuous_mode_ = false;
-    log_.INFO("VL6180", "Sensor is in single-shot ranging mode\n");
-  }
-}
-
-uint8_t VL6180::singleRangeDistance()
-{
-  uint8_t data;
-  data = 1;
-  uint8_t status;
-  status = 1;
-
-  // Make sure in single shot ranging mode
-  writeByte(kSysrangeStart, kModeStartStop | kModeSingleShot);
-
-  // Clear the interrupt
-  writeByte(kSystemInterruptClear, kInterruptClearRanging);
-
-  // Wait until the sample is ready
-  do {
-    rangeWaitDeviceReady();
-    readByte(kResultInterruptStatusGpio, &status);
-  }while(status);
-
-  writeByte(kSystemInterruptClear, kInterruptClearRanging);
-  readByte(kResultRangeVal, &data);
-  log_.DBG3("VL6180", "Sensor single-shot range: %f\n", data);
-  return data;
-}
-
-bool VL6180::waitDeviceBooted()
-{
-  // Will hold the return value of the register kSystemFreshOutOfReset
-  uint8_t fresh_out_of_reset;
-  int send_counter;
-
-  for (send_counter = 0; send_counter < 3; send_counter++) {
-    readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
-    if (fresh_out_of_reset == 1) {
-      log_.DBG("VL6180", "Sensor out of reset");
-      return true;
-    }
-    Thread::sleep(100);
-  }
-  log_.ERR("VL6180", "Sensor failed to get of reset");
-  is_online_ = false;
-  return false;
-}
-
-bool VL6180::rangeWaitDeviceReady()
-{
-  uint8_t data;
-  for (int i = 0; i < 10; i++) {
-    readByte(kResultRangeStatus, &data);
-    data = data & kRangeDeviceReadyMask;
-    if (data)
-      return true;
-    Thread::yield();
-  }
-  log_.ERR("VL6180", "Sensor took too long to wait for data");
-  is_online_ = false;
-  return false;
 }
 
 void VL6180::checkStatus()
@@ -353,7 +298,7 @@ void VL6180::checkStatus()
       log_.ERR("VL6180", "Result is out of range. This occurs typically around 200 mm");
     break;
     case 14:
-      log_.ERR("VL6180", "Range < 0 .");
+      log_.ERR("VL6180", "Range < 0");
     break;
     case 15:
       log_.ERR("VL6180", "Result is out of range. This occurs typically around 200 mm");

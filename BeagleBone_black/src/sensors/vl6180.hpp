@@ -35,26 +35,16 @@ namespace sensors {
 class VL6180: public ProxiInterface {
  public:
   VL6180(uint8_t i2c_addr, Logger& log);
-  ~VL6180() {}
+  ~VL6180();
 
   bool isOnline() override;
-  void getData(Proximity* proxi) override {
-    proxi->operational = isOnline();
-    proxi->val = getDistance();
-  }
+  void getData(Proximity* proxi) override;
   /**
    * @brief Calculates the variance for the data structure
    *
    * @return float value of the variance for the sensor
    */
   float calcCalibrationData() override;
-
-  /**
-    *  @brief  Returns the distance from the nearest object the sensor is facing
-    *
-    *  @return double Returns the distance to the nearest object
-    */
-  uint8_t getDistance();
   /**
     *  @brief  Sets the the ranging mode to continuous
     */
@@ -122,6 +112,7 @@ class VL6180: public ProxiInterface {
   uint32_t i2c_addr_;
   I2C& i2c_;
   bool is_online_;
+  bool timeout_;
 };
 
 }}  // namespace hyped::sensors

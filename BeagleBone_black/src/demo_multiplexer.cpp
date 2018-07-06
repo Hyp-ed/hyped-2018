@@ -43,31 +43,27 @@ int main(int argc, char* argv[])
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
   uint8_t kMultiplexerAddr = 0x70;
   VL6180* proxi_[kNumOfProxis];
-  // array<RollingStatistics<float>, kNumOfProxis> stats = {RollingStatistics<float>(10), RollingStatistics<float>(10), RollingStatistics<float>(10)};
 
-  // i2c.write(kMultiplexerAddr, 0xFF);
   for (int i = 0; i < kNumOfProxis; i++) {
       i2c.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       log.INFO("Multiplexer", "Opening channel: %d", i);
       VL6180* proxi = new VL6180(0x29, log);
-      proxi->setContinuousRangingMode();
       proxi->setAddress(0x29 + i);
       proxi_[i] = proxi;
     }
-   i2c.write(kMultiplexerAddr, 0xFF);
 
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 100; i++) {
     // update front cluster of proximities
     for (int j = 0; j < kNumOfProxis; j++) {
       i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
       log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
+      log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
       Thread::sleep(10);
     }
-    Thread::sleep(500);
   }
-  Thread::sleep(10);
+  log.INFO("CALIBRATION", "variance: %f", proxi_[0]->calcCalibrationData());
 
  	return 0;
 }
