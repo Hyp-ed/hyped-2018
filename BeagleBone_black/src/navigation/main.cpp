@@ -96,11 +96,11 @@ void Main::run()
       continue;
     }
     if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis, readings->stripe_counter);
+      nav_.update(readings->imu, *proxis, readings->keyence_stripe_counter);
     else if (proxiChanged(*last_readings, *readings))
       nav_.update(readings->imu, *proxis);
     else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->stripe_counter);
+      nav_.update(readings->imu, readings->keyence_stripe_counter);
     else
       nav_.update(readings->imu);
 
@@ -125,7 +125,7 @@ bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  return new_data.stripe_counter.count.timestamp != old_data.stripe_counter.count.timestamp;
+  return new_data.keyence_stripe_counter.count.timestamp != old_data.keyence_stripe_counter.count.timestamp; //NOLINT
 }
 
 void Main::updateData()
