@@ -24,8 +24,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
 
 #include <cstdint>
 
@@ -41,9 +41,9 @@ using utils::Logger;
 namespace sensors {
 
 
-class Keyence: public Thread {
+class GpioCounter: public Thread {
  public:
-  explicit Keyence(Logger& log, int pin);
+  explicit GpioCounter(Logger& log, int pin);
   void run() override;
   data::StripeCounter getStripeCounter();
 
@@ -54,4 +54,4 @@ class Keyence: public Thread {
 };
 }}  // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_KEYENCE_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
