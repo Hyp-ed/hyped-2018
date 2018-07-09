@@ -51,7 +51,7 @@ void printUsage()
     "\n  --debug_motor, --debug_nav, --debug_sensor, --debug_state, --debug_cmn\n"
     "    Set module-specific debug level. All DBG[n] where n <= level messages are printed.\n"
     "\n  --fake_imu --fake_proxi\n"
-    "    Make the system use the fake data drivers"
+    "    Make the system use the fake data drivers.\n"
     "");
 }
 }
@@ -95,7 +95,7 @@ System::System(int argc, char* argv[])
       {"debug_cmn", optional_argument, 0, 'g'},
       {"help", no_argument, 0, 'h'},
       {"fake_imu", optional_argument, 0, 'i'},
-      {"fake_proxi", optional_argument, 0, 'I'},
+      {"fake_proxi", optional_argument, 0, 'j'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -163,6 +163,7 @@ System::System(int argc, char* argv[])
       case 'I':
         if (optarg) fake_proxi = atoi(optarg);
         else        fake_proxi = 0;
+        break;
       default:
         printUsage();
         exit(1);
