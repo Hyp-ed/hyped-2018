@@ -71,22 +71,11 @@ VL6180::~VL6180()
   writeByte(kSysrangeStart, kModeStartStop | kModeContinuous);
 }
 
-void VL6180::setAddress(uint32_t i2c_addr)
-{
-  writeByte(0x0212, i2c_addr);
-  i2c_addr_ = i2c_addr;
-}
-
 void VL6180::turnOn()
 {
-  uint8_t fresh_out_of_reset;
   log_.INFO("VL6180", "Trying to turn sensor on");
 
-  Thread::sleep(100);
-
-  // This waits for the device to be fresh out of reset
-  readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
-  log_.INFO("VL6180", "Fresh out of reset: %d", fresh_out_of_reset);
+  waitDeviceBooted();
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
@@ -149,6 +138,7 @@ void VL6180::turnOn()
   // writeByte(kSystemFreshOutOfReset, 0x00);
 
   if (isOnline()) {
+    // TODO(Jack) Redo this, there has to be a better way
     log_.INFO("VL6180", "Sensor is online");
     Proximity proxi;
     getData(&proxi);
@@ -158,6 +148,9 @@ void VL6180::turnOn()
     Thread::sleep(100);
     getData(&proxi);
     if (timeout_) setContinuousRangingMode();
+    Thread::sleep(100);
+    getData(&proxi);
+    if (timeout_) is_online_ = false;
   } else {
     log_.ERR("VL6180", "Sensor is not operational");
   }
@@ -306,6 +299,25 @@ void VL6180::checkStatus()
     default:
           log_.ERR("VL6180", "Unidentified error");
   }
+}
+
+bool VL6180::waitDeviceBooted()
+{
+  // Will hold the return value of the register kSystemFreshOutOfReset
+  uint8_t fresh_out_of_reset;
+  int send_counter;
+
+  for (send_counter = 0; send_counter < 10; send_counter++) {
+    readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
+    if (fresh_out_of_reset == 1) {
+      log_.DBG("VL6180", "Sensor out of reset");
+      return true;
+    }
+    Thread::sleep(20);
+  }
+  log_.ERR("VL6180", "Sensor failed to get of reset");
+  is_online_ = false;
+  return false;
 }
 
 void VL6180::readByte(uint16_t reg_add, uint8_t *data)

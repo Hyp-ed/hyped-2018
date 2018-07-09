@@ -51,7 +51,6 @@ ProxiManager::ProxiManager(Logger& log,
       i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       VL6180* proxi = new VL6180(0x29, log_);
       proxi->setContinuousRangingMode();
-      proxi->setAddress(0x29);
       proxi_[i] = proxi;
     }
 

@@ -49,20 +49,8 @@ class VL6180: public ProxiInterface {
     *  @brief  Sets the the ranging mode to continuous
     */
   void setContinuousRangingMode();
-  /**
-    *  @brief  Sets the the ranging mode to single shot
-    */
-  void setSingleShotMode();
-
-  void setAddress(uint32_t i2c_addr);
 
  private:
-  /**
-    *  @brief called from getDistance() for single shot ranging
-    *
-    *  @return double Returns the distance to the nearest object
-    */
-  uint8_t singleRangeDistance();
   /**
     *  @brief called from getDistance() for continuous ranging
     *
@@ -87,13 +75,6 @@ class VL6180: public ProxiInterface {
     *  @brief  Sets the maximum convergence time in ms
     */
   void setMaxConvergenceTime(uint8_t time);
-  /**
-    *  @brief  Wait for sensor to be ready before a new ranging command
-    *            is issued
-    *
-    *  @return bool Returns true when device is ready to get a new range
-    */
-  bool rangeWaitDeviceReady();
   /**
     *  @brief  Reads a single byte register and returns its status
     */
