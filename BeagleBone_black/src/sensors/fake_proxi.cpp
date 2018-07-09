@@ -128,7 +128,11 @@ uint8_t FakeProxi::addNoiseToData(uint8_t value, float noise)
 
   std::normal_distribution<float> distribution(static_cast<float>(value), noise);
   temp = distribution(generator);
-
+  if (temp > 255.0) {
+    temp = 255.0;
+  } else if (temp < 0) {
+    temp = 0;
+  }
   return static_cast<uint8_t>(temp);
 }
 

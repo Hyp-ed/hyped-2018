@@ -44,37 +44,30 @@ ProxiManager::ProxiManager(Logger& log,
       sys_(System::getSystem())
 {
   is_fake_ = sys_.fake_proxi;
-  if (!is_fake_) {
-    if (isFront) {
-      // create CAN-based proximities
-      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-        CanProxi* proxi = new CanProxi(i, log_);
-        proxi_[i] = proxi;
-        proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
-      }
-    } else {
-      I2C& i2c = I2C::getInstance();
-      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-        i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
-        VL6180* proxi = new VL6180(0x29, log_);
-        proxi->setContinuousRangingMode();
-        proxi->setAddress(0x29 + i);
-        proxi_[i] = proxi;
-      }
-      i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
-
-      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-        proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
-      }
-    }
-  } else {
+  if (is_fake_) {
     // TODO(anyone) add read to file after
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       FakeProxi* proxi = new FakeProxi(log_, 23, 1.5);
       proxi_[i] = proxi;
+      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
+    }
+  } else if (isFront) {
+    // create CAN-based proximities
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      CanProxi* proxi = new CanProxi(i, log_);
+      proxi_[i] = proxi;
+      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
+    }
+  } else {
+    I2C& i2c = I2C::getInstance();
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
+      VL6180* proxi = new VL6180(0x29, log_);
+      proxi->setContinuousRangingMode();
+      proxi_[i] = proxi;
+      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
   }
-
   sensors_proxi_ = proxi;
 }
 
