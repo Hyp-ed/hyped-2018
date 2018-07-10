@@ -332,7 +332,7 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
       prev_velocity_ = velocity;
       prev_index_++;
       time_of_update_ = timer.getTimeMicros();
-      if (prev_index_ < acceleration_slip_[1].size()) {
+      if (prev_index_ < (int32_t) acceleration_slip_[1].size()) {
         return (int32_t) acceleration_slip_[1][prev_index_];
       } else {
         return 6000;
@@ -356,27 +356,17 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
 
 int32_t Main::decelerationVelocity(NavigationType velocity)
 {
-  // Decrease velocity from max RPM to 0, with updates every 30 milliseconds 
-  while(timer.getTimeMicros() - time_of_update_ < 30000);
+  // Decrease velocity from max RPM to 0, with updates every 30 milliseconds
+  while (timer.getTimeMicros() - time_of_update_ < 30000);
   int32_t rpm;
   time_of_update_ = timer.getTimeMicros();
-  if (dec_index_ < deceleration_slip_[1].size()) {
+  if (dec_index_ < (int32_t) deceleration_slip_[1].size()) {
     rpm = (int32_t) deceleration_slip_[1][dec_index_];
   } else {
     log_.ERR("MOTOR", "Deceleration index out of bounds");
     return 0;
   }
   return (rpm > 300) ? rpm : 0;
-}
-
-int16_t Main::accelerationTorque(NavigationType velocity)
-{
-  return 0;
-}
-
-int16_t Main::decelerationTorque(NavigationType velocity)
-{
-  return 0;
 }
 
 void Main::servicePropulsion()
