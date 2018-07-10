@@ -29,11 +29,11 @@ using hyped::sensors::VL6180;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
 
-Logger log(true, 1);
 
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
+  Logger log(true, 1);
   VL6180 vl6180 = VL6180(0x29, log);
 
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
