@@ -113,11 +113,15 @@ class Main: public Thread {
     *  @brief  { Updates the data structure motor failure has occured }
     */
   void updateMotorFailure();
+   /**
+    *  @brief  { Enters controllers into a preoperational state }
+    */
+  void enterPreOperational();
 
   data::Data& data_;
   data::StateMachine state_;
   data::Motors motor_data_;
-  Barrier post_calibration_barrier_;
+  Barrier& post_calibration_barrier_;
   Communicator* communicator_;
   int32_t target_velocity_;
   int16_t target_torque_;
@@ -125,7 +129,7 @@ class Main: public Thread {
   bool nav_calib_;
   bool motors_init_;
   bool motors_ready_;
-  bool motors_operational_;
+  bool motors_preoperational_;
   bool motor_failure_;
   bool all_motors_stopped_;
   MotorVelocity motor_velocity_;

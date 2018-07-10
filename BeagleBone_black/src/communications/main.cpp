@@ -135,26 +135,6 @@ int Main::sendLpCharge1(Battery lpBattery1)
   return baseCommunicator_->sendData("CMD16" + std::to_string(lpBattery1.charge) + "\n");
 }
 
-int Main::sendTorqueFr(float torquefr)
-{
-  return baseCommunicator_->sendData("CMD17" + std::to_string(torquefr) + "\n");
-}
-
-int Main::sendTorqueFl(float torquefl)
-{
-  return baseCommunicator_->sendData("CMD18" + std::to_string(torquefl) + "\n");
-}
-
-int Main::sendTorqueBr(float torquebr)
-{
-  return baseCommunicator_->sendData("CMD19" + std::to_string(torquebr) + "\n");
-}
-
-int Main::sendTorqueBl(float torquebl)
-{
-  return baseCommunicator_->sendData("CMD20" + std::to_string(torquebl) + "\n");
-}
-
 int Main::sendImu(bool op, bool op1, bool op2, bool op3)
 {
   std::string sen, sen1, sen2, sen3;
@@ -162,7 +142,7 @@ int Main::sendImu(bool op, bool op1, bool op2, bool op3)
   sen1 = op1 ? "1" : "2";
   sen2 = op2 ? "1" : "2";
   sen3 = op3 ? "1" : "2";
-  return baseCommunicator_->sendData("CMD21" + sen + sen1 + sen2 +
+  return baseCommunicator_->sendData("CMD17" + sen + sen1 + sen2 +
                                      sen3 + "\n");
 }
 
@@ -178,7 +158,7 @@ int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
   sen5 = op5 ? "1" : "2";
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
-  return baseCommunicator_->sendData("CMD22" + sen + sen1 + sen2 +
+  return baseCommunicator_->sendData("CMD18" + sen + sen1 + sen2 +
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
@@ -194,7 +174,7 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
   sen5 = op5 ? "1" : "2";
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
-  return baseCommunicator_->sendData("CMD23" + sen + sen1 + sen2 +
+  return baseCommunicator_->sendData("CMD19" + sen + sen1 + sen2 +
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
@@ -203,7 +183,7 @@ int Main::sendEmBrakes(bool leftbrakes, bool rightbrakes)
   std::string brake, brake1;
   brake = leftbrakes ? "1" : "2";
   brake1 = rightbrakes ? "1" : "2";
-  return baseCommunicator_->sendData("CMD24" + brake + brake1 + "\n");
+  return baseCommunicator_->sendData("CMD20" + brake + brake1 + "\n");
 }
 
 void Main::run()
@@ -244,10 +224,6 @@ void Main::run()
     sendHpCharge1(bat_.high_power_batteries.at(1));
     sendLpCharge(bat_.low_power_batteries.at(0));
     sendLpCharge1(bat_.low_power_batteries.at(1));
-    sendTorqueFr(mtr_.torque_2);
-    sendTorqueFl(mtr_.torque_1);
-    sendTorqueBr(mtr_.torque_4);
-    sendTorqueBl(mtr_.torque_3);
     sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
             sen_.imu.value[2].operational, sen_.imu.value[3].operational);
     sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,

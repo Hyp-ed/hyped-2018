@@ -41,6 +41,7 @@ Main::Main(uint8_t id, Logger& log)
       nav_calib_(false),
       motors_init_(false),
       motors_ready_(false),
+      motors_preoperational_(false),
       motor_failure_(false),
       all_motors_stopped_(false)
 {
@@ -62,7 +63,7 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
-  log_.INFO("MOTOR", "Starting motor controller");
+  log_.INFO("MOTOR", "Starting motor controllers");
   while (run_) {
     state_ = data_.getStateMachineData();
     if (state_.current_state == data::State::kIdle) {
@@ -71,18 +72,22 @@ void Main::run()
     } else if (state_.current_state == data::State::kCalibrating) {
       prepareMotors();
       yield();
+    } else if (state_.current_state == data::State::kReady) {
+      // Wait for launch command
+      yield();
     } else if (state_.current_state == data::State::kAccelerating) {
       accelerateMotors();
     } else if (state_.current_state == data::State::kDecelerating) {
       decelerateMotors();
     } else if (state_.current_state == data::State::kRunComplete) {
       // Wait for state machine to transition to kExiting
+      yield();
     } else if (state_.current_state == data::State::kExiting) {
       servicePropulsion();
     } else if (state_.current_state == data::State::kEmergencyBraking) {
       stopMotors();
     } else if (state_.current_state == data::State::kFailureStopped) {
-      communicator_->enterPreOperational();
+      enterPreOperational();
     } else {
       run_ = false;
     }
@@ -279,6 +284,13 @@ void Main::updateMotorFailure()
   motor_data_.module_status = data::ModuleStatus::kCriticalFailure;
   data_.setMotorData(motor_data_);
   motor_failure_ = true;
+}
+
+void Main::enterPreOperational()
+{
+  if (!motors_preoperational_) {
+    communicator_->enterPreOperational();
+  }
 }
 
 }}  // namespace hyped::motor_control
