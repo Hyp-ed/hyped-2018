@@ -28,7 +28,8 @@ namespace hyped {
 namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int portNo)
-    : log_(log)
+    : log_(log),
+      connected_(false)
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -36,14 +37,12 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
   struct hostent *server;
 
   if (sockfd_ < 0) {
-    connected_ = false;
     log_.ERR("COMN", "CANNOT OPEN SOCKET.");
   }
 
   server = gethostbyname(ip);
 
   if (server == NULL) {
-    connected_ = false;
     log_.ERR("COMN", "INCORRECT BASE-STATION IP, OR BASE-STATION S/W NOT RUNNING.");
   }
 
@@ -54,13 +53,11 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 
   if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0) {
     log_.ERR("COMN", "INVALID ADDRESS.\n");
-    connected_ = false;
   }
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     // if connect does not complete successfully it returns -1
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
-    connected_ = false;
   } else {
     log_.INFO("COMN", "TCP/IP connection established.");
     connected_ = true;

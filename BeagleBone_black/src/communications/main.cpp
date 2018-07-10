@@ -142,6 +142,7 @@ int Main::sendImu(bool op, bool op1, bool op2, bool op3)
   sen1 = op1 ? "1" : "2";
   sen2 = op2 ? "1" : "2";
   sen3 = op3 ? "1" : "2";
+
   return baseCommunicator_->sendData("CMD17" + sen + sen1 + sen2 +
                                      sen3 + "\n");
 }
@@ -158,6 +159,7 @@ int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
   sen5 = op5 ? "1" : "2";
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
+
   return baseCommunicator_->sendData("CMD18" + sen + sen1 + sen2 +
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
@@ -174,6 +176,7 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
   sen5 = op5 ? "1" : "2";
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
+
   return baseCommunicator_->sendData("CMD19" + sen + sen1 + sen2 +
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
@@ -232,9 +235,6 @@ void Main::run()
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
     sleep(0.2);
   }
-
-  // receiverThread->join();
-  // delete receiverThread;
 }
 
 }}
