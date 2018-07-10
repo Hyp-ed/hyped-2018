@@ -27,11 +27,13 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/io/i2c.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
+using utils::io::I2C;
 
 namespace sensors {
 
@@ -50,6 +52,8 @@ class ProxiManager: public ProxiManagerInterface {
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
   array<float, data::Sensors::kNumProximities> proxi_calibration_;
+  I2C& i2c_;
+  bool is_front_;
 };
 
 }}  // namespace hyped::sensors
