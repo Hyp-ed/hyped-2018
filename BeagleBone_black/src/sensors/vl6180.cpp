@@ -142,7 +142,6 @@ void VL6180::turnOn()
     log_.INFO("VL6180", "Sensor is online");
     Proximity proxi;
     getData(&proxi);
-    getData(&proxi);
     Thread::sleep(100);
     if (timeout_) setContinuousRangingMode();
     Thread::sleep(100);
