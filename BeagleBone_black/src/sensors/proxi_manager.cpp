@@ -35,13 +35,16 @@ using utils::System;
 using sensors::FakeProxi;
 using utils::io::I2C;
 
+
 namespace sensors {
 
 ProxiManager::ProxiManager(Logger& log,
-                           bool isFront,
+                           bool is_front,
                            data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
     : ProxiManagerInterface(log),
-      sys_(System::getSystem())
+      sys_(System::getSystem()),
+      i2c_(I2C::getInstance()),
+      is_front_(is_front)
 {
   if (sys_.fake_proxi || sys_.fake_sensors) is_fake_ = true;
   if (is_fake_) {
@@ -49,24 +52,23 @@ ProxiManager::ProxiManager(Logger& log,
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       FakeProxi* proxi = new FakeProxi(log_, 23, 1.5);
       proxi_[i] = proxi;
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
-  } else if (isFront) {
+  } else if (is_front_) {
     // create CAN-based proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       CanProxi* proxi = new CanProxi(i, log_);
       proxi_[i] = proxi;
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
   } else {
-    I2C& i2c = I2C::getInstance();
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
+      i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       VL6180* proxi = new VL6180(0x29, log_);
       proxi->setContinuousRangingMode();
       proxi_[i] = proxi;
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
+  }
+  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+    proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
   }
   sensors_proxi_ = proxi;
 }
@@ -76,6 +78,7 @@ void ProxiManager::run()
   while (1) {
     // update front cluster of proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      if (!is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
       proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
     sensors_proxi_->timestamp = utils::Timer::getTimeMicros();;

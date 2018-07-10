@@ -63,6 +63,7 @@ bool CanProxi::isOnline()
 void CanProxi::getData(Proximity* proxi)
 {
   proxi->val = data_[id_];
+  proxi->operational = isOnline();
 }
 
 float CanProxi::calcCalibrationData()

@@ -60,7 +60,7 @@ class Main: public Thread {
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  std::unique_ptr<GpioCounter>           keyence;
+  std::unique_ptr<GpioCounter>           keyence_;
   std::unique_ptr<ImuManagerInterface>   imu_manager_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;
