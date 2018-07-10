@@ -184,17 +184,21 @@ void Main::run()
   cmn_data_.resetCommand = false;
   cmn_data_.servicePropulsionGo = false;
   cmn_data_.run_length = 1250;
+
   if (baseCommunicator_->connectionEstablished()) {
     cmn_data_.module_status = data::ModuleStatus::kInit;
+    data_.setCommunicationsData(cmn_data_);
   } else {
     cmn_data_.module_status = data::ModuleStatus::kCriticalFailure;
+    data_.setCommunicationsData(cmn_data_);
+
+    return;  // If connection fail, stops the communication module
   }
-  data_.setCommunicationsData(cmn_data_);
+
   ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
   receiverThread->start();
 
   while (1) {
-    sleep(0.2);
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
     sen_ = data_.getSensorsData();
@@ -226,10 +230,11 @@ void Main::run()
                   sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
                   sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
+    sleep(0.2);
   }
 
-  receiverThread->join();
-  delete receiverThread;
+  // receiverThread->join();
+  // delete receiverThread;
 }
 
 }}
