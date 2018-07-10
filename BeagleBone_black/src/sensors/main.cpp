@@ -43,7 +43,7 @@ namespace sensors {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence(new GpioCounter(log, 73)),  // Pins for keynece GPIO_73 and GPIO_75
+      keyence_(new GpioCounter(log, 73)),  // Pins for keynece GPIO_73 and GPIO_75
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
@@ -60,7 +60,7 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   // start all managers
-  keyence->start();
+  keyence_->start();
   optical_encoder_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
@@ -101,7 +101,7 @@ void Main::run()
   while (1) {
     // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
-      sensors_.keyence_stripe_counter = keyence->getStripeCounter();
+      sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
       sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
                                       M_PI *
                                       kWheelDiameter;

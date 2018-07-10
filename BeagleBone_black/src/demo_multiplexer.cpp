@@ -24,46 +24,46 @@
 #include "utils/system.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "sensors/interface.hpp"
+#include "utils/math/statistics.hpp"
 
 using hyped::sensors::VL6180;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::io::I2C;
 using hyped::sensors::ProxiInterface;
+using hyped::utils::math::RollingStatistics;
 
-Logger log(true, 1);
+ constexpr uint8_t kNumOfProxis = 1;
 
-// 
-    
-//     i2c.write(kMultiplexerAddr, 0xFF);      // open all i2c channels
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
   I2C& i2c = I2C::getInstance();
+  Logger log(true, 1);
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
   uint8_t kMultiplexerAddr = 0x70;
-  uint8_t kNumOfProxis = 2;
-  ProxiInterface* proxi_[hyped::data::Sensors::kNumProximities];
+  VL6180* proxi_[kNumOfProxis];
 
   for (int i = 0; i < kNumOfProxis; i++) {
-      i2c.write(kMultiplexerAddr, 1 << i);  // open particular i2c channel
+      i2c.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
+      log.INFO("Multiplexer", "Opening channel: %d", i);
       VL6180* proxi = new VL6180(0x29, log);
-      proxi->setContinuousRangingMode();
       proxi->setAddress(0x29 + i);
       proxi_[i] = proxi;
     }
 
-  for (int i = 0; i < 300; i++) {
+  for (int i = 0; i < 100; i++) {
     // update front cluster of proximities
-    for (int i = 0; i < kNumOfProxis; i++) {
+    for (int j = 0; j < kNumOfProxis; j++) {
+      i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
-      proxi_[i%kNumOfProxis]->getData(&proxi);
-      log.INFO("Multiplexer-test", "Sensor %d, reading %d", i%kNumOfProxis, proxi.val);
-      Thread::sleep(3);
+      proxi_[j]->getData(&proxi);
+      log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
+      log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
+      Thread::sleep(10);
     }
-
   }
-  Thread::sleep(10);
+  log.INFO("CALIBRATION", "variance: %f", proxi_[0]->calcCalibrationData());
 
  	return 0;
 }
