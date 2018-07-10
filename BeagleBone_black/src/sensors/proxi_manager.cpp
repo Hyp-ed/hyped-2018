@@ -43,7 +43,7 @@ ProxiManager::ProxiManager(Logger& log,
     : ProxiManagerInterface(log),
       sys_(System::getSystem())
 {
-  is_fake_ = sys_.fake_proxi;
+  if (sys_.fake_proxi || sys_.fake_sensors) is_fake_ = true;
   if (is_fake_) {
     // TODO(anyone) add read to file after
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
