@@ -57,6 +57,9 @@ void Main::run()
     batteries_data_ = data_.getBatteriesData();
     sensors_data_ = data_.getSensorsData();
 
+    if (sm_data_.current_state == data::kIdle) {
+      checkInit();
+    }
     checkFailure();
     checkReady();
     if (sm_data_.current_state != data::kIdle) {
