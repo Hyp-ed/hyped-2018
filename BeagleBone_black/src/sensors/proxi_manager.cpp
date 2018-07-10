@@ -24,11 +24,17 @@
 #include "sensors/vl6180.hpp"
 #include "data/data.hpp"
 #include "utils/timer.hpp"
+#include "utils/io/i2c.hpp"
+#include "sensors/fake_proxi.hpp"
 
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
+using utils::System;
+using sensors::FakeProxi;
+using utils::io::I2C;
+
 
 namespace sensors {
 
@@ -36,15 +42,22 @@ ProxiManager::ProxiManager(Logger& log,
                            bool is_front,
                            data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
     : ProxiManagerInterface(log),
+      sys_(System::getSystem()),
       i2c_(I2C::getInstance()),
       is_front_(is_front)
 {
-  if (is_front_) {
+  if (sys_.fake_proxi || sys_.fake_sensors) is_fake_ = true;
+  if (is_fake_) {
+    // TODO(anyone) add read to file after
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      FakeProxi* proxi = new FakeProxi(log_, 23, 1.5);
+      proxi_[i] = proxi;
+    }
+  } else if (is_front_) {
     // create CAN-based proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       CanProxi* proxi = new CanProxi(i, log_);
       proxi_[i] = proxi;
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
     }
   } else {
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
@@ -53,11 +66,9 @@ ProxiManager::ProxiManager(Logger& log,
       proxi->setContinuousRangingMode();
       proxi_[i] = proxi;
     }
-
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
-      proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
-    }
+  }
+  for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+    proxi_calibration_[i] = proxi_[i]->calcCalibrationData();
   }
   sensors_proxi_ = proxi;
 }

@@ -42,7 +42,7 @@ ImuManager::ImuManager(Logger& log,
       data_(Data::getInstance()),
       chip_select_ {31, 50, 48, 51}
 {
-  is_fake_ = sys_.fake_imu;
+  if (sys_.fake_imu || sys_.fake_sensors) is_fake_ = true;
   if (!is_fake_) {
     // create IMUs
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
