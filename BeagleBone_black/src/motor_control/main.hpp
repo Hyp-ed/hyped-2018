@@ -140,10 +140,10 @@ class Main: public Thread {
   std::vector<std::vector<double>> acceleration_slip_;
   std::vector<std::vector<double>> deceleration_slip_;
   NavigationType prev_velocity_;
-  uint64_t time_of_update;
+  uint64_t time_of_update_;
   int32_t  target_velocity_;
-  int16_t  target_torque_;
-  int32_t  prev_index;
+  int32_t  prev_index_;
+  int32_t  dec_index_;
   bool run_;
   bool nav_calib_;
   bool motors_init_;
@@ -152,7 +152,6 @@ class Main: public Thread {
   bool motor_failure_;
   bool all_motors_stopped_;
   MotorVelocity motor_velocity_;
-  MotorTorque motor_torque_;
 };
 
 }}  // namespace hyped::motor_control

@@ -47,10 +47,10 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance()),
       post_calibration_barrier_(System::getSystem().navigation_motors_sync_),
       prev_velocity_(0),
-      time_of_update(0),
+      time_of_update_(0),
       target_velocity_(0),
-      target_torque_(0),
-      prev_index(0),
+      prev_index_(0),
+      dec_index_(0),
       run_(true),
       nav_calib_(false),
       motors_init_(false),
@@ -71,7 +71,6 @@ Main::Main(uint8_t id, Logger& log)
   motor_data_.torque_4 = 0;
   data_.setMotorData(motor_data_);
   motor_velocity_ = {0, 0, 0, 0};
-  motor_torque_   = {0, 0, 0, 0};
   communicator_ = new Communicator(log);
 }
 
@@ -259,9 +258,7 @@ void Main::accelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Accelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = accelerationVelocity(nav_.velocity);
-    target_torque_        = accelerationTorque(nav_.velocity);
     communicator_->sendTargetVelocity(target_velocity_);
-    communicator_->sendTargetTorque(target_torque_);
     updateMotorData();
   }
 }
@@ -292,9 +289,7 @@ void Main::decelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Deccelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = decelerationVelocity(nav_.velocity);
-    target_torque_        = decelerationTorque(nav_.velocity);
     communicator_->sendTargetVelocity(target_velocity_);
-    communicator_->sendTargetTorque(target_torque_);
     updateMotorData();
   }
 }
@@ -325,29 +320,24 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
   if (velocity == 0) {
     prev_velocity_ = velocity;
     timer.start();
-    time_of_update = timer.getTimeMicros();
+    time_of_update_ = timer.getTimeMicros();
     return 250;
   }
 
   // If the current velocity has not exceeded the previous velocity by at least
-  // 0.2 m/s in 40 milliseconds, then it is likely that the slip is too low, so
+  // 0.2 m/s in 50 milliseconds, then it is likely that the slip is too low, so
   // we manually increase the RPM.
-  if (timer.getTimeMicros() - time_of_update > 40000) {
+  if (timer.getTimeMicros() - time_of_update_ > 50000) {
     if (velocity - prev_velocity_ < 0.2) {
       prev_velocity_ = velocity;
-      prev_index++;
-      time_of_update = timer.getTimeMicros();
-      return acceleration_slip_[1][prev_index];
+      prev_index_++;
+      time_of_update_ = timer.getTimeMicros();
+      if (prev_index_ < acceleration_slip_[1].size()) {
+        return (int32_t) acceleration_slip_[1][prev_index_];
+      } else {
+        return 6000;
+      }
     }
-  }
-
-  // If current velocity is less than previous velocity during acceleration, then
-  // it is likely that the slip is too high, so we manually decrease the RPM.
-  if (velocity < prev_velocity_) {
-    prev_velocity_ = velocity;
-    prev_index--;
-    time_of_update = timer.getTimeMicros();
-    return acceleration_slip_[1][prev_index];
   }
 
   // Otherwise, perform upper bound binary search to find the first element in the vector
@@ -357,16 +347,26 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
                                       velocity);
 
   // Use index to find corresponding RPM
-  int index      = upper_bound - acceleration_slip_[0].begin();
-  prev_velocity_ = velocity;
-  prev_index     = index;
-  time_of_update = timer.getTimeMicros();
-  return acceleration_slip_[1][index];
+  int index       = upper_bound - acceleration_slip_[0].begin();
+  prev_velocity_  = velocity;
+  prev_index_     = index;
+  time_of_update_ = timer.getTimeMicros();
+  return (int32_t) acceleration_slip_[1][index];
 }
 
 int32_t Main::decelerationVelocity(NavigationType velocity)
 {
-  return target_velocity_ -= 100;  // dummy calculation to decrease rpm
+  // Decrease velocity from max RPM to 0, with updates every 30 milliseconds 
+  while(timer.getTimeMicros() - time_of_update_ < 30000);
+  int32_t rpm;
+  time_of_update_ = timer.getTimeMicros();
+  if (dec_index_ < deceleration_slip_[1].size()) {
+    rpm = (int32_t) deceleration_slip_[1][dec_index_];
+  } else {
+    log_.ERR("MOTOR", "Deceleration index out of bounds");
+    return 0;
+  }
+  return (rpm > 300) ? rpm : 0;
 }
 
 int16_t Main::accelerationTorque(NavigationType velocity)
@@ -393,16 +393,11 @@ void Main::servicePropulsion()
 void Main::updateMotorData()
 {
   motor_velocity_   = communicator_->requestActualVelocity();
-  motor_torque_     = communicator_->requestActualTorque();
   // Write motor data to data structure
   motor_data_.velocity_1 = motor_velocity_.velocity_1;
   motor_data_.velocity_2 = motor_velocity_.velocity_2;
   motor_data_.velocity_3 = motor_velocity_.velocity_3;
   motor_data_.velocity_4 = motor_velocity_.velocity_4;
-  motor_data_.torque_1 = motor_torque_.torque_1;
-  motor_data_.torque_2 = motor_torque_.torque_2;
-  motor_data_.torque_3 = motor_torque_.torque_3;
-  motor_data_.torque_4 = motor_torque_.torque_4;
   data_.setMotorData(motor_data_);
 }
 
