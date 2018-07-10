@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "sensors/interface.hpp"
+#include "utils/logger.hpp"
 
 using std::chrono::high_resolution_clock;
 
@@ -41,12 +42,12 @@ class FakeProxi : public ProxiInterface {
   /*
    * @brief    A constructor for the fake proximity class by reading from file
    */
-  explicit FakeProxi(std::string file_path);
+  explicit FakeProxi(utils::Logger& log, std::string file_path);
 
   /*
    * @brief    A constructor for the fake proximity class by generating random data
    */
-  explicit FakeProxi(uint8_t value, double noise);
+  explicit FakeProxi(utils::Logger& log, uint8_t value, float noise);
 
   /*
    * @brief    A function to check if the proximity sensor is online
@@ -57,6 +58,13 @@ class FakeProxi : public ProxiInterface {
    * @brief    A function to get the proximity data
    */
   void getData(Proximity* proxi) override;
+  /**
+   * @brief Calculates the variance for the data structure
+   *
+   * @return float value of the variance for the sensor
+   */
+  float calcCalibrationData() override;
+
 
  private:
   const uint8_t kProxiTimeInterval = 10;
@@ -72,7 +80,7 @@ class FakeProxi : public ProxiInterface {
   /*
    * @brief    A function to add noise to the proximity data
    */
-  uint8_t addNoiseToData(uint8_t value, double noise);
+  uint8_t addNoiseToData(uint8_t value, float noise);
 
   /*
    * @brief    Checks to see if sufficient time has pass for the sensor to be updated
@@ -87,12 +95,13 @@ class FakeProxi : public ProxiInterface {
   bool read_file_;
 
   uint8_t value_;
-  double noise_;
+  float noise_;
   DataPoint<uint8_t> prev_reading_;
 
   int64_t reading_counter_;
   std::vector<DataPoint<uint8_t>> val_read_;
   high_resolution_clock::time_point ref_time_;
+  utils::Logger& log_;
 };
 
 }}  // namespace hyped::sensors

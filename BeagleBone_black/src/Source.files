@@ -55,4 +55,5 @@ MAINS := \
   demo_can \
   demo_mpu9250 \
   demo_fake_imu \
+  demo_fake_proxi \
   demo_optical_encoder \

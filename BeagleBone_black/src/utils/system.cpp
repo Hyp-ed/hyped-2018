@@ -29,7 +29,6 @@
 
 #define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
-#define DEFAULT_IMU     false
 
 namespace hyped {
 namespace utils {
@@ -50,6 +49,8 @@ void printUsage()
     "    Set system-wide debug level. All DBG[n] where n <= level messages are printed.\n"
     "\n  --debug_motor, --debug_nav, --debug_sensor, --debug_state, --debug_cmn\n"
     "    Set module-specific debug level. All DBG[n] where n <= level messages are printed.\n"
+    "\n  --fake_imu --fake_proxi\n"
+    "    Make the system use the fake data drivers.\n"
     "");
 }
 }
@@ -72,7 +73,9 @@ System::System(int argc, char* argv[])
       debug_sensor(DEFAULT_DEBUG),
       debug_state(DEFAULT_DEBUG),
       debug_cmn(DEFAULT_DEBUG),
-      fake_imu(false)
+      fake_imu(false),
+      fake_proxi(false),
+      fake_sensors(false)
 {
   int c;
   int option_index = 0;
@@ -92,6 +95,8 @@ System::System(int argc, char* argv[])
       {"debug_cmn", optional_argument, 0, 'g'},
       {"help", no_argument, 0, 'h'},
       {"fake_imu", optional_argument, 0, 'i'},
+      {"fake_proxi", optional_argument, 0, 'j'},
+      {"fake_sensors", optional_argument, 0, 'k'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -155,6 +160,14 @@ System::System(int argc, char* argv[])
       case 'i':
         if (optarg) fake_imu = atoi(optarg);
         else        fake_imu = 0;
+        break;
+      case 'j':
+        if (optarg) fake_proxi = atoi(optarg);
+        else        fake_proxi = 0;
+        break;
+      case 'k':
+        if (optarg) fake_sensors = atoi(optarg);
+        else        fake_sensors = 0;
         break;
       default:
         printUsage();
