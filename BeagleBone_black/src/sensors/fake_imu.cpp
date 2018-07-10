@@ -245,6 +245,7 @@ array<NavigationVector, 2> FakeImuStationary::calcCalibrationData()
   }
   stats[0] = stats_acc.getVariance();
   stats[1] = stats_gyr.getVariance();
+  log_.INFO("Fake-imu", "Sensor has calculated the variance");
   return stats;
 }
 
