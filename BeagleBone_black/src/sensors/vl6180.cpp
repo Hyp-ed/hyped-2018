@@ -227,7 +227,7 @@ uint8_t VL6180::continuousRangeDistance()
   // Make sure we are in continuous ranging mode
   readByte(kResultInterruptStatusGpio, &interrupt);
 
-  while (((interrupt & 0xC7) & 0x04) == 0) {
+  while ((interrupt & 0x04) == 0) {
     readByte(kResultInterruptStatusGpio, &interrupt);
     if ((utils::Timer::getTimeMicros() - start) > timeout) {
       log_.ERR("Vl6180", "TIMEOUT");
