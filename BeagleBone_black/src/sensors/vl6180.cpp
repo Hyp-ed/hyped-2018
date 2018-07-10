@@ -37,12 +37,9 @@ constexpr uint16_t kSysrangeMaxConvergenceTime         = 0x001C;
 constexpr uint16_t kSysrangeVhvRecalibrate             = 0x002E;
 constexpr uint16_t kResultRangeStatus                  = 0x004D;
 constexpr uint16_t kResultRangeVal                     = 0x0062;
-constexpr uint16_t kRangeDeviceReadyMask               = 0x01;
 constexpr uint16_t kModeStartStop                      = 0x01;
 constexpr uint16_t kModeContinuous                     = 0x02;
-constexpr uint16_t kModeSingleShot                     = 0x00;
 constexpr uint16_t kResultInterruptStatusGpio          = 0x4F;
-constexpr uint16_t kInterruptClearRanging              = 0x01;
 constexpr uint16_t kSystemInterruptConfigGpio          = 0x014;
 
 namespace hyped {
