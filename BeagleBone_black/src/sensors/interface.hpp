@@ -29,6 +29,7 @@ namespace hyped {
 using data::Imu;
 using data::Proximity;
 using data::Battery;
+using data::NavigationVector;
 
 namespace sensors {
 
@@ -48,6 +49,7 @@ class ProxiInterface: public SensorInterface {
    * @param proxi - output pointer to be filled by this sensor
    */
   virtual void getData(Proximity* proxi) = 0;
+  virtual float calcCalibrationData() = 0;
 };
 
 class ImuInterface: public SensorInterface {
@@ -57,6 +59,7 @@ class ImuInterface: public SensorInterface {
    * @param imu - output pointer to be filled by this sensor
    */
   virtual void getData(Imu* imu) = 0;
+  virtual array<NavigationVector, 2> calcCalibrationData() = 0;
 };
 
 class BMSInterface: public SensorInterface {

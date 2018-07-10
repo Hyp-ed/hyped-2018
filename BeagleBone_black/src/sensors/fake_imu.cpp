@@ -31,9 +31,11 @@
 #include "data/data_point.hpp"
 #include "sensors/fake_imu.hpp"
 #include "utils/timer.hpp"
+#include "utils/math/statistics.hpp"
 
 
 namespace hyped {
+using utils::math::OnlineStatistics;
 namespace sensors {
 
 FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
@@ -51,6 +53,7 @@ FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
 {
   read_file_ = true;
   readDataFromFile(acc_file_path_, gyr_file_path_);
+  log_.INFO("Fake-IMU-accl", "Fake IMU initialised");
 }
 
 void FakeImuAccelerating::start()
@@ -88,6 +91,22 @@ void FakeImuAccelerating::getData(Imu* imu)
   imu->gyr = prev_gyr_;
 }
 
+array<NavigationVector, 2> FakeImuAccelerating::calcCalibrationData()
+{
+  array<NavigationVector, 2> stats;
+  OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
+  OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
+  for (int i = 0; i < 1000; i++) {
+    Imu imu;
+    getData(&imu);
+    stats_acc.update(imu.acc);
+    stats_gyr.update(imu.gyr);
+  }
+  stats[0] = stats_acc.getVariance();
+  stats[1] = stats_gyr.getVariance();
+  return stats;
+}
+
 NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
@@ -120,7 +139,7 @@ void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::strin
     std::ifstream file;
     file.open(file_path);
     if (!file.is_open()) {
-      log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
+      log_.ERR("Fake-IMU-accl", "Wrong file path for argument: %d", i);
     }
 
     NavigationVector value, noise;
@@ -134,7 +153,7 @@ void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::strin
       input >> temp_time;
 
       if (temp_time != timestamp*counter) {
-        throw std::invalid_argument("Timestamp format invalid");
+        log_.ERR("Fake-IMU-accl", "Timestamp format invalid %d", temp_time);
       }
 
       int value_counter = 0;
@@ -143,7 +162,7 @@ void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::strin
       }
 
       if (value_counter != 6) {
-        log_.ERR("Fake-IMU", "Incomplete values for the argument timestamp: %d", temp_time);
+        log_.ERR("Fake-IMU-accl", "Incomplete values for the argument timestamp: %d", temp_time);
       }
 
       for (int i = 0; i < 3; i++)
@@ -198,6 +217,7 @@ FakeImuStationary::FakeImuStationary(utils::Logger& log,
 {
   imu_ref_time_ = utils::Timer::getTimeMicros();
   acc_count_ = gyr_count_ = 0;
+  log_.INFO("Fake-IMU-stationary", "Stationary IMU initialised");
 }
 
 void FakeImuStationary::getData(Imu* imu)
@@ -210,6 +230,22 @@ void FakeImuStationary::getData(Imu* imu)
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
+}
+
+array<NavigationVector, 2> FakeImuStationary::calcCalibrationData()
+{
+  array<NavigationVector, 2> stats;
+  OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
+  OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
+  for (int i = 0; i < 1000; i++) {
+    Imu imu;
+    getData(&imu);
+    stats_acc.update(imu.acc);
+    stats_gyr.update(imu.gyr);
+  }
+  stats[0] = stats_acc.getVariance();
+  stats[1] = stats_gyr.getVariance();
+  return stats;
 }
 
 NavigationVector FakeImuStationary::addNoiseToData(NavigationVector value, NavigationVector noise)

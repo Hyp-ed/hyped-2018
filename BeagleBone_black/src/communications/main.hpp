@@ -55,45 +55,27 @@ class Main : public Thread {
   int sendHpCharge1(Battery hpBattery1);        // CMD14
   int sendLpCharge(Battery lpBattery);          // CMD15
   int sendLpCharge1(Battery lpBattery1);        // CMD16
-  int sendTorqueFl(float torquefl);             // CMD17
-  int sendTorqueFr(float torquefr);             // CMD18
-  int sendTorqueBl(float torquebl);             // CMD19
-  int sendTorqueBr(float torquebr);             // CMD20
-  int sendImu1(bool operational);               // CMD21
-  int sendImu2(bool operational);               // CMD22
-  int sendImu3(bool operational);               // CMD23
-  int sendImu4(bool operational);               // CMD24
-  int sendImu5(bool operational);               // CMD25
-  int sendImu6(bool operational);               // CMD26
-  int sendImu7(bool operational);               // CMD27
-  int sendImu8(bool operational);               // CMD28
-  int sendProxiFront1(bool operational);        // CMD29
-  int sendProxiFront2(bool operational);        // CMD30
-  int sendProxiFront3(bool operational);        // CMD31
-  int sendProxiFront4(bool operational);        // CMD32
-  int sendProxiFront5(bool operational);        // CMD33
-  int sendProxiFront6(bool operational);        // CMD34
-  int sendProxiFront7(bool operational);        // CMD35
-  int sendProxiFront8(bool operational);        // CMD36
-  int sendProxiRear1(bool operational);         // CMD37
-  int sendProxiRear2(bool operational);         // CMD38
-  int sendProxiRear3(bool operational);         // CMD39
-  int sendProxiRear4(bool operational);         // CMD40
-  int sendProxiRear5(bool operational);         // CMD41
-  int sendProxiRear6(bool operational);         // CMD42
-  int sendProxiRear7(bool operational);         // CMD43
-  int sendProxiRear8(bool operational);         // CMD44
+  int sendImu(bool op, bool op1, bool o2,
+              bool op3);                        // CMD17
+  int sendProxiFront(bool op, bool op1,
+                     bool op2, bool op3,
+                     bool op4, bool op5,
+                     bool op6, bool op7);       // CMD18
+  int sendProxiRear(bool op, bool op1,
+                    bool op2, bool op3,
+                    bool op4, bool op5,
+                    bool op6, bool op7);        // CMD19
 
  private:
   int stateCode_;
   Communications* baseCommunicator_;
-  data::Data& data_ = data::Data::getInstance();
-  data::Navigation nav_;
-  data::Motors mtr_;
+  data::Data& data_;
   data::StateMachine stm_;
-  data::Batteries bat_;
-  data::Communications cmn_data_;
+  data::Motors mtr_;
   data::Sensors sen_;
+  data::Batteries bat_;
+  data::Navigation nav_;
+  data::Communications cmn_data_;
 };
 
 }}  //  namespace hyped::communications

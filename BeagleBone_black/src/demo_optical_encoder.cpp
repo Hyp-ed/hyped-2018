@@ -1,8 +1,8 @@
 /*
  * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 30/05/18
- * Description: Demo for MPU9250 sensor
+ * Date: 02/07/18
+ * Description: Driver for the OPB720B-12Z optical encoder
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,34 +18,32 @@
  *    limitations under the License.
  */
 
-#include "utils/logger.hpp"
+
+#include <stdio.h>
+#include "utils/io/gpio.hpp"
 #include "utils/system.hpp"
-#include "utils/concurrent/thread.hpp"
-#include "sensors/bms.hpp"
-#include "data/data.hpp"
+#include "utils/logger.hpp"
 
+using hyped::utils::io::GPIO;
+using hyped::utils::System;
 using hyped::utils::Logger;
-using hyped::utils::concurrent::Thread;
+namespace io = hyped::utils::io;
 
-using hyped::data::Battery;
-using hyped::sensors::BMSHP;
 
-int main(int argc, char* argv[])
-{
-  hyped::utils::System::parseArgs(argc, argv);
-  Logger& log = hyped::utils::System::getLogger();
-  BMSHP bms(1, log);
+int main(int argc, char* argv[]) {
+  System::parseArgs(argc, argv);
+  Logger log(true, 1);
 
-  Battery b;
+  GPIO the_pin(60, io::gpio::kIn);
+  uint8_t val = the_pin.wait();
+  int count = 0;
+  log.INFO("Opt-En", "Starting optical encoder / keyence");
+
   while (1) {
-    bms.getData(&b);
-    log.INFO("TEST", "volatage: %d, temp: %d, current: %d, charge: %d", 
-      b.voltage,
-      b.temperature,
-      b.current,
-      b.charge);
-    Thread::sleep(100);
+      val = the_pin.wait();
+      if (val == 1) {
+        count++;
+      log.INFO("Opt-En", "count: %d", count);
+      }
   }
-
-  return 0;
 }

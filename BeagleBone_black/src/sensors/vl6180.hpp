@@ -38,34 +38,19 @@ class VL6180: public ProxiInterface {
   ~VL6180();
 
   bool isOnline() override;
-  void getData(Proximity* proxi) override {
-    proxi->val = getDistance();
-  }
-
+  void getData(Proximity* proxi) override;
   /**
-    *  @brief  Returns the distance from the nearest object the sensor is facing
-    *
-    *  @return double Returns the distance to the nearest object
-    */
-  uint8_t getDistance();
+   * @brief Calculates the variance for the data structure
+   *
+   * @return float value of the variance for the sensor
+   */
+  float calcCalibrationData() override;
   /**
     *  @brief  Sets the the ranging mode to continuous
     */
   void setContinuousRangingMode();
-  /**
-    *  @brief  Sets the the ranging mode to single shot
-    */
-  void setSingleShotMode();
-
-  void setAddress(uint8_t i2c_addr);
 
  private:
-  /**
-    *  @brief called from getDistance() for single shot ranging
-    *
-    *  @return double Returns the distance to the nearest object
-    */
-  uint8_t singleRangeDistance();
   /**
     *  @brief called from getDistance() for continuous ranging
     *
@@ -91,13 +76,6 @@ class VL6180: public ProxiInterface {
     */
   void setMaxConvergenceTime(uint8_t time);
   /**
-    *  @brief  Wait for sensor to be ready before a new ranging command
-    *            is issued
-    *
-    *  @return bool Returns true when device is ready to get a new range
-    */
-  bool rangeWaitDeviceReady();
-  /**
     *  @brief  Reads a single byte register and returns its status
     */
   void readByte(uint16_t reg_add, uint8_t *data);
@@ -108,14 +86,14 @@ class VL6180: public ProxiInterface {
   /**
     *  @brief  Checks the status register and sets the error_status_
     */
-  bool checkStatus();
+  void checkStatus();
 
   Logger& log_;
-  bool on_;
   bool continuous_mode_;
-  uint8_t i2c_addr_;
+  uint32_t i2c_addr_;
   I2C& i2c_;
-  bool error_status_;
+  bool is_online_;
+  bool timeout_;
 };
 
 }}  // namespace hyped::sensors

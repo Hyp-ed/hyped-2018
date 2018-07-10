@@ -85,6 +85,7 @@ struct Navigation : public Module {
   NavigationType  velocity;
   NavigationType  acceleration;
   NavigationType  emergency_braking_distance;
+  NavigationType  braking_distance = 0;  // TODO(Brano): Remove default and publish the actual dist
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -115,7 +116,14 @@ struct Sensors : public Module {
   DataPoint<array<Imu, kNumImus>> imu;
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
-  StripeCounter stripe_counter;
+  StripeCounter keyence_stripe_counter;
+  float optical_enc_distance;
+};
+
+struct SensorCalibration {
+  array<float, Sensors::kNumProximities> proxi_front_variance;
+  array<float, Sensors::kNumProximities> proxi_back_variance;
+  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;
 };
 
 struct Battery {
@@ -205,12 +213,15 @@ class Data {
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
-  StripeCounter getStripeCounterData();
-
+  StripeCounter getKeyenceStripeCounterData();
   /**
-   * @brief       Should be called to update StripeCount part in Sensors data
+   * @brief      Should be called to update sensor calibration data
    */
-  void setStripeCounterData(const StripeCounter& stripe_counter);
+  void setCalibrationData(const SensorCalibration sensor_calibration_data);
+  /**
+   * @brief      Retrieves data from the calibrated sensors
+   */
+  SensorCalibration getCalibrationData();
 
   /**
    * @brief      Retrieves data from the batteries.
@@ -249,6 +260,8 @@ class Data {
   Motors motors_;
   Batteries batteries_;
   Communications communications_;
+  SensorCalibration calibration_data_;
+
 
   // locks for data substructures
   Lock lock_state_machine_;
@@ -258,6 +271,7 @@ class Data {
 
   Lock lock_communications_;
   Lock lock_batteries_;
+  Lock lock_calibration_data_;
 };
 
 }}  // namespace data::hyped

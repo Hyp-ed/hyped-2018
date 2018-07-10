@@ -56,13 +56,12 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
+    // if connect does not complete successfully it returns -1
+    connected_ = false;
+  } else {
+    log_.INFO("COMN", "TCP/IP connection established.");
+    connected_ = true;
   }
-
-  log_.INFO("COMN", "TCP/IP connection established.");
-  data::Communications cmn_data;
-  cmn_data = data_.getCommunicationsData();
-  cmn_data.module_status = data::ModuleStatus::kInit;
-  data_.setCommunicationsData(cmn_data);
 }
 
 Communications::~Communications()
@@ -106,7 +105,7 @@ int Communications::receiveMessage()
     return 1;
   }
 
-  int command = atoi(buffer_);
+  int command = buffer_[0]-'0';
 
   switch (command) {
     case 0:
@@ -130,8 +129,16 @@ int Communications::receiveMessage()
     case 6:
       log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
       break;
+    default:
+      log_.ERR("COMN", "Received %d (Should not reach here)", command);
+      break;
   }
 
   return command;
+}
+
+bool Communications::connectionEstablished()
+{
+  return connected_;
 }
 }}  // namespace hyped::communcations
