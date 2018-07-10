@@ -142,10 +142,6 @@ struct Motors : public Module {
   int32_t velocity_2;
   int32_t velocity_3;
   int32_t velocity_4;
-  int16_t torque_1;
-  int16_t torque_2;
-  int16_t torque_3;
-  int16_t torque_4;
 };
 
 // -------------------------------------------------------------------------------------------------

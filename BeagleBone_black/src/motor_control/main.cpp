@@ -65,10 +65,6 @@ Main::Main(uint8_t id, Logger& log)
   motor_data_.velocity_2 = 0;
   motor_data_.velocity_3 = 0;
   motor_data_.velocity_4 = 0;
-  motor_data_.torque_1 = 0;
-  motor_data_.torque_2 = 0;
-  motor_data_.torque_3 = 0;
-  motor_data_.torque_4 = 0;
   data_.setMotorData(motor_data_);
   motor_velocity_ = {0, 0, 0, 0};
   communicator_ = new Communicator(log);

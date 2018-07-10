@@ -101,15 +101,6 @@ void Communicator::sendTargetVelocity(int32_t target_velocity)
   controller4_.sendTargetVelocity(-target_velocity);
 }
 
-void Communicator::sendTargetTorque(int16_t target_torque)
-{
-  // TODO(Sean) Should torque for 2 controllers be negative?
-  controller1_.sendTargetTorque(target_torque);
-  controller2_.sendTargetTorque(target_torque);
-  controller3_.sendTargetTorque(target_torque);
-  controller4_.sendTargetTorque(target_torque);
-}
-
 MotorVelocity Communicator::requestActualVelocity()
 {
   controller1_.updateActualVelocity();
@@ -128,26 +119,6 @@ MotorVelocity Communicator::requestActualVelocity()
     , motor_velocity_.velocity_4);
 
   return motor_velocity_;
-}
-
-MotorTorque Communicator::requestActualTorque()
-{
-  controller1_.updateActualTorque();
-  controller2_.updateActualTorque();
-  controller3_.updateActualTorque();
-  controller4_.updateActualTorque();
-  motor_torque_.torque_1 = controller1_.getTorque();
-  motor_torque_.torque_2 = controller2_.getTorque();
-  motor_torque_.torque_3 = controller3_.getTorque();
-  motor_torque_.torque_4 = controller4_.getTorque();
-
-  log_.DBG2("MOTOR", "Actual Torque: 1: %d, 2: %d, 3: %d, 4: %d"
-    , motor_torque_.torque_1
-    , motor_torque_.torque_2
-    , motor_torque_.torque_3
-    , motor_torque_.torque_4);
-
-  return motor_torque_;
 }
 
 void Communicator::quickStopAll()
