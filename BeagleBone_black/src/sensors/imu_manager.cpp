@@ -51,9 +51,13 @@ ImuManager::ImuManager(Logger& log,
     }
   } else {
     // create fake IMUs
+    NavigationVector acc;
+    acc[0] = 0.0;
+    acc[1] = 0.0;
+    acc[2] = 9.8;
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i] = new FakeImuStationary(log,
-                                      NavigationVector(0),
+                                      acc,
                                       NavigationVector(1),
                                       NavigationVector(0),
                                       NavigationVector(1));
@@ -72,6 +76,7 @@ void ImuManager::run()
   while (1) {
     // If the state changes to accelerating use different data
     if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kAccelerating) { //NOLINT
+      Thread::sleep(100);
       for (int i =0; i < data::Sensors::kNumImus; i++) {
         imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
       }

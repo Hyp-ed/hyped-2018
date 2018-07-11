@@ -69,7 +69,7 @@ class Main: public Thread {
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;
   std::unique_ptr<ManagerInterface>      battery_manager_;
-  std::unique_ptr<GpioCounter>           optical_encoder_;
+  GpioInterface*         optical_encoder_;
 
   bool sensor_init_;
   bool battery_init_;

@@ -53,16 +53,17 @@ Main::Main(uint8_t id, Logger& log)
       battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
-      optical_encoder_(new GpioCounter(log, 76)),  // Pins for optical encoder GPIO_76 and GPIO_77
       sensor_init_(false),
       battery_init_(false)
 {
   // @TODO (Ragnor) Add second Keyence?
   if (sys_.fake_sensors || sys_.fake_keyence) {
     keyence_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+    optical_encoder_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
   } else {
     // Pins for keyence GPIO_73 and GPIO_75
     keyence_ = new GpioCounter(log, 73);
+    optical_encoder_ = new GpioCounter(log, 76);
   }
 }
 
