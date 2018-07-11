@@ -1,5 +1,5 @@
 /*
- * Author: Ragnor Comerford
+ * Author: Ragnor Comerford and Jack Horsburgh
  * Organisation: HYPED
  * Date: 19/06/18
  * Description:
@@ -29,23 +29,22 @@
 
 #include <cstdint>
 
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/interface.hpp"
 
 
 namespace hyped {
 
-using utils::concurrent::Thread;
 using utils::Logger;
 
 namespace sensors {
 
 
-class GpioCounter: public Thread {
+class GpioCounter: public GpioInterface {
  public:
   explicit GpioCounter(Logger& log, int pin);
+  data::StripeCounter getStripeCounter() override;
   void run() override;
-  data::StripeCounter getStripeCounter();
 
  private:
   int pin_;

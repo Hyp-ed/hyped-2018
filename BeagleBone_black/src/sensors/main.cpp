@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien and Jack Horsburgh
+ * Author: Martin Kristien, Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -29,6 +29,7 @@
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
 #include "sensors/fake_gpio_counter.hpp"
+#include "sensors/gpio_counter.hpp"
 
 constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
@@ -58,9 +59,9 @@ Main::Main(uint8_t id, Logger& log)
 {
   // @TODO (Ragnor) Add second Keyence?
   if (sys_.fake_sensors || sys_.fake_keyence) {
-    fake_keyence_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+    keyence_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
   } else {
-    // Pins for keynece GPIO_73 and GPIO_75
+    // Pins for keyence GPIO_73 and GPIO_75
     keyence_ = new GpioCounter(log, 73);
   }
 }
@@ -68,7 +69,7 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   // start all managers
-  if (!sys_.fake_sensors && !sys_.fake_keyence) keyence_->start();
+  keyence_->start();
   optical_encoder_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
@@ -109,11 +110,7 @@ void Main::run()
   while (1) {
     // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
-      if (sys_.fake_sensors || sys_.fake_keyence) {
-        sensors_.keyence_stripe_counter = fake_keyence_->getStripeCounter();
-      } else {
-        sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
-      }
+      sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
       sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
                                       M_PI *
                                       kWheelDiameter;

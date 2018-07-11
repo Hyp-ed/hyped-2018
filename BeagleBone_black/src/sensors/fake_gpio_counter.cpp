@@ -1,5 +1,5 @@
 /*
- * Author: Jack Horsburgh
+ * Author: Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
  * Date: 28/05/18
  * Description: Main class for fake gpio_counters.
@@ -39,10 +39,12 @@ using data::StripeCounter;
 namespace sensors {
 
 FakeGpioCounter::FakeGpioCounter(Logger& log, std::string file_path)
-    : log_(log),
-      is_started_(false)
+    : GpioInterface(log), file_path_(file_path), is_started_(false)
+{}
+
+void FakeGpioCounter::run()
 {
-    readDataFromFile(file_path);
+  readDataFromFile(file_path_);
 }
 
 void FakeGpioCounter::readDataFromFile(std::string file_path)
@@ -77,7 +79,7 @@ void FakeGpioCounter::readDataFromFile(std::string file_path)
     file.close();
 }
 
-void FakeGpioCounter::start()
+void FakeGpioCounter::init()
 {
   ref_time_ = utils::Timer::getTimeMicros();
   gpio_count_ = 0;
@@ -99,7 +101,7 @@ StripeCounter FakeGpioCounter::getStripeCounter()
 {
   if (!is_started_) {
     is_started_ = true;
-    start();
+    init();
   }
   if (checkTime()) {
     gpio_count_ = std::min(gpio_count_/kTimeStamp, (uint64_t) val_read_.size());

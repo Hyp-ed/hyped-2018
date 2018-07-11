@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien and Jack Horsburgh
+ * Author: Martin Kristien, Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -63,8 +63,8 @@ class Main: public Thread {
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  GpioCounter*           keyence_;
-  FakeGpioCounter*     fake_keyence_;
+
+  GpioInterface*         keyence_;
   std::unique_ptr<ImuManagerInterface>   imu_manager_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;

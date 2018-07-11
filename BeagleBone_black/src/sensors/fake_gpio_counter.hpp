@@ -1,5 +1,5 @@
 /*
- * Author: Jack Horsburgh
+ * Author: Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
  * Date: 28/05/18
  * Description: Main class for fake gpio_counters.
@@ -26,6 +26,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "sensors/interface.hpp"
 
 namespace hyped {
 
@@ -34,20 +35,21 @@ using utils::Logger;
 namespace sensors {
 
 
-class FakeGpioCounter {
+class FakeGpioCounter:public GpioInterface {
  public:
   explicit FakeGpioCounter(Logger& log, std::string file_path);
-  data::StripeCounter getStripeCounter();
+  data::StripeCounter getStripeCounter() override;
+  void run() override;
 
  private:
   void readDataFromFile(std::string file_path);
-  void start();
+  void init();
   bool checkTime();
+  std::string file_path_;
 
   std::vector<uint64_t> val_read_;
   uint64_t gpio_count_;
 
-  Logger& log_;
   data::StripeCounter stripe_counter_;
   uint64_t ref_time_;
   uint64_t prev_gpio_;
