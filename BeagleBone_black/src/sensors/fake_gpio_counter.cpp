@@ -30,7 +30,7 @@
 #include "utils/timer.hpp"
 
 // TODO(Jack) Find the least between stripes
-constexpr uint8_t kTimeStamp = 250;    // ms
+constexpr uint8_t kTimeStamp = 50;    // ms
 
 namespace hyped {
 
