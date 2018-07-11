@@ -28,6 +28,7 @@
 #include <algorithm>
 
 #include "utils/timer.hpp"
+#include "data/data.hpp"
 
 // TODO(Jack) Find the least between stripes
 constexpr uint8_t kTimeStamp = 50;    // ms
@@ -39,7 +40,10 @@ using data::StripeCounter;
 namespace sensors {
 
 FakeGpioCounter::FakeGpioCounter(Logger& log, std::string file_path)
-    : GpioInterface(log), file_path_(file_path), is_started_(false)
+    : GpioInterface(log),
+      data_(Data::getInstance()),
+      file_path_(file_path),
+      is_started_(false)
 {}
 
 void FakeGpioCounter::run()
@@ -99,21 +103,29 @@ bool FakeGpioCounter::checkTime()
 
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
-  if (!is_started_) {
-    is_started_ = true;
-    init();
-  }
-  if (checkTime()) {
-    gpio_count_ = std::min(gpio_count_/kTimeStamp, (uint64_t) val_read_.size());
-    if (gpio_count_ == (uint64_t) val_read_.size()) {
-        prev_gpio_ = val_read_[gpio_count_-1];
-    } else {
-        prev_gpio_ = val_read_[gpio_count_];
-    }
-  }
   data::StripeCounter stripes;
-  stripes.count.value = prev_gpio_;
-  stripe_counter_.count.timestamp = ref_time_;
+  if (data_.getStateMachineData().current_state == data::State::kAccelerating || is_started_) {
+    if (!is_started_) {
+      is_started_ = true;
+      init();
+    }
+    if (checkTime()) {
+      gpio_count_ = std::min(gpio_count_/kTimeStamp, (uint64_t) val_read_.size());
+      if (gpio_count_ == (uint64_t) val_read_.size()) {
+          prev_gpio_ = val_read_[gpio_count_-1];
+      } else {
+          prev_gpio_ = val_read_[gpio_count_];
+      }
+    }
+
+    stripes.count.value = prev_gpio_;
+    stripes.count.timestamp = ref_time_;
+    stripes.operational = true;
+  } else {
+    stripes.count.value = 0;
+    stripes.count.timestamp = 0;
+    stripes.operational = true;
+  }
   return stripes;
 }
 

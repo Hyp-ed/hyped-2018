@@ -31,6 +31,7 @@
 namespace hyped {
 
 using utils::Logger;
+using data::Data;
 
 namespace sensors {
 
@@ -46,6 +47,7 @@ class FakeGpioCounter:public GpioInterface {
   void init();
   bool checkTime();
   std::string file_path_;
+  Data& data_;
 
   std::vector<uint64_t> val_read_;
   uint64_t gpio_count_;
