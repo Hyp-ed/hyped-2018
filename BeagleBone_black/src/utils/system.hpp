@@ -62,6 +62,7 @@ class System {
   bool fake_imu;
   bool fake_proxi;
   bool fake_sensors;
+  bool fake_keyence;
 
   // barriers
   /**

@@ -33,8 +33,10 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/gpio_counter.hpp"
+#include "sensors/fake_gpio_counter.hpp"
 #include "sensors/interface.hpp"
 #include "sensors/manager_interface.hpp"
+#include "utils/system.hpp"
 
 
 namespace hyped {
@@ -54,13 +56,15 @@ class Main: public Thread {
 
  private:
   data::Data&     data_;
+  utils::System& sys_;
 
   // master data structures
   data::Sensors   sensors_;
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-  std::unique_ptr<GpioCounter>           keyence_;
+  GpioCounter*           keyence_;
+  FakeGpioCounter*     fake_keyence_;
   std::unique_ptr<ImuManagerInterface>   imu_manager_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;

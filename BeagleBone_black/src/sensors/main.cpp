@@ -28,6 +28,7 @@
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
+#include "sensors/fake_gpio_counter.hpp"
 
 constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
@@ -37,13 +38,14 @@ using data::Sensors;
 using data::Batteries;
 using data::StripeCounter;
 using data::SensorCalibration;
+using utils::System;
 
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence_(new GpioCounter(log, 73)),  // Pins for keynece GPIO_73 and GPIO_75
+      sys_(System::getSystem()),
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
@@ -55,12 +57,18 @@ Main::Main(uint8_t id, Logger& log)
       battery_init_(false)
 {
   // @TODO (Ragnor) Add second Keyence?
+  if (sys_.fake_sensors || sys_.fake_keyence) {
+    fake_keyence_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+  } else {
+    // Pins for keynece GPIO_73 and GPIO_75
+    keyence_ = new GpioCounter(log, 73);
+  }
 }
 
 void Main::run()
 {
   // start all managers
-  keyence_->start();
+  if (!sys_.fake_sensors && !sys_.fake_keyence) keyence_->start();
   optical_encoder_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
@@ -101,7 +109,11 @@ void Main::run()
   while (1) {
     // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
-      sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
+      if (sys_.fake_sensors || sys_.fake_keyence) {
+        sensors_.keyence_stripe_counter = fake_keyence_->getStripeCounter();
+      } else {
+        sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
+      }
       sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
                                       M_PI *
                                       kWheelDiameter;
