@@ -23,41 +23,54 @@
 
 #include "data/data.hpp"
 #include "utils/logger.hpp"
-#include "utils/system.hpp"
 
 namespace hyped {
+
+using utils::System;
+
 namespace motor_control {
 
 Communicator::Communicator(Logger& log)
-  : data_(data::Data::getInstance()),
+  : sys_(System::getSystem()),
+    data_(data::Data::getInstance()),
     log_(log),
-    controller1_(log, 1),
-    controller2_(log, 2),
-    controller3_(log, 3),
-    controller4_(log, 4),
-    critical_failure_(false)
-{}
+    critical_failure_(false),
+    is_fake_(false)
+{
+  if (!sys_.fake_motors) {
+    controller1_ = new Controller(log, 1);
+    controller2_ = new Controller(log, 2);
+    controller3_ = new Controller(log, 3);
+    controller4_ = new Controller(log, 4);
+  } else {
+    controller1_ = new FakeController(log, 1);
+    controller2_ = new FakeController(log, 2);
+    controller3_ = new FakeController(log, 3);
+    controller4_ = new FakeController(log, 4);
+    log_.INFO("MOTOR", "Fake motors created");
+  }
+}
 
 void Communicator::registerControllers()
 {
-  controller1_.registerController();
-  controller2_.registerController();
-  controller3_.registerController();
-  controller4_.registerController();
+  controller1_->registerController();
+  controller2_->registerController();
+  controller3_->registerController();
+  controller4_->registerController();
   log_.INFO("MOTOR", "Controllers registered on CAN bus");
 }
 
 void Communicator::configureControllers()
 {
-  controller1_.configure();
-  controller2_.configure();
-  controller3_.configure();
-  controller4_.configure();
+  controller1_->configure();
+  controller2_->configure();
+  controller3_->configure();
+  controller4_->configure();
   bool f1, f2, f3, f4;
-  f1 = controller1_.getFailure();
-  f2 = controller2_.getFailure();
-  f3 = controller3_.getFailure();
-  f4 = controller4_.getFailure();
+  f1 = controller1_->getFailure();
+  f2 = controller2_->getFailure();
+  f3 = controller3_->getFailure();
+  f4 = controller4_->getFailure();
   if (f1 || f2 || f3 || f4) {
     critical_failure_ = true;
     log_.ERR("MOTOR", "COMMUNICATION FAILURE");
@@ -68,14 +81,14 @@ void Communicator::configureControllers()
 
 void Communicator::prepareMotors()
 {
-  controller1_.enterOperational();
-  controller2_.enterOperational();
-  controller3_.enterOperational();
-  controller4_.enterOperational();
-  if (controller1_.getControllerState() != kOperationEnabled
-     || controller1_.getControllerState() != kOperationEnabled
-     || controller1_.getControllerState() != kOperationEnabled
-     || controller1_.getControllerState() != kOperationEnabled)
+  controller1_->enterOperational();
+  controller2_->enterOperational();
+  controller3_->enterOperational();
+  controller4_->enterOperational();
+  if (controller1_->getControllerState() != kOperationEnabled
+     || controller1_->getControllerState() != kOperationEnabled
+     || controller1_->getControllerState() != kOperationEnabled
+     || controller1_->getControllerState() != kOperationEnabled)
   {
     critical_failure_ = true;
     log_.ERR("MOTOR", "Motors not operational");
@@ -86,40 +99,31 @@ void Communicator::prepareMotors()
 
 void Communicator::enterPreOperational()
 {
-  controller1_.enterPreOperational();
-  controller2_.enterPreOperational();
-  controller3_.enterPreOperational();
-  controller4_.enterPreOperational();
+  controller1_->enterPreOperational();
+  controller2_->enterPreOperational();
+  controller3_->enterPreOperational();
+  controller4_->enterPreOperational();
 }
 
 void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
   // TODO(anyone) need to check if this is correct for our set-up of motors
-  controller1_.sendTargetVelocity(target_velocity);
-  controller2_.sendTargetVelocity(-target_velocity);
-  controller3_.sendTargetVelocity(target_velocity);
-  controller4_.sendTargetVelocity(-target_velocity);
-}
-
-void Communicator::sendTargetTorque(int16_t target_torque)
-{
-  // TODO(Sean) Should torque for 2 controllers be negative?
-  controller1_.sendTargetTorque(target_torque);
-  controller2_.sendTargetTorque(target_torque);
-  controller3_.sendTargetTorque(target_torque);
-  controller4_.sendTargetTorque(target_torque);
+  controller1_->sendTargetVelocity(target_velocity);
+  controller2_->sendTargetVelocity(-target_velocity);
+  controller3_->sendTargetVelocity(target_velocity);
+  controller4_->sendTargetVelocity(-target_velocity);
 }
 
 MotorVelocity Communicator::requestActualVelocity()
 {
-  controller1_.updateActualVelocity();
-  controller2_.updateActualVelocity();
-  controller3_.updateActualVelocity();
-  controller4_.updateActualVelocity();
-  motor_velocity_.velocity_1 = controller1_.getVelocity();
-  motor_velocity_.velocity_2 = controller2_.getVelocity();
-  motor_velocity_.velocity_3 = controller3_.getVelocity();
-  motor_velocity_.velocity_4 = controller4_.getVelocity();
+  controller1_->updateActualVelocity();
+  controller2_->updateActualVelocity();
+  controller3_->updateActualVelocity();
+  controller4_->updateActualVelocity();
+  motor_velocity_.velocity_1 = controller1_->getVelocity();
+  motor_velocity_.velocity_2 = -controller2_->getVelocity();
+  motor_velocity_.velocity_3 = controller3_->getVelocity();
+  motor_velocity_.velocity_4 = -controller4_->getVelocity();
 
   log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
     , motor_velocity_.velocity_1
@@ -130,45 +134,25 @@ MotorVelocity Communicator::requestActualVelocity()
   return motor_velocity_;
 }
 
-MotorTorque Communicator::requestActualTorque()
-{
-  controller1_.updateActualTorque();
-  controller2_.updateActualTorque();
-  controller3_.updateActualTorque();
-  controller4_.updateActualTorque();
-  motor_torque_.torque_1 = controller1_.getTorque();
-  motor_torque_.torque_2 = controller2_.getTorque();
-  motor_torque_.torque_3 = controller3_.getTorque();
-  motor_torque_.torque_4 = controller4_.getTorque();
-
-  log_.DBG2("MOTOR", "Actual Torque: 1: %d, 2: %d, 3: %d, 4: %d"
-    , motor_torque_.torque_1
-    , motor_torque_.torque_2
-    , motor_torque_.torque_3
-    , motor_torque_.torque_4);
-
-  return motor_torque_;
-}
-
 void Communicator::quickStopAll()
 {
-  controller1_.quickStop();
-  controller2_.quickStop();
-  controller3_.quickStop();
-  controller4_.quickStop();
+  controller1_->quickStop();
+  controller2_->quickStop();
+  controller3_->quickStop();
+  controller4_->quickStop();
 }
 
 void Communicator::healthCheck()
 {
-  controller1_.healthCheck();
-  controller2_.healthCheck();
-  controller3_.healthCheck();
-  controller4_.healthCheck();
+  controller1_->healthCheck();
+  controller2_->healthCheck();
+  controller3_->healthCheck();
+  controller4_->healthCheck();
   bool f1, f2, f3, f4;
-  f1 = controller1_.getFailure();
-  f2 = controller2_.getFailure();
-  f3 = controller3_.getFailure();
-  f4 = controller4_.getFailure();
+  f1 = controller1_->getFailure();
+  f2 = controller2_->getFailure();
+  f3 = controller3_->getFailure();
+  f4 = controller4_->getFailure();
   if (f1 || f2 || f3 || f4) {
     critical_failure_ = true;
   }
