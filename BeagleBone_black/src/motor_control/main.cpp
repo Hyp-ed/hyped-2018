@@ -253,7 +253,6 @@ void Main::accelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Accelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = accelerationVelocity(nav_.velocity);
-    log_.INFO("MOTOR", "target: %d", target_velocity_);
     communicator_->sendTargetVelocity(target_velocity_);
     updateMotorData();
 
