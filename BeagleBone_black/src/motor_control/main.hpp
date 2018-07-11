@@ -20,11 +20,14 @@
 #define BEAGLEBONE_BLACK_MOTOR_CONTROL_MAIN_HPP_
 
 #include <cstdint>
+#include <vector>
+#include <string>
 
 #include "motor_control/communicator.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/concurrent/barrier.hpp"
 #include "data/data.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
@@ -32,6 +35,7 @@ using data::NavigationType;
 using utils::concurrent::Thread;
 using utils::concurrent::Barrier;
 using utils::Logger;
+using utils::Timer;
 
 namespace motor_control {
 
@@ -46,9 +50,22 @@ class Main: public Thread {
 
  private:
   /**
-    *  @brief  { Establish CAN connections with motor controllers }
+    *  @brief  { Establish CAN connections with motor controllers and configure them }
     */
   void initMotors();
+  /**
+   *   @brief  { Reads slip and translational velocity data from acceleration and
+   *             deceleration text files, calculates RPM's for appropriate slip at each
+   *             translational velocity and stores the values in a 2D array containing
+   *             translational velocity and RPM }
+   */
+  void calculateSlip(std::string filepath);
+  /**
+   *  @brief   { Returns the transposed 2D vector containing acceleration slip and deceleration
+   *             slip values. This makes it easier to pass the translational velocity
+   *             vector into binary search }
+   */
+  std::vector<std::vector<double>> transpose(std::vector<std::vector<double>> data);
   /**
     *  @brief  { Set motors into operational state }
     */
@@ -84,24 +101,6 @@ class Main: public Thread {
     */
   int32_t decelerationVelocity(NavigationType velocity);
   /**
-    *  @brief  { This function will calculate desired torque based on current
-    *            translational velocity }
-    *
-    *  @param[in]  translational_velocity  { Value read from shared data structure }
-    *
-    *  @return  { 16 bit integer - target torque }
-    */
-  int16_t accelerationTorque(NavigationType velocity);
-  /**
-    *  @brief  { This function will calculate desired torque based on current
-    *            translational velocity }
-    *
-    *  @param[in]  translational_velocity  { Value read from shared data structure }
-    *
-    *  @return  { 16 bit integer - target torque }
-    */
-  int16_t decelerationTorque(NavigationType velocity);
-  /**
     *  @brief  { Continously listen for Go/Stop Comms commands to slowly move pod }
     */
   void servicePropulsion();
@@ -123,17 +122,24 @@ class Main: public Thread {
   data::Motors motor_data_;
   Barrier& post_calibration_barrier_;
   Communicator* communicator_;
-  int32_t target_velocity_;
-  int16_t target_torque_;
+  Timer timer_rpm;
+  std::vector<std::vector<double>> acceleration_slip_;
+  std::vector<std::vector<double>> deceleration_slip_;
+  Timer timer;
+  NavigationType prev_velocity_;
+  uint64_t time_of_update_;
+  int32_t  target_velocity_;
+  int32_t  prev_index_;
+  int32_t  dec_index_;
   bool run_;
   bool nav_calib_;
   bool motors_init_;
   bool motors_ready_;
+  bool slip_calculated_;
   bool motors_preoperational_;
   bool motor_failure_;
   bool all_motors_stopped_;
   MotorVelocity motor_velocity_;
-  MotorTorque motor_torque_;
 };
 
 }}  // namespace hyped::motor_control

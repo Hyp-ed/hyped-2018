@@ -9,6 +9,7 @@ SRCS := \
   motor_control/main.cpp \
   motor_control/communicator.cpp \
   motor_control/controller.cpp \
+  motor_control/fake_controller.cpp \
   navigation/main.cpp \
   navigation/navigation.cpp \
   sensors/main.cpp \

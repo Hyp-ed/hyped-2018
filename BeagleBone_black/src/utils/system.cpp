@@ -76,7 +76,8 @@ System::System(int argc, char* argv[])
       fake_imu(false),
       fake_proxi(false),
       fake_sensors(false),
-      fake_keyence(false)
+      fake_keyence(false),
+      fake_motors(false)
 {
   int c;
   int option_index = 0;
@@ -99,6 +100,7 @@ System::System(int argc, char* argv[])
       {"fake_proxi", optional_argument, 0, 'j'},
       {"fake_sensors", optional_argument, 0, 'k'},
       {"fake_keyence", optional_argument, 0, 'l'},
+      {"fake_motors", optional_argument, 0, 'm'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -174,6 +176,9 @@ System::System(int argc, char* argv[])
       case 'l':
         if (optarg) fake_keyence = atoi(optarg);
         else        fake_keyence = 0;
+      case 'm':
+        if (optarg) fake_motors = atoi(optarg);
+        else        fake_motors = 0;
         break;
       default:
         printUsage();
