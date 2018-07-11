@@ -188,7 +188,7 @@ void Main::run()
   cmn_data_.servicePropulsionGo = false;
   cmn_data_.run_length = 1250;
 
-  if (baseCommunicator_->connectionEstablished()) {
+  if (baseCommunicator_->isConnected()) {
     cmn_data_.module_status = data::ModuleStatus::kInit;
     data_.setCommunicationsData(cmn_data_);
   } else {

@@ -18,7 +18,6 @@
  *    limitations under the License.
  */
 
-
 #include "communications.hpp"
 
 #include <string>
@@ -29,7 +28,8 @@ namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int portNo)
     : log_(log),
-      connected_(false)
+      connected_(false),
+      data_(data::Data::getInstance())
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -91,7 +91,7 @@ int Communications::receiveRunLength()
 
   if (n < 0) {
       log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    }
+  }
 
   return run_length;
 }
@@ -137,7 +137,7 @@ int Communications::receiveMessage()
   return command;
 }
 
-bool Communications::connectionEstablished()
+bool Communications::isConnected()
 {
   return connected_;
 }
