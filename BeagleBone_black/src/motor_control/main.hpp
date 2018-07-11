@@ -50,7 +50,7 @@ class Main: public Thread {
 
  private:
   /**
-    *  @brief  { Establish CAN connections with motor controllers }
+    *  @brief  { Establish CAN connections with motor controllers and configure them }
     */
   void initMotors();
   /**
@@ -101,24 +101,6 @@ class Main: public Thread {
     */
   int32_t decelerationVelocity(NavigationType velocity);
   /**
-    *  @brief  { This function will calculate desired torque based on current
-    *            translational velocity }
-    *
-    *  @param[in]  translational_velocity  { Value read from shared data structure }
-    *
-    *  @return  { 16 bit integer - target torque }
-    */
-  int16_t accelerationTorque(NavigationType velocity);
-  /**
-    *  @brief  { This function will calculate desired torque based on current
-    *            translational velocity }
-    *
-    *  @param[in]  translational_velocity  { Value read from shared data structure }
-    *
-    *  @return  { 16 bit integer - target torque }
-    */
-  int16_t decelerationTorque(NavigationType velocity);
-  /**
     *  @brief  { Continously listen for Go/Stop Comms commands to slowly move pod }
     */
   void servicePropulsion();
@@ -140,9 +122,10 @@ class Main: public Thread {
   data::Motors motor_data_;
   Barrier& post_calibration_barrier_;
   Communicator* communicator_;
-  Timer timer;
+  Timer timer_rpm;
   std::vector<std::vector<double>> acceleration_slip_;
   std::vector<std::vector<double>> deceleration_slip_;
+  Timer timer;
   NavigationType prev_velocity_;
   uint64_t time_of_update_;
   int32_t  target_velocity_;

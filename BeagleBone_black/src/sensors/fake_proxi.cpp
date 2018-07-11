@@ -83,6 +83,7 @@ void FakeProxi::getData(Proximity* proxi)
 
   // TODO(Anyone): Add timestamp
   proxi->val = prev_reading_.value;
+  proxi->operational = true;
 }
 
 void FakeProxi::readDataFromFile(std::string file_path)

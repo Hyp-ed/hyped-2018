@@ -89,6 +89,7 @@ void FakeImuAccelerating::getData(Imu* imu)
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
+  imu->operational = true;
 }
 
 array<NavigationVector, 2> FakeImuAccelerating::calcCalibrationData()
@@ -230,6 +231,7 @@ void FakeImuStationary::getData(Imu* imu)
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
+  imu->operational = true;
 }
 
 array<NavigationVector, 2> FakeImuStationary::calcCalibrationData()

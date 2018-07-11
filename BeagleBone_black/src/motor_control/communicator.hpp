@@ -24,7 +24,10 @@
 #include <cstdint>
 
 #include "motor_control/controller.hpp"
+#include "motor_control/fake_controller.hpp"
 #include "data/data.hpp"
+#include "utils/system.hpp"
+#include "motor_control/controller_interface.hpp"
 
 namespace hyped {
 namespace motor_control {
@@ -85,14 +88,16 @@ class Communicator {
   bool getFailure();
 
  private:
+  utils::System& sys_;
   data::Data& data_;
   Logger& log_;
-  Controller controller1_;
-  Controller controller2_;
-  Controller controller3_;
-  Controller controller4_;
+  ControllerInterface* controller1_;
+  ControllerInterface* controller2_;
+  ControllerInterface* controller3_;
+  ControllerInterface* controller4_;
   MotorVelocity motor_velocity_;
   bool critical_failure_;
+  bool is_fake_;
 };
 
 }}  // namespace hyped::motor_control
