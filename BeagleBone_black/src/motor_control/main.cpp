@@ -237,9 +237,6 @@ void Main::accelerateMotors()
   }
 
   while (state_.current_state == data::State::kAccelerating) {
-    // Check for state machine critical failure flag
-    state_ = data_.getStateMachineData();
-
     // Check for motors critical failure flag
     communicator_->healthCheck();
 
@@ -259,6 +256,9 @@ void Main::accelerateMotors()
     log_.INFO("MOTOR", "target: %d", target_velocity_);
     communicator_->sendTargetVelocity(target_velocity_);
     updateMotorData();
+
+    // Update state machine data
+    state_ = data_.getStateMachineData();
   }
 }
 
@@ -266,13 +266,6 @@ void Main::decelerateMotors()
 {
   log_.INFO("MOTOR", "Motor State: Deccelerating\n");
   while (state_.current_state == data::State::kDecelerating) {
-    // Check for state machine critical failure flag
-    state_ = data_.getStateMachineData();
-    if (state_.critical_failure) {
-      stopMotors();
-      break;
-    }
-
     // Check for motors critical failure flag
     communicator_->healthCheck();
 
@@ -290,6 +283,9 @@ void Main::decelerateMotors()
     target_velocity_      = decelerationVelocity(nav_.velocity);
     communicator_->sendTargetVelocity(target_velocity_);
     updateMotorData();
+
+    // Update state machine data
+    state_ = data_.getStateMachineData();
   }
 }
 
@@ -336,8 +332,10 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
       prev_index_++;
       time_of_update_ = timer.getTimeMicros();
       if (prev_index_ < (int32_t) acceleration_slip_[1].size()) {
+        // Increase the velocity to the next RPM
         return (int32_t) acceleration_slip_[1][prev_index_];
       } else {
+        // Otherwise we are at max velocity, so return max RPM
         return 6000;
       }
     }
@@ -365,10 +363,13 @@ int32_t Main::decelerationVelocity(NavigationType velocity)
   time_of_update_ = timer.getTimeMicros();
   if (dec_index_ < (int32_t) deceleration_slip_[1].size()) {
     rpm = (int32_t) deceleration_slip_[1][dec_index_];
+    dec_index_++;
   } else {
-    log_.ERR("MOTOR", "Deceleration index out of bounds");
+    // Otherwise return RPM of 0
     return 0;
   }
+  // Return calculated RPM if it is greater than 300, otherwise stop motors
+  // as we are now slowed down enough for an immediate stop
   return (rpm > 300) ? rpm : 0;
 }
 

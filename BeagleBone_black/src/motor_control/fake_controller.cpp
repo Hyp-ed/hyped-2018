@@ -45,7 +45,7 @@ FakeController::FakeController(Logger& log, uint8_t id)
 }
 
 void FakeController::registerController()
-{}
+{/*EMPTY*/}
 
 void FakeController::configure()
 {
@@ -79,6 +79,8 @@ void FakeController::checkState()
 
 void FakeController::sendTargetVelocity(int32_t target_velocity)
 {
+  // Write timestamp and target velocity data to text file (only need to use one
+  // as all four fake controllers are identical)
   if (!started_ && node_id_ == 1) {
     timer.start();
     started_ = true;
@@ -86,15 +88,15 @@ void FakeController::sendTargetVelocity(int32_t target_velocity)
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity to %d", node_id_, target_velocity);
   actual_velocity_ = target_velocity;
   if (node_id_ == 1) {
-    RPMvTime << (timer.getTimeMicros() / 1000) << "\t" << actual_velocity_;
+    RPMvTime << (timer.getTimeMicros() / 1000) << "\t" << target_velocity;
   }
 }
 
 void FakeController::updateActualVelocity()
-{}
+{/*EMPTY*/}
 
 void updateActualTorque()
-{}
+{/*EMPTY*/}
 
 int32_t FakeController::getVelocity()
 {
@@ -107,7 +109,7 @@ void FakeController::quickStop()
 }
 
 void FakeController::healthCheck()
-{}
+{/*EMPTY*/}
 
 bool FakeController::getFailure()
 {
