@@ -244,7 +244,7 @@ void MPU9250::getData(Imu* imu)
     for (i = 0; i < 3; i++) {
       bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
       data = static_cast<float>(bit_data);
-      accel_data[i] = data/acc_divider_  * 9.80665;
+      accel_data[i] = (data/acc_divider_) * 9.80665;
 
       bit_data = ((int16_t) response[i*2 + 8] << 8) | response[i*2+9];
       data = static_cast<float>(bit_data);

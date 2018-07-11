@@ -79,8 +79,8 @@ class FakeImuAccelerating : public ImuInterface {
 
  private:
   utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 250;
-  const int64_t kGyrTimeInterval = 125;
+  const uint64_t kAccTimeInterval = 250;
+  const uint64_t kGyrTimeInterval = 125;
   /*
    * @brief     A function that starts internal clock and sensor counts
    */
@@ -124,7 +124,7 @@ class FakeImuAccelerating : public ImuInterface {
   std::vector<NavigationVector> acc_val_read_;
   std::vector<NavigationVector> gyr_val_read_;
 
-  int64_t acc_count_, gyr_count_;
+  uint64_t acc_count_, gyr_count_;
   uint64_t imu_ref_time_;
   std::string acc_file_path_;
   std::string gyr_file_path_;
@@ -156,8 +156,8 @@ class FakeImuStationary : public ImuInterface {
 
  private:
   utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 250;
-  const int64_t kGyrTimeInterval = 125;
+  const uint64_t kAccTimeInterval = 250;
+  const uint64_t kGyrTimeInterval = 125;
   /*
    * @brief     A function that adds noise to the imu data using normal distribution
    *
@@ -176,7 +176,7 @@ class FakeImuStationary : public ImuInterface {
   NavigationVector acc_val_, gyr_val_;
   NavigationVector acc_noise_, gyr_noise_;
   NavigationVector prev_acc_, prev_gyr_;
-  int64_t acc_count_, gyr_count_;
+  uint64_t acc_count_, gyr_count_;
   uint64_t imu_ref_time_;
 };
 

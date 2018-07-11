@@ -72,19 +72,14 @@ namespace io {
 
 SPI& SPI::getInstance()
 {
-  static SPI spi(System::getLogger(), 1);
+  static SPI spi(System::getLogger());
   return spi;
 }
 
-SPI::SPI(Logger& log, uint8_t file_no)
+SPI::SPI(Logger& log)
     : log_(log)
 {
-  const char* device;
-  if (file_no == 1) {
-    device = "/dev/spidev1.0";
-  } else {
-    device = "/dev/spidev2.0";
-  }
+  const char device[] = "/dev/spidev1.0";
 
   spi_fd_ = open(device, O_RDWR, 0);
 

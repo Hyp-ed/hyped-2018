@@ -64,7 +64,7 @@ class SPI {
   void write(uint8_t addr, uint8_t* tx, uint16_t len);
 
  private:
-  explicit SPI(Logger& log, uint8_t file_no);
+  explicit SPI(Logger& log);
   ~SPI();
   int spi_fd_;
   Logger& log_;

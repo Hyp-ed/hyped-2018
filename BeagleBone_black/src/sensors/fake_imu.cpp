@@ -69,7 +69,7 @@ void FakeImuAccelerating::getData(Imu* imu)
     start();
   }
   if (accCheckTime()) {
-    acc_count_ = std::min(acc_count_/kAccTimeInterval, (int64_t) acc_val_read_.size());
+    acc_count_ = std::min(acc_count_/kAccTimeInterval, (uint64_t) acc_val_read_.size());
     // Check so you don't go out of bounds
     if (acc_count_ == (int64_t) acc_val_read_.size()) {
       prev_acc_ = acc_val_read_[acc_count_-1];
@@ -79,7 +79,7 @@ void FakeImuAccelerating::getData(Imu* imu)
   }
 
   if (gyrCheckTime()) {
-    gyr_count_ = std::min(gyr_count_/kGyrTimeInterval, (int64_t) gyr_val_read_.size());
+    gyr_count_ = std::min(gyr_count_/kGyrTimeInterval, (uint64_t) gyr_val_read_.size());
     // Check so you don't go out of bounds
     if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
       prev_gyr_ = gyr_val_read_[gyr_count_-1];

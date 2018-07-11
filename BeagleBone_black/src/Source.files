@@ -57,3 +57,4 @@ MAINS := \
   demo_fake_imu \
   demo_fake_proxi \
   demo_optical_encoder \
+  demo_imus \

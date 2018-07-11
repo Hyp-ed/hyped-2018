@@ -35,19 +35,17 @@ using hyped::data::Imu;
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
-  Logger log(true, 0);
-  MPU9250 mpu9250 = MPU9250(log, 66, 0x08, 0x00);
+  Logger log(true, 1);
+  MPU9250 mpu9250 = MPU9250(log, 51, 0x08, 0x00);
   Imu imu;
 
   log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
 
-  
-
   for (int i=0; i< 100; i++) {
     mpu9250.getData(&imu);
     log.DBG("TEST-mpu9250", "accelerometer readings x: %f m/s^2, y: %f m/s^2, z: %f m/s^2", imu.acc[0], imu.acc[1], imu.acc[2]);
-    log.DBG("TEST-mpu9250", "gyroscope readings     x: %f rad/s, y: %f rad/s, z: %f rad/s", imu.gyr[0], imu.gyr[1], imu.gyr[2]);
-    Thread::sleep(500);
+    // log.DBG("TEST-mpu9250", "gyroscope readings     x: %f rad/s, y: %f rad/s, z: %f rad/s", imu.gyr[0], imu.gyr[1], imu.gyr[2]);
+    Thread::sleep(10);
   }
 
 
