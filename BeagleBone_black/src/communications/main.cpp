@@ -32,6 +32,7 @@ namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
+      log_(log),
       data_(data::Data::getInstance())
 {
   const char* ipAddress = "127.0.0.1";
@@ -198,7 +199,7 @@ void Main::run()
     return;  // If connection fail, stops the communication module
   }
 
-  ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
+  ReceiverThread* receiverThread = new ReceiverThread(log_, baseCommunicator_);
   receiverThread->start();
 
   while (1) {
