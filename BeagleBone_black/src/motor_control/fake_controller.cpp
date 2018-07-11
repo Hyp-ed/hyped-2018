@@ -51,7 +51,7 @@ void FakeController::configure()
 {
   log_.INFO("MOTOR", "Controller %d: Configuring...", node_id_);
   if(node_id_ == 1) {
-    RPMvTime.open("RPMvTime");
+    RPMvTime.open("RPMvTime.txt");
     if(!RPMvTime.is_open()) {
       log_.ERR("MOTOR", "Could not open RPM v Time text file");
     } else {

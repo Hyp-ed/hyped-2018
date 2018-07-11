@@ -233,16 +233,12 @@ void Main::accelerateMotors()
   if (!nav_calib_) {
     post_calibration_barrier_.wait();
     nav_calib_ = true;
+    log_.INFO("MOTOR", "Motor state: Accelerating");
   }
 
-  log_.INFO("MOTOR", "Motor State: Accelerating\n");
   while (state_.current_state == data::State::kAccelerating) {
     // Check for state machine critical failure flag
     state_ = data_.getStateMachineData();
-    if (state_.critical_failure) {
-      stopMotors();
-      break;
-    }
 
     // Check for motors critical failure flag
     communicator_->healthCheck();
@@ -250,6 +246,7 @@ void Main::accelerateMotors()
     // If a failure occurs in any motor, set motor status to critical failure
     //  and stop all motors
     if (communicator_->getFailure()) {
+      log_.INFO("MOTOR", "Motor failure");
       updateMotorFailure();
       stopMotors();
       break;
@@ -259,6 +256,7 @@ void Main::accelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Accelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = accelerationVelocity(nav_.velocity);
+    log_.INFO("MOTOR", "target: %d", target_velocity_);
     communicator_->sendTargetVelocity(target_velocity_);
     updateMotorData();
   }
@@ -318,6 +316,10 @@ void Main::stopMotors()
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
   // Starting acceleration. TODO(Sean) Check with sims on this value
+  if (std::isnan(velocity)) {
+    log_.ERR("NAV", "Velocity is NAN");
+    updateMotorFailure();
+  }
   if (velocity == 0) {
     prev_velocity_ = velocity;
     timer.start();

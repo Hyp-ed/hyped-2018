@@ -47,6 +47,7 @@ Communicator::Communicator(Logger& log)
     controller2_ = new FakeController(log, 2);
     controller3_ = new FakeController(log, 3);
     controller4_ = new FakeController(log, 4);
+    log_.INFO("MOTOR", "Fake motors created");
   }
 }
 
@@ -120,9 +121,9 @@ MotorVelocity Communicator::requestActualVelocity()
   controller3_->updateActualVelocity();
   controller4_->updateActualVelocity();
   motor_velocity_.velocity_1 = controller1_->getVelocity();
-  motor_velocity_.velocity_2 = controller2_->getVelocity();
+  motor_velocity_.velocity_2 = -controller2_->getVelocity();
   motor_velocity_.velocity_3 = controller3_->getVelocity();
-  motor_velocity_.velocity_4 = controller4_->getVelocity();
+  motor_velocity_.velocity_4 = -controller4_->getVelocity();
 
   log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
     , motor_velocity_.velocity_1
