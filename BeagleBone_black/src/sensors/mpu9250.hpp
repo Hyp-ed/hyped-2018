@@ -71,6 +71,8 @@ class MPU9250 : public ImuInterface {
    *  @brief Sets the range for the accelerometer
    */
   void setAcclScale(int scale);
+  void getGyroData();
+  void getAcclData();
   static const uint64_t time_start;
   void init();
   void select();
@@ -87,6 +89,8 @@ class MPU9250 : public ImuInterface {
   double acc_divider_;
   double gyro_divider_;
   bool is_online_;
+  float accel_data_[3];
+  float gyro_data_[3];
 };
 
 }}  // namespace hyped::sensors

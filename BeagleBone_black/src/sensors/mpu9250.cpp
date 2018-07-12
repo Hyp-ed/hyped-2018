@@ -29,6 +29,7 @@
 
 // Accelerometer addresses
 constexpr uint8_t kAccelXoutH               = 0x3B;
+constexpr uint8_t  kGyroXoutH               = 0x43;
 
 constexpr uint8_t kAccelConfig              = 0x1C;
 constexpr uint8_t kAccelConfig2             = 0x1D;
@@ -85,7 +86,7 @@ void MPU9250::init()
   // Set pin high
   gpio_.set();
 
-  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
+  writeByte(kMpuRegPwrMgmt1, 0x00);   // Reset Device
   Thread::sleep(200);
   // Test connection
   whoAmI();
@@ -227,6 +228,37 @@ void MPU9250::setAcclScale(int scale)
   }
 }
 
+void MPU9250::getAcclData()
+{
+  uint8_t response[6];
+  int16_t bit_data;
+  float data;
+  int i;
+
+  readBytes(kAccelXoutH, response, 6);
+  for (i = 0; i < 3; i++) {
+    bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+    data = (float) bit_data;
+    log_.INFO("DATA", "accel %d: %f", i, data);
+    accel_data_[i] = data/acc_divider_  * 9.80665;   // - acc_bias_[i];
+  }
+}
+
+void MPU9250::getGyroData()
+{
+  uint8_t response[6];
+  int16_t bit_data;
+  float data;
+  int i;
+
+  readBytes(kGyroXoutH, response, 6);
+  for (i = 0; i < 3; i++) {
+    bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+    data = (float) bit_data;
+    gyro_data_[i] = data/gyro_divider_;    // - gyro_bias_[i];
+  }
+}
+
 void MPU9250::getData(Imu* imu)
 {
   if (is_online_) {
@@ -239,24 +271,26 @@ void MPU9250::getData(Imu* imu)
     int i;
     float accel_data[3];
     float gyro_data[3];
+    getAcclData();
+    getGyroData();
+    // readBytes(kAccelXoutH, response, 14);
+    // for (i = 0; i < 3; i++) {
+    //   bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+    //   data = static_cast<float>(bit_data);
+    //   log_.INFO("DATA", "accel %d: %f", i, data);
+    //   accel_data[i] = data/acc_divider_  * 9.80665;
 
-    readBytes(kAccelXoutH, response, 14);
-    for (i = 0; i < 3; i++) {
-      bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
-      data = static_cast<float>(bit_data);
-      accel_data[i] = (data/acc_divider_) * 9.80665;
-
-      bit_data = ((int16_t) response[i*2 + 8] << 8) | response[i*2+9];
-      data = static_cast<float>(bit_data);
-      gyro_data[i] = data/gyro_divider_;
-    }
+    //   bit_data = ((int16_t) response[i*2 + 8] << 8) | response[i*2+9];
+    //   data = static_cast<float>(bit_data);
+    //   gyro_data[i] = data/gyro_divider_;
+    // }
     imu->operational = is_online_;
-    acc[0] = accel_data[0];
-    acc[1] = accel_data[1];
-    acc[2] = accel_data[2];
-    gyr[0] = gyro_data[0];
-    gyr[1] = gyro_data[1];
-    gyr[2] = gyro_data[2];
+    acc[0] = accel_data_[0];
+    acc[1] = accel_data_[1];
+    acc[2] = accel_data_[2];
+    gyr[0] = gyro_data_[0];
+    gyr[1] = gyro_data_[1];
+    gyr[2] = gyro_data_[2];
   } else {
     // Try and turn the sensor on again
     log_.ERR("MPU9250", "Sensor not operational, trying to turn on sensor");
