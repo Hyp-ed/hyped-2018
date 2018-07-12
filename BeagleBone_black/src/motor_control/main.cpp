@@ -325,7 +325,7 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
   // 0.2 m/s in 50 milliseconds, then it is likely that the slip is too low, so
   // we manually increase the RPM.
   if (timer.getTimeMicros() - time_of_update_ > 50000) {
-    int32_t rpm;
+    int32_t rpm = 0;
     if (velocity - prev_velocity_ < 0.2) {
       prev_index_++;
       if (prev_index_ < (int32_t) acceleration_slip_[1].size()) {
