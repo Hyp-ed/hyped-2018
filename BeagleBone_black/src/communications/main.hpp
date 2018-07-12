@@ -76,6 +76,7 @@ class Main : public Thread {
   data::Batteries bat_;
   data::Navigation nav_;
   data::Communications cmn_data_;
+  data::EmergencyBrakes emb_;
   Logger& log_;
 };
 
