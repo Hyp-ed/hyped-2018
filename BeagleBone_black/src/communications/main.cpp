@@ -243,7 +243,7 @@ void Main::run()
                   sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
                   sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
-    sendEmBrakes(emb_.leftbrakes, emb_.rightbrakes);              
+    sendEmBrakes(emb_.leftbrakes, emb_.rightbrakes);
     sleep(0.2);
   }
 }

@@ -65,6 +65,8 @@ class Main : public Thread {
                     bool op2, bool op3,
                     bool op4, bool op5,
                     bool op6, bool op7);        // CMD19
+  int sendEmBrakes(bool leftbrakes,
+                   bool rightbrakes);           // CMD20
 
  private:
   int stateCode_;

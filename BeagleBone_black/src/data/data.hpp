@@ -239,6 +239,16 @@ class Data {
   void setBatteryData(const Batteries& batteries_data);
 
   /**
+   * @brief      Retrieves data from the emergency brakes.
+   */
+  EmergencyBrakes getEmergencyBrakesData();
+
+  /**
+   * @brief      Should be called to update emergency brakes data
+   */
+  void setEmergencyBrakesData(const EmergencyBrakes& emergency_brakes_data);
+
+  /**
    * @brief      Retrieves data produced by each of the four motors.
    */
   Motors getMotorData();
@@ -266,6 +276,7 @@ class Data {
   Batteries batteries_;
   Communications communications_;
   SensorCalibration calibration_data_;
+  EmergencyBrakes emergency_brakes_;
 
 
   // locks for data substructures
@@ -276,6 +287,7 @@ class Data {
 
   Lock lock_communications_;
   Lock lock_batteries_;
+  Lock lock_emergency_brakes_;
   Lock lock_calibration_data_;
 };
 
