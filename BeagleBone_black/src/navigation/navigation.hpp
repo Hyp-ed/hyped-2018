@@ -136,7 +136,7 @@ class Navigation {
   bool finishCalibration();
   /**
    * @brief Initializes filters and transitions nav from kStart to kInit
-   * 
+   *
    * @param sc        Sensor variance data
    * @param readings  Latest sensor readings
    */
