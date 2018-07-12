@@ -31,7 +31,7 @@
 #include "data/data.hpp"
 
 // TODO(Jack) Find the least between stripes
-constexpr uint8_t kTimeStamp = 50;    // ms
+constexpr uint8_t kTimeStamp = 50;    // micro s
 
 namespace hyped {
 
@@ -53,7 +53,6 @@ void FakeGpioCounter::run()
 
 void FakeGpioCounter::readDataFromFile(std::string file_path)
 {
-    uint32_t timestamp = kTimeStamp;
     std::vector<uint64_t>* val_read = &val_read_;
 
     std::ifstream file;
@@ -71,8 +70,8 @@ void FakeGpioCounter::readDataFromFile(std::string file_path)
       std::stringstream input(line);
       input >> temp_time;
 
-      if (temp_time != timestamp*counter) {
-        log_.ERR("Fake-IMU-accl", "Timestamp format invalid %d", temp_time);
+      if (temp_time != kTimeStamp*counter) {
+        log_.ERR("Fake-keyence", "Timestamp format invalid %d", temp_time);
       }
 
       input >> temp_value;
