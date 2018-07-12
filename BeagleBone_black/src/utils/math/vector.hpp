@@ -91,6 +91,13 @@ class Vector {
   double norm();
 
   /**
+   * @brief Element-wise square root
+   *
+   * @return Vector<T, dimension> A new Vector with sqrt applied
+   */
+  Vector<T, dimension> sqrt();
+
+  /**
    * @brief    Creates a new vector of magnitude one.
    */
   Vector<double, dimension> toUnitVector();
@@ -223,7 +230,16 @@ double Vector<T, dimension>::norm()
   double ans = 0;
   for (int i = 0; i < dimension; i++)
     ans += elements_[i]*elements_[i];
-  return sqrt(ans);
+  return std::sqrt(ans);
+}
+
+template <typename T, int dimension>
+Vector<T, dimension> Vector<T, dimension>::sqrt()
+{
+  auto ans = *this;
+  for (int i = 0; i < dimension; i++)
+    ans[i] = std::sqrt(ans[i]);
+  return ans;
 }
 
 
