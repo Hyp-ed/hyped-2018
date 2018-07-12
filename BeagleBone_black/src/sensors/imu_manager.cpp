@@ -76,7 +76,6 @@ void ImuManager::run()
   while (1) {
     // If the state changes to accelerating use different data
     if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kAccelerating) { //NOLINT
-      Thread::sleep(100);
       for (int i =0; i < data::Sensors::kNumImus; i++) {
         imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
       }
