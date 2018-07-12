@@ -139,6 +139,13 @@ void Main::updateData()
   nav_data.emergency_braking_distance = nav_.getEmergencyBrakingDistance();
 
   data_.setNavigationData(nav_data);
+  log_.DBG1("NAV",
+      "Update: ms=%d, a=(%.2f, %.2f, %.2f), v=(%.2f, %.2f, %.2f), d=(%.2f, %.2f, %.2f), ebd=%.2f",
+      nav_.status_,
+      nav_.acceleration_[0], nav_.acceleration_[1], nav_.acceleration_[2],
+      nav_.velocity_[0], nav_.velocity_[1], nav_.velocity_[2],
+      nav_.displacement_[0], nav_.displacement_[1], nav_.displacement_[2],
+      nav_.getEmergencyBrakingDistance());
 }
 
 }}  // namespace hyped::navigation
