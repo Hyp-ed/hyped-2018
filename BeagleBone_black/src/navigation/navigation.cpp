@@ -52,28 +52,7 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       displacement_(0),
       prev_angular_velocity_(0 , NavigationVector()),
       orientation_(1, 0, 0, 0)
-{
-  for (int i = 0; i < Sensors::kNumImus; i++) {
-    // TODO(Brano,Uday): Properly initialise filters (with std dev of sensors and stuff)
-    acceleration_filter_[i].configure(NavigationVector(),
-                                      NavigationVector(),
-                                      NavigationVector());
-    gyro_filter_[i].configure(NavigationVector(),
-                              NavigationVector(),
-                              NavigationVector());
-  }
-
-  for (auto filter: proximity_filter_)
-    filter.configure(0, 0, 0);
-
-  log_.DBG("NAV",
-      "After init: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
-      acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
-
-  status_ = ModuleStatus::kInit;
-}
+{}
 
 NavigationType Navigation::getAcceleration()
 {
@@ -129,6 +108,36 @@ bool Navigation::finishCalibration()
   post_calibration_barrier_.wait();
 
   return true;
+}
+
+void Navigation::init(SensorCalibration sc, Sensors readings)
+{
+  for (int i = 0; i < Sensors::kNumImus; i++) {
+    // TODO(Brano,Uday): Properly initialise filters (with std dev of sensors and stuff)
+    acceleration_filter_[i].configure(readings.imu.value[i].acc,
+                                      sc.imu_variance[i][0].sqrt(),
+                                      NavigationVector(0.1));
+    gyro_filter_[i].configure(readings.imu.value[i].gyr,
+                              sc.imu_variance[i][0].sqrt(),
+                              NavigationVector(0.1));
+  }
+
+  for (int i = 0; i < Sensors::kNumProximities; ++i) {
+    proximity_filter_[i].configure(readings.proxi_front.value[i].val,
+                                   sqrt(sc.proxi_front_variance[i]),
+                                   0.1);
+    proximity_filter_[i + Sensors::kNumProximities].configure(readings.proxi_back.value[i].val,
+                                                              sqrt(sc.proxi_back_variance[i]),
+                                                              0.1);
+  }
+
+  log_.DBG("NAV",
+      "After init: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
+      acceleration_[0], acceleration_[1], acceleration_[2],
+      velocity_[0], velocity_[1], velocity_[2],
+      displacement_[0], displacement_[1], displacement_[2]);
+
+  status_ = ModuleStatus::kInit;
 }
 
 

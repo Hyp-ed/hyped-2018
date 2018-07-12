@@ -24,7 +24,7 @@
 
 namespace hyped {
 
-using data::Sensors;
+using data::ModuleStatus;
 using data::State;
 using utils::System;
 
@@ -53,14 +53,22 @@ void Main::run()
     (*last_proxis)[i] = &(last_readings->proxi_front.value[i]);
     (*last_proxis)[i + Sensors::kNumProximities] = &(last_readings->proxi_back.value[i]);
   }
-  log_.INFO("NAVIGATION", "Main started");
+  log_.INFO("NAV", "Main started");
 
-  *last_readings = data_.getSensorsData();  // TODO(Brano): Make sure data_ is properly initd
   while (1) {
     // State updates
     State current_state = data_.getStateMachineData().current_state;
     switch (current_state) {
       case State::kIdle :
+        *readings = data_.getSensorsData();
+        if ((readings->module_status == ModuleStatus::kInit ||
+             readings->module_status == ModuleStatus::kReady) &&
+            nav_.getStatus() == ModuleStatus::kStart) {  // NOLINT [whitespace/braces]
+          nav_.init(data_.getCalibrationData(), *readings);
+          *last_readings = data_.getSensorsData();
+          *readings = data_.getSensorsData();
+          updateData();
+        }
         yield();
         continue;
       case State::kCalibrating :
