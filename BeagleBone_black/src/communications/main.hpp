@@ -65,6 +65,8 @@ class Main : public Thread {
                     bool op2, bool op3,
                     bool op4, bool op5,
                     bool op6, bool op7);        // CMD19
+  int sendEmBrakes(bool leftbrakes,
+                   bool rightbrakes);           // CMD20
 
  private:
   int stateCode_;
@@ -76,6 +78,7 @@ class Main : public Thread {
   data::Batteries bat_;
   data::Navigation nav_;
   data::Communications cmn_data_;
+  data::EmergencyBrakes emb_;
   Logger& log_;
 };
 
