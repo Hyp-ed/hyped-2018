@@ -69,7 +69,7 @@ void FakeImuAccelerating::getData(Imu* imu)
     start();
   }
   if (accCheckTime()) {
-    acc_count_ = std::min(acc_count_/kAccTimeInterval, (int64_t) acc_val_read_.size());
+    acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
     // Check so you don't go out of bounds
     if (acc_count_ == (int64_t) acc_val_read_.size()) {
       prev_acc_ = acc_val_read_[acc_count_-1];
@@ -79,7 +79,7 @@ void FakeImuAccelerating::getData(Imu* imu)
   }
 
   if (gyrCheckTime()) {
-    gyr_count_ = std::min(gyr_count_/kGyrTimeInterval, (int64_t) gyr_val_read_.size());
+    gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
     // Check so you don't go out of bounds
     if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
       prev_gyr_ = gyr_val_read_[gyr_count_-1];
@@ -183,7 +183,7 @@ void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::strin
 bool FakeImuAccelerating::accCheckTime()
 {
   uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = now - imu_ref_time_;
+  uint64_t time_span = (now - imu_ref_time_) / 1000;
 
   if (time_span < kAccTimeInterval*acc_count_) {
     return false;
@@ -195,7 +195,7 @@ bool FakeImuAccelerating::accCheckTime()
 bool FakeImuAccelerating::gyrCheckTime()
 {
   uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = now - imu_ref_time_;
+  uint64_t time_span = (now - imu_ref_time_) / 1000;
 
   if (time_span < kGyrTimeInterval*gyr_count_) {
     return false;
@@ -223,6 +223,7 @@ FakeImuStationary::FakeImuStationary(utils::Logger& log,
 
 void FakeImuStationary::getData(Imu* imu)
 {
+  Thread::yield();
   if (accCheckTime()) {
     prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
   }

@@ -1,14 +1,8 @@
 /*
- * Author: Ragnor Comerford and Jack Horsburgh
+ * Author: Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
- * Date: 19/06/18
- * Description:
- * Main manages sensor drivers, collects data from sensors and updates
- * shared Data::Sensors structure. Main is not responsible for initialisation
- * of supporting io drivers (i2c, spi, can). This should be done by the sensor
- * drivers themselves.
- * Currently supported sensors:
- * - BMS (low powered), ids: 0
+ * Date: 28/05/18
+ * Description: Main class for fake gpio_counters.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,33 +18,45 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_
 
-#include <cstdint>
+#include <string>
+#include <vector>
 
+#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
-
 
 namespace hyped {
 
 using utils::Logger;
+using data::Data;
 
 namespace sensors {
 
 
-class GpioCounter: public GpioInterface {
+class FakeGpioCounter:public GpioInterface {
  public:
-  explicit GpioCounter(Logger& log, int pin);
+  explicit FakeGpioCounter(Logger& log, std::string file_path);
   data::StripeCounter getStripeCounter() override;
   void run() override;
 
  private:
-  int pin_;
+  void readDataFromFile(std::string file_path);
+  void init();
+  bool checkTime();
+  std::string file_path_;
+  Data& data_;
+
+  std::vector<uint64_t> val_read_;
+  uint64_t gpio_count_;
 
   data::StripeCounter stripe_counter_;
+  uint64_t ref_time_;
+  bool is_started_;
+  uint64_t prev_gpio_;
 };
-}}  // namespace hyped::sensors
+}}    // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_

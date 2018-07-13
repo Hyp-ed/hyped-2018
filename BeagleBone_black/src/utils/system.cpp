@@ -49,7 +49,7 @@ void printUsage()
     "    Set system-wide debug level. All DBG[n] where n <= level messages are printed.\n"
     "\n  --debug_motor, --debug_nav, --debug_sensor, --debug_state, --debug_cmn\n"
     "    Set module-specific debug level. All DBG[n] where n <= level messages are printed.\n"
-    "\n  --fake_imu --fake_proxi\n"
+    "\n  --fake_imu --fake_proxi --fake_motors --fake_sensors --fake_keyence --fake_embrakes\n"
     "    Make the system use the fake data drivers.\n"
     "");
 }
@@ -99,8 +99,9 @@ System::System(int argc, char* argv[])
       {"fake_imu", optional_argument, 0, 'i'},
       {"fake_proxi", optional_argument, 0, 'j'},
       {"fake_sensors", optional_argument, 0, 'k'},
-      {"fake_motors", optional_argument, 0, 'l'},
-      {"fake_embrakes", optional_argument, 0, 'm'},
+      {"fake_keyence", optional_argument, 0, 'l'},
+      {"fake_motors", optional_argument, 0, 'm'},
+      {"fake_embrakes", optional_argument, 0, 'n'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -174,10 +175,13 @@ System::System(int argc, char* argv[])
         else        fake_sensors = 0;
         break;
       case 'l':
+        if (optarg) fake_keyence = atoi(optarg);
+        else        fake_keyence = 0;
+      case 'm':
         if (optarg) fake_motors = atoi(optarg);
         else        fake_motors = 0;
         break;
-      case 'm':
+      case 'n':
         if (optarg) fake_embrakes = atoi(optarg);
         else        fake_embrakes = 0;
         break;

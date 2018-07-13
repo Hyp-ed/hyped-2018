@@ -39,13 +39,16 @@ int main(int argc, char* argv[])
   hyped::utils::System::parseArgs(argc, argv);
   Imu reading;
   Logger log(true, 1);
-  FakeImuStationary   imuStationary(log, NavigationVector(0), NavigationVector(1), NavigationVector(0), NavigationVector(1));
+  NavigationVector acc;
+    acc[0] = 0.0;
+    acc[1] = 0.0;
+    acc[2] = 9.8;
+  FakeImuStationary   imuStationary(log, acc, NavigationVector(1), NavigationVector(0), NavigationVector(1));
 
   for (int i=0; i<20; i++) {
     imuStationary.getData(&reading);
     printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
     printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
-    // TODO(Anyone) change the state of the state machine to accelerating
     Thread::sleep(50);
   }
 
@@ -55,7 +58,6 @@ int main(int argc, char* argv[])
     imuAccelerating.getData(&reading);
     printf("Accel Readings: x: %f m/s^2, y: %f m/s^2, z: %f m/s^2\n", reading.acc[0], reading.acc[1], reading.acc[2]);
     printf("Gyros Readings: x: %f rad/s, y: %f rad/s, z: %f rad/s\n", reading.gyr[0], reading.gyr[1], reading.gyr[2]);
-    // TODO(Anyone) change the state of the state machine to accelerating
     Thread::sleep(50);
   }
 }
