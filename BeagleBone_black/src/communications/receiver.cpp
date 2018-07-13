@@ -48,11 +48,11 @@ void ReceiverThread::run()
         break;
       case 2:
         log_.INFO("COMN", "Received 2 (LAUNCH)");  // LAUNCH
-        cmn_data.launchCommand = true;
+        cmn_data.launch_command = true;
         break;
       case 3:
         log_.INFO("COMN", "Received 3 (RESET)");  // RESET
-        cmn_data.resetCommand = true;
+        cmn_data.reset_command = true;
         break;
       case 4:
         log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
@@ -60,11 +60,11 @@ void ReceiverThread::run()
         break;
       case 5:
         log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO
-        cmn_data.servicePropulsionGo = true;
+        cmn_data.service_propulsion_go = true;
         break;
       case 6:
         log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
-        cmn_data.servicePropulsionGo = false;
+        cmn_data.service_propulsion_go = false;
         break;
       default:
         log_.ERR("COMN", "Received %d (Should not reach here)", command);

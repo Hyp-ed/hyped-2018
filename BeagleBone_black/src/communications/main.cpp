@@ -193,9 +193,9 @@ int Main::sendEmBrakes(bool leftbrakes, bool rightbrakes)
 
 void Main::run()
 {
-  cmn_data_.launchCommand = false;
-  cmn_data_.resetCommand = false;
-  cmn_data_.servicePropulsionGo = false;
+  cmn_data_.launch_command = false;
+  cmn_data_.reset_command = false;
+  cmn_data_.service_propulsion_go = false;
   cmn_data_.run_length = 1250;
 
   if (baseCommunicator_->isConnected()) {

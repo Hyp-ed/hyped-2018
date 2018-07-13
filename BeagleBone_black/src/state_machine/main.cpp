@@ -90,11 +90,11 @@ void Main::checkNavigation()
 
 void Main::checkCommunications()
 {
-  if (comms_data_.launchCommand) {
+  if (comms_data_.launch_command) {
     hypedMachine.handleEvent(kOnStart);
   }
 
-  if (comms_data_.resetCommand) {
+  if (comms_data_.reset_command) {
     hypedMachine.reset();
   }
 }
