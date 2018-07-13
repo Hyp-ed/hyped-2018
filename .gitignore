@@ -43,5 +43,6 @@ BeagleBone_black/hyped
 BeagleBone_black/main*
 BeagleBone_black/demo_*
 .vscode
+RPMvTime.txt
 
 .idea
