@@ -28,6 +28,7 @@ namespace hyped {
 
 using state = data::State;
 using utils::io::GPIO;
+using utils::System;
 
 namespace state_machine {
 
@@ -118,10 +119,12 @@ void EmergencyBraking::entry()
 void EmergencyBraking::react(HypedMachine &machine, Event event)
 {
   // Set pins low to redundantly activate emergency brakes
-  GPIO pin_37(78, utils::io::gpio::kOut);
-  GPIO pin_38(79, utils::io::gpio::kOut);
-  pin_37.clear();
-  pin_38.clear();
+  if (!sys_.fake_embrakes) {
+    GPIO pin_37(78, utils::io::gpio::kOut);
+    GPIO pin_38(79, utils::io::gpio::kOut);
+    pin_37.clear();
+    pin_38.clear();
+  }
 
 
   if (event == kVelocityZeroReached) {

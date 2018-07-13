@@ -31,6 +31,7 @@
 #include "data/data.hpp"
 #include "state_machine/hyped-machine.hpp"
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -83,6 +84,8 @@ class EmergencyBraking : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
+  private:
+  utils::System& sys_ = utils::System::getSystem();
 };
 
 class RunComplete : public State {
