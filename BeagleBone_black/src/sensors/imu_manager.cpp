@@ -65,6 +65,9 @@ ImuManager::ImuManager(Logger& log,
       imu_accelerating_[i] = new FakeImuAccelerating(log,
                                                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",  //NOLINT
                                                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
+      imu_decelerating_[i] = new FakeImuAccelerating(log,
+                                                    "../BeagleBone_black/data/in/fake_imu_input_dec.txt",  //NOLINT
+                                                    "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
       // TODO(anyone) add fake calcCalibrationData()
     }
   }
@@ -78,6 +81,10 @@ void ImuManager::run()
     if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kAccelerating) { //NOLINT
       for (int i =0; i < data::Sensors::kNumImus; i++) {
         imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
+      }
+    } else if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kDecelerating) { //NOLINT
+      for (int i =0; i < data::Sensors::kNumImus; i++) {
+        imu_decelerating_[i]->getData(&(sensors_imu_->value[i]));
       }
     } else {
       for (int i = 0; i < data::Sensors::kNumImus; i++) {

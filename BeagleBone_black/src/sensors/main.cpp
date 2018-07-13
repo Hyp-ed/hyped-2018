@@ -107,6 +107,8 @@ void Main::run()
   }
   log_.INFO("SENSORS", "batteries data has been initialised");
 
+  if (battery_init_ && sensor_init_) sensors_.module_status = data::ModuleStatus::kReady;
+
   // work loop
   while (1) {
     // Write sensor data to data structure only when all the imu or proxi values are different
