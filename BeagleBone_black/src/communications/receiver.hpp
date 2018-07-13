@@ -24,6 +24,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "communications/communications.hpp"
 #include "data/data.hpp"
+#include "utils/logger.hpp"
 
 namespace hyped {
 
@@ -34,12 +35,13 @@ namespace communications {
 
 class ReceiverThread : public Thread {
  public:
-  explicit ReceiverThread(Communications* baseCommunicator);
+  explicit ReceiverThread(Logger& log, Communications* baseCommunicator);
   void run() override;
 
  private:
   Communications* baseCommunicator_;
   data::Data& data_;
+  Logger& log_;
 };
 
 }}  //   namespace hyped::communications

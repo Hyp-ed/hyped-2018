@@ -18,7 +18,6 @@
  *    limitations under the License.
  */
 
-
 #include "communications.hpp"
 
 #include <string>
@@ -29,7 +28,8 @@ namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int portNo)
     : log_(log),
-      connected_(false)
+      connected_(false),
+      data_(data::Data::getInstance())
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -91,7 +91,7 @@ int Communications::receiveRunLength()
 
   if (n < 0) {
       log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    }
+  }
 
   return run_length;
 }
@@ -107,37 +107,10 @@ int Communications::receiveMessage()
 
   int command = buffer_[0]-'0';
 
-  switch (command) {
-    case 0:
-      log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
-      break;
-    case 1:
-      log_.INFO("COMN", "Received 1 (STOP)");  // STOP
-      break;
-    case 2:
-      log_.INFO("COMN", "Received 2 (LAUNCH)");  // LAUNCH
-      break;
-    case 3:
-      log_.INFO("COMN", "Received 3 (RESET)");  // RESET
-      break;
-    case 4:
-      log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
-      break;
-    case 5:
-      log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO
-      break;
-    case 6:
-      log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
-      break;
-    default:
-      log_.ERR("COMN", "Received %d (Should not reach here)", command);
-      break;
-  }
-
   return command;
 }
 
-bool Communications::connectionEstablished()
+bool Communications::isConnected()
 {
   return connected_;
 }

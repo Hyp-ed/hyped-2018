@@ -123,7 +123,7 @@ struct Sensors : public Module {
 struct SensorCalibration {
   array<float, Sensors::kNumProximities> proxi_front_variance;
   array<float, Sensors::kNumProximities> proxi_back_variance;
-  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;
+  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;  // x[i][0]=acc, x[i][1]=gyr
 };
 
 struct Battery {
@@ -139,6 +139,11 @@ struct Batteries : public Module {
 
   array<Battery, kNumLPBatteries> low_power_batteries;
   array<Battery, kNumHPBatteries> high_power_batteries;
+};
+
+struct EmergencyBrakes {
+  bool leftbrakes;        // true if left facing emergency brakes deploy
+  bool rightbrakes;       // true if right facing emergency brakes deploy
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -234,6 +239,16 @@ class Data {
   void setBatteryData(const Batteries& batteries_data);
 
   /**
+   * @brief      Retrieves data from the emergency brakes.
+   */
+  EmergencyBrakes getEmergencyBrakesData();
+
+  /**
+   * @brief      Should be called to update emergency brakes data
+   */
+  void setEmergencyBrakesData(const EmergencyBrakes& emergency_brakes_data);
+
+  /**
    * @brief      Retrieves data produced by each of the four motors.
    */
   Motors getMotorData();
@@ -261,6 +276,7 @@ class Data {
   Batteries batteries_;
   Communications communications_;
   SensorCalibration calibration_data_;
+  EmergencyBrakes emergency_brakes_;
 
 
   // locks for data substructures
@@ -271,6 +287,7 @@ class Data {
 
   Lock lock_communications_;
   Lock lock_batteries_;
+  Lock lock_emergency_brakes_;
   Lock lock_calibration_data_;
 };
 
