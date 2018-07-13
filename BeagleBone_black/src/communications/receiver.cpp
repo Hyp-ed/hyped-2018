@@ -23,10 +23,10 @@
 namespace hyped {
 namespace communications {
 
-ReceiverThread::ReceiverThread(Logger& log, Communications* baseCommunicator)
+ReceiverThread::ReceiverThread(Logger& log, Communications* base_communicator)
     : Thread(),
       log_(log),
-      baseCommunicator_(baseCommunicator),
+      base_communicator_(base_communicator),
       data_(data::Data::getInstance())
 { /* Empty */ }
 
@@ -36,7 +36,7 @@ void ReceiverThread::run()
 
   while (1) {
     cmn_data = data_.getCommunicationsData();
-    int command = baseCommunicator_->receiveMessage();
+    int command = base_communicator_->receiveMessage();
 
     switch (command) {
       case 0:
@@ -56,7 +56,7 @@ void ReceiverThread::run()
         break;
       case 4:
         log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
-        cmn_data.run_length = static_cast<float>(baseCommunicator_->receiveRunLength())/1000;
+        cmn_data.run_length = static_cast<float>(base_communicator_->receiveRunLength())/1000;
         break;
       case 5:
         log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO

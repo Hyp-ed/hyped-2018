@@ -36,43 +36,43 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance())
 {
   const char* ipAddress = "127.0.0.1"; /*SpaceX will give an IP 192.168.0.6-24*/
-  int portNo = 5695;
-  baseCommunicator_ = new Communications(log, ipAddress, portNo);
+  int port_no = 5695;
+  base_communicator_ = new Communications(log, ipAddress, port_no);
 }
 
 int Main::sendDistance(NavigationType distance)
 {
-  return baseCommunicator_->sendData("CMD01" + std::to_string(distance) + "\n");
+  return base_communicator_->sendData("CMD01" + std::to_string(distance) + "\n");
 }
 
 int Main::sendVelocity(NavigationType speed)
 {
-  return baseCommunicator_->sendData("CMD02" + std::to_string(speed) + "\n");
+  return base_communicator_->sendData("CMD02" + std::to_string(speed) + "\n");
 }
 
 int Main::sendAcceleration(NavigationType accel)
 {
-  return baseCommunicator_->sendData("CMD03" + std::to_string(accel) + "\n");
+  return base_communicator_->sendData("CMD03" + std::to_string(accel) + "\n");
 }
 
 int Main::sendRpmFl(float rpmfl)
 {
-  return baseCommunicator_->sendData("CMD04" + std::to_string(rpmfl) + "\n");
+  return base_communicator_->sendData("CMD04" + std::to_string(rpmfl) + "\n");
 }
 
 int Main::sendRpmFr(float rpmfr)
 {
-  return baseCommunicator_->sendData("CMD05" + std::to_string(rpmfr) + "\n");
+  return base_communicator_->sendData("CMD05" + std::to_string(rpmfr) + "\n");
 }
 
 int Main::sendRpmBl(float rpmbl)
 {
-  return baseCommunicator_->sendData("CMD06" + std::to_string(rpmbl) + "\n");
+  return base_communicator_->sendData("CMD06" + std::to_string(rpmbl) + "\n");
 }
 
 int Main::sendRpmBr(float rpmbr)
 {
-  return baseCommunicator_->sendData("CMD07" + std::to_string(rpmbr) + "\n");
+  return base_communicator_->sendData("CMD07" + std::to_string(rpmbr) + "\n");
 }
 
 int Main::sendState(State state)
@@ -91,49 +91,49 @@ int Main::sendState(State state)
     default: break;
   }
 
-  return baseCommunicator_->sendData("CMD08" + std::to_string(stateCode_) + "\n");
+  return base_communicator_->sendData("CMD08" + std::to_string(stateCode_) + "\n");
 }
 
 int Main::sendHpVoltage(Battery hpBattery)
 {
   // Convert voltage reading units from mV to V
-  return baseCommunicator_->sendData("CMD09" + std::to_string(hpBattery.voltage / 1000.0) + "\n");
+  return base_communicator_->sendData("CMD09" + std::to_string(hpBattery.voltage / 1000.0) + "\n");
 }
 
 int Main::sendHpTemperature(Battery hpBattery)
 {
-  return baseCommunicator_->sendData("CMD10" + std::to_string(hpBattery.temperature) + "\n");
+  return base_communicator_->sendData("CMD10" + std::to_string(hpBattery.temperature) + "\n");
 }
 
 int Main::sendHpCharge(Battery hpBattery)
 {
-  return baseCommunicator_->sendData("CMD11" + std::to_string(hpBattery.charge) + "\n");
+  return base_communicator_->sendData("CMD11" + std::to_string(hpBattery.charge) + "\n");
 }
 
 int Main::sendHpVoltage1(Battery hpBattery1)
 {
   // Convert voltage reading units from mV to V
-  return baseCommunicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage / 1000.0) + "\n");
+  return base_communicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage / 1000.0) + "\n");
 }
 
 int Main::sendHpTemperature1(Battery hpBattery1)
 {
-  return baseCommunicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
+  return base_communicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
 }
 
 int Main::sendHpCharge1(Battery hpBattery1)
 {
-  return baseCommunicator_->sendData("CMD14" + std::to_string(hpBattery1.charge) + "\n");
+  return base_communicator_->sendData("CMD14" + std::to_string(hpBattery1.charge) + "\n");
 }
 
 int Main::sendLpCharge(Battery lpBattery)
 {
-  return baseCommunicator_->sendData("CMD15" + std::to_string(lpBattery.charge) + "\n");
+  return base_communicator_->sendData("CMD15" + std::to_string(lpBattery.charge) + "\n");
 }
 
 int Main::sendLpCharge1(Battery lpBattery1)
 {
-  return baseCommunicator_->sendData("CMD16" + std::to_string(lpBattery1.charge) + "\n");
+  return base_communicator_->sendData("CMD16" + std::to_string(lpBattery1.charge) + "\n");
 }
 
 int Main::sendImu(bool op, bool op1, bool op2, bool op3)
@@ -144,7 +144,7 @@ int Main::sendImu(bool op, bool op1, bool op2, bool op3)
   sen2 = op2 ? "1" : "2";
   sen3 = op3 ? "1" : "2";
 
-  return baseCommunicator_->sendData("CMD17" + sen + sen1 + sen2 +
+  return base_communicator_->sendData("CMD17" + sen + sen1 + sen2 +
                                      sen3 + "\n");
 }
 
@@ -161,7 +161,7 @@ int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
 
-  return baseCommunicator_->sendData("CMD18" + sen + sen1 + sen2 +
+  return base_communicator_->sendData("CMD18" + sen + sen1 + sen2 +
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
@@ -178,7 +178,7 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
 
-  return baseCommunicator_->sendData("CMD19" + sen + sen1 + sen2 +
+  return base_communicator_->sendData("CMD19" + sen + sen1 + sen2 +
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
@@ -187,28 +187,28 @@ int Main::sendEmBrakes(bool leftbrakes, bool rightbrakes)
   std::string brake, brake1;
   brake = leftbrakes ? "1" : "2";
   brake1 = rightbrakes ? "1" : "2";
-  return baseCommunicator_->sendData("CMD20" + brake + brake1 + "\n");
+  return base_communicator_->sendData("CMD20" + brake + brake1 + "\n");
 }
 
 
 void Main::run()
 {
-  cmn_data_.launch_command = false;
-  cmn_data_.reset_command = false;
-  cmn_data_.service_propulsion_go = false;
-  cmn_data_.run_length = 1250;
+  cmn_.launch_command = false;
+  cmn_.reset_command = false;
+  cmn_.service_propulsion_go = false;
+  cmn_.run_length = 1250;
 
-  if (baseCommunicator_->isConnected()) {
-    cmn_data_.module_status = data::ModuleStatus::kInit;
-    data_.setCommunicationsData(cmn_data_);
+  if (base_communicator_->isConnected()) {
+    cmn_.module_status = data::ModuleStatus::kInit;
+    data_.setCommunicationsData(cmn_);
   } else {
-    cmn_data_.module_status = data::ModuleStatus::kCriticalFailure;
-    data_.setCommunicationsData(cmn_data_);
+    cmn_.module_status = data::ModuleStatus::kCriticalFailure;
+    data_.setCommunicationsData(cmn_);
 
     return;  // If connection fail, stops the communication module
   }
 
-  ReceiverThread* receiverThread = new ReceiverThread(log_, baseCommunicator_);
+  ReceiverThread* receiverThread = new ReceiverThread(log_, base_communicator_);
   receiverThread->start();
 
   while (1) {

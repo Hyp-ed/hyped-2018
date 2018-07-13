@@ -26,9 +26,9 @@ namespace hyped {
 
 namespace communications {
 
-Communications::Communications(Logger& log, const char* ip, int portNo)
+Communications::Communications(Logger& log, const char* ip, int port_no)
     : log_(log),
-      connected_(false),
+      is_connected_(false),
       data_(data::Data::getInstance())
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
@@ -49,7 +49,7 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
   memset(&serv_addr, '\0', sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;   // server byte order
   // memcpy(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
-  serv_addr.sin_port = htons(portNo);
+  serv_addr.sin_port = htons(port_no);
 
   if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0) {
     log_.ERR("COMN", "INVALID ADDRESS.\n");
@@ -60,7 +60,7 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
   } else {
     log_.INFO("COMN", "TCP/IP connection established.");
-    connected_ = true;
+    is_connected_ = true;
   }
 }
 
@@ -112,6 +112,6 @@ int Communications::receiveMessage()
 
 bool Communications::isConnected()
 {
-  return connected_;
+  return is_connected_;
 }
 }}  // namespace hyped::communcations

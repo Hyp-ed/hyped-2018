@@ -26,10 +26,10 @@ using namespace hyped::communications;
 int main()
 {
   const char* ipAddress = "localhost";
-  int portNo = 5695;
+  int port_no = 5695;
   hyped::utils::Logger log(true, 1);
-  hyped::communications::Communications baseCommunicator(log, ipAddress, portNo);
-  baseCommunicator.sendData("CMD01987654321\n");
+  hyped::communications::Communications base_communicator(log, ipAddress, port_no);
+  base_communicator.sendData("CMD01987654321\n");
 
   return 0;
 }

@@ -70,13 +70,13 @@ class Main : public Thread {
 
  private:
   int stateCode_;
-  Communications* baseCommunicator_;
+  Communications* base_communicator_;
   data::StateMachine stm_;
   data::Motors mtr_;
   data::Sensors sen_;
   data::Batteries bat_;
   data::Navigation nav_;
-  data::Communications cmn_data_;
+  data::Communications cmn_;
   data::EmergencyBrakes emb_;
   Logger& log_;
   data::Data& data_;
