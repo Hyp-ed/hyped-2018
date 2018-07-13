@@ -59,7 +59,6 @@ struct spi_ioc_transfer {
 #include "utils/concurrent/thread.hpp"
 
 // configure SPI
-#define SPI_CLK   1000000   // 4MHz
 #define SPI_MODE  3
 #define SPI_BITS  8         // each word is 1B
 #define SPI_MSBFIRST 0
@@ -88,10 +87,7 @@ SPI::SPI(Logger& log)
   }
 
   // set clock frequency
-  uint32_t clock = SPI_CLK;
-  if (ioctl(spi_fd_, SPI_IOC_WR_MAX_SPEED_HZ, &clock) < 0) {
-    log_.ERR("SPI", "could not set clock frequency");
-  }
+  setClock(Clock::k1MHz);
 
   // set bits per word
   uint8_t bits = SPI_BITS;
@@ -113,6 +109,19 @@ SPI::SPI(Logger& log)
 
   System::setExitFunction();
   log_.INFO("SPI", "spi instance created, exit function registered with the system");
+}
+
+void SPI::setClock(Clock clk)
+{
+  uint32_t data;
+  switch (clk) {
+    case Clock::k1MHz: data = 1000000; break;
+    case Clock::k4MHz: data = 4000000; break;
+  }
+
+  if (ioctl(spi_fd_, SPI_IOC_WR_MAX_SPEED_HZ, &data) < 0) {
+    log_.ERR("SPI", "could not set clock frequency of %d", data);
+  }
 }
 
 void SPI::transfer(uint8_t* tx, uint8_t* rx, uint16_t len)

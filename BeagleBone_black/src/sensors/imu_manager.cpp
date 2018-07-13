@@ -45,10 +45,12 @@ ImuManager::ImuManager(Logger& log,
   if (sys_.fake_imu || sys_.fake_sensors) is_fake_ = true;
   if (!is_fake_) {
     // create IMUs
+    utils::io::SPI::getInstance().setClock(utils::io::SPI::Clock::k1MHz);
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
       imu_calibrations_[i] = imu_[i]->calcCalibrationData();
     }
+    utils::io::SPI::getInstance().setClock(utils::io::SPI::Clock::k4MHz);
   } else {
     // create fake IMUs
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
