@@ -133,7 +133,7 @@ bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  return new_data.keyence_stripe_counter.count.timestamp != old_data.keyence_stripe_counter.count.timestamp; //NOLINT
+  return new_data.keyence_stripe_counter.count.value != old_data.keyence_stripe_counter.count.value;
 }
 
 void Main::updateData()
