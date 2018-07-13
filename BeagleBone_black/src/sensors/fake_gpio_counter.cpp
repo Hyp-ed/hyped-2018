@@ -102,6 +102,7 @@ bool FakeGpioCounter::checkTime()
 
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
+  Thread::yield();
   data::StripeCounter stripes;
   if (data_.getStateMachineData().current_state == data::State::kAccelerating || is_started_) {
     if (!is_started_) {

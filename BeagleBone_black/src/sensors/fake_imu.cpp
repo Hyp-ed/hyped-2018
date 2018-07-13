@@ -223,6 +223,7 @@ FakeImuStationary::FakeImuStationary(utils::Logger& log,
 
 void FakeImuStationary::getData(Imu* imu)
 {
+  Thread::yield();
   if (accCheckTime()) {
     prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
   }
