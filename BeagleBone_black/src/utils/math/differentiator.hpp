@@ -54,7 +54,7 @@ template <typename T>
 DataPoint<T> Differentiator<T>::update(DataPoint<T> point)
 {
   if (!initialised_) {
-    previous_point_ = point;
+    prev_point_ = point;
     initialised_ = true;
   }
   // Assume timestamp in microseconds and convert to seconds
