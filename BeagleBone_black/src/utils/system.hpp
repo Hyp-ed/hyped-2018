@@ -63,6 +63,7 @@ class System {
   bool fake_proxi;
   bool fake_sensors;
   bool fake_motors;
+  bool fake_embrakes;
 
   // barriers
   /**
