@@ -48,8 +48,8 @@ class Integrator {
 };
 
 template <typename T>
-Integrator<T>::Integrator() :
-    previous_point_(0, T(0)), previous_output_(0, T(0)), initialised_(false)
+Integrator<T>::Integrator()
+    : previous_point_(0, T(0)), previous_output_(0, T(0)), initialised_(false)
 {}
 
 template <typename T>
