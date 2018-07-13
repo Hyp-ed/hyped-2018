@@ -55,85 +55,86 @@ int Main::sendAcceleration(NavigationType accel)
   return base_communicator_->sendData("CMD03" + std::to_string(accel) + "\n");
 }
 
-int Main::sendRpmFl(float rpmfl)
+int Main::sendRpmFl(float rpm_fl)
 {
-  return base_communicator_->sendData("CMD04" + std::to_string(rpmfl) + "\n");
+  return base_communicator_->sendData("CMD04" + std::to_string(rpm_fl) + "\n");
 }
 
-int Main::sendRpmFr(float rpmfr)
+int Main::sendRpmFr(float rpm_fr)
 {
-  return base_communicator_->sendData("CMD05" + std::to_string(rpmfr) + "\n");
+  return base_communicator_->sendData("CMD05" + std::to_string(rpm_fr) + "\n");
 }
 
-int Main::sendRpmBl(float rpmbl)
+int Main::sendRpmBl(float rpm_bl)
 {
-  return base_communicator_->sendData("CMD06" + std::to_string(rpmbl) + "\n");
+  return base_communicator_->sendData("CMD06" + std::to_string(rpm_bl) + "\n");
 }
 
-int Main::sendRpmBr(float rpmbr)
+int Main::sendRpmBr(float rpm_br)
 {
-  return base_communicator_->sendData("CMD07" + std::to_string(rpmbr) + "\n");
+  return base_communicator_->sendData("CMD07" + std::to_string(rpm_br) + "\n");
 }
 
 int Main::sendState(State state)
 {
   switch (state) {
-    case data::kIdle             : stateCode_ = 0; break;
-    case data::kCalibrating      : stateCode_ = 1; break;
-    case data::kReady            : stateCode_ = 2; break;
-    case data::kAccelerating     : stateCode_ = 3; break;
-    case data::kDecelerating     : stateCode_ = 4; break;
-    case data::kEmergencyBraking : stateCode_ = 5; break;
-    case data::kRunComplete      : stateCode_ = 6; break;
-    case data::kFailureStopped   : stateCode_ = 7; break;
-    case data::kExiting          : stateCode_ = 8; break;
-    case data::kFinished         : stateCode_ = 9; break;
+    case data::kIdle             : state_code_ = 0; break;
+    case data::kCalibrating      : state_code_ = 1; break;
+    case data::kReady            : state_code_ = 2; break;
+    case data::kAccelerating     : state_code_ = 3; break;
+    case data::kDecelerating     : state_code_ = 4; break;
+    case data::kEmergencyBraking : state_code_ = 5; break;
+    case data::kRunComplete      : state_code_ = 6; break;
+    case data::kFailureStopped   : state_code_ = 7; break;
+    case data::kExiting          : state_code_ = 8; break;
+    case data::kFinished         : state_code_ = 9; break;
     default: break;
   }
 
-  return base_communicator_->sendData("CMD08" + std::to_string(stateCode_) + "\n");
+  return base_communicator_->sendData("CMD08" + std::to_string(state_code_) + "\n");
 }
 
-int Main::sendHpVoltage(Battery hpBattery)
+int Main::sendHpVoltage(Battery hp_battery)
 {
   // Convert voltage reading units from mV to V
-  return base_communicator_->sendData("CMD09" + std::to_string(hpBattery.voltage / 1000.0) + "\n");
+  return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage / 1000.0) + "\n");
 }
 
-int Main::sendHpTemperature(Battery hpBattery)
+int Main::sendHpTemperature(Battery hp_battery)
 {
-  return base_communicator_->sendData("CMD10" + std::to_string(hpBattery.temperature) + "\n");
+  return base_communicator_->sendData("CMD10" + std::to_string(hp_battery.temperature) + "\n");
 }
 
-int Main::sendHpCharge(Battery hpBattery)
+int Main::sendHpCharge(Battery hp_battery)
 {
-  return base_communicator_->sendData("CMD11" + std::to_string(hpBattery.charge) + "\n");
+  return base_communicator_->sendData("CMD11" + std::to_string(hp_battery.charge) + "\n");
 }
 
-int Main::sendHpVoltage1(Battery hpBattery1)
+int Main::sendHpVoltage1(Battery hp_battery1)
 {
   // Convert voltage reading units from mV to V
-  return base_communicator_->sendData("CMD12" + std::to_string(hpBattery1.voltage / 1000.0) + "\n");
+  return base_communicator_->sendData("CMD12" + std::to_string(hp_battery1.voltage / 1000.0)
+                                      + "\n");
 }
 
-int Main::sendHpTemperature1(Battery hpBattery1)
+int Main::sendHpTemperature1(Battery hp_battery1)
 {
-  return base_communicator_->sendData("CMD13" + std::to_string(hpBattery1.temperature) + "\n");
+  return base_communicator_->sendData("CMD13" + std::to_string(hp_battery1.temperature) + "\n");
 }
 
-int Main::sendHpCharge1(Battery hpBattery1)
+int Main::sendHpCharge1(Battery hp_battery1)
 {
-  return base_communicator_->sendData("CMD14" + std::to_string(hpBattery1.charge) + "\n");
+  return base_communicator_->sendData("CMD14" + std::to_string(hp_battery1.charge) + "\n");
 }
 
-int Main::sendLpCharge(Battery lpBattery)
+int Main::sendLpCharge(Battery lp_battery)
 {
-  return base_communicator_->sendData("CMD15" + std::to_string(lpBattery.charge) + "\n");
+  return base_communicator_->sendData("CMD15" + std::to_string(lp_battery.charge) + "\n");
 }
 
-int Main::sendLpCharge1(Battery lpBattery1)
+int Main::sendLpCharge1(Battery lp_battery1)
 {
-  return base_communicator_->sendData("CMD16" + std::to_string(lpBattery1.charge) + "\n");
+  return base_communicator_->sendData("CMD16" + std::to_string(lp_battery1.charge) + "\n");
 }
 
 int Main::sendImu(bool op, bool op1, bool op2, bool op3)
@@ -182,14 +183,14 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
-int Main::sendEmBrakes(bool leftbrakes, bool rightbrakes)
+int Main::sendEmBrakes(bool left_brakes, bool right_brakes)
 {
   std::string brake, brake1;
-  brake = leftbrakes ? "1" : "2";
-  brake1 = rightbrakes ? "1" : "2";
+  brake = left_brakes ? "1" : "2";
+  brake1 = right_brakes ? "1" : "2";
+
   return base_communicator_->sendData("CMD20" + brake + brake1 + "\n");
 }
-
 
 void Main::run()
 {
@@ -243,7 +244,7 @@ void Main::run()
                   sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
                   sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
-    sendEmBrakes(emb_.leftbrakes, emb_.rightbrakes);
+    sendEmBrakes(emb_.left_brakes, emb_.right_brakes);
     sleep(200);
   }
 }
