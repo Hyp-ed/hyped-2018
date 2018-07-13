@@ -60,7 +60,9 @@ void Main::run()
     if (sm_data_.current_state == data::kIdle) {
       checkInit();
     }
+    if (sm_data_.current_state != data::kEmergencyBraking && sm_data_.current_state != data::kFailureStopped) {
     checkFailure();
+    }
     checkReady();
     if (sm_data_.current_state != data::kIdle) {
       checkNavigation();
