@@ -43,15 +43,20 @@ class Differentiator {
 
  private:
   DataPoint<T> prev_point_;
+  bool initialised_;
 };
 
 template <typename T>
-Differentiator<T>::Differentiator() : prev_point_(0, T(0))
+Differentiator<T>::Differentiator() : prev_point_(0, T(0)), initialised_(false)
 {}
 
 template <typename T>
 DataPoint<T> Differentiator<T>::update(DataPoint<T> point)
 {
+  if (!initialised_) {
+    previous_point_ = point;
+    initialised_ = true;
+  }
   // Assume timestamp in microseconds and convert to seconds
   T gradient = (point.value - prev_point_.value) / ((point.timestamp - prev_point_.timestamp)/1e6);
 
