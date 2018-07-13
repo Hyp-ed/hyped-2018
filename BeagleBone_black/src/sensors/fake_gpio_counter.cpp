@@ -129,7 +129,7 @@ StripeCounter FakeGpioCounter::getStripeCounter()
     stripes.count.timestamp = utils::Timer::getTimeMicros();
     stripes.operational = true;
   }
-  log_.INFO("Fake-Gpio", "stripe count: %d", stripes.count.value);
+  // log_.INFO("Fake-Gpio", "stripe count: %d", stripes.count.value);
   return stripes;
 }
 
