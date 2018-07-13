@@ -123,7 +123,7 @@ struct Sensors : public Module {
 struct SensorCalibration {
   array<float, Sensors::kNumProximities> proxi_front_variance;
   array<float, Sensors::kNumProximities> proxi_back_variance;
-  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;
+  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;  // x[i][0]=acc, x[i][1]=gyr
 };
 
 struct Battery {

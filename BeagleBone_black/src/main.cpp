@@ -90,9 +90,15 @@ int main(int argc, char* argv[])
     }
 
     navs = data.getNavigationData();
-    log_system.INFO("TEST", "Distance, Velocity (%f, %f)\n"
-      , navs.distance
-      , navs.velocity);
+    log_system.INFO("TEST", "Module statuses: nav=%d, sns=%d, bat=%d, mot=%d, cmn=%d",
+        navs.module_status,
+        sens.module_status,
+        data.getBatteriesData().module_status,
+        data.getMotorData().module_status,
+        data.getCommunicationsData().module_status);
+    log_system.INFO("TEST", "Distance, Velocity (%f, %f)\n",
+        navs.distance,
+        navs.velocity);
     Thread::sleep(500);
   }
   state_machine->join();
