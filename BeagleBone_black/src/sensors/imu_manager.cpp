@@ -80,11 +80,11 @@ void ImuManager::run()
   while (1) {
     data::State state_ = data_.getStateMachineData().current_state;
     // If the state changes to accelerating use different data
-    if (is_fake_ == true && state_ == data::State::kAccelerating) { //NOLINT
+    if (is_fake_ && state_ == data::State::kAccelerating) { //NOLINT
       for (int i = 0; i < data::Sensors::kNumImus; i++) {
         imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
       }
-    } else if (is_fake_ == true && (state_ == data::State::kDecelerating || state_ == data::State::kEmergencyBraking)) { //NOLINT
+    } else if (is_fake_ && (state_ == data::State::kDecelerating || state_ == data::State::kEmergencyBraking)) { //NOLINT
       for (int i = 0; i < data::Sensors::kNumImus; i++) {
         imu_decelerating_[i]->getData(&(sensors_imu_->value[i]));
       }
