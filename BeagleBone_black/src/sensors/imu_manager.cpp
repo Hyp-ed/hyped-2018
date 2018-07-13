@@ -42,6 +42,7 @@ ImuManager::ImuManager(Logger& log,
       data_(Data::getInstance()),
       chip_select_ {31, 50, 48, 51}
 {
+  old_timestamp_ = utils::Timer::getTimeMicros();
   if (sys_.fake_imu || sys_.fake_sensors) is_fake_ = true;
   if (!is_fake_) {
     // create IMUs
