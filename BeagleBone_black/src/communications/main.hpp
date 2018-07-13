@@ -71,7 +71,6 @@ class Main : public Thread {
  private:
   int stateCode_;
   Communications* baseCommunicator_;
-  data::Data& data_;
   data::StateMachine stm_;
   data::Motors mtr_;
   data::Sensors sen_;
@@ -80,6 +79,7 @@ class Main : public Thread {
   data::Communications cmn_data_;
   data::EmergencyBrakes emb_;
   Logger& log_;
+  data::Data& data_;
 };
 
 }}  //  namespace hyped::communications

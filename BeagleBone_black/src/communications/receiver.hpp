@@ -39,9 +39,9 @@ class ReceiverThread : public Thread {
   void run() override;
 
  private:
+  Logger& log_;
   Communications* baseCommunicator_;
   data::Data& data_;
-  Logger& log_;
 };
 
 }}  //   namespace hyped::communications
