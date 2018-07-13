@@ -9,6 +9,7 @@ SRCS := \
   motor_control/main.cpp \
   motor_control/communicator.cpp \
   motor_control/controller.cpp \
+  motor_control/fake_controller.cpp \
   navigation/main.cpp \
   navigation/navigation.cpp \
   sensors/main.cpp \
@@ -20,7 +21,8 @@ SRCS := \
   sensors/proxi_manager.cpp \
   sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
-  sensors/keyence.cpp \
+  sensors/gpio_counter.cpp \
+  sensors/fake_proxi.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
@@ -54,3 +56,5 @@ MAINS := \
   demo_can \
   demo_mpu9250 \
   demo_fake_imu \
+  demo_fake_proxi \
+  demo_optical_encoder \

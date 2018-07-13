@@ -24,6 +24,7 @@
 #include <cstdint>
 #include "utils/io/can.hpp"
 #include "data/data.hpp"
+#include "motor_control/controller_interface.hpp"
 
 namespace hyped {
 // Forward declarations
@@ -38,18 +39,7 @@ using utils::Logger;
 using utils::io::Can;
 using utils::io::CanProccesor;
 
-enum ControllerState {
-  kNotReadyToSwitchOn,
-  kSwitchOnDisabled,
-  kReadyToSwitchOn,
-  kSwitchedOn,
-  kOperationEnabled,
-  kQuickStopActive,
-  kFaultReactionActive,
-  kFault,
-};
-
-class Controller : public CanProccesor {
+class Controller : public CanProccesor, public ControllerInterface {
   friend Can;
 
  public:
@@ -63,29 +53,29 @@ class Controller : public CanProccesor {
   /**
     *  @brief  { Register controller to receive and transmit messages on CAN bus }
     */
-  void registerController();
+  void registerController() override;
   /**
     *   @brief  { Applies configuration settings }
     */
-  void configure();
+  void configure() override;
   /**
     *   @brief  { Checks for any warnings or errors, and enters operational state }
     */
-  void enterOperational();
+  void enterOperational() override;
   /**
     *   @brief  { Enter preop state }
     */
-  void enterPreOperational();
+  void enterPreOperational() override;
   /**
     *   @brief  { Checks controller statusword for state }
     */
-  void checkState();
+  void checkState() override;
   /**
     *  @brief  { Set target velocity in controller object dictionary }
     *
     *  @param[in] { Target velocity calculated in Main }
     */
-  void sendTargetVelocity(int32_t target_velocity);
+  void sendTargetVelocity(int32_t target_velocity) override;
   /**
     *  @brief  { Set target torque in controller object dictionary }
     *
@@ -95,7 +85,7 @@ class Controller : public CanProccesor {
   /**
     *  @brief  { Send velocity sensor request to controller }
     */
-  void updateActualVelocity();
+  void updateActualVelocity() override;
   /**
     *  @brief  { Send torque sensor request to controller }
     */
@@ -103,7 +93,7 @@ class Controller : public CanProccesor {
   /**
     *  @return { Actual velocity of motor }
     */
-  int32_t getVelocity();
+  int32_t getVelocity() override;
   /**
     *  @return { Actual torque of motor }
     */
@@ -111,15 +101,15 @@ class Controller : public CanProccesor {
   /**
     *  @brief { Sets controller into quickStop mode. Use in case of critical failure }
     */
-  void quickStop();
+  void quickStop() override;
   /*
    *  @brief { Check error and warning register in controller }
    */
-  void healthCheck();
+  void healthCheck() override;
   /*
    *  @brief { Return failure flag of controller }
    */
-  bool getFailure();
+  bool getFailure() override;
   /*
    *  @brief { Return ID of controller }
    */
@@ -129,7 +119,7 @@ class Controller : public CanProccesor {
    *
    * @return { ControllerState }
    */
-  ControllerState getControllerState();
+  ControllerState getControllerState() override;
   /*
    *  @brief { To be called by CAN receive side. Controller processes received CAN
    *           message and updates its local data }

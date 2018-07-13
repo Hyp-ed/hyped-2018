@@ -34,12 +34,14 @@ sensors/proxi_manager.cpp
 sensors/proxi_manager.hpp
 sensors/fake_imu.hpp
 sensors/fake_imu.cpp
+sensors/fake_proxi.hpp
+sensors/fake_proxi.cpp
 sensors/mpu9250.hpp
 sensors/mpu9250.cpp
 sensors/vl6180.hpp
 sensors/vl6180.cpp
-sensors/keyence.cpp
-sensors/keyence.hpp
+sensors/gpio_counter.cpp
+sensors/gpio_counter.hpp
 communications/main.hpp
 communications/main.cpp
 communications/communications.hpp

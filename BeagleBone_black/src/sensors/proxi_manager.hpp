@@ -27,15 +27,18 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/system.hpp"
+#include "utils/io/i2c.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
+using utils::io::I2C;
 
 namespace sensors {
 
-class ProxiManager: public ManagerInterface {
+class ProxiManager: public ProxiManagerInterface {
   static constexpr uint8_t kMultiplexerAddr = 0x70;
  public:
   ProxiManager(Logger& log,
@@ -44,10 +47,16 @@ class ProxiManager: public ManagerInterface {
   void run() override;
   bool updated() override;
   void resetTimestamp() override;
+  array<float, data::Sensors::kNumProximities> getCalibrationData() override;
 
  private:
+  utils::System& sys_;
   data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
   ProxiInterface* proxi_[data::Sensors::kNumProximities];
+  array<float, data::Sensors::kNumProximities> proxi_calibration_;
+  bool is_fake_;
+  I2C& i2c_;
+  bool is_front_;
 };
 
 }}  // namespace hyped::sensors

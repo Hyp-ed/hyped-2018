@@ -85,16 +85,22 @@ void Data::setSensorsImuData(const DataPoint<array<Imu, Sensors::kNumImus>>& imu
   sensors_.imu = imu;
 }
 
-StripeCounter Data::getStripeCounterData()
+StripeCounter Data::getKeyenceStripeCounterData()
 {
   ScopedLock L(&lock_sensors_);
-  return sensors_.stripe_counter;
+  return sensors_.keyence_stripe_counter;
 }
 
-void Data::setStripeCounterData(const StripeCounter& stripe_counter)
+void Data::setCalibrationData(const SensorCalibration sensor_calibration_data)
 {
-  ScopedLock L(&lock_sensors_);
-  sensors_.stripe_counter = stripe_counter;
+  ScopedLock L(&lock_calibration_data_);
+  calibration_data_ = sensor_calibration_data;
+}
+
+SensorCalibration Data::getCalibrationData()
+{
+  ScopedLock L(&lock_calibration_data_);
+  return calibration_data_;
 }
 
 Batteries Data::getBatteriesData()
@@ -107,6 +113,18 @@ void Data::setBatteryData(const Batteries& batteries_data)
 {
   ScopedLock L(&lock_batteries_);
   batteries_ = batteries_data;
+}
+
+EmergencyBrakes Data::getEmergencyBrakesData()
+{
+  ScopedLock L(&lock_emergency_brakes_);
+  return emergency_brakes_;
+}
+
+void Data::setEmergencyBrakesData(const EmergencyBrakes& emergency_brakes_data)
+{
+  ScopedLock L(&lock_emergency_brakes_);
+  emergency_brakes_ = emergency_brakes_data;
 }
 
 Motors Data::getMotorData()

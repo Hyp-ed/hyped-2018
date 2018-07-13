@@ -60,6 +60,10 @@ class System {
   int8_t debug_cmn;
 
   bool fake_imu;
+  bool fake_proxi;
+  bool fake_sensors;
+  bool fake_motors;
+  bool fake_embrakes;
 
   // barriers
   /**

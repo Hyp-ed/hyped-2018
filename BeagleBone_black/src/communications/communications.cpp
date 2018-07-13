@@ -18,7 +18,6 @@
  *    limitations under the License.
  */
 
-
 #include "communications.hpp"
 
 #include <string>
@@ -28,7 +27,9 @@ namespace hyped {
 namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int portNo)
-    : log_(log)
+    : log_(log),
+      connected_(false),
+      data_(data::Data::getInstance())
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
@@ -51,18 +52,16 @@ Communications::Communications(Logger& log, const char* ip, int portNo)
   serv_addr.sin_port = htons(portNo);
 
   if (inet_pton(AF_INET, ip, &serv_addr.sin_addr) <= 0) {
-    log_.ERR("COMN", "Invalid address.\n");
+    log_.ERR("COMN", "INVALID ADDRESS.\n");
   }
 
   if (connect(sockfd_, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
+    // if connect does not complete successfully it returns -1
     log_.ERR("COMN", "CANNOT ESTABLISH CONNECTION TO BASE-STATION.");
+  } else {
+    log_.INFO("COMN", "TCP/IP connection established.");
+    connected_ = true;
   }
-
-  log_.INFO("COMN", "TCP/IP connection established.");
-  data::Communications cmn_data;
-  cmn_data = data_.getCommunicationsData();
-  cmn_data.module_status = data::ModuleStatus::kInit;
-  data_.setCommunicationsData(cmn_data);
 }
 
 Communications::~Communications()
@@ -92,7 +91,7 @@ int Communications::receiveRunLength()
 
   if (n < 0) {
       log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    }
+  }
 
   return run_length;
 }
@@ -108,33 +107,11 @@ int Communications::receiveMessage()
 
   int command = buffer_[0]-'0';
 
-  switch (command) {
-    case 0:
-      log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
-      break;
-    case 1:
-      log_.INFO("COMN", "Received 1 (STOP)");  // STOP
-      break;
-    case 2:
-      log_.INFO("COMN", "Received 2 (LAUNCH)");  // LAUNCH
-      break;
-    case 3:
-      log_.INFO("COMN", "Received 3 (RESET)");  // RESET
-      break;
-    case 4:
-      log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
-      break;
-    case 5:
-      log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO
-      break;
-    case 6:
-      log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
-      break;
-    default:
-      log_.ERR("COMN", "Received %d (Should not reach here)", command);
-      break;
-  }
-
   return command;
+}
+
+bool Communications::isConnected()
+{
+  return connected_;
 }
 }}  // namespace hyped::communcations

@@ -38,6 +38,7 @@ using data::DataPoint;
 using data::Imu;
 using data::Proximity;
 using data::Sensors;
+using data::SensorCalibration;
 using data::StripeCounter;
 using data::ModuleStatus;
 using data::NavigationType;
@@ -144,6 +145,13 @@ class Navigation {
    * @return false Transition is not possible at the moment
    */
   bool finishCalibration();
+  /**
+   * @brief Initializes filters and transitions nav from kStart to kInit
+   *
+   * @param sc        Sensor variance data
+   * @param readings  Latest sensor readings
+   */
+  void init(SensorCalibration sc, Sensors readings);
 
  private:
   /**
@@ -234,7 +242,7 @@ class Navigation {
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;          // One for each IMU
-  std::array<Kalman<uint8_t>, 2*Sensors::kNumProximities> proximity_filter_;
+  std::array<Kalman<float>, 2*Sensors::kNumProximities> proximity_filter_;
 
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement

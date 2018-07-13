@@ -116,7 +116,14 @@ struct Sensors : public Module {
   DataPoint<array<Imu, kNumImus>> imu;
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
-  StripeCounter stripe_counter;
+  StripeCounter keyence_stripe_counter;
+  float optical_enc_distance;
+};
+
+struct SensorCalibration {
+  array<float, Sensors::kNumProximities> proxi_front_variance;
+  array<float, Sensors::kNumProximities> proxi_back_variance;
+  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;  // x[i][0]=acc, x[i][1]=gyr
 };
 
 struct Battery {
@@ -134,6 +141,11 @@ struct Batteries : public Module {
   array<Battery, kNumHPBatteries> high_power_batteries;
 };
 
+struct EmergencyBrakes {
+  bool leftbrakes;        // true if left facing emergency brakes deploy
+  bool rightbrakes;       // true if right facing emergency brakes deploy
+};
+
 // -------------------------------------------------------------------------------------------------
 // Motor data
 // -------------------------------------------------------------------------------------------------
@@ -143,10 +155,6 @@ struct Motors : public Module {
   int32_t velocity_2;
   int32_t velocity_3;
   int32_t velocity_4;
-  int16_t torque_1;
-  int16_t torque_2;
-  int16_t torque_3;
-  int16_t torque_4;
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -210,12 +218,15 @@ class Data {
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
-  StripeCounter getStripeCounterData();
-
+  StripeCounter getKeyenceStripeCounterData();
   /**
-   * @brief       Should be called to update StripeCount part in Sensors data
+   * @brief      Should be called to update sensor calibration data
    */
-  void setStripeCounterData(const StripeCounter& stripe_counter);
+  void setCalibrationData(const SensorCalibration sensor_calibration_data);
+  /**
+   * @brief      Retrieves data from the calibrated sensors
+   */
+  SensorCalibration getCalibrationData();
 
   /**
    * @brief      Retrieves data from the batteries.
@@ -226,6 +237,16 @@ class Data {
    * @brief      Should be called to update battery data
    */
   void setBatteryData(const Batteries& batteries_data);
+
+  /**
+   * @brief      Retrieves data from the emergency brakes.
+   */
+  EmergencyBrakes getEmergencyBrakesData();
+
+  /**
+   * @brief      Should be called to update emergency brakes data
+   */
+  void setEmergencyBrakesData(const EmergencyBrakes& emergency_brakes_data);
 
   /**
    * @brief      Retrieves data produced by each of the four motors.
@@ -254,6 +275,9 @@ class Data {
   Motors motors_;
   Batteries batteries_;
   Communications communications_;
+  SensorCalibration calibration_data_;
+  EmergencyBrakes emergency_brakes_;
+
 
   // locks for data substructures
   Lock lock_state_machine_;
@@ -263,6 +287,8 @@ class Data {
 
   Lock lock_communications_;
   Lock lock_batteries_;
+  Lock lock_emergency_brakes_;
+  Lock lock_calibration_data_;
 };
 
 }}  // namespace data::hyped

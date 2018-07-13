@@ -24,7 +24,10 @@
 #include <cstdint>
 
 #include "motor_control/controller.hpp"
+#include "motor_control/fake_controller.hpp"
 #include "data/data.hpp"
+#include "utils/system.hpp"
+#include "motor_control/controller_interface.hpp"
 
 namespace hyped {
 namespace motor_control {
@@ -37,13 +40,6 @@ struct MotorVelocity {
   int32_t velocity_2;
   int32_t velocity_3;
   int32_t velocity_4;
-};
-
-struct MotorTorque {
-  int16_t torque_1;
-  int16_t torque_2;
-  int16_t torque_3;
-  int16_t torque_4;
 };
 
 class Communicator {
@@ -72,23 +68,11 @@ class Communicator {
     */
   void sendTargetVelocity(int32_t target_velocity);
   /**
-    *  @brief  { Set target torque for each controller }
-    *
-    *  @param[in] { Target torque calculated in Main }
-    */
-  void sendTargetTorque(int16_t target_torque);
-  /**
     *  @brief  { Read actual velocity from each controller }
     *
     *  @return { Motor velocity struct }
     */
   MotorVelocity requestActualVelocity();
-  /**
-    *  @brief  { Read actual torque from each controller }
-    *
-    *  @return { Motor torque struct }
-    */
-  MotorTorque requestActualTorque();
   /*
    *  @brief  { Sets all controllers into quickStop mode. Use in case of critical failure }
    */
@@ -104,15 +88,16 @@ class Communicator {
   bool getFailure();
 
  private:
+  utils::System& sys_;
   data::Data& data_;
   Logger& log_;
-  Controller controller1_;
-  Controller controller2_;
-  Controller controller3_;
-  Controller controller4_;
+  ControllerInterface* controller1_;
+  ControllerInterface* controller2_;
+  ControllerInterface* controller3_;
+  ControllerInterface* controller4_;
   MotorVelocity motor_velocity_;
-  MotorTorque motor_torque_;
   bool critical_failure_;
+  bool is_fake_;
 };
 
 }}  // namespace hyped::motor_control

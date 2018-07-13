@@ -55,27 +55,31 @@ class Main : public Thread {
   int sendHpCharge1(Battery hpBattery1);        // CMD14
   int sendLpCharge(Battery lpBattery);          // CMD15
   int sendLpCharge1(Battery lpBattery1);        // CMD16
-  int sendTorqueFl(float torquefl);             // CMD17
-  int sendTorqueFr(float torquefr);             // CMD18
-  int sendTorqueBl(float torquebl);             // CMD19
-  int sendTorqueBr(float torquebr);             // CMD20
-  int sendImu(bool op, bool op1, bool o2, bool op3,
-  bool op4, bool op5, bool op6, bool op7);      // CMD21
-  int sendProxiFront(bool op, bool op1, bool o2, bool op3,
-  bool op4, bool op5, bool op6, bool op7);      // CMD22
-  int sendProxiRear(bool op, bool op1, bool op2, bool op3,
-  bool op4, bool op5, bool op6, bool op7);      // CMD23
+  int sendImu(bool op, bool op1, bool o2,
+              bool op3);                        // CMD17
+  int sendProxiFront(bool op, bool op1,
+                     bool op2, bool op3,
+                     bool op4, bool op5,
+                     bool op6, bool op7);       // CMD18
+  int sendProxiRear(bool op, bool op1,
+                    bool op2, bool op3,
+                    bool op4, bool op5,
+                    bool op6, bool op7);        // CMD19
+  int sendEmBrakes(bool leftbrakes,
+                   bool rightbrakes);           // CMD20
 
  private:
   int stateCode_;
   Communications* baseCommunicator_;
-  data::Data& data_ = data::Data::getInstance();
-  data::Navigation nav_;
-  data::Motors mtr_;
+  data::Data& data_;
   data::StateMachine stm_;
-  data::Batteries bat_;
-  data::Communications cmn_data_;
+  data::Motors mtr_;
   data::Sensors sen_;
+  data::Batteries bat_;
+  data::Navigation nav_;
+  data::Communications cmn_data_;
+  data::EmergencyBrakes emb_;
+  Logger& log_;
 };
 
 }}  //  namespace hyped::communications

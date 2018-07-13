@@ -65,12 +65,19 @@ class Communications
    * @return int Returns command code (1 = STOP, 2 = KILL POWER, 3 = LAUNCH)
    */
   int receiveMessage();
+  /**
+   * @brief Reads data from server.
+   *
+   * @return bool Returns true if connection is established
+   */
+  bool isConnected();
 
  private:
   int sockfd_;
-  data::Data& data_ = data::Data::getInstance();
+  data::Data& data_;
   char buffer_[256];
   Logger& log_;
+  bool connected_;
 };
 
 }}  //  namespace hyped::communications
