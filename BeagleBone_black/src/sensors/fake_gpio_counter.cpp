@@ -31,7 +31,7 @@
 #include "data/data.hpp"
 
 // TODO(Jack) Find the least between stripes
-constexpr uint8_t kTimeStamp = 50;    // micro s
+constexpr uint8_t kTimeStamp = 50;    // ms
 
 namespace hyped {
 
@@ -43,12 +43,15 @@ FakeGpioCounter::FakeGpioCounter(Logger& log, std::string file_path)
     : GpioInterface(log),
       data_(Data::getInstance()),
       file_path_(file_path),
-      is_started_(false)
-{}
+      is_started_(false),
+      prev_gpio_(0)
+{
+  readDataFromFile(file_path_);
+}
 
 void FakeGpioCounter::run()
 {
-  readDataFromFile(file_path_);
+  Thread::yield();
 }
 
 void FakeGpioCounter::readDataFromFile(std::string file_path)
@@ -84,6 +87,7 @@ void FakeGpioCounter::readDataFromFile(std::string file_path)
 
 void FakeGpioCounter::init()
 {
+  log_.INFO("Fake-Gpio", "TIMER START");
   ref_time_ = utils::Timer::getTimeMicros();
   gpio_count_ = 0;
 }
@@ -91,18 +95,18 @@ void FakeGpioCounter::init()
 bool FakeGpioCounter::checkTime()
 {
   uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = now - ref_time_;
+  uint64_t time_span = (now - ref_time_) / 1000;
 
   if (time_span < kTimeStamp * gpio_count_) {
       return false;
   }
-  gpio_count_ = time_span/kTimeStamp +1;
+  gpio_count_ = time_span/kTimeStamp + 1;
+  // log_.INFO("Fake-Gpio", "Gpio-count: %d", gpio_count_);
   return true;
 }
 
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
-  Thread::yield();
   data::StripeCounter stripes;
   if (data_.getStateMachineData().current_state == data::State::kAccelerating || is_started_) {
     if (!is_started_) {
@@ -110,22 +114,22 @@ StripeCounter FakeGpioCounter::getStripeCounter()
       init();
     }
     if (checkTime()) {
-      gpio_count_ = std::min(gpio_count_/kTimeStamp, (uint64_t) val_read_.size());
+      gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
       if (gpio_count_ == (uint64_t) val_read_.size()) {
           prev_gpio_ = val_read_[gpio_count_-1];
       } else {
           prev_gpio_ = val_read_[gpio_count_];
       }
     }
-
     stripes.count.value = prev_gpio_;
-    stripes.count.timestamp = ref_time_;
+    stripes.count.timestamp = utils::Timer::getTimeMicros();
     stripes.operational = true;
   } else {
-    stripes.count.value = 0;
-    stripes.count.timestamp = 0;
+    stripes.count.value = prev_gpio_;
+    stripes.count.timestamp = utils::Timer::getTimeMicros();
     stripes.operational = true;
   }
+  log_.INFO("Fake-Gpio", "stripe count: %d", stripes.count.value);
   return stripes;
 }
 

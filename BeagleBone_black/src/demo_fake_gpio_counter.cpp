@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   StripeCounter stripe_counter;
   FakeGpioCounter fake_gpio_counter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
 
-  for (int i=0; i<20; i++) {
+  for (int i=0; i<1000; i++) {
     stripe_counter = fake_gpio_counter.getStripeCounter();
     log.INFO("Fake-Gpio-counter", "Stripes seen: %d", stripe_counter.count.value);
     Thread::sleep(50);

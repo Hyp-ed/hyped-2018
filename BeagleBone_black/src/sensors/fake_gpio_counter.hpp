@@ -54,8 +54,8 @@ class FakeGpioCounter:public GpioInterface {
 
   data::StripeCounter stripe_counter_;
   uint64_t ref_time_;
-  uint64_t prev_gpio_;
   bool is_started_;
+  uint64_t prev_gpio_;
 };
 }}    // namespace hyped::sensors
 
