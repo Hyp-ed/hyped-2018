@@ -80,7 +80,6 @@ void Main::run()
   // init loop
   while (!sensor_init_) {
     if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
-      sensors_.module_status = data::ModuleStatus::kInit;
       data_.setSensorsData(sensors_);
 
       // Get calibration data
@@ -98,7 +97,6 @@ void Main::run()
   log_.INFO("SENSORS", "sensors data has been initialised");
   while (!battery_init_) {
     if (battery_manager_->updated()) {
-      batteries_.module_status = data::ModuleStatus::kInit;
       data_.setBatteryData(batteries_);
       battery_init_ = true;
       break;
@@ -107,7 +105,8 @@ void Main::run()
   }
   log_.INFO("SENSORS", "batteries data has been initialised");
 
-  // if (battery_init_ && sensor_init_) sensors_.module_status = data::ModuleStatus::kReady;
+  if (sensor_init_) sensors_.module_status = data::ModuleStatus::kInit;
+  if (battery_init_) batteries_.module_status = data::ModuleStatus::kInit;
 
   // work loop
   while (1) {
