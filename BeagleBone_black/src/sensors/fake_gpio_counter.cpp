@@ -50,9 +50,7 @@ FakeGpioCounter::FakeGpioCounter(Logger& log, std::string file_path)
 }
 
 void FakeGpioCounter::run()
-{
-  Thread::yield();
-}
+{}
 
 void FakeGpioCounter::readDataFromFile(std::string file_path)
 {
