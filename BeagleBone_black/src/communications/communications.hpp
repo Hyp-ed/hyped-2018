@@ -70,11 +70,11 @@ class Communications
    *
    * @return bool Returns true if connection is established
    */
-  bool connectionEstablished();
+  bool isConnected();
 
  private:
   int sockfd_;
-  data::Data& data_ = data::Data::getInstance();
+  data::Data& data_;
   char buffer_[256];
   Logger& log_;
   bool connected_;

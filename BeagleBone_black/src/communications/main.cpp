@@ -32,6 +32,7 @@ namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
+      log_(log),
       data_(data::Data::getInstance())
 {
   const char* ipAddress = "127.0.0.1";
@@ -181,6 +182,15 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
                                      sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
+int Main::sendEmBrakes(bool leftbrakes, bool rightbrakes)
+{
+  std::string brake, brake1;
+  brake = leftbrakes ? "1" : "2";
+  brake1 = rightbrakes ? "1" : "2";
+  return baseCommunicator_->sendData("CMD20" + brake + brake1 + "\n");
+}
+
+
 void Main::run()
 {
   cmn_data_.launchCommand = false;
@@ -188,7 +198,7 @@ void Main::run()
   cmn_data_.servicePropulsionGo = false;
   cmn_data_.run_length = 1250;
 
-  if (baseCommunicator_->connectionEstablished()) {
+  if (baseCommunicator_->isConnected()) {
     cmn_data_.module_status = data::ModuleStatus::kInit;
     data_.setCommunicationsData(cmn_data_);
   } else {
@@ -198,7 +208,7 @@ void Main::run()
     return;  // If connection fail, stops the communication module
   }
 
-  ReceiverThread* receiverThread = new ReceiverThread(baseCommunicator_);
+  ReceiverThread* receiverThread = new ReceiverThread(log_, baseCommunicator_);
   receiverThread->start();
 
   while (1) {
@@ -233,6 +243,7 @@ void Main::run()
                   sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
                   sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
+    sendEmBrakes(emb_.leftbrakes, emb_.rightbrakes);
     sleep(0.2);
   }
 }

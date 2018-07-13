@@ -52,7 +52,8 @@ Differentiator<T>::Differentiator() : prev_point_(0, T(0))
 template <typename T>
 DataPoint<T> Differentiator<T>::update(DataPoint<T> point)
 {
-  T gradient = (point.value - prev_point_.value) / (point.timestamp - prev_point_.timestamp);
+  // Assume timestamp in microseconds and convert to seconds
+  T gradient = (point.value - prev_point_.value) / ((point.timestamp - prev_point_.timestamp)/1e6);
 
   prev_point_ = point;
 

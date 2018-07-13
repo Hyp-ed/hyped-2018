@@ -23,8 +23,9 @@
 namespace hyped {
 namespace communications {
 
-ReceiverThread::ReceiverThread(Communications* baseCommunicator)
+ReceiverThread::ReceiverThread(Logger& log, Communications* baseCommunicator)
     : Thread(),
+      log_(log),
       baseCommunicator_(baseCommunicator),
       data_(data::Data::getInstance())
 { /* Empty */ }
@@ -39,23 +40,30 @@ void ReceiverThread::run()
 
     switch (command) {
       case 0:
+        log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
         break;
       case 1:
+        log_.INFO("COMN", "Received 1 (STOP)");  // STOP
         cmn_data.module_status = data::ModuleStatus::kCriticalFailure;
         break;
       case 2:
+        log_.INFO("COMN", "Received 2 (LAUNCH)");  // LAUNCH
         cmn_data.launchCommand = true;
         break;
       case 3:
+        log_.INFO("COMN", "Received 3 (RESET)");  // RESET
         cmn_data.resetCommand = true;
         break;
       case 4:
+        log_.INFO("COMN", "Received 4 (TRACK LENGTH)");  // TRACK LENGTH
         cmn_data.run_length = static_cast<float>(baseCommunicator_->receiveRunLength())/1000;
         break;
       case 5:
+        log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");  // SERVICE PROPULSION GO
         cmn_data.servicePropulsionGo = true;
         break;
       case 6:
+        log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // SERVICE PROPULSION STOP
         cmn_data.servicePropulsionGo = false;
         break;
       default:

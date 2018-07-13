@@ -53,7 +53,10 @@ Integrator<T>::Integrator() : previous_point_(0, T(0)), previous_output_(0, T(0)
 template <typename T>
 DataPoint<T> Integrator<T>::update(const DataPoint<T>& point)
 {
-  T area = (point.value + previous_point_.value)/2 * (point.timestamp - previous_point_.timestamp);
+  // TODO(Brano,anyone): Change timestamp in DataPoint to use std::chrono::duration
+  // Assume timestamp in microseconds and convert to seconds
+  T area = (point.value + previous_point_.value)/2 *
+           ((point.timestamp - previous_point_.timestamp)/1e6);
 
   previous_output_.value += area;
   previous_output_.timestamp = point.timestamp;

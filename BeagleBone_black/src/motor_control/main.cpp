@@ -19,6 +19,9 @@
 #include "motor_control/main.hpp"
 
 #include <math.h>
+#ifndef M_PI
+#define M_PI           3.14159265358979323846
+#endif
 #include <cstdint>
 #include <fstream>
 #include <string>
@@ -311,10 +314,6 @@ void Main::stopMotors()
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
   // Starting acceleration. TODO(Sean) Check with sims on this value
-  if (std::isnan(velocity)) {
-    log_.ERR("NAV", "Velocity is NAN");
-    updateMotorFailure();
-  }
   if (velocity == 0) {
     prev_velocity_ = velocity;
     timer.start();
@@ -326,18 +325,20 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
   // 0.2 m/s in 50 milliseconds, then it is likely that the slip is too low, so
   // we manually increase the RPM.
   if (timer.getTimeMicros() - time_of_update_ > 50000) {
+    int32_t rpm = 0;
     if (velocity - prev_velocity_ < 0.2) {
-      prev_velocity_ = velocity;
       prev_index_++;
-      time_of_update_ = timer.getTimeMicros();
       if (prev_index_ < (int32_t) acceleration_slip_[1].size()) {
         // Increase the velocity to the next RPM
-        return (int32_t) acceleration_slip_[1][prev_index_];
+        rpm = (int32_t) acceleration_slip_[1][prev_index_];
       } else {
         // Otherwise we are at max velocity, so return max RPM
-        return 6000;
+        rpm = 6000;
       }
     }
+    prev_velocity_ = velocity;
+    time_of_update_ = timer.getTimeMicros();
+    return rpm;
   }
 
   // Otherwise, perform upper bound binary search to find the first element in the vector
@@ -348,7 +349,6 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
 
   // Use index to find corresponding RPM
   int index       = upper_bound - acceleration_slip_[0].begin();
-  prev_velocity_  = velocity;
   prev_index_     = index;
   time_of_update_ = timer.getTimeMicros();
   return (int32_t) acceleration_slip_[1][index];
