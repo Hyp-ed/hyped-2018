@@ -35,7 +35,7 @@ Main::Main(uint8_t id, Logger& log)
       log_(log),
       data_(data::Data::getInstance())
 {
-  const char* ipAddress = "127.0.0.1";
+  const char* ipAddress = "127.0.0.1"; /*SpaceX will give an IP 192.168.0.6-24*/
   int portNo = 5695;
   baseCommunicator_ = new Communications(log, ipAddress, portNo);
 }
@@ -244,7 +244,7 @@ void Main::run()
                   sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
     sendEmBrakes(emb_.leftbrakes, emb_.rightbrakes);
-    sleep(0.2);
+    sleep(200);
   }
 }
 
