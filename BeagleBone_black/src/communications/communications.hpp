@@ -74,10 +74,10 @@ class Communications
 
  private:
   int sockfd_;
-  data::Data& data_;
   char buffer_[256];
   Logger& log_;
   bool connected_;
+  data::Data& data_;
 };
 
 }}  //  namespace hyped::communications
