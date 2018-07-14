@@ -88,7 +88,8 @@ void Main::checkNavigation()
     log_.INFO("STATE", "Critical failure caused by exceeding braking distance.");
   }
 
-  if ((sm_data_.current_state == data::kDecelerating || sm_data_.current_state == data::kEmergencyBraking) && nav_data_.velocity <= 0.01) {
+  if ((sm_data_.current_state == data::kDecelerating
+       || sm_data_.current_state == data::kEmergencyBraking) && nav_data_.velocity <= 0.01) {
     hypedMachine.handleEvent(kVelocityZeroReached);
     log_.INFO("STATE", "Velocity reached zero.");
   }
