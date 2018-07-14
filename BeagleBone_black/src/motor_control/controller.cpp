@@ -418,33 +418,20 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
+  for (int i = 0; i < 3; i++) {
+    can_.send(sdo_message_);
+    Thread::sleep(500);
+    checkState();
+    if (state_ == kReadyToSwitchOn) {
+      break;
+    }
   }
-  checkState();
-  checkStateTransition(kReadyToSwitchOn);
-
-  // Send switch on message to transition from state 2 (Ready to switch on)
-  // to state 3 (Switched on)
-  sdo_message_.data[0]   = kWriteTwoBytes;
-  sdo_message_.data[1]   = 0x40;
-  sdo_message_.data[2]   = 0x60;
-  sdo_message_.data[3]   = 0x00;
-  sdo_message_.data[4]   = 0x07;
-  sdo_message_.data[5]   = 0x00;
-  sdo_message_.data[6]   = 0x00;
-  sdo_message_.data[7]   = 0x00;
-
-  log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
+  if (state_ != kReadyToSwitchOn) {
+    log_.ERR("MOTOR", "Could not transition to ready to switch on");
+    exit(1);
   }
-  checkState();
-  checkStateTransition(kSwitchedOn);
 
-  // Send enter operational message to transition from state 3 (Switched on)
+  // Send enter operational message to transition from state 2 (Ready to switch on)
   // to state 4 (Operation enabled)
   sdo_message_.data[0]   = kWriteTwoBytes;
   sdo_message_.data[1]   = 0x40;
@@ -456,12 +443,18 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
+  for (int i = 0; i < 3; i++) {
+    can_.send(sdo_message_);
+    Thread::sleep(1000);
+    checkState();
+    if (state_ == kOperationEnabled) {
+      break;
+    }
   }
-  checkState();
-  checkStateTransition(kOperationEnabled);
+  if (state_ != kOperationEnabled) {
+    log_.ERR("MOTOR", "Could not transition to operation enabled");
+    exit(1);
+  }
 }
 
 void Controller::enterPreOperational()
