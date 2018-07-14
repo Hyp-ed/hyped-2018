@@ -21,6 +21,9 @@
 #include <algorithm>  // std::min
 #include <cmath>
 
+#include "Eigen/Dense"
+#include "Eigen/SVD"
+
 namespace hyped {
 namespace navigation {
 
@@ -295,15 +298,40 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
   NavigationVector f_r = kRailProxiFR;     f_r[1] += rail.fr;
 
   // Vector EF in the vertical plane of the I beam
-  NavigationVector r = (f_l - f_r)/2 - (e_l + e_r)/2;
+  NavigationVector temp_r = (f_l + f_r)/2 - (e_l + e_r)/2;
+  Eigen::Vector3d r(temp_r[0], temp_r[1], temp_r[2]);
 
   // Calculate the normal n of the ground plane given by a, b, c, and d
+  Eigen::Matrix<double, 3, 4> m;
+  m << a[0], b[0], c[0], d[0],
+       a[1], b[1], c[1], d[1],
+       a[2], b[2], c[2], d[2];
+
+  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeThinU);
+  Eigen::Vector3d n = svd.matrixU().col(svd.matrixU().cols() - 1);
+  if (n(2) < 0.0)
+    n = -n;
 
   // Calculate rejection of r on n and use cross product to complete the basis of tube ref. frame
+  Eigen::Vector3d x = r - r.dot(n)/n.dot(n)*n;
+  x /= x.norm();
+  Eigen::Vector3d y = n.cross(x);
+  y /= y.norm();
+  Eigen::Vector3d z = n/n.norm();
+  Eigen::Matrix3d rot;
+  rot << x, y, z;
 
   // Calculate orientation quaternion
+  Eigen::Quaternion<double> q(rot);
+  Eigen::Quaternion<double> orientation(
+      orientation_[0], orientation_[1], orientation_[2], orientation_[3]);
 
-  // SLERP
+  // SLERP (weighted average of the two orientation estimates)
+  orientation = q.slerp(settings_.prox_orient_w, orientation);
+  orientation_[0] = orientation.w();
+  orientation_[1] = orientation.x();
+  orientation_[2] = orientation.y();
+  orientation_[3] = orientation.z();
 }
 
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
