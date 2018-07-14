@@ -45,7 +45,7 @@ namespace communications {
 class Communications
 {
  public:
-  explicit Communications(Logger& log, const char* ip, int portNo);
+  explicit Communications(Logger& log, const char* ip, int port_no);
   ~Communications();
   /**
    * @brief Sends data to server.
@@ -76,7 +76,7 @@ class Communications
   int sockfd_;
   char buffer_[256];
   Logger& log_;
-  bool connected_;
+  bool is_connected_;
   data::Data& data_;
 };
 
