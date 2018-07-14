@@ -184,6 +184,7 @@ void VL6180::getData(Proximity* proxi)
 {
   proxi->val = continuousRangeDistance();
   proxi->operational = is_online_;
+  writeByte(kSysrangeStart, 0x01);
 }
 
 
@@ -246,12 +247,6 @@ uint8_t VL6180::continuousRangeDistance()
   writeByte(kSystemInterruptClear, 0x01);
   isOnline();
   return data;
-}
-
-// Performs a single-shot ranging measurement
-void VL6180::singleRangeDistance()
-{
-  writeByte(kSysrangeStart, 0x01);
 }
 
 void VL6180::checkStatus()

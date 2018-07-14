@@ -77,19 +77,9 @@ void ProxiManager::run()
 {
   while (1) {
     // update front cluster of proximities
-    if (is_front_) {
-      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-        i2c_.write(kMultiplexerAddr, 0x01 << i);
-        proxi_[i]->singleRangeDistance();
-      }
-      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-        i2c_.write(kMultiplexerAddr, 0x01 << i);
-        proxi_[i]->getData(&(sensors_proxi_->value[i]));
-      }
-    } else {
-      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-        proxi_[i]->getData(&(sensors_proxi_->value[i]));
-      }
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      if (is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
+      proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
     sensors_proxi_->timestamp = utils::Timer::getTimeMicros();
   }
