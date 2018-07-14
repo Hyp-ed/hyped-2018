@@ -204,6 +204,7 @@ class Navigation {
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(StripeCounter sc);  // Point number 7
+  void opticalEncoderUpdate(StripeCounter sc); 
 
   // Admin stuff
   Barrier& post_calibration_barrier_;

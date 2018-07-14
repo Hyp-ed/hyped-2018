@@ -367,4 +367,47 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
       displacement_[0], displacement_[1], displacement_[2]);
 }
 
+void Navigation::opticalEncoderUpdate(StripeCounter sc)
+{
+  log_.DBG2("NAV",
+      "Before stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
+      acceleration_[0], acceleration_[1], acceleration_[2],
+      velocity_[0], velocity_[1], velocity_[2],
+      displacement_[0], displacement_[1], displacement_[2]);
+  // TODO(Brano): Update displacement and velocity
+
+  // TODO(Brano): Change this once 2nd Optical Encoder is added
+  if (!sc.operational) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: optical encoder down");
+    return;
+  }
+  auto dists = getNearestStripeDists();
+  if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
+    // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
+    // definitely gone wrong.
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV",
+        "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
+        stripe_count_, sc.count.value, dists[0], dists[1], dists[2]);
+    return;
+  }
+
+  stripe_count_ = sc.count.value;
+  DataPoint<NavigationType> dp(sc.count.timestamp, kStripeLocations[stripe_count_]);
+
+  // Update x-axis (forwards) displacement
+  displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
+                          settings_.strp_displ_w  * dp.value;
+
+  // Update x-axis velocity
+  velocity_[0] = (1 - settings_.strp_vel_w) * velocity_[0] +
+                      settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
+
+  log_.DBG2("NAV",
+      " After stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
+      acceleration_[0], acceleration_[1], acceleration_[2],
+      velocity_[0], velocity_[1], velocity_[2],
+      displacement_[0], displacement_[1], displacement_[2]);
+}
 }}  // namespace hyped::navigation
