@@ -44,8 +44,8 @@ class BmsManager: public ManagerInterface  {
   void resetTimestamp() override;
 
  private:
-  Batteries *lp_batteries_;
-  Batteries *hp_batteries_;
+  Batteries*      lp_batteries_;
+  Batteries*      hp_batteries_;
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries+data::Batteries::kNumHPBatteries];
 
   uint64_t timestamp;
