@@ -6,6 +6,7 @@ LL:=g++
 TARGET=hyped
 MAIN=main.cpp
 SRCS_DIR:=src
+LIBS_DIR:=lib
 OBJS_DIR:=bin
 
 CFLAGS:=-pthread -std=c++11 -O2 -Wall -Wno-unused-result
@@ -34,7 +35,7 @@ OBJS := $(patsubst %,$(OBJS_DIR)/%,$(OBJS))
 
 DEP_DIR := $(OBJS_DIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
-INC_DIR := -I$(SRCS_DIR)
+INC_DIR := -I$(SRCS_DIR) -I$(LIBS_DIR)/eigen-git-mirror
 
 # run "make VERBOSE=1" to see all commands
 ifndef VERBOSE
