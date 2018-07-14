@@ -67,6 +67,8 @@ class Main : public Thread {
                     bool op6, bool op7);        // CMD19
   int sendEmBrakes(bool leftbrakes,
                    bool rightbrakes);           // CMD20
+  int sendHpCurrent(Batter hpBattery);          // CMD21
+  int sendHpCurrent1(Batter hpBattery1);        // CMD22
 
  private:
   int stateCode_;

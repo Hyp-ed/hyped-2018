@@ -190,6 +190,16 @@ int Main::sendEmBrakes(bool leftbrakes, bool rightbrakes)
   return baseCommunicator_->sendData("CMD20" + brake + brake1 + "\n");
 }
 
+int Main::sendHpCurrent(Battery hpBattery)
+{
+  return baseCommunicator_->sendData("CMD21" + std::to_string(hpBattery.current / 1000.0) + "\n");
+}
+
+int Main::sendHpCurrent1(Battery hpBattery1)
+{
+  return baseCommunicator_->sendData("CMD22" + std::to_string(hpBattery1.current / 1000.0) + "\n");
+}
+
 
 void Main::run()
 {
@@ -244,6 +254,8 @@ void Main::run()
                   sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
                   sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
     sendEmBrakes(emb_.leftbrakes, emb_.rightbrakes);
+    sendHpCurrent(bat_.high_power_batteries.at(0));
+    sendHpCurrent(bat_.high_power_batteries.at(1));
     sleep(200);
   }
 }
