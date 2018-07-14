@@ -40,12 +40,6 @@ class VL6180: public ProxiInterface {
   bool isOnline() override;
   void getData(Proximity* proxi) override;
   /**
-   * @brief Calculates the variance for the data structure
-   *
-   * @return float value of the variance for the sensor
-   */
-  float calcCalibrationData() override;
-  /**
     *  @brief  Sets the the ranging mode to continuous
     */
   void setContinuousRangingMode();

@@ -89,7 +89,7 @@ class FakeController : public ControllerInterface {
    *
    * @return { ControllerState }
    */
-  ControllerState getControllerState();
+  ControllerState getControllerState() override;
 
  private:
 
@@ -102,10 +102,6 @@ class FakeController : public ControllerInterface {
   uint8_t  node_id_;
   bool     critical_failure_;
   int32_t  actual_velocity_;
-  int16_t  actual_torque_;
-  bool     sdo_frame_recieved_;
-  uint8_t  motor_temperature_;
-  uint8_t  controller_temperature_;
   bool     started_;
 };
 

@@ -97,7 +97,6 @@ class Communicator {
   ControllerInterface* controller4_;
   MotorVelocity motor_velocity_;
   bool critical_failure_;
-  bool is_fake_;
 };
 
 }}  // namespace hyped::motor_control

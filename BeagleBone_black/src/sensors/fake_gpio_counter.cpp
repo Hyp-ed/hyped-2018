@@ -63,7 +63,7 @@ void FakeGpioCounter::readDataFromFile(std::string file_path)
     }
 
     uint32_t temp_value;
-    int counter = 0;
+    uint64_t counter = 0;
     uint32_t temp_time;
     std::string line;
 
