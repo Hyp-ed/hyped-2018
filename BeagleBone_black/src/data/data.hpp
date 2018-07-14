@@ -142,8 +142,8 @@ struct Batteries : public Module {
 };
 
 struct EmergencyBrakes {
-  bool leftbrakes;        // true if left facing emergency brakes deploy
-  bool rightbrakes;       // true if right facing emergency brakes deploy
+  bool left_brakes;        // true if left facing emergency brakes deploy
+  bool right_brakes;       // true if right facing emergency brakes deploy
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -162,10 +162,10 @@ struct Motors : public Module {
 // -------------------------------------------------------------------------------------------------
 
 struct Communications : public Module {
-  bool launchCommand;
-  bool resetCommand;
+  bool launch_command;
+  bool reset_command;
   float run_length;
-  bool servicePropulsionGo;
+  bool service_propulsion_go;
 };
 
 // -------------------------------------------------------------------------------------------------
