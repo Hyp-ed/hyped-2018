@@ -1,8 +1,7 @@
 
 
 # define VERBOSE to see executed commands
-CC:=g++
-LL:=g++
+
 TARGET=hyped
 MAIN=main.cpp
 SRCS_DIR:=src
@@ -11,18 +10,33 @@ OBJS_DIR:=bin
 CFLAGS:=-pthread -std=c++11 -O2 -Wall -Wno-unused-result
 LFLAGS:=-lpthread -pthread
 
-UNAME=$(shell uname)
-ifneq ($(UNAME),Linux)
-	# assume Windows
-	UNAME='Windows'
-	CFLAGS:=$(CFLAGS) -DWIN
-endif
-ARCH=$(shell uname -m)
-ifneq (,$(findstring 64,$(ARCH)))
-	CFLAGS:=$(CFLAGS) -DARCH_64
+CROSS=0
+
+ifeq ($(CROSS), 0)
+	CC:=g++
+	UNAME=$(shell uname)
+	ifneq ($(UNAME),Linux)
+		# assume Windows
+		UNAME='Windows'
+		CFLAGS:=$(CFLAGS) -DWIN
+	endif
+	ARCH=$(shell uname -m)
+	ifneq (,$(findstring 64,$(ARCH)))
+		CFLAGS:=$(CFLAGS) -DARCH_64
+	endif
 else
-  CFLAGS:=$(CFLAGS) -DARCH_32
+	CC:=arm-linux-gnueabihf-g++
+	CFLAGS:=$(CFLAGS) -DARCH_32
 endif
+
+# test if compiler is installed
+ifeq ($(shell which $(CC)), )
+$(error compiler $(CC) is not installed)
+else
+$(info cross-compiling)
+endif
+LL:=$(CC)
+
 
 
 include $(SRCS_DIR)/Source.files
