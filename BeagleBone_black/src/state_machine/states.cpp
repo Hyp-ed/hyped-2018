@@ -39,8 +39,8 @@ void Idle::entry()
 {
   state_ = state::kIdle;
   // Set pins high to prevent activation of ermergency brakes
-  GPIO pin_37(37, utils::io::gpio::kOut);
-  GPIO pin_38(38, utils::io::gpio::kOut);
+  GPIO pin_37(78, utils::io::gpio::kOut);
+  GPIO pin_38(79, utils::io::gpio::kOut);
   pin_37.set();
   pin_38.set();
 }
