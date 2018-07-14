@@ -55,16 +55,16 @@ ProxiManager::ProxiManager(Logger& log,
       proxi_[i] = proxi;
     }
   } else if (is_front_) {
-    // create CAN-based proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      CanProxi* proxi = new CanProxi(i, log_);
-      proxi_[i] = proxi;
-    }
-  } else {
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       VL6180* proxi = new VL6180(0x29, log_);
       proxi->setContinuousRangingMode();
+      proxi_[i] = proxi;
+    }
+  } else {
+    // create CAN-based proximities
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      CanProxi* proxi = new CanProxi(i, log_);
       proxi_[i] = proxi;
     }
   }
