@@ -46,6 +46,7 @@ ProxiManager::ProxiManager(Logger& log,
       i2c_(I2C::getInstance()),
       is_front_(is_front)
 {
+  old_timestamp_ = utils::Timer::getTimeMicros();
   if (sys_.fake_proxi || sys_.fake_sensors) is_fake_ = true;
   if (is_fake_) {
     // TODO(anyone) add read to file after
@@ -81,7 +82,7 @@ void ProxiManager::run()
       if (!is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
       proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
-    sensors_proxi_->timestamp = utils::Timer::getTimeMicros();;
+    sensors_proxi_->timestamp = utils::Timer::getTimeMicros();
   }
   sleep(10);
 }

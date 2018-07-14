@@ -79,8 +79,8 @@ class FakeImuAccelerating : public ImuInterface {
 
  private:
   utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 250;
-  const int64_t kGyrTimeInterval = 125;
+  const int64_t kAccTimeInterval = 50;
+  const int64_t kGyrTimeInterval = 50;
   /*
    * @brief     A function that starts internal clock and sensor counts
    */
@@ -156,8 +156,8 @@ class FakeImuStationary : public ImuInterface {
 
  private:
   utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 250;
-  const int64_t kGyrTimeInterval = 125;
+  const int64_t kAccTimeInterval = 50;
+  const int64_t kGyrTimeInterval = 50;
   /*
    * @brief     A function that adds noise to the imu data using normal distribution
    *
