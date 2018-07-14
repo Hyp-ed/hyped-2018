@@ -60,7 +60,10 @@ void Main::run()
     if (sm_data_.current_state == data::kIdle) {
       checkInit();
     }
+    if (sm_data_.current_state != data::kEmergencyBraking
+        && sm_data_.current_state != data::kFailureStopped) {
     checkFailure();
+    }
     checkReady();
     if (sm_data_.current_state != data::kIdle) {
       checkNavigation();
@@ -77,14 +80,17 @@ void Main::checkNavigation()
 
   if ((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length) {
     hypedMachine.handleEvent(kCriticalFailure);
+    log_.INFO("STATE", "Critical failure caused by exceeding emergency braking distance.");
   }
 
   if ((nav_data_.distance + nav_data_.braking_distance) + 20 >= comms_data_.run_length) {
     hypedMachine.handleEvent(kMaxDistanceReached);
+    log_.INFO("STATE", "Critical failure caused by exceeding braking distance.");
   }
 
   if (nav_data_.velocity <= 0.01) {
     hypedMachine.handleEvent(kVelocityZeroReached);
+    log_.INFO("STATE", "Velocity reached zero.");
   }
 }
 
@@ -92,21 +98,36 @@ void Main::checkCommunications()
 {
   if (comms_data_.launchCommand) {
     hypedMachine.handleEvent(kOnStart);
+    log_.INFO("STATE", "State machine received launch command");
   }
 
   if (comms_data_.resetCommand) {
     hypedMachine.reset();
+    log_.INFO("STATE", "State machine received reset command");
   }
 }
 
 void Main::checkFailure()
 {
-  if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure
-      || nav_data_.module_status == data::ModuleStatus::kCriticalFailure
-      || motor_data_.module_status == data::ModuleStatus::kCriticalFailure
-      || sensors_data_.module_status == data::ModuleStatus::kCriticalFailure
-      || batteries_data_.module_status == data::ModuleStatus::kCriticalFailure) {
-    hypedMachine.handleEvent(kCriticalFailure);  //  Transitions to FailureStopped/EmergencyBraking
+  if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
+    hypedMachine.handleEvent(kCriticalFailure);
+    log_.INFO("STATE", "Critical failure caused by communications ");
+  }
+  if (nav_data_.module_status == data::ModuleStatus::kCriticalFailure) {
+    hypedMachine.handleEvent(kCriticalFailure);
+    log_.INFO("STATE", "Critical failure caused by navigation ");
+  }
+  if (motor_data_.module_status == data::ModuleStatus::kCriticalFailure) {
+    hypedMachine.handleEvent(kCriticalFailure);
+    log_.INFO("STATE", "Critical failure caused by motors ");
+  }
+  if (sensors_data_.module_status == data::ModuleStatus::kCriticalFailure) {
+    hypedMachine.handleEvent(kCriticalFailure);
+    log_.INFO("STATE", "Critical failure caused by sensors ");
+  }
+  if (batteries_data_.module_status == data::ModuleStatus::kCriticalFailure) {
+    hypedMachine.handleEvent(kCriticalFailure);
+    log_.INFO("STATE", "Critical failure caused by batteries ");
   }
 }
 
