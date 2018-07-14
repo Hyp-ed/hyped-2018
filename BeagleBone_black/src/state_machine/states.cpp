@@ -39,10 +39,12 @@ void Idle::entry()
 {
   state_ = state::kIdle;
   // Set pins high to prevent activation of ermergency brakes
-  GPIO pin_37(78, utils::io::gpio::kOut);
-  GPIO pin_38(79, utils::io::gpio::kOut);
-  pin_37.set();
-  pin_38.set();
+  if (!sys_.fake_embrakes) {
+    GPIO pin_37(78, utils::io::gpio::kOut);
+    GPIO pin_38(79, utils::io::gpio::kOut);
+    pin_37.set();
+    pin_38.set();
+  }
 }
 
 void Idle::react(HypedMachine &machine, Event event)

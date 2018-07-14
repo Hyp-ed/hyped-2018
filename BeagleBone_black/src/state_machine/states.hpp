@@ -54,6 +54,8 @@ class Idle : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
+ private:
+  utils::System& sys_ = utils::System::getSystem();
 };
 
 class Calibrating : public State {
