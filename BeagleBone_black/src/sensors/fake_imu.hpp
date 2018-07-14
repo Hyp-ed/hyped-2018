@@ -73,8 +73,8 @@ class FakeImu : public ImuInterface {
 
  private:
   utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 50;
-  const int64_t kGyrTimeInterval = 50;
+  const uint64_t kAccTimeInterval = 50;
+  const uint64_t kGyrTimeInterval = 50;
   void startAcc();
   void startDec();
 
