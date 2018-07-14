@@ -61,6 +61,7 @@ FakeProxi::FakeProxi(Logger& log, uint8_t value, float noise)
       log_(log)
 {
   setData();
+  log_.INFO("Fake-Proxi", "Initialised");
 }
 
 void FakeProxi::setData()

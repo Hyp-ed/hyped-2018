@@ -106,7 +106,6 @@ class FakeImu : public ImuInterface {
   bool accCheckTime();
   bool gyrCheckTime();
 
-  bool read_file_;
   NavigationVector acc_val_, gyr_val_;
   NavigationVector acc_noise_, gyr_noise_;
 
@@ -122,7 +121,6 @@ class FakeImu : public ImuInterface {
   std::string acc_file_path_;
   std::string gyr_file_path_;
   std::string dec_file_path_;
-  bool is_started_;
   bool acc_started_;
   bool dec_started_;
   data::Data&  data_;

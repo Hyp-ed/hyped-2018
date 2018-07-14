@@ -48,15 +48,12 @@ FakeImu::FakeImu(utils::Logger& log,
       acc_noise_(1),
       gyr_noise_(1),
       acc_file_path_(acc_file_path),
-      dec_file_path_(dec_file_path),
       gyr_file_path_(gyr_file_path),
-      is_started_(false),
+      dec_file_path_(dec_file_path),
       acc_started_(false),
       dec_started_(false),
       data_(data::Data::getInstance())
-
 {
-  read_file_ = true;
   readDataFromFile(acc_file_path_, dec_file_path_, gyr_file_path_);
   log_.INFO("Fake-IMU-accl", "Fake IMU initialised");
 }
