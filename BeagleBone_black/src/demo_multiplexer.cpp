@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
       i2c.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       log.INFO("Multiplexer", "Opening channel: %d", i);
       VL6180* proxi = new VL6180(0x29, log);
-      proxi->setAddress(0x29 + i);
       proxi_[i] = proxi;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Author: Ragnor Comerford
+ * Author: Ragnor Comerford and Jack Horsburgh
  * Organisation: HYPED
  * Date: 186/18
  * Description: Main interface for IMU class.
@@ -36,7 +36,7 @@ using utils::io::GPIO;
 namespace sensors {
 
 GpioCounter::GpioCounter(Logger& log, int pin)
-    : Thread(log), pin_(pin)
+     : GpioInterface(log), pin_(pin)
 {}
 
 void GpioCounter::run()

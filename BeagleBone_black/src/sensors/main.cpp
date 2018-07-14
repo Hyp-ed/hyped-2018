@@ -1,5 +1,5 @@
 /*
- * Author: Martin Kristien and Jack Horsburgh
+ * Author: Martin Kristien, Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
  * Date: 13/03/18
  * Description:
@@ -28,6 +28,8 @@
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
 #include "sensors/proxi_manager.hpp"
+#include "sensors/fake_gpio_counter.hpp"
+#include "sensors/gpio_counter.hpp"
 
 constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
@@ -37,24 +39,32 @@ using data::Sensors;
 using data::Batteries;
 using data::StripeCounter;
 using data::SensorCalibration;
+using utils::System;
 
 namespace sensors {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       data_(data::Data::getInstance()),
-      keyence_(new GpioCounter(log, 73)),  // Pins for keynece GPIO_73 and GPIO_75
+      sys_(System::getSystem()),
       imu_manager_(new ImuManager(log, &sensors_.imu)),
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
       battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
-      optical_encoder_(new GpioCounter(log, 76)),  // Pins for optical encoder GPIO_76 and GPIO_77
       sensor_init_(false),
       battery_init_(false)
 {
   // @TODO (Ragnor) Add second Keyence?
+  if (sys_.fake_sensors || sys_.fake_keyence) {
+    keyence_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+    optical_encoder_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
+  } else {
+    // Pins for keyence GPIO_73 and GPIO_75
+    keyence_ = new GpioCounter(log, 73);
+    optical_encoder_ = new GpioCounter(log, 76);
+  }
 }
 
 void Main::run()
@@ -70,7 +80,6 @@ void Main::run()
   // init loop
   while (!sensor_init_) {
     if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
-      sensors_.module_status = data::ModuleStatus::kInit;
       data_.setSensorsData(sensors_);
 
       // Get calibration data
@@ -88,7 +97,6 @@ void Main::run()
   log_.INFO("SENSORS", "sensors data has been initialised");
   while (!battery_init_) {
     if (battery_manager_->updated()) {
-      batteries_.module_status = data::ModuleStatus::kInit;
       data_.setBatteryData(batteries_);
       battery_init_ = true;
       break;
@@ -96,6 +104,9 @@ void Main::run()
     yield();
   }
   log_.INFO("SENSORS", "batteries data has been initialised");
+
+  if (sensor_init_) sensors_.module_status = data::ModuleStatus::kInit;
+  if (battery_init_) batteries_.module_status = data::ModuleStatus::kInit;
 
   // work loop
   while (1) {

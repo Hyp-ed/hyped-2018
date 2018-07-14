@@ -72,6 +72,7 @@ void FakeProxi::setData()
 
 void FakeProxi::getData(Proximity* proxi)
 {
+  Thread::sleep(3);
   bool update_time = checkTime();
   if (read_file_ && update_time) {
     reading_counter_ = std::min(reading_counter_, (int64_t) val_read_.size());
