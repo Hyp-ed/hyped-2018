@@ -151,18 +151,5 @@ bool FakeProxi::checkTime()
   return true;
 }
 
-float FakeProxi::calcCalibrationData()
-{
-  Proximity proxi;
-  OnlineStatistics<float> stats = OnlineStatistics<float>();
-  for (int i = 0; i < 100; i++) {
-    getData(&proxi);
-    stats.update(proxi.val);
-    Thread::sleep(10);
-  }
-  log_.INFO("VL6180", "Sensor has calculated the variance");
-  return stats.getVariance();
-}
-
 }}   // namespace hyped::sensors
 

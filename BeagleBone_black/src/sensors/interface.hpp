@@ -51,7 +51,6 @@ class ProxiInterface: public SensorInterface {
    * @param proxi - output pointer to be filled by this sensor
    */
   virtual void getData(Proximity* proxi) = 0;
-  virtual float calcCalibrationData() = 0;
 };
 
 class ImuInterface: public SensorInterface {
