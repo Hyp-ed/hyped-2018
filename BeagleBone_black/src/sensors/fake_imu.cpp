@@ -38,8 +38,9 @@ namespace hyped {
 using utils::math::OnlineStatistics;
 namespace sensors {
 
-FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
+FakeImu::FakeImu(utils::Logger& log,
                                          std::string acc_file_path,
+                                         std::string dec_file_path,
                                          std::string gyr_file_path)
     : log_(log),
       acc_val_(0),
@@ -48,43 +49,87 @@ FakeImuAccelerating::FakeImuAccelerating(utils::Logger& log,
       gyr_noise_(1),
       acc_file_path_(acc_file_path),
       gyr_file_path_(gyr_file_path),
-      is_started_(false)
-
+      dec_file_path_(dec_file_path),
+      acc_started_(false),
+      dec_started_(false),
+      data_(data::Data::getInstance())
 {
-  read_file_ = true;
-  readDataFromFile(acc_file_path_, gyr_file_path_);
+  readDataFromFile(acc_file_path_, dec_file_path_, gyr_file_path_);
   log_.INFO("Fake-IMU-accl", "Fake IMU initialised");
 }
 
-void FakeImuAccelerating::start()
+
+void FakeImu::startAcc()
 {
   imu_ref_time_ = utils::Timer::getTimeMicros();
   acc_count_ = gyr_count_ = 0;
 }
 
-void FakeImuAccelerating::getData(Imu* imu)
+void FakeImu::startDec()
 {
-  if (!is_started_) {
-    is_started_ = true;
-    start();
-  }
-  if (accCheckTime()) {
-    acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
-    // Check so you don't go out of bounds
-    if (acc_count_ == (int64_t) acc_val_read_.size()) {
-      prev_acc_ = acc_val_read_[acc_count_-1];
-    } else {
-      prev_acc_ = acc_val_read_[acc_count_];
-    }
-  }
+  imu_ref_time_ = utils::Timer::getTimeMicros();
+  acc_count_ = gyr_count_ = 0;
+}
 
-  if (gyrCheckTime()) {
-    gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
-    // Check so you don't go out of bounds
-    if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
-      prev_gyr_ = gyr_val_read_[gyr_count_-1];
-    } else {
-      prev_gyr_ = gyr_val_read_[gyr_count_];
+void FakeImu::getData(Imu* imu)
+{
+  data::State state = data_.getStateMachineData().current_state;
+  if (state == data::State::kAccelerating) {
+    // start acc
+    if (!acc_started_) {
+      acc_started_ = true;
+      startAcc();
+    }
+    if (accCheckTime()) {
+      acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
+      // Check so you don't go out of bounds
+      if (acc_count_ == (int64_t) acc_val_read_.size()) {
+        prev_acc_ = acc_val_read_[acc_count_-1];
+      } else {
+        prev_acc_ = acc_val_read_[acc_count_];
+      }
+    }
+
+    if (gyrCheckTime()) {
+      gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
+      // Check so you don't go out of bounds
+      if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
+        prev_gyr_ = gyr_val_read_[gyr_count_-1];
+      } else {
+        prev_gyr_ = gyr_val_read_[gyr_count_];
+      }
+    }
+  } else if (state == data::State::kDecelerating || state == data::State::kEmergencyBraking) {
+    // start acc
+    if (!dec_started_) {
+      dec_started_ = true;
+      startDec();
+    }
+    if (accCheckTime()) {
+      acc_count_ = std::min(acc_count_, (int64_t) dec_val_read_.size());
+      // Check so you don't go out of bounds
+      if (acc_count_ == (int64_t) dec_val_read_.size()) {
+        prev_acc_ = dec_val_read_[acc_count_-1];
+      } else {
+        prev_acc_ = dec_val_read_[acc_count_];
+      }
+    }
+
+    if (gyrCheckTime()) {
+      gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
+      // Check so you don't go out of bounds
+      if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
+        prev_gyr_ = gyr_val_read_[gyr_count_-1];
+      } else {
+        prev_gyr_ = gyr_val_read_[gyr_count_];
+      }
+    }
+  } else {
+    if (accCheckTime()) {
+      prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
+    }
+    if (gyrCheckTime()) {
+      prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
     }
   }
   imu->acc = prev_acc_;
@@ -92,23 +137,7 @@ void FakeImuAccelerating::getData(Imu* imu)
   imu->operational = true;
 }
 
-array<NavigationVector, 2> FakeImuAccelerating::calcCalibrationData()
-{
-  array<NavigationVector, 2> stats;
-  OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
-  OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
-  for (int i = 0; i < 1000; i++) {
-    Imu imu;
-    getData(&imu);
-    stats_acc.update(imu.acc);
-    stats_gyr.update(imu.gyr);
-  }
-  stats[0] = stats_acc.getVariance();
-  stats[1] = stats_gyr.getVariance();
-  return stats;
-}
-
-NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, NavigationVector noise)
+NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
   static std::default_random_engine generator;
@@ -120,9 +149,9 @@ NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, Nav
   return temp;
 }
 
-void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::string gyr_file_path)
+void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_path, std::string gyr_file_path) //NOLINT
 {
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < 3; i++) {
     std::string file_path;
     uint32_t timestamp;
     std::vector<NavigationVector>* val_read;
@@ -131,6 +160,10 @@ void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::strin
       file_path = acc_file_path;
       timestamp = kAccTimeInterval;
       val_read  = &acc_val_read_;
+    } else if (i == 1) {
+      file_path = dec_file_path;
+      timestamp = kAccTimeInterval;
+      val_read  = &dec_val_read_;
     } else {
       file_path = gyr_file_path;
       timestamp = kGyrTimeInterval;
@@ -180,7 +213,7 @@ void FakeImuAccelerating::readDataFromFile(std::string acc_file_path, std::strin
   }
 }
 
-bool FakeImuAccelerating::accCheckTime()
+bool FakeImu::accCheckTime()
 {
   uint64_t now = utils::Timer::getTimeMicros();
   uint64_t time_span = (now - imu_ref_time_) / 1000;
@@ -192,93 +225,10 @@ bool FakeImuAccelerating::accCheckTime()
   return true;
 }
 
-bool FakeImuAccelerating::gyrCheckTime()
+bool FakeImu::gyrCheckTime()
 {
   uint64_t now = utils::Timer::getTimeMicros();
   uint64_t time_span = (now - imu_ref_time_) / 1000;
-
-  if (time_span < kGyrTimeInterval*gyr_count_) {
-    return false;
-  }
-
-  gyr_count_ = time_span/kGyrTimeInterval + 1;
-  return true;
-}
-
-FakeImuStationary::FakeImuStationary(utils::Logger& log,
-                                     NavigationVector acc_val,
-                                     NavigationVector acc_noise,
-                                     NavigationVector gyr_val,
-                                     NavigationVector gyr_noise)
-    : log_(log),
-      acc_val_(acc_val),
-      gyr_val_(gyr_val),
-      acc_noise_(acc_noise),
-      gyr_noise_(gyr_noise)
-{
-  imu_ref_time_ = utils::Timer::getTimeMicros();
-  acc_count_ = gyr_count_ = 0;
-  log_.INFO("Fake-IMU-stationary", "Stationary IMU initialised");
-}
-
-void FakeImuStationary::getData(Imu* imu)
-{
-  Thread::yield();
-  if (accCheckTime()) {
-    prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
-  }
-  if (gyrCheckTime()) {
-    prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
-  }
-  imu->acc = prev_acc_;
-  imu->gyr = prev_gyr_;
-  imu->operational = true;
-}
-
-array<NavigationVector, 2> FakeImuStationary::calcCalibrationData()
-{
-  array<NavigationVector, 2> stats;
-  OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
-  OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
-  for (int i = 0; i < 1000; i++) {
-    Imu imu;
-    getData(&imu);
-    stats_acc.update(imu.acc);
-    stats_gyr.update(imu.gyr);
-  }
-  stats[0] = stats_acc.getVariance();
-  stats[1] = stats_gyr.getVariance();
-  return stats;
-}
-
-NavigationVector FakeImuStationary::addNoiseToData(NavigationVector value, NavigationVector noise)
-{
-  NavigationVector temp;
-  static std::default_random_engine generator;
-
-  for (int i = 0; i < 3; i++) {
-    std::normal_distribution<NavigationType> distribution(value[i], noise[i]);
-    temp[i] = distribution(generator);
-  }
-  return temp;
-}
-
-bool FakeImuStationary::accCheckTime()
-{
-  uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = now - imu_ref_time_;
-
-  if (time_span < kAccTimeInterval*acc_count_) {
-    return false;
-  }
-  acc_count_ = time_span/kAccTimeInterval + 1;
-  return true;
-}
-
-bool FakeImuStationary::gyrCheckTime()
-{
-  uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = now - imu_ref_time_;
 
   if (time_span < kGyrTimeInterval*gyr_count_) {
     return false;

@@ -46,16 +46,16 @@ class FakeGpioCounter:public GpioInterface {
   void readDataFromFile(std::string file_path);
   void init();
   bool checkTime();
-  std::string file_path_;
   Data& data_;
+  std::string file_path_;
+  bool is_started_;
+  uint64_t prev_gpio_;
 
   std::vector<uint64_t> val_read_;
   uint64_t gpio_count_;
 
   data::StripeCounter stripe_counter_;
   uint64_t ref_time_;
-  bool is_started_;
-  uint64_t prev_gpio_;
 };
 }}    // namespace hyped::sensors
 
