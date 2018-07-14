@@ -29,12 +29,14 @@
 #include "sensors/interface.hpp"
 #include "utils/system.hpp"
 #include "utils/io/i2c.hpp"
+#include "utils/math/statistics.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
 using utils::io::I2C;
+using utils::math::OnlineStatistics;
 
 namespace sensors {
 
@@ -57,6 +59,9 @@ class ProxiManager: public ProxiManagerInterface {
   bool is_fake_;
   I2C& i2c_;
   bool is_front_;
+  OnlineStatistics<float> stats_[data::Sensors::kNumProximities];
+  bool is_calib_;
+  uint32_t calib_counter_;
 };
 
 }}  // namespace hyped::sensors

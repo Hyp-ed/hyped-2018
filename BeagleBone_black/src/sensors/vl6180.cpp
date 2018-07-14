@@ -24,7 +24,6 @@
 #include "utils/logger.hpp"
 #include "utils/timer.hpp"
 #include "utils/concurrent/thread.hpp"
-#include "utils/math/statistics.hpp"
 
 
 // Register addresses
@@ -46,7 +45,6 @@ namespace hyped {
 
 using utils::io::I2C;
 using utils::concurrent::Thread;
-using utils::math::OnlineStatistics;
 
 namespace sensors {
 
@@ -154,24 +152,6 @@ void VL6180::turnOn()
     if (timeout_) is_online_ = false;
   } else {
     log_.ERR("VL6180", "Sensor is not operational");
-  }
-}
-
-float VL6180::calcCalibrationData()
-{
-  if (is_online_) {
-    OnlineStatistics<float> stats = OnlineStatistics<float>();
-    Proximity proxi;
-    for (int i = 0; i < 100; i++) {
-      getData(&proxi);
-      if (proxi.operational) stats.update(proxi.val);
-      Thread::sleep(10);
-    }
-    log_.INFO("VL6180", "Sensor has calculated the variance");
-    return stats.getVariance();
-  } else {
-    log_.ERR("VL6180", "Could not calibrate proxi, sensor not operational");
-    return -1.0;
   }
 }
 
