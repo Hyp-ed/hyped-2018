@@ -27,13 +27,12 @@ ifeq ($(CROSS), 0)
 else
 	CC:=arm-linux-gnueabihf-g++
 	CFLAGS:=$(CFLAGS) -DARCH_32
+$(info cross-compiling)
 endif
 
 # test if compiler is installed
 ifeq ($(shell which $(CC)), )
 $(error compiler $(CC) is not installed)
-else
-$(info cross-compiling)
 endif
 LL:=$(CC)
 
