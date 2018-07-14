@@ -64,7 +64,6 @@ ProxiManager::ProxiManager(Logger& log,
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       VL6180* proxi = new VL6180(0x29, log_);
-      proxi->setContinuousRangingMode();
       proxi_[i] = proxi;
     }
   }
@@ -78,9 +77,19 @@ void ProxiManager::run()
 {
   while (1) {
     // update front cluster of proximities
-    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      if (!is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
-      proxi_[i]->getData(&(sensors_proxi_->value[i]));
+    if (is_front_) {
+      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+        i2c_.write(kMultiplexerAddr, 0x01 << i);
+        proxi_[i]->singleRangeDistance();
+      }
+      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+        i2c_.write(kMultiplexerAddr, 0x01 << i);
+        proxi_[i]->getData(&(sensors_proxi_->value[i]));
+      }
+    } else {
+      for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+        proxi_[i]->getData(&(sensors_proxi_->value[i]));
+      }
     }
     sensors_proxi_->timestamp = utils::Timer::getTimeMicros();
   }

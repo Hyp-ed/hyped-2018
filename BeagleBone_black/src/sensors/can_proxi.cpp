@@ -66,6 +66,8 @@ void CanProxi::getData(Proximity* proxi)
   proxi->operational = isOnline();
 }
 
+void CanProxi::singleRangeDistance() {}
+
 float CanProxi::calcCalibrationData()
 {
   if (isOnline()) {

@@ -54,6 +54,8 @@ class FakeProxi : public ProxiInterface {
    */
   bool isOnline() override { return true; }
 
+  void singleRangeDistance() override;
+
   /*
    * @brief    A function to get the proximity data
    */

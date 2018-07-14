@@ -138,6 +138,8 @@ uint8_t FakeProxi::addNoiseToData(uint8_t value, float noise)
   return static_cast<uint8_t>(temp);
 }
 
+void FakeProxi::singleRangeDistance() {}
+
 bool FakeProxi::checkTime()
 {
   high_resolution_clock::time_point now = high_resolution_clock::now();

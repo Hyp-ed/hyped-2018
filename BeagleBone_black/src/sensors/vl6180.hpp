@@ -49,7 +49,7 @@ class VL6180: public ProxiInterface {
     *  @brief  Sets the the ranging mode to continuous
     */
   void setContinuousRangingMode();
-  void singleRangeDistance();
+  void singleRangeDistance() override;
 
  private:
   /**

@@ -52,6 +52,7 @@ class ProxiInterface: public SensorInterface {
    */
   virtual void getData(Proximity* proxi) = 0;
   virtual float calcCalibrationData() = 0;
+  virtual void singleRangeDistance() = 0;
 };
 
 class ImuInterface: public SensorInterface {

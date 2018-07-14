@@ -63,6 +63,7 @@ class CanProxi : public ProxiInterface, public CanProccesor {
   // from CanProcessor
   void processNewData(Frame& message) override;
   bool hasId(uint32_t id, bool extended) override;
+  void singleRangeDistance() override;
 
  private:
   Logger& log_;
