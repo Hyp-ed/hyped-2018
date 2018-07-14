@@ -89,7 +89,7 @@ void ProxiManager::run()
     calib_counter_++;
     if (calib_counter_ >= 100) is_calib_ = true;
   }
-
+  log_.INFO("PROXI-MANAGER", "Calibration complete!");
   while (1) {
     // update front cluster of proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
