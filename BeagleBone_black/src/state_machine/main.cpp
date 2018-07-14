@@ -60,7 +60,8 @@ void Main::run()
     if (sm_data_.current_state == data::kIdle) {
       checkInit();
     }
-    if (sm_data_.current_state != data::kEmergencyBraking && sm_data_.current_state != data::kFailureStopped) {
+    if (sm_data_.current_state != data::kEmergencyBraking
+        && sm_data_.current_state != data::kFailureStopped) {
     checkFailure();
     }
     checkReady();
@@ -107,7 +108,7 @@ void Main::checkCommunications()
 }
 
 void Main::checkFailure()
-{ 
+{
   if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
     hypedMachine.handleEvent(kCriticalFailure);
     log_.INFO("STATE", "Critical failure caused by communications ");
