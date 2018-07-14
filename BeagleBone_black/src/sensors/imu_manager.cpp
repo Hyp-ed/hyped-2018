@@ -42,6 +42,7 @@ ImuManager::ImuManager(Logger& log,
       data_(Data::getInstance()),
       chip_select_ {31, 50, 48, 51}
 {
+  old_timestamp_ = utils::Timer::getTimeMicros();
   if (sys_.fake_imu || sys_.fake_sensors) is_fake_ = true;
   if (!is_fake_) {
     // create IMUs
@@ -53,15 +54,22 @@ ImuManager::ImuManager(Logger& log,
     utils::io::SPI::getInstance().setClock(utils::io::SPI::Clock::k4MHz);
   } else {
     // create fake IMUs
+    NavigationVector acc;
+    acc[0] = 0.0;
+    acc[1] = 0.0;
+    acc[2] = 9.8;
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i] = new FakeImuStationary(log,
-                                      NavigationVector(0),
+                                      acc,
                                       NavigationVector(1),
                                       NavigationVector(0),
                                       NavigationVector(1));
       imu_calibrations_[i] = imu_[i]->calcCalibrationData();
       imu_accelerating_[i] = new FakeImuAccelerating(log,
                                                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",  //NOLINT
+                                                    "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
+      imu_decelerating_[i] = new FakeImuAccelerating(log,
+                                                    "../BeagleBone_black/data/in/fake_imu_input_dec.txt",  //NOLINT
                                                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
       // TODO(anyone) add fake calcCalibrationData()
     }
@@ -72,10 +80,15 @@ ImuManager::ImuManager(Logger& log,
 void ImuManager::run()
 {
   while (1) {
+    data::State state_ = data_.getStateMachineData().current_state;
     // If the state changes to accelerating use different data
-    if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kAccelerating) { //NOLINT
-      for (int i =0; i < data::Sensors::kNumImus; i++) {
+    if (is_fake_ && state_ == data::State::kAccelerating) { //NOLINT
+      for (int i = 0; i < data::Sensors::kNumImus; i++) {
         imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
+      }
+    } else if (is_fake_ && (state_ == data::State::kDecelerating || state_ == data::State::kEmergencyBraking)) { //NOLINT
+      for (int i = 0; i < data::Sensors::kNumImus; i++) {
+        imu_decelerating_[i]->getData(&(sensors_imu_->value[i]));
       }
     } else {
       for (int i = 0; i < data::Sensors::kNumImus; i++) {
