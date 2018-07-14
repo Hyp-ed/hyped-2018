@@ -23,11 +23,14 @@
 #include "state_machine/hyped-machine.hpp"
 #include "state_machine/states.hpp"
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 
 using namespace hyped::state_machine;
+using hyped::utils::System;
 
-int main()
+int main(int argc, char* argv[])
 {
+  System::parseArgs(argc, argv);
   hyped::utils::Logger log(true, 1);
   HypedMachine hypedMachine(log);
   hypedMachine.handleEvent(kInitialised);
