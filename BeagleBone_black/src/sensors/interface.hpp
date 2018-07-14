@@ -60,7 +60,6 @@ class ImuInterface: public SensorInterface {
    * @param imu - output pointer to be filled by this sensor
    */
   virtual void getData(Imu* imu) = 0;
-  virtual array<NavigationVector, 2> calcCalibrationData() = 0;
 };
 
 class BMSInterface: public SensorInterface {

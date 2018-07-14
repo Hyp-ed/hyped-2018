@@ -92,22 +92,6 @@ void FakeImuAccelerating::getData(Imu* imu)
   imu->operational = true;
 }
 
-array<NavigationVector, 2> FakeImuAccelerating::calcCalibrationData()
-{
-  array<NavigationVector, 2> stats;
-  OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
-  OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
-  for (int i = 0; i < 1000; i++) {
-    Imu imu;
-    getData(&imu);
-    stats_acc.update(imu.acc);
-    stats_gyr.update(imu.gyr);
-  }
-  stats[0] = stats_acc.getVariance();
-  stats[1] = stats_gyr.getVariance();
-  return stats;
-}
-
 NavigationVector FakeImuAccelerating::addNoiseToData(NavigationVector value, NavigationVector noise)
 {
   NavigationVector temp;
@@ -233,22 +217,6 @@ void FakeImuStationary::getData(Imu* imu)
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
   imu->operational = true;
-}
-
-array<NavigationVector, 2> FakeImuStationary::calcCalibrationData()
-{
-  array<NavigationVector, 2> stats;
-  OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
-  OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
-  for (int i = 0; i < 1000; i++) {
-    Imu imu;
-    getData(&imu);
-    stats_acc.update(imu.acc);
-    stats_gyr.update(imu.gyr);
-  }
-  stats[0] = stats_acc.getVariance();
-  stats[1] = stats_gyr.getVariance();
-  return stats;
 }
 
 NavigationVector FakeImuStationary::addNoiseToData(NavigationVector value, NavigationVector noise)
