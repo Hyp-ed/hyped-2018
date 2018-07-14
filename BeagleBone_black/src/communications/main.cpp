@@ -145,8 +145,7 @@ int Main::sendImu(bool op, bool op1, bool op2, bool op3)
   sen2 = op2 ? "1" : "2";
   sen3 = op3 ? "1" : "2";
 
-  return base_communicator_->sendData("CMD17" + sen + sen1 + sen2 +
-                                     sen3 + "\n");
+  return base_communicator_->sendData("CMD17" + sen + sen1 + sen2 + sen3 + "\n");
 }
 
 int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
@@ -162,8 +161,8 @@ int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
 
-  return base_communicator_->sendData("CMD18" + sen + sen1 + sen2 +
-                                     sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
+  return base_communicator_->sendData("CMD18" + sen + sen1 + sen2 + sen3 +
+                                      sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
 int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
@@ -179,8 +178,8 @@ int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
   sen6 = op6 ? "1" : "2";
   sen7 = op7 ? "1" : "2";
 
-  return base_communicator_->sendData("CMD19" + sen + sen1 + sen2 +
-                                     sen3 + sen4 + sen5 + sen6 + sen7 + "\n");
+  return base_communicator_->sendData("CMD19" + sen + sen1 + sen2 + sen3 +
+                                      sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
 int Main::sendEmBrakes(bool left_brakes, bool right_brakes)
@@ -206,7 +205,7 @@ void Main::run()
     cmn_.module_status = data::ModuleStatus::kCriticalFailure;
     data_.setCommunicationsData(cmn_);
 
-    return;  // If connection fail, stops the communication module
+    return;  // If connection fails, stops the communication module
   }
 
   ReceiverThread* receiverThread = new ReceiverThread(log_, base_communicator_);
@@ -248,5 +247,4 @@ void Main::run()
     sleep(200);
   }
 }
-
 }}
