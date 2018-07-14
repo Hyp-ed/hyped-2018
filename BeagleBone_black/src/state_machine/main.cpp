@@ -88,7 +88,8 @@ void Main::checkNavigation()
     log_.INFO("STATE", "Critical failure caused by exceeding braking distance.");
   }
 
-  if (nav_data_.velocity <= 0.01) {
+  if ((sm_data_.current_state == data::kDecelerating
+       || sm_data_.current_state == data::kEmergencyBraking) && nav_data_.velocity <= 0.01) {
     hypedMachine.handleEvent(kVelocityZeroReached);
     log_.INFO("STATE", "Velocity reached zero.");
   }
@@ -96,7 +97,7 @@ void Main::checkNavigation()
 
 void Main::checkCommunications()
 {
-  if (comms_data_.launch_command) {
+  if (sm_data_.current_state == data::kReady && comms_data_.launch_command) {
     hypedMachine.handleEvent(kOnStart);
     log_.INFO("STATE", "State machine received launch command");
   }
@@ -104,6 +105,8 @@ void Main::checkCommunications()
   if (comms_data_.reset_command) {
     hypedMachine.reset();
     log_.INFO("STATE", "State machine received reset command");
+    comms_data_.reset_command = false;
+    data_.setCommunicationsData(comms_data_);
   }
 }
 
