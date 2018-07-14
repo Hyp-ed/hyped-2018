@@ -96,12 +96,12 @@ void Main::checkNavigation()
 
 void Main::checkCommunications()
 {
-  if (comms_data_.launchCommand) {
+  if (comms_data_.launch_command) {
     hypedMachine.handleEvent(kOnStart);
     log_.INFO("STATE", "State machine received launch command");
   }
 
-  if (comms_data_.resetCommand) {
+  if (comms_data_.reset_command) {
     hypedMachine.reset();
     log_.INFO("STATE", "State machine received reset command");
   }
