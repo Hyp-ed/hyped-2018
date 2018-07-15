@@ -33,7 +33,7 @@ using hyped::utils::io::I2C;
 using hyped::sensors::ProxiInterface;
 using hyped::utils::math::RollingStatistics;
 
- constexpr uint8_t kNumOfProxis = 1;
+ constexpr uint8_t kNumOfProxis = 8;
 
 int main(int argc, char* argv[])
 {
@@ -55,14 +55,16 @@ int main(int argc, char* argv[])
     // update front cluster of proximities
     for (int j = 0; j < kNumOfProxis; j++) {
       i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
+      proxi_[j]->singleRangeDistance();
+    }
+    for (int j = 0; j < kNumOfProxis; j++) {
+      i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
       log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
       log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
-      Thread::sleep(10);
     }
+    Thread::sleep(10);
   }
-  log.INFO("CALIBRATION", "variance: %f", proxi_[0]->calcCalibrationData());
-
  	return 0;
 }

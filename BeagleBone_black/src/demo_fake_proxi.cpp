@@ -49,10 +49,6 @@ int main()
     log.INFO("Fake-Proxi", "From generator: %d", reading.val);
     Thread::sleep(10);
   }
-  log.INFO("Fake-Proxi", "From generator calibration data: %f", generator.calcCalibrationData());
-  
-
-  
 
 }
 

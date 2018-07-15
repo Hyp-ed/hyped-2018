@@ -55,12 +55,6 @@ class MPU9250 : public ImuInterface {
    *  @brief Get the IMU data and update the pointer
    */
   void getData(Imu* imu) override;
-  /**
-   * @brief Calculates the variance for the data structure
-   *
-   * @return float value of the variance for the sensor
-   */
-  array<NavigationVector, 2> calcCalibrationData() override;
 
  private:
   /*

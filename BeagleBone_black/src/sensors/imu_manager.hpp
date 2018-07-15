@@ -28,12 +28,14 @@
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
 #include "utils/system.hpp"
+#include "utils/math/statistics.hpp"
 
 namespace hyped {
 
 using utils::concurrent::Thread;
 using utils::Logger;
 using data::NavigationVector;
+using utils::math::OnlineStatistics;
 
 namespace sensors {
 
@@ -52,10 +54,11 @@ class ImuManager: public ImuManagerInterface {
 
   uint8_t         chip_select_[data::Sensors::kNumImus];
   ImuInterface*   imu_[data::Sensors::kNumImus];
-  ImuInterface*   imu_accelerating_[data::Sensors::kNumImus];
-  ImuInterface*   imu_decelerating_[data::Sensors::kNumImus];
   array<array<NavigationVector, 2>, data::Sensors::kNumImus> imu_calibrations_;
   bool is_fake_;
+  OnlineStatistics<NavigationVector> stats_[data::Sensors::kNumImus][2];
+  bool is_calib_;
+  uint32_t calib_counter_;
 };
 
 }}  // namespace hyped::sensors

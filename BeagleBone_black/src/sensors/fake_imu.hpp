@@ -42,7 +42,7 @@ namespace sensors {
  *           and calling getData function multiple times at different time periods to produce
  *           reading that will be used by other classes.
  */
-class FakeImuAccelerating : public ImuInterface {
+class FakeImu : public ImuInterface {
  public:
   /*
    * @brief     A constructor for the fake IMU class by reading from file
@@ -60,7 +60,7 @@ class FakeImuAccelerating : public ImuInterface {
    * @param[in] acc_file_path    A string to the file location of the accelerometer data points
    * @param[in] gyr_file_path    A string to the file location of the gyroscope data points
    */
-  FakeImuAccelerating(utils::Logger& log_, std::string acc_file_path, std::string gyr_file_path);
+  FakeImu(utils::Logger& log_, std::string acc_file_path, std::string dec_file_path, std::string gyr_file_path); //NOLINT
 
   bool isOnline() override { return true; }
   /*
@@ -70,21 +70,13 @@ class FakeImuAccelerating : public ImuInterface {
    *            sufficiently long.
    */
   void getData(Imu* imu) override;
-  /**
-   * @brief Calculates the variance for the data structure
-   *
-   * @return float value of the variance for the sensor
-   */
-  array<NavigationVector, 2> calcCalibrationData() override;
 
  private:
   utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 50;
-  const int64_t kGyrTimeInterval = 50;
-  /*
-   * @brief     A function that starts internal clock and sensor counts
-   */
-  void start();
+  const uint64_t kAccTimeInterval = 50;
+  const uint64_t kGyrTimeInterval = 50;
+  void startAcc();
+  void startDec();
 
   /*
    * @brief     A function that reads data from file directory. This function also validates them
@@ -95,7 +87,7 @@ class FakeImuAccelerating : public ImuInterface {
    *
    * @param[in]    The file format is as stated in the constructor comments
    */
-  void readDataFromFile(std::string acc_file_path, std::string gyr_file_path);
+  void readDataFromFile(std::string acc_file_path, std::string dec_file_path, std::string gyr_file_path); //NOLINT
 
   /*
    * @brief     A function that adds noise to the imu data using normal distribution
@@ -114,7 +106,6 @@ class FakeImuAccelerating : public ImuInterface {
   bool accCheckTime();
   bool gyrCheckTime();
 
-  bool read_file_;
   NavigationVector acc_val_, gyr_val_;
   NavigationVector acc_noise_, gyr_noise_;
 
@@ -122,62 +113,17 @@ class FakeImuAccelerating : public ImuInterface {
   NavigationVector prev_gyr_;
 
   std::vector<NavigationVector> acc_val_read_;
+  std::vector<NavigationVector> dec_val_read_;
   std::vector<NavigationVector> gyr_val_read_;
 
   int64_t acc_count_, gyr_count_;
   uint64_t imu_ref_time_;
   std::string acc_file_path_;
   std::string gyr_file_path_;
-  bool is_started_;
-};
-
-class FakeImuStationary : public ImuInterface {
- public:
-   /*
-   * @brief     A constructor for the fake IMU class. This works by generating random numbers
-   *            using a normal distribution with xxx_val as mean and xxx_noise as standard deviation.
-   */
-  FakeImuStationary(utils::Logger& log_, NavigationVector acc_val, NavigationVector acc_noise,
-                   NavigationVector gyr_val, NavigationVector gyr_noise);
-  bool isOnline() override { return true; }
-  /*
-   * @brief     A function that gets the imu data at the time of call. The function will return
-   *            the same data point if the time period since the last update isn't long enough. It
-   *            will also skip a couple of data points if the time since the last call has been
-   *            sufficiently long.
-   */
-  void getData(Imu* imu) override;
-  /**
-   * @brief Calculates the variance for the data structure
-   *
-   * @return float value of the variance for the sensor
-   */
-  array<NavigationVector, 2> calcCalibrationData() override;
-
- private:
-  utils::Logger&       log_;
-  const int64_t kAccTimeInterval = 50;
-  const int64_t kGyrTimeInterval = 50;
-  /*
-   * @brief     A function that adds noise to the imu data using normal distribution
-   *
-   * @param[in] value    This is the mean of the normal distribution
-   * @param[in] noise    This is the standard deviation of the normal distribution
-   *
-   * @return    Returns random data point value
-   */
-  NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
-  /*
-   * @brief     Checks to see if sufficient time has pass for the sensor to be updated and checks if
-   *            some data points need to be skipped
-   */
-  bool accCheckTime();
-  bool gyrCheckTime();
-  NavigationVector acc_val_, gyr_val_;
-  NavigationVector acc_noise_, gyr_noise_;
-  NavigationVector prev_acc_, prev_gyr_;
-  int64_t acc_count_, gyr_count_;
-  uint64_t imu_ref_time_;
+  std::string dec_file_path_;
+  bool acc_started_;
+  bool dec_started_;
+  data::Data&  data_;
 };
 
 }}  // namespace hyped::sensors
