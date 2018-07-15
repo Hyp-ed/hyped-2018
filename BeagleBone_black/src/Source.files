@@ -59,3 +59,4 @@ MAINS := \
   demo_fake_proxi \
   demo_optical_encoder \
   demo_fake_gpio_counter \
+  demo_imus \
