@@ -128,7 +128,7 @@ struct SensorCalibration {
 
 struct Battery {
   uint16_t  voltage;      // in mV
-  uint16_t  current;      // in mA
+  int16_t   current;      // in mA (can be negative)
   uint8_t   charge;       // in % (from 0 to 100)
   int8_t    temperature;  // in C
 };
