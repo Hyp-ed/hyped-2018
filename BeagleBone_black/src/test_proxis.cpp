@@ -60,15 +60,15 @@ int main(int argc, char* argv[])
     }
 
   uint64_t start = hyped::utils::Timer::getTimeMicros();
-  for (int i = 0; i < 100; i++) {
-      myfile << hyped::utils::Timer::getTimeMicros() - start;
+    while (120000000 > (hyped::utils::Timer::getTimeMicros() - start)) {
+    myfile << hyped::utils::Timer::getTimeMicros() - start;
     for (int j = 0; j < kNumOfProxis; j++) {
       i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
       myfile << proxi.val << ",";
-      log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
-      log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
+      // log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
+      // log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
     }
     myfile << "\n";
     Thread::sleep(10);
