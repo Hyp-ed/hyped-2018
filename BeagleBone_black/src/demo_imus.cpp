@@ -51,11 +51,11 @@ int main(int argc, char* argv[])
     for (int j = 0; j < hyped::data::Sensors::kNumImus; j ++) {
         hyped::data::Imu imu;
         imu_[j]->getData(&imu);
-        // log.DBG("TEST-mpu9250", "accelerometer id: %d,  x: %f m/s^2, y: %f m/s^2, z: %f m/s^2",
-        //         j,
-        //         imu.acc[0],
-        //         imu.acc[1],
-        //         imu.acc[2]);
+        log.DBG("TEST-mpu9250", "accelerometer id: %d,  x: %f m/s^2, y: %f m/s^2, z: %f m/s^2",
+                j,
+                imu.acc[0],
+                imu.acc[1],
+                imu.acc[2]);
         log.DBG("TEST-mpu9250", "gyroscope id: %d,  x: %f rad/s, y: %f rad/s, z: %f rad/s",
                 j,
                 imu.gyr[0],

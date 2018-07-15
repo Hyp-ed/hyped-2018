@@ -27,6 +27,7 @@
 #include "utils/math/statistics.hpp"
 #include "utils/timer.hpp"
 
+#include <string>
 #include <iostream>
 #include <fstream>
 
@@ -50,7 +51,9 @@ int main(int argc, char* argv[])
   VL6180* proxi_[kNumOfProxis];
   std::ofstream myfile;
   myfile.open ("proxi_test.csv");
-  myfile << "Timestamp µs, Sensor 1, Sensor 2, Sensor 3, Sensor 4, Sensor 5, Sensor 6, Sensor 7, Sensor 8\n";
+  myfile << "Timestamp µs, Sensor 1, operational, Sensor 2, operational, Sensor 3, " <<
+            "operational, Sensor 4, operational, Sensor 5, operational, Sensor 6, operational, " <<
+            "Sensor 7, operational, Sensor 8, operational\n";
 
   for (int i = 0; i < kNumOfProxis; i++) {
       i2c.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
@@ -60,18 +63,30 @@ int main(int argc, char* argv[])
     }
 
   uint64_t start = hyped::utils::Timer::getTimeMicros();
-    while (120000000 > (hyped::utils::Timer::getTimeMicros() - start)) {
-    myfile << hyped::utils::Timer::getTimeMicros() - start;
+    while (120000 > (hyped::utils::Timer::getTimeMicros() - start)) {
+    myfile << std::to_string(hyped::utils::Timer::getTimeMicros() - start) << ",";
     for (int j = 0; j < kNumOfProxis; j++) {
       i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
-      myfile << proxi.val << ",";
-      // log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
-      // log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
+
+      myfile << std::to_string(proxi.val) << ",";
+      if (j == 7) {
+        if (proxi.operational) {
+          myfile << "true";
+        } else {
+         myfile << "false" ;
+        }
+      } else {
+        if (proxi.operational) {
+          myfile << "true,";
+        } else {
+         myfile << "false," ;
+        }
+      }
+      
     }
     myfile << "\n";
-    Thread::sleep(10);
   }
 
   myfile.close();
