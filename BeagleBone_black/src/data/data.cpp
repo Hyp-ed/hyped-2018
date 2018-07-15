@@ -85,7 +85,7 @@ void Data::setSensorsImuData(const DataPoint<array<Imu, Sensors::kNumImus>>& imu
   sensors_.imu = imu;
 }
 
-StripeCounter Data::getKeyenceStripeCounterData()
+array<StripeCounter, Sensors::kNumKeyence> Data::getKeyenceStripeCounterData()
 {
   ScopedLock L(&lock_sensors_);
   return sensors_.keyence_stripe_counter;

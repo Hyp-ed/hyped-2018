@@ -112,12 +112,14 @@ struct StripeCounter : public Sensor {
 struct Sensors : public Module {
   static constexpr int kNumImus = 4;
   static constexpr int kNumProximities = 8;
+  static constexpr int kNumKeyence = 2;
+  static constexpr int kNumOptEnc = 2;
 
   DataPoint<array<Imu, kNumImus>> imu;
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
-  StripeCounter keyence_stripe_counter;
-  float optical_enc_distance;
+  array<StripeCounter, kNumKeyence>  keyence_stripe_counter;   //  l = 0, r = 1
+  array<float, kNumOptEnc> optical_enc_distance;   // l = 0, r =1
 };
 
 struct SensorCalibration {
@@ -218,7 +220,7 @@ class Data {
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
-  StripeCounter getKeyenceStripeCounterData();
+  array<StripeCounter, Sensors::kNumKeyence> getKeyenceStripeCounterData();
   /**
    * @brief      Should be called to update sensor calibration data
    */
