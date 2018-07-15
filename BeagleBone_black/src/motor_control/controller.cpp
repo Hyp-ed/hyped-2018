@@ -363,13 +363,14 @@ void Controller::configure()
 
 void Controller::enterOperational()
 {
-  // Send NMT Operational message to transition from state 0 (Not ready to switch on)
+// Send NMT Operational message to transition from state 0 (Not ready to switch on)
   // to state 1 (Switch on disabled)
   nmt_message_.data[0]   = kNmtOperational;
   nmt_message_.data[1]   = node_id_;
 
   log_.INFO("MOTOR", "Controller %d: Sending NMT Operational command", node_id_);
   can_.send(nmt_message_);
+  Thread::sleep(100);
 
   // Enable velocity mode
   sdo_message_.data[0]   = kWriteOneByte;
@@ -418,18 +419,12 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
-  for (int i = 0; i < 3; i++) {
-    can_.send(sdo_message_);
-    Thread::sleep(500);
-    checkState();
-    if (state_ == kReadyToSwitchOn) {
-      break;
-    }
+  sendSdoMessage(sdo_message_);
+  if (critical_failure_) {
+    return;
   }
-  if (state_ != kReadyToSwitchOn) {
-    log_.ERR("MOTOR", "Could not transition to ready to switch on");
-    exit(1);
-  }
+  checkState();
+  checkStateTransition(kReadyToSwitchOn);
 
   // Send enter operational message to transition from state 2 (Ready to switch on)
   // to state 4 (Operation enabled)
@@ -443,18 +438,12 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
-  for (int i = 0; i < 3; i++) {
-    can_.send(sdo_message_);
-    Thread::sleep(1000);
-    checkState();
-    if (state_ == kOperationEnabled) {
-      break;
-    }
+  sendSdoMessage(sdo_message_);
+  if (critical_failure_) {
+    return;
   }
-  if (state_ != kOperationEnabled) {
-    log_.ERR("MOTOR", "Could not transition to operation enabled");
-    exit(1);
-  }
+  checkState();
+  checkStateTransition(kOperationEnabled);
 }
 
 void Controller::enterPreOperational()
