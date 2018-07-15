@@ -78,20 +78,27 @@ void Main::checkNavigation()
   *  @TODO Check if margin (20m) is appropriate
   */
 
-  if ((nav_data_.distance + nav_data_.emergency_braking_distance) + 20 >= comms_data_.run_length) {
-    hypedMachine.handleEvent(kCriticalFailure);
+  if ((sm_data_.current_state == data::kDecelerating
+      || sm_data_.current_state == data::kAccelerating)
+      && ((nav_data_.distance + nav_data_.emergency_braking_distance)
+      + 20 >= comms_data_.run_length)) {
     log_.INFO("STATE", "Critical failure caused by exceeding emergency braking distance.");
+    hypedMachine.handleEvent(kCriticalFailure);
   }
 
-  if ((nav_data_.distance + nav_data_.braking_distance) + 20 >= comms_data_.run_length) {
-    hypedMachine.handleEvent(kMaxDistanceReached);
+  if ((sm_data_.current_state == data::kDecelerating
+      || sm_data_.current_state == data::kAccelerating)
+      && ((nav_data_.distance + nav_data_.braking_distance)
+      + 20 >= comms_data_.run_length))
+      {
     log_.INFO("STATE", "Critical failure caused by exceeding braking distance.");
+    hypedMachine.handleEvent(kMaxDistanceReached);
   }
 
   if ((sm_data_.current_state == data::kDecelerating
        || sm_data_.current_state == data::kEmergencyBraking) && nav_data_.velocity <= 0.01) {
-    hypedMachine.handleEvent(kVelocityZeroReached);
     log_.INFO("STATE", "Velocity reached zero.");
+    hypedMachine.handleEvent(kVelocityZeroReached);
   }
 }
 
@@ -113,24 +120,24 @@ void Main::checkCommunications()
 void Main::checkFailure()
 {
   if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
-    hypedMachine.handleEvent(kCriticalFailure);
     log_.INFO("STATE", "Critical failure caused by communications ");
+    hypedMachine.handleEvent(kCriticalFailure);
   }
   if (nav_data_.module_status == data::ModuleStatus::kCriticalFailure) {
-    hypedMachine.handleEvent(kCriticalFailure);
     log_.INFO("STATE", "Critical failure caused by navigation ");
+    hypedMachine.handleEvent(kCriticalFailure);
   }
   if (motor_data_.module_status == data::ModuleStatus::kCriticalFailure) {
-    hypedMachine.handleEvent(kCriticalFailure);
     log_.INFO("STATE", "Critical failure caused by motors ");
+    hypedMachine.handleEvent(kCriticalFailure);
   }
   if (sensors_data_.module_status == data::ModuleStatus::kCriticalFailure) {
-    hypedMachine.handleEvent(kCriticalFailure);
     log_.INFO("STATE", "Critical failure caused by sensors ");
+    hypedMachine.handleEvent(kCriticalFailure);
   }
   if (batteries_data_.module_status == data::ModuleStatus::kCriticalFailure) {
-    hypedMachine.handleEvent(kCriticalFailure);
     log_.INFO("STATE", "Critical failure caused by batteries ");
+    hypedMachine.handleEvent(kCriticalFailure);
   }
 }
 
