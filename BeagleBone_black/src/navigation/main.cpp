@@ -96,6 +96,11 @@ void Main::run()
 
     // Data updates
     *readings = data_.getSensorsData();
+    // check if time goes backwards, ignore such readings
+    if (readings->imu.timestamp < last_readings->imu.timestamp) {
+      log_.ERR("NAV", "new reading has past timestamp %u", readings->imu.timestamp);
+      continue;
+    }
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
     if (!imuChanged(*last_readings, *readings)) {
