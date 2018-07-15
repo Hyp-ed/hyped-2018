@@ -99,6 +99,7 @@ void Main::run()
     // check if time goes backwards, ignore such readings
     if (readings->imu.timestamp < last_readings->imu.timestamp) {
       log_.ERR("NAV", "new reading has past timestamp %u", readings->imu.timestamp);
+      yield();
       continue;
     }
 
