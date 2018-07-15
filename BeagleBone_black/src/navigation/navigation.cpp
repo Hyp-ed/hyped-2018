@@ -323,6 +323,7 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
 
   // Calculate orientation quaternion
   Eigen::Quaternion<double> q(rot);
+  q = q.conjugate();  // We want the opposite rotation
   Eigen::Quaternion<double> orientation(
       orientation_[0], orientation_[1], orientation_[2], orientation_[3]);
 
