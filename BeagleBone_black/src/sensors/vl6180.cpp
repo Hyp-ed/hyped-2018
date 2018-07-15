@@ -63,7 +63,9 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
 VL6180::~VL6180()
 {
   // turn off ranging
-  writeByte(kSysrangeStart, kModeStartStop | kModeContinuous);
+  writeByte(kSysrangeStart, 0x01);
+  Thread::sleep(100);
+  log_.INFO("VL6180", "Stop Ranging command");
 }
 
 void VL6180::turnOn()
@@ -71,6 +73,10 @@ void VL6180::turnOn()
   log_.INFO("VL6180", "Trying to turn sensor on");
 
   waitDeviceBooted();
+
+  writeByte(kSysrangeStart, 0x01);
+  Thread::sleep(100);
+  log_.INFO("VL6180", "Stop ranging command");
 
   // Initialise the sensor / register tuning
   // Taken from ST Microelectronics API
@@ -129,20 +135,19 @@ void VL6180::turnOn()
 
   // Clear interrupt
   writeByte(kSystemInterruptClear, 0x01);
+  log_.INFO("VL6180", "Clear interrupt");
 
-  // writeByte(kSystemFreshOutOfReset, 0x00);
+  setContinuousRangingMode();
+
 
   if (isOnline()) {
     // TODO(Jack) Redo this, there has to be a better way
     log_.INFO("VL6180", "Sensor is online");
     Proximity proxi;
     getData(&proxi);
-    Thread::sleep(100);
     if (timeout_) setContinuousRangingMode();
-    Thread::sleep(100);
     getData(&proxi);
     if (timeout_) setContinuousRangingMode();
-    Thread::sleep(100);
     getData(&proxi);
     if (timeout_) is_online_ = false;
   } else {
@@ -159,6 +164,7 @@ void VL6180::getData(Proximity* proxi)
 {
   proxi->val = continuousRangeDistance();
   proxi->operational = is_online_;
+  writeByte(kSysrangeStart, 0x01);
 }
 
 
@@ -216,10 +222,10 @@ uint8_t VL6180::continuousRangeDistance()
       return 255;
     }
   }
-  isOnline();
   readByte(kResultRangeVal, &data);   // read the sampled data
   log_.DBG3("VL6180", "Sensor continuous range: %f\n", data);
   writeByte(kSystemInterruptClear, 0x01);
+  isOnline();
   return data;
 }
 
