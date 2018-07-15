@@ -135,7 +135,7 @@ void BMS::getData(Battery* battery)
 {
   battery->voltage = 0;
   for (uint16_t v: data_.voltage) battery->voltage += v;
-
+  battery->voltage /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
 }
 
@@ -187,11 +187,7 @@ void BMSHP::processNewData(utils::io::can::Frame& message)
   // [voltageH , volageL  , currentH   , currentL,
   //  charge   , HighTemp , AverageTemp, state   ]
   local_data_.voltage     = (message.data[0] << 8) | message.data[1];
-  local_data_.voltage    *= 100;  // scale to mV
-
   local_data_.current     = (message.data[2] << 8) | message.data[3];
-  local_data_.current    *= 100;  // scale to mA
-
   local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
   local_data_.temperature = message.data[5];
 
