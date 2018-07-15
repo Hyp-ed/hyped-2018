@@ -36,16 +36,17 @@ using utils::Logger;
 namespace sensors {
 
 class BmsManager: public ManagerInterface  {
-  typedef array<Battery, data::Batteries::kNumLPBatteries> Batteries;
+  typedef array<Battery, data::Batteries::kNumLPBatteries> BatteriesLP;
+  typedef array<Battery, data::Batteries::kNumHPBatteries> BatteriesHP;
  public:
-  BmsManager(Logger& log, Batteries *lp_batteries, Batteries* hp_batteries);
+  BmsManager(Logger& log, BatteriesLP *lp_batteries, BatteriesHP* hp_batteries);
   void run() override;
   bool updated() override;
   void resetTimestamp() override;
 
  private:
-  Batteries*      lp_batteries_;
-  Batteries*      hp_batteries_;
+  BatteriesLP*    lp_batteries_;
+  BatteriesHP*    hp_batteries_;
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries+data::Batteries::kNumHPBatteries];
 
   uint64_t timestamp;

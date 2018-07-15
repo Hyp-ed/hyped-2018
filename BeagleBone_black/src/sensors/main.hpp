@@ -55,6 +55,10 @@ class Main: public Thread {
   void run() override;
 
  private:
+  // check if all battery values are in expected range
+  // returns true iff all battery values (LP and HP) are in expected ranges
+  bool batteriesInRange();
+
   data::Data&     data_;
   utils::System& sys_;
 
