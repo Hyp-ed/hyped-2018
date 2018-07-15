@@ -1,5 +1,5 @@
 /*
- * Author: Uday Patel
+ * Author: Uday Patel, Jack Horsburgh and Ragnor Comerford
  * Organisation: HYPED
  * Date: 28/05/18
  * Description: Main interface for IMU class.
@@ -23,6 +23,7 @@
 
 #include <string>
 #include "data/data.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
@@ -30,6 +31,7 @@ using data::Imu;
 using data::Proximity;
 using data::Battery;
 using data::NavigationVector;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
@@ -37,7 +39,7 @@ class SensorInterface {
  public:
   /**
    * @brief Check if sensor is responding, i.e. connected to the system
-   * @return true - iff sensor is online
+   * @return true - if sensor is online
    */
   virtual bool isOnline() = 0;
 };
@@ -49,7 +51,6 @@ class ProxiInterface: public SensorInterface {
    * @param proxi - output pointer to be filled by this sensor
    */
   virtual void getData(Proximity* proxi) = 0;
-  virtual float calcCalibrationData() = 0;
 };
 
 class ImuInterface: public SensorInterface {
@@ -59,7 +60,6 @@ class ImuInterface: public SensorInterface {
    * @param imu - output pointer to be filled by this sensor
    */
   virtual void getData(Imu* imu) = 0;
-  virtual array<NavigationVector, 2> calcCalibrationData() = 0;
 };
 
 class BMSInterface: public SensorInterface {
@@ -69,6 +69,16 @@ class BMSInterface: public SensorInterface {
    * @param battery - output pointer to be filled by this sensor
    */
   virtual void getData(Battery* battery) = 0;
+};
+
+class GpioInterface: public Thread {
+ public:
+  explicit GpioInterface(utils::Logger& log) : Thread(log) {}
+  /**
+   * @brief Get GPIO data
+   * @param
+   */
+  virtual data::StripeCounter getStripeCounter() = 0;
 };
 
 

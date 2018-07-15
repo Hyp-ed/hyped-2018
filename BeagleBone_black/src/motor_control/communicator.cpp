@@ -34,8 +34,7 @@ Communicator::Communicator(Logger& log)
   : sys_(System::getSystem()),
     data_(data::Data::getInstance()),
     log_(log),
-    critical_failure_(false),
-    is_fake_(false)
+    critical_failure_(false)
 {
   if (!sys_.fake_motors) {
     controller1_ = new Controller(log, 1);

@@ -35,13 +35,13 @@ namespace communications {
 
 class ReceiverThread : public Thread {
  public:
-  explicit ReceiverThread(Logger& log, Communications* baseCommunicator);
+  explicit ReceiverThread(Logger& log, Communications* base_communicator);
   void run() override;
 
  private:
-  Communications* baseCommunicator_;
-  data::Data& data_;
   Logger& log_;
+  Communications* base_communicator_;
+  data::Data& data_;
 };
 
 }}  //   namespace hyped::communications

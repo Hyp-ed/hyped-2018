@@ -39,7 +39,6 @@ FakeController::FakeController(Logger& log, uint8_t id)
     node_id_(id),
     critical_failure_(false),
     actual_velocity_(0),
-    actual_torque_(0),
     started_(false)
 {
 }

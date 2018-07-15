@@ -58,12 +58,6 @@ class FakeProxi : public ProxiInterface {
    * @brief    A function to get the proximity data
    */
   void getData(Proximity* proxi) override;
-  /**
-   * @brief Calculates the variance for the data structure
-   *
-   * @return float value of the variance for the sensor
-   */
-  float calcCalibrationData() override;
 
 
  private:

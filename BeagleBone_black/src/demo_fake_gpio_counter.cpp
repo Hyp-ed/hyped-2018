@@ -1,8 +1,8 @@
 /*
- * Author: Uday Patel
+ * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 18/02/2018
- * Description: This is to show the usage of the fake proximity class
+ * Date: 10/07/2018
+ * Description: This is to show the usage of the fake gpio counter class
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -16,39 +16,33 @@
  *    limitations under the License.
  */
 
-#include "sensors/fake_proxi.hpp"
+#include "sensors/fake_gpio_counter.hpp"
 
 #include <cstdio>
 #include <unistd.h>
 
+#include "state_machine/hyped-machine.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "utils/system.hpp"
 #include "utils/logger.hpp"
+#include "data/data.hpp"
 #include "utils/concurrent/thread.hpp"
 
-using hyped::data::Proximity;
-using hyped::sensors::FakeProxi;
 using hyped::utils::Logger;
+using hyped::sensors::FakeGpioCounter;
 using hyped::utils::concurrent::Thread;
+using hyped::data::StripeCounter;
 
-int main()
+int main(int argc, char* argv[])
 {
-  Logger log(1, true);
-  Proximity reading;
-  FakeProxi generator(log, 23, 1);
-  FakeProxi file(log, "../BeagleBone_black/data/in/fake_proxi_input.txt");
+  hyped::utils::System::parseArgs(argc, argv);
+  Logger log(true, 1);
+  StripeCounter stripe_counter;
+  FakeGpioCounter fake_gpio_counter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
 
-  log.INFO("Fake-Proxi", "From file....");
-  for (int i = 0; i < 3; i++) {
-    file.getData(&reading);
-    log.INFO("Fake-Proxi", "From file: %d", reading.val);
-    Thread::sleep(10);
+  for (int i=0; i<1000; i++) {
+    stripe_counter = fake_gpio_counter.getStripeCounter();
+    log.INFO("Fake-Gpio-counter", "Stripes seen: %d", stripe_counter.count.value);
+    Thread::sleep(50);
   }
-
-  log.INFO("Fake-Proxi", "From generator....");
-  for (int i = 0; i < 3; i++) {
-    generator.getData(&reading);
-    log.INFO("Fake-Proxi", "From generator: %d", reading.val);
-    Thread::sleep(10);
-  }
-
 }
-

@@ -21,6 +21,7 @@ SRCS := \
   sensors/proxi_manager.cpp \
   sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
+  sensors/fake_gpio_counter.cpp \
   sensors/gpio_counter.cpp \
   sensors/fake_proxi.cpp \
   communications/main.cpp \
@@ -55,6 +56,6 @@ MAINS := \
   demo_statistics\
   demo_can \
   demo_mpu9250 \
-  demo_fake_imu \
   demo_fake_proxi \
   demo_optical_encoder \
+  demo_fake_gpio_counter \

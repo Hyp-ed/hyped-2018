@@ -61,6 +61,7 @@ FakeProxi::FakeProxi(Logger& log, uint8_t value, float noise)
       log_(log)
 {
   setData();
+  log_.INFO("Fake-Proxi", "Initialised");
 }
 
 void FakeProxi::setData()
@@ -72,6 +73,7 @@ void FakeProxi::setData()
 
 void FakeProxi::getData(Proximity* proxi)
 {
+  Thread::sleep(3);
   bool update_time = checkTime();
   if (read_file_ && update_time) {
     reading_counter_ = std::min(reading_counter_, (int64_t) val_read_.size());
@@ -148,19 +150,6 @@ bool FakeProxi::checkTime()
 
   reading_counter_ = time_span.count()/kProxiTimeInterval + 1;
   return true;
-}
-
-float FakeProxi::calcCalibrationData()
-{
-  Proximity proxi;
-  OnlineStatistics<float> stats = OnlineStatistics<float>();
-  for (int i = 0; i < 100; i++) {
-    getData(&proxi);
-    stats.update(proxi.val);
-    Thread::sleep(10);
-  }
-  log_.INFO("VL6180", "Sensor has calculated the variance");
-  return stats.getVariance();
 }
 
 }}   // namespace hyped::sensors

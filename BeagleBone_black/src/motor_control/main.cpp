@@ -376,7 +376,7 @@ void Main::servicePropulsion()
 {
   data::Communications comms_ = data_.getCommunicationsData();
   // TODO(Anyone) Check that this is a sufficient velocity
-  if (comms_.servicePropulsionGo) {
+  if (comms_.service_propulsion_go) {
     communicator_->sendTargetVelocity(200);
   } else {
     communicator_->sendTargetVelocity(0);

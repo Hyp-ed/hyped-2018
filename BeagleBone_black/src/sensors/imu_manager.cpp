@@ -40,27 +40,26 @@ ImuManager::ImuManager(Logger& log,
     : ImuManagerInterface(log),
       sys_(System::getSystem()),
       data_(Data::getInstance()),
-      chip_select_ {31, 50, 48, 51}
+      chip_select_ {31, 50, 48, 51},
+      is_calib_(false),
+      calib_counter_(0)
 {
+  old_timestamp_ = utils::Timer::getTimeMicros();
   if (sys_.fake_imu || sys_.fake_sensors) is_fake_ = true;
   if (!is_fake_) {
     // create IMUs
+    utils::io::SPI::getInstance().setClock(utils::io::SPI::Clock::k1MHz);
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
-      imu_calibrations_[i] = imu_[i]->calcCalibrationData();
     }
+    utils::io::SPI::getInstance().setClock(utils::io::SPI::Clock::k4MHz);
   } else {
     // create fake IMUs
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imu_[i] = new FakeImuStationary(log,
-                                      NavigationVector(0),
-                                      NavigationVector(1),
-                                      NavigationVector(0),
-                                      NavigationVector(1));
-      imu_calibrations_[i] = imu_[i]->calcCalibrationData();
-      imu_accelerating_[i] = new FakeImuAccelerating(log,
-                                                    "../BeagleBone_black/data/in/fake_imu_input_acc.txt",  //NOLINT
-                                                    "../BeagleBone_black/data/in/fake_imu_input_gyr.txt"); //NOLINT
+      imu_[i] = new FakeImu(log,
+                            "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+                            "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                            "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       // TODO(anyone) add fake calcCalibrationData()
     }
   }
@@ -69,16 +68,24 @@ ImuManager::ImuManager(Logger& log,
 
 void ImuManager::run()
 {
+  while (!is_calib_) {
+    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+      Imu imu;
+      imu_[i]->getData(&imu);
+      if (imu.operational) {
+        stats_[i][0].update(imu.acc);
+        stats_[i][1].update(imu.gyr);
+      }
+    }
+    calib_counter_++;
+    if (calib_counter_ >= 100) is_calib_ = true;
+  }
+
+  log_.INFO("IMU-MANAGER", "Calibration complete!");
+
   while (1) {
-    // If the state changes to accelerating use different data
-    if (is_fake_ == true && data_.getStateMachineData().current_state == data::State::kAccelerating) { //NOLINT
-      for (int i =0; i < data::Sensors::kNumImus; i++) {
-        imu_accelerating_[i]->getData(&(sensors_imu_->value[i]));
-      }
-    } else {
-      for (int i = 0; i < data::Sensors::kNumImus; i++) {
-      imu_[i]->getData(&(sensors_imu_->value[i]));
-      }
+    for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    imu_[i]->getData(&(sensors_imu_->value[i]));
     }
     sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }
@@ -86,6 +93,13 @@ void ImuManager::run()
 
 array<array<NavigationVector, 2>, data::Sensors::kNumImus> ImuManager::getCalibrationData()
 {
+  while (!is_calib_) {
+    Thread::yield();
+  }
+  for (int i = 0; i < data::Sensors::kNumImus; i++) {
+    imu_calibrations_[i][0] = stats_[i][0].getVariance();
+    imu_calibrations_[i][1] = stats_[i][1].getVariance();
+  }
   return imu_calibrations_;
 }
 
