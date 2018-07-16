@@ -309,7 +309,7 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
        a[1], b[1], c[1], d[1],
        a[2], b[2], c[2], d[2];
 
-  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeThinU);
+  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeFullU);
   Eigen::Vector3d n = svd.matrixU().col(svd.matrixU().cols() - 1);
   if (n(2) < 0.0)
     n = -n;
