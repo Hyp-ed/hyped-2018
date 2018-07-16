@@ -110,23 +110,26 @@ bool FakeGpioCounter::checkTime()
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
   data::StripeCounter stripes;
-  bool operational = false;
-  if (data_.getStateMachineData().current_state == data::State::kAccelerating || is_started_) {
+  bool operational = true;
+  if (data_.getStateMachineData().current_state == data::State::kAccelerating ||
+      data_.getStateMachineData().current_state == data::State::kDecelerating ||
+      is_started_) {
     if (!is_started_) {
       is_started_ = true;
       init();
     }
-    gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
+
     if (checkTime()) {
+      gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
       if (gpio_count_ == (uint64_t) val_read_.size()) {
           prev_gpio_ = val_read_[gpio_count_-1];
+          operational = val_operational_[gpio_count_-1];
       } else {
           prev_gpio_ = val_read_[gpio_count_];
+          operational = val_operational_[gpio_count_];
       }
     }
-    if (gpio_count_ == (uint64_t) val_read_.size())
-      operational = val_operational_[gpio_count_-1];
-    operational = val_operational_[gpio_count_];
+
     stripes.count.value = prev_gpio_;
     stripes.count.timestamp = utils::Timer::getTimeMicros();
     stripes.operational = operational;

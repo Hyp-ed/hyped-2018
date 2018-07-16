@@ -39,9 +39,9 @@ using utils::math::OnlineStatistics;
 namespace sensors {
 
 FakeImu::FakeImu(utils::Logger& log,
-                                         std::string acc_file_path,
-                                         std::string dec_file_path,
-                                         std::string gyr_file_path)
+                std::string acc_file_path,
+                std::string dec_file_path,
+                std::string gyr_file_path)
     : log_(log),
       gyr_val_(0),
       acc_noise_(1),
@@ -59,7 +59,7 @@ FakeImu::FakeImu(utils::Logger& log,
   acc[2] = 9.8;
   acc_val_ = acc;
   readDataFromFile(acc_file_path_, dec_file_path_, gyr_file_path_);
-  log_.INFO("Fake-IMU-accl", "Fake IMU initialised");
+  log_.INFO("Fake-IMU", "Fake IMU initialised");
 }
 
 
@@ -78,25 +78,26 @@ void FakeImu::startDec()
 void FakeImu::getData(Imu* imu)
 {
   data::State state = data_.getStateMachineData().current_state;
-  bool operational;
+  bool operational = true;
   if (state == data::State::kAccelerating) {
     // start acc
     if (!acc_started_) {
       acc_started_ = true;
       startAcc();
     }
-    acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
+
     if (accCheckTime()) {
+      acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
       // Check so you don't go out of bounds
       if (acc_count_ == (int64_t) acc_val_read_.size()) {
-        prev_acc_ = acc_val_read_[acc_count_-1];
+        prev_acc_ = acc_val_read_[acc_count_- 1];
+        operational = acc_val_operational_[acc_count_ - 1];
       } else {
         prev_acc_ = acc_val_read_[acc_count_];
+        operational = acc_val_operational_[acc_count_];
       }
     }
-    if (acc_count_ == (int64_t) acc_val_read_.size())
-      operational = acc_val_opertional[acc_count_-1];
-    operational = acc_val_opertional[acc_count_-1];
+
     if (gyrCheckTime()) {
       gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
       // Check so you don't go out of bounds
@@ -107,23 +108,23 @@ void FakeImu::getData(Imu* imu)
       }
     }
   } else if (state == data::State::kDecelerating || state == data::State::kEmergencyBraking) {
-    // start acc
     if (!dec_started_) {
+      log_.INFO("Fake-IMUs", "Start decelerating...");
       dec_started_ = true;
       startDec();
     }
-    acc_count_ = std::min(acc_count_, (int64_t) dec_val_read_.size());
+
     if (accCheckTime()) {
+      acc_count_ = std::min(acc_count_, (int64_t) dec_val_read_.size());
       // Check so you don't go out of bounds
       if (acc_count_ == (int64_t) dec_val_read_.size()) {
         prev_acc_ = dec_val_read_[acc_count_-1];
+        operational = dec_val_operational_[acc_count_-1];
       } else {
         prev_acc_ = dec_val_read_[acc_count_];
+        operational = dec_val_operational_[acc_count_];
       }
     }
-    if (acc_count_ == (int64_t) acc_val_read_.size())
-      operational = dec_val_opertional[acc_count_-1];
-    operational = dec_val_opertional[acc_count_-1];
 
     if (gyrCheckTime()) {
       gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
@@ -137,12 +138,11 @@ void FakeImu::getData(Imu* imu)
   } else {
     if (accCheckTime()) {
       prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
-      operational = true;
     }
     if (gyrCheckTime()) {
       prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
-      operational = true;
     }
+    operational = true;
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
@@ -173,23 +173,24 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
       file_path = acc_file_path;
       timestamp = kAccTimeInterval;
       val_read  = &acc_val_read_;
-      bool_read = &acc_val_opertional;
+      bool_read = &acc_val_operational_;
     } else if (i == 1) {
       file_path = dec_file_path;
       timestamp = kAccTimeInterval;
       val_read  = &dec_val_read_;
-      bool_read = &dec_val_opertional;
+      bool_read = &dec_val_operational_;
     } else {
       file_path = gyr_file_path;
       timestamp = kGyrTimeInterval;
       val_read  = &gyr_val_read_;
-      bool_read = &gyr_val_opertional;
+      bool_read = &gyr_val_operational_;
     }
 
     std::ifstream file;
     file.open(file_path);
+    Thread::sleep(15);
     if (!file.is_open()) {
-      log_.ERR("Fake-IMU-accl", "Wrong file path for argument: %d", i);
+      log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
     }
 
     NavigationVector value, noise;
@@ -203,7 +204,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
       input >> temp_time;
 
       if (temp_time != timestamp*counter) {
-        log_.ERR("Fake-IMU-accl", "Timestamp format invalid %d", temp_time);
+        log_.ERR("Fake-IMU", "Timestamp format invalid %d", temp_time);
       }
 
       int value_counter = 0;
@@ -212,7 +213,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
       }
 
       if (value_counter != 7) {
-        log_.ERR("Fake-IMU-accl", "Incomplete values for the argument timestamp: %d", temp_time);
+        log_.ERR("Fake-IMU", "Incomplete values for the argument timestamp: %d", temp_time);
       }
 
       for (int i = 0; i < 3; i++)
