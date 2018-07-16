@@ -390,9 +390,9 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     }
   }
 
-  if (num_operational < data::Sensors::kNumKeyence) {
+  if (num_operational < 1) {
     status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV", "Critical failure: num operational stripe counters = %d < 2", num_operational);
+    log_.ERR("NAV", "Critical failure: stripe counter down", num_operational);
     return;
   }
 
@@ -404,8 +404,7 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     log_.ERR("NAV",
         "Critical failure: missed stripe "
         "(oldCnt=%d, newCnts=<%d, %d>, nearestStripes=[%f, %f, %f])",
-        stripe_count_, scs[0].count.value, scs[1].count.value, scs[1].count.value,
-        dists[0], dists[1], dists[2]);
+        stripe_count_, scs[0].count.value, scs[1].count.value, dists[0], dists[1], dists[2]);
     return;
   }
 
@@ -419,7 +418,7 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     int i = (scs[0].count.timestamp > scs[1].count.timestamp) ? 0 : 1;
     stripe_count_ = scs[i].count.value;
     timestamp = scs[i].count.timestamp;
-    log_.DBG2("NAV", "Stripe counters are not in synced. newCnts=<%d, %d>",
+    log_.DBG2("NAV", "Stripe counters are not in sync. newCnts=<%d, %d>",
               scs[0].count.value, scs[1].count.value);
   }
   DataPoint<NavigationType> dp(timestamp, kStripeLocations[stripe_count_]);
