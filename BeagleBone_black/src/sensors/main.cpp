@@ -56,22 +56,28 @@ Main::Main(uint8_t id, Logger& log)
       sensor_init_(false),
       battery_init_(false)
 {
-  // @TODO (Ragnor) Add second Keyence?
+  // @TODO (Anyone) Check THESE PINS
   if (sys_.fake_sensors || sys_.fake_keyence) {
-    keyence_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
-    optical_encoder_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
+    keyence_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+    keyence_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+    optical_encoder_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
+    optical_encoder_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
   } else {
     // Pins for keyence GPIO_73 and GPIO_75
-    keyence_ = new GpioCounter(log, 73);
-    optical_encoder_ = new GpioCounter(log, 76);
+    keyence_l_ = new GpioCounter(log, 73);
+    keyence_r_ = new GpioCounter(log, 75);
+    optical_encoder_l_ = new GpioCounter(log, 76);
+    optical_encoder_r_ = new GpioCounter(log, 76);
   }
 }
 
 void Main::run()
 {
   // start all managers
-  keyence_->start();
-  optical_encoder_->start();
+  keyence_l_->start();
+  keyence_r_->start();
+  optical_encoder_l_->start();
+  optical_encoder_r_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
   proxi_manager_back_->start();
@@ -112,8 +118,12 @@ void Main::run()
   while (1) {
     // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
-      sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
-      sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
+      sensors_.keyence_stripe_counter[0] = keyence_l_->getStripeCounter();
+      sensors_.keyence_stripe_counter[1] = keyence_r_->getStripeCounter();
+      sensors_.optical_enc_distance[0] = optical_encoder_l_->getStripeCounter().count.value *
+                                      M_PI *
+                                      kWheelDiameter;
+      sensors_.optical_enc_distance[1] = optical_encoder_r_->getStripeCounter().count.value *
                                       M_PI *
                                       kWheelDiameter;
       data_.setSensorsData(sensors_);
