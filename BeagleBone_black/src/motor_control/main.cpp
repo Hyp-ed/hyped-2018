@@ -89,6 +89,7 @@ void Main::run()
       yield();
     } else if (state_.current_state == data::State::kReady) {
       // Wait for launch command
+      updateMotorData();
       yield();
     } else if (state_.current_state == data::State::kAccelerating) {
       accelerateMotors();
@@ -96,6 +97,7 @@ void Main::run()
       decelerateMotors();
     } else if (state_.current_state == data::State::kRunComplete) {
       // Wait for state machine to transition to kExiting
+      updateMotorData();
       yield();
     } else if (state_.current_state == data::State::kExiting) {
       servicePropulsion();
@@ -103,6 +105,8 @@ void Main::run()
       stopMotors();
     } else if (state_.current_state == data::State::kFailureStopped) {
       enterPreOperational();
+      updateMotorData();
+      yield();
     } else {
       run_ = false;
     }
@@ -378,8 +382,10 @@ void Main::servicePropulsion()
   // TODO(Anyone) Check that this is a sufficient velocity
   if (comms_.service_propulsion_go) {
     communicator_->sendTargetVelocity(200);
+    updateMotorData();
   } else {
     communicator_->sendTargetVelocity(0);
+    updateMotorData();
   }
 }
 

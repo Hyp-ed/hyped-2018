@@ -363,13 +363,14 @@ void Controller::configure()
 
 void Controller::enterOperational()
 {
-// Send NMT Operational message to transition from state 0 (Not ready to switch on)
+  // Send NMT Operational message to transition from state 0 (Not ready to switch on)
   // to state 1 (Switch on disabled)
   nmt_message_.data[0]   = kNmtOperational;
   nmt_message_.data[1]   = node_id_;
 
   log_.INFO("MOTOR", "Controller %d: Sending NMT Operational command", node_id_);
   can_.send(nmt_message_);
+  // Leave sufficient time for controller to enter NMT Operational
   Thread::sleep(100);
 
   // Enable velocity mode
@@ -419,12 +420,7 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
-  }
-  checkState();
-  checkStateTransition(kReadyToSwitchOn);
+  requestStateTransition(sdo_message_, kReadyToSwitchOn);
 
   // Send enter operational message to transition from state 2 (Ready to switch on)
   // to state 4 (Operation enabled)
@@ -438,12 +434,7 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
-  }
-  checkState();
-  checkStateTransition(kOperationEnabled);
+  requestStateTransition(sdo_message_, kOperationEnabled);
 }
 
 void Controller::enterPreOperational()
@@ -713,17 +704,17 @@ void Controller::throwCriticalFailure()
   data_.setMotorData(motor_data_);
 }
 
-void Controller::checkStateTransition(ControllerState state)
+void Controller::requestStateTransition(utils::io::can::Frame& message, ControllerState state)
 {
   uint8_t state_count;
   // Wait for maximum of three seconds, checking state each second.
   // If state doesn't change then throw critical failure
   for (state_count = 0; state_count < 3; state_count++) {
+    can_.send(message);
+    Thread::sleep(1000);
+    checkState();
     if (state_ == state) {
-      break;
-    } else {
-      Thread::sleep(1000);
-      checkState();
+      return;
     }
   }
   if (state_ != state) {
