@@ -77,8 +77,9 @@ class Navigation {
   friend class Main;
 
  public:
-  typedef std::array<Imu,        Sensors::kNumImus>          ImuArray;
-  typedef std::array<Proximity*, 2*Sensors::kNumProximities> ProximityArray;
+  typedef std::array<Imu,           Sensors::kNumImus>          ImuArray;
+  typedef std::array<Proximity*,    2*Sensors::kNumProximities> ProximityArray;
+  typedef std::array<StripeCounter, Sensors::kNumKeyence>       StripeCounterArray;
   struct Settings {
     // TODO(Brano): Change the default values
     float prox_orient_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in orientation calculation
@@ -166,7 +167,7 @@ class Navigation {
     float fl;  // mm
   };
 
-  static constexpr int kMinNumCalibrationSamples = 200000;
+  static constexpr int kMinNumCalibrationSamples = 200;
   static const Settings kDefaultSettings;
   /**
    * @brief Calculates distance to the last stripe, the next stripe and the one after that.
@@ -196,27 +197,25 @@ class Navigation {
    *        IMU and stripe counter have been updated but there is no update from proximity sensors.
    *
    * @param imus         Datapoint of an array of IMU readings
-   * @param sc           Stripe counter reading
+   * @param scs          Array of stripe counter readings
    */
-  void update(DataPoint<ImuArray> imus, array<StripeCounter, Sensors::kNumKeyence> sc);
+  void update(DataPoint<ImuArray> imus, StripeCounterArray scs);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
    *
    * @param imus         Datapoint of an array of IMU readings
    * @param[in] proxis   Array of proximity readings
-   * @param sc           Stripe counter reading
+   * @param scs          Array of stripe counter readings
    */
-  void update(DataPoint<ImuArray> imus,
-                        ProximityArray proxis,
-                        array<StripeCounter, Sensors::kNumKeyence> sc);
+  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounterArray scs);
 
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
-  void stripeCounterUpdate(array<StripeCounter, Sensors::kNumKeyence> sc);  // Point number 7
+  void stripeCounterUpdate(StripeCounterArray scs);  // Point number 7
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
