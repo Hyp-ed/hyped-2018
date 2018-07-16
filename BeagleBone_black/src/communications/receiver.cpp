@@ -40,12 +40,12 @@ void ReceiverThread::run()
 
     switch (command) {
       case 0:
-        log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");
+        log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");          // 0: ACK
         break;
       case 1:
         log_.INFO("COMN", "Received 1 (STOP)");                     // 1: STOP
         cmn_.module_status = data::ModuleStatus::kCriticalFailure;
-        break;
+        return;
       case 2:
         log_.INFO("COMN", "Received 2 (LAUNCH)");                   // 2: LAUNCH
         cmn_.launch_command = true;
@@ -67,12 +67,14 @@ void ReceiverThread::run()
         cmn_.service_propulsion_go = false;
         break;
       default:
-        log_.ERR("COMN", "Received %d (Should not reach here)", command);
-        break;
+        log_.ERR("COMN", "Received NULL (STOP)", command);
+        cmn_.module_status = data::ModuleStatus::kCriticalFailure;  // DEFAULT: Critical Failure
+        return;
     }
 
     data_.setCommunicationsData(cmn_);
   }
 }
+
 
 }}
