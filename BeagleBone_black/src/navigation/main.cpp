@@ -109,14 +109,20 @@ void Main::run()
       yield();
       continue;
     }
-    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis, readings->keyence_stripe_counter);
-    else if (proxiChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis);
-    else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->keyence_stripe_counter);
-    else
-      nav_.update(readings->imu);
+    Navigation::NavigationInput input;
+     if (proxiChanged(*last_readings, *readings)) {
+      input.proxis = &(*proxis);
+     }
+     if (stripeCntChanged(*last_readings, *readings)) {
+      input.sc = &readings->keyence_stripe_counter;
+     }
+     if (opticalEncDistChanged(*last_readings, *readings)) {
+      input.optical_enc_distance = &readings->optical_enc_distance;
+     }
+     if (imuChanged(*last_readings, *readings)) {
+      input.imus = &readings->imu;
+     }
+     nav_.update(input);
 
     updateData();
 
@@ -141,6 +147,16 @@ inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_d
 {
   for (int i = 0; i < Sensors::kNumKeyence; i++) {
     if (new_data.keyence_stripe_counter[i].count.value != old_data.keyence_stripe_counter[i].count.value) //NOLINT
+      return true;
+  }
+
+  return false;
+}
+
+inline bool Main::opticalEncDistChanged(const Sensors& old_data, const Sensors& new_data)
+{
+  for (int i = 0; i < Sensors::kNumOptEnc; i++) {
+    if (new_data.optical_enc_distance[i] != old_data.optical_enc_distance[i]) //NOLINT
       return true;
   }
 
