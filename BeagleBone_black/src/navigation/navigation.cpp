@@ -401,15 +401,15 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     // definitely gone wrong.
     status_ = ModuleStatus::kCriticalFailure;
     log_.ERR("NAV",
-        "Critical failure: missed stripe
-         (oldCnt=%d, newCnts=<%d, %d>, nearestStripes=[%f, %f, %f])",
+        "Critical failure: missed stripe "
+        "(oldCnt=%d, newCnts=<%d, %d>, nearestStripes=[%f, %f, %f])",
         stripe_count_, scs[0].count.value, scs[1].count.value, scs[1].count.value,
         dists[0], dists[1], dists[2]);
     return;
   }
 
   int i = 0;  // index for the most updated stripe counter
-  if (scs[0] != scs[1]) {
+  if (scs[0].count.value != scs[1].count.value) {
     // One stripe counter is behind, use the latest (?) one
     i = (scs[0].count.timestamp > scs[1].count.timestamp) ? 0 : 1;
   }
