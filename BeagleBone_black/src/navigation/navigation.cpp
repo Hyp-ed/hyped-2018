@@ -269,7 +269,7 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
       acceleration_[0], acceleration_[1], acceleration_[2],
       velocity_[0], velocity_[1], velocity_[2],
       displacement_[0], displacement_[1], displacement_[2]);
-  acceleration_  = acceleration.value;
+  acceleration_ = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
   velocity_     = velocity.value;
   displacement_ = velocity_integrator_.update(velocity).value;
