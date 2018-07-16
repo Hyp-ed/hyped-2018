@@ -31,8 +31,6 @@ namespace state_machine {
 
 // statically allocate memory for current_state
 State* State::alloc_ = static_cast<State*>(malloc(sizeof(State)));
-GPIO pin_37_ = GPIO(78, utils::io::gpio::kOut);
-GPIO pin_38_ = GPIO(79, utils::io::gpio::kOut);
 
 void Idle::entry()
 {
