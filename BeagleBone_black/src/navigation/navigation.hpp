@@ -187,7 +187,7 @@ class Navigation {
    * @param imus         Datapoint of an array of IMU readings
    * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus, StripeCounter sc);
+  void update(DataPoint<ImuArray> imus, array<StripeCounter, Sensors::kNumKeyence> sc);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -196,14 +196,16 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc);
+  void update(DataPoint<ImuArray> imus,
+                        ProximityArray proxis,
+                        array<StripeCounter, Sensors::kNumKeyence> sc);
 
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
-  void stripeCounterUpdate(StripeCounter sc);  // Point number 7
+  void stripeCounterUpdate(array<StripeCounter, Sensors::kNumKeyence> sc);  // Point number 7
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
