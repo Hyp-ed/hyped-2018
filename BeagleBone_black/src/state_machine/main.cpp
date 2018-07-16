@@ -52,7 +52,7 @@ void Main::run()
 
     switch (sm_data_.current_state) {
       case data::State::kIdle:
-        if (checkCriticalFailure())     break;
+        // if (checkCriticalFailure())     break;   // TODO(anyone): discuss this transition again
         if (checkInitialised())         break;
         break;
       case data::State::kCalibrating:
