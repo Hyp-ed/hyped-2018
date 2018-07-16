@@ -94,31 +94,31 @@ class Navigation {
    * @return NavigationType Returns the forward component of acceleration vector (negative when
    *                        decelerating)
    */
-  NavigationType getAcceleration();
+  NavigationType getAcceleration() const;
   /**
    * @brief Get the velocity value
    *
    * @return NavigationType Returns the forward component of velocity vector
    */
-  NavigationType getVelocity();
+  NavigationType getVelocity() const;
   /**
    * @brief Get the displacement value
    *
    * @return NavigationType Returns the forward component of displacement vector
    */
-  NavigationType getDisplacement();
+  NavigationType getDisplacement() const;
   /**
    * @brief Get the emergency braking distance in metres
    *
    * @return NavigationType emergency braking distance in metres
    */
-  NavigationType getEmergencyBrakingDistance();
+  NavigationType getEmergencyBrakingDistance() const;
   /**
    * @brief Get the status of the nav module
    *
    * @return ModuleStatus Status of the nav module
    */
-  ModuleStatus getStatus();
+  ModuleStatus getStatus() const;
   /**
    * @brief Starts the calibration phase if the module's status is `kInit`.
    *

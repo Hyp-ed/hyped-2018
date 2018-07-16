@@ -54,28 +54,28 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       orientation_(1, 0, 0, 0)
 {}
 
-NavigationType Navigation::getAcceleration()
+NavigationType Navigation::getAcceleration() const
 {
   return acceleration_[0];
 }
 
-NavigationType Navigation::getVelocity()
+NavigationType Navigation::getVelocity() const
 {
   return velocity_[0];
 }
 
-NavigationType Navigation::getDisplacement()
+NavigationType Navigation::getDisplacement() const
 {
   return displacement_[0];
 }
 
-NavigationType Navigation::getEmergencyBrakingDistance()
+NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
-ModuleStatus Navigation::getStatus()
+ModuleStatus Navigation::getStatus() const
 {
   return status_;
 }
