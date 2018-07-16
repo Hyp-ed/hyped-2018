@@ -395,6 +395,7 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     log_.ERR("NAV", "Critical failure: num operational stripe counters = %d < 2", num_operational);
     return;
   }
+
   auto dists = getNearestStripeDists();
   if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
     // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
@@ -408,14 +409,20 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     return;
   }
 
-  int i = 0;  // index for the most updated stripe counter
-  if (scs[0].count.value != scs[1].count.value) {
-    // One stripe counter is behind, use the latest (?) one
-    i = (scs[0].count.timestamp > scs[1].count.timestamp) ? 0 : 1;
+  uint16_t timestamp;
+  // If stripe counters measure different counts, use the counter with the latest timestamp,
+  // otherwise, average the timestamps for higher accuracy
+  if (scs[0].count.value == scs[1].count.value) {
+    stripe_count_ = scs[0].count.value;
+    timestamp = (scs[0].count.timestamp + scs[1].count.timestamp) / 2;
+  } else {
+    int i = (scs[0].count.timestamp > scs[1].count.timestamp) ? 0 : 1;
+    stripe_count_ = scs[i].count.value;
+    timestamp = scs[i].count.timestamp;
+    log_.DBG2("NAV", "Stripe counters are not in synced. newCnts=<%d, %d>",
+              scs[0].count.value, scs[1].count.value);
   }
-  stripe_count_ = scs[i].count.value;
-
-  DataPoint<NavigationType> dp(scs[i].count.timestamp, kStripeLocations[stripe_count_]);
+  DataPoint<NavigationType> dp(timestamp, kStripeLocations[stripe_count_]);
 
   // Update x-axis (forwards) displacement
   displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
