@@ -26,12 +26,15 @@
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
 #include "utils/timer.hpp"
+#include "sensors/interface.hpp"
+#include "sensors/fake_imu.hpp"
 
 using hyped::sensors::MPU9250;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
 using hyped::data::Imu;
 using hyped::sensors::ImuInterface;
+using hyped::sensors::FakeImu;
 
 #include <string>
 #include <iostream>
@@ -73,8 +76,16 @@ int main(int argc, char* argv[])
       myfile[j] << std::to_string(imu.gyr[0]) << ",";
       myfile[j] << std::to_string(imu.gyr[1]) << ",";
       myfile[j] << std::to_string(imu.gyr[2]) << ",";
-      myfile[j] << std::to_string(imu.operational)<<"\n";
-    }
+      if (imu.operational) {
+        myfile[j] << "true" << "\n";
+      } else {
+        myfile[j] << "false" << "\n";
+      }
+   }
+   Thread::sleep(50);
+  }
+  for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
+    myfile[i].close();
   }
  	return 0;
 }

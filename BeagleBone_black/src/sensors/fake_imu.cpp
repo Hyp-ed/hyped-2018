@@ -43,7 +43,6 @@ FakeImu::FakeImu(utils::Logger& log,
                                          std::string dec_file_path,
                                          std::string gyr_file_path)
     : log_(log),
-      acc_val_(0),
       gyr_val_(0),
       acc_noise_(1),
       gyr_noise_(1),
@@ -54,6 +53,11 @@ FakeImu::FakeImu(utils::Logger& log,
       dec_started_(false),
       data_(data::Data::getInstance())
 {
+  NavigationVector acc;
+    acc[0] = 0.0;
+    acc[1] = 0.0;
+    acc[2] = 9.8;
+  acc_val_ = acc;
   readDataFromFile(acc_file_path_, dec_file_path_, gyr_file_path_);
   log_.INFO("Fake-IMU-accl", "Fake IMU initialised");
 }
