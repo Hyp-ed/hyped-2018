@@ -1,5 +1,5 @@
 /*
- * Author: Brano, Uday, Adi
+ * Author: Brano, Uday, Adi and Ragnor
  * Organisation: HYPED
  * Date: 18 March 2018
  * Description: Main file for navigation class.
@@ -42,6 +42,7 @@ class Main: public Thread {
   bool imuChanged(const Sensors& old_data, const Sensors& new_data);
   bool proxiChanged(const Sensors& old_data, const Sensors& new_data);
   inline bool stripeCntChanged(const Sensors& old_data, const Sensors& new_data);
+  inline bool opticalEncDistChanged(const Sensors& old_data, const Sensors& new_data);
   void updateData();
 
 

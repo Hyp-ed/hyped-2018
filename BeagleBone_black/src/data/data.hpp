@@ -117,7 +117,8 @@ struct Sensors : public Module {
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
   StripeCounter keyence_stripe_counter;
-  float optical_enc_distance;
+  StripeCounter optical_encoder;
+  float optical_enc_distance;   // remove
 };
 
 struct SensorCalibration {

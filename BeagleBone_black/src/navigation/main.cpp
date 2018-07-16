@@ -1,5 +1,5 @@
 /*
- * Author: Brano, Adi, Uday
+ * Author: Brano, Adi, Uday and Ragnor
  * Organisation: HYPED
  * Date: 18 March 2018
  * Description: Main file for navigation class.
@@ -103,14 +103,20 @@ void Main::run()
       yield();
       continue;
     }
-    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis, readings->keyence_stripe_counter);
-    else if (proxiChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis);
-    else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->keyence_stripe_counter);
-    else
-      nav_.update(readings->imu);
+    Navigation::NavigationInput input;
+     if (proxiChanged(*last_readings, *readings)) {
+      input.proxis = &(*proxis);
+     }
+     if (stripeCntChanged(*last_readings, *readings)) {
+      input.sc = &readings->keyence_stripe_counter;
+     }
+     if (opticalEncDistChanged(*last_readings, *readings)) {
+      input.oe = &readings->optical_encoder;
+     }
+     if (imuChanged(*last_readings, *readings)) {
+      input.imus = &readings->imu;
+     }
+     nav_.update(input);
 
     updateData();
 
@@ -134,6 +140,11 @@ bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
   return new_data.keyence_stripe_counter.count.value != old_data.keyence_stripe_counter.count.value;
+}
+
+inline bool Main::opticalEncDistChanged(const Sensors& old_data, const Sensors& new_data)
+{
+  return new_data.optical_encoder.count.value != old_data.optical_encoder.count.value;
 }
 
 void Main::updateData()

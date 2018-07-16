@@ -1,5 +1,5 @@
 /*
- * Author: Adithya Sireesh, Uday Patel
+ * Author: Adithya Sireesh, Uday Patel, Brano Pilnan and Ragnor Comerford
  * Organisation: HYPED
  * Date: 10/02/2018
  * Description: Navigation class functionality definition.
@@ -24,6 +24,7 @@
 namespace hyped {
 namespace navigation {
 
+constexpr float kWheelDiameter = 0.0608;
 const Navigation::Settings Navigation::kDefaultSettings;
 float proxiMean(const Proximity* const a, const Proximity* const b)
 {
@@ -150,7 +151,23 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists()
   return arr;
 }
 
-void Navigation::update(DataPoint<ImuArray> imus)
+void Navigation::update(NavigationInput input)
+{
+  if (input.imus != nullptr) {
+    updateImus(*input.imus);
+  }
+  if (input.proxis != nullptr && !is_calibrating_) {
+    updateProxis(*input.proxis);
+  }
+  if (input.sc != nullptr && !is_calibrating_) {
+    stripeCounterUpdate(*input.sc);
+  }
+  if (input.oe != nullptr && !is_calibrating_) {
+    opticalEncoderUpdate(*input.oe);
+  }
+}
+
+void Navigation::updateImus(DataPoint<ImuArray> imus)
 {
   for (unsigned int i = 0; i < imus.value.size(); ++i) {
     log_.DBG3("NAV", "Before filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
@@ -186,11 +203,8 @@ void Navigation::update(DataPoint<ImuArray> imus)
   }
 }
 
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
+void Navigation::updateProxis(ProximityArray proxis)
 {
-  update(imus);
-  if (is_calibrating_) return;
-
   Proximities ground, rail;
   // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
   int num_ground_fail = 0;
@@ -217,21 +231,6 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 
   proximityDisplacementUpdate(ground, rail);
   proximityOrientationUpdate(ground, rail);
-}
-
-void Navigation::update(DataPoint<ImuArray> imus, StripeCounter sc)
-{
-  update(imus);
-  // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
-  if (!is_calibrating_)
-    stripeCounterUpdate(sc);
-}
-
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc)
-{
-  update(imus, proxis);
-  if (!is_calibrating_)
-    stripeCounterUpdate(sc);
 }
 
 void Navigation::calibrationUpdate(ImuArray imus)
@@ -367,7 +366,7 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
       displacement_[0], displacement_[1], displacement_[2]);
 }
 
-void Navigation::opticalEncoderUpdate(StripeCounter sc)
+void Navigation::opticalEncoderUpdate(StripeCounter oe)
 {
   log_.DBG2("NAV",
       "Before stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
@@ -376,25 +375,7 @@ void Navigation::opticalEncoderUpdate(StripeCounter sc)
       displacement_[0], displacement_[1], displacement_[2]);
   // TODO(Brano): Update displacement and velocity
 
-  // TODO(Brano): Change this once 2nd Optical Encoder is added
-  if (!sc.operational) {
-    status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV", "Critical failure: optical encoder down");
-    return;
-  }
-  auto dists = getNearestStripeDists();
-  if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
-    // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
-    // definitely gone wrong.
-    status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV",
-        "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
-        stripe_count_, sc.count.value, dists[0], dists[1], dists[2]);
-    return;
-  }
-
-  stripe_count_ = sc.count.value;
-  DataPoint<NavigationType> dp(sc.count.timestamp, kStripeLocations[stripe_count_]);
+  DataPoint<NavigationType> dp(oe.count.timestamp, oe.count.value*M_PI*kWheelDiameter);
 
   // Update x-axis (forwards) displacement
   displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +

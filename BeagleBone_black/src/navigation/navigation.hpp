@@ -1,5 +1,5 @@
 /*
- * Author: Adithya Sireesh
+ * Author: Adithya Sireesh, Brano Pilnan and Ragnor Comerford
  * Organisation: HYPED
  * Date: 10/02/2018
  * Description: Navigation class skeleton.
@@ -56,7 +56,7 @@ namespace navigation {
 
 constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
 constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
-      30.48,   60.96,   91.44,  121.92,  152.4,  182.88,  213.36,  243.84,  274.32,  304.8,
+     30.48,   60.96,   91.44,  121.92,  152.4,  182.88,  213.36,  243.84,  274.32,  304.8,
      335.28,  365.76,  396.24,  426.72,  457.2,  487.68,  518.16,  548.64,  579.12,  609.6,
      640.08,  670.56,  701.04,  731.52,  762.0,  792.48,  822.96,  853.44,  883.92,  914.4,
      944.88,  975.36, 1005.84, 1036.32, 1066.8, 1097.28, 1127.76, 1158.24, 1188.72, 1219.2,
@@ -155,6 +155,13 @@ class Navigation {
     float fl;  // mm
   };
 
+  struct NavigationInput {
+    DataPoint<ImuArray> *imus = nullptr;
+    ProximityArray *proxis = nullptr;
+    StripeCounter *sc = nullptr;
+    StripeCounter *oe = nullptr;
+  };
+
   static constexpr int kMinNumCalibrationSamples = 200000;
   static const Settings kDefaultSettings;
   /**
@@ -171,40 +178,24 @@ class Navigation {
    *
    * @param[in] imus Datapoint of an array of IMU readings
    */
-  void update(DataPoint<ImuArray> imus);
-  /**
-   * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
-   *        proxi have been updated but there is no update from stripe counter.
-   *
-   * @param[in] imus   Datapoint of an array of IMU readings
-   * @param[in] proxis Array of proximity readings
-   */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis);
-  /**
-   * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
-   *        IMU and stripe counter have been updated but there is no update from proximity sensors.
-   *
-   * @param imus         Datapoint of an array of IMU readings
-   * @param sc           Stripe counter reading
-   */
-  void update(DataPoint<ImuArray> imus, StripeCounter sc);
-  /**
-   * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
-   *        IMU, proximity sensors, and stripe counter have all been updated.
+  void update(NavigationInput);
+  /*
+   * @brief Updates navigation based on new IMU, proximity, stripe counter readings and optical encoder distance.
    *
    * @param imus         Datapoint of an array of IMU readings
    * @param[in] proxis   Array of proximity readings
    * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc);
 
+  void updateProxis(ProximityArray proxis);
+  void updateImus(DataPoint<ImuArray> imus);
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(StripeCounter sc);  // Point number 7
-  void opticalEncoderUpdate(StripeCounter sc); 
+  void opticalEncoderUpdate(StripeCounter oe);
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
@@ -224,6 +215,7 @@ class Navigation {
   NavigationVector velocity_;
   NavigationVector displacement_;
   uint16_t stripe_count_;
+  uint16_t rotations_count_;
 
   // Internal data that is not published
   DataPoint<NavigationVector> prev_angular_velocity_;  // To calculate how much has the pod rotated

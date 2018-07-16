@@ -31,7 +31,6 @@
 #include "sensors/fake_gpio_counter.hpp"
 #include "sensors/gpio_counter.hpp"
 
-constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
 
 using data::Data;
@@ -113,9 +112,7 @@ void Main::run()
     // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
       sensors_.keyence_stripe_counter = keyence_->getStripeCounter();
-      sensors_.optical_enc_distance = optical_encoder_->getStripeCounter().count.value *
-                                      M_PI *
-                                      kWheelDiameter;
+      sensors_.optical_encoder = optical_encoder_->getStripeCounter();
       data_.setSensorsData(sensors_);
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
