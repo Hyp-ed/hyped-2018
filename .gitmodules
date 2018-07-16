@@ -1,0 +1,3 @@
+[submodule "BeagleBone_black/lib/eigen-git-mirror"]
+	path = BeagleBone_black/lib/eigen-git-mirror
+	url = https://github.com/eigenteam/eigen-git-mirror.git
