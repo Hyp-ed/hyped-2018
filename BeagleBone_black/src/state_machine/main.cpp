@@ -33,13 +33,7 @@ namespace state_machine {
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
       hypedMachine(log),
-      data_(data::Data::getInstance()),
-      comms_data_(data_.getCommunicationsData()),
-      nav_data_(data_.getNavigationData()),
-      sm_data_(data_.getStateMachineData()),
-      motor_data_(data_.getMotorData()),
-      batteries_data_(data_.getBatteriesData()),
-      sensors_data_(data_.getSensorsData())
+      data_(data::Data::getInstance())
 { /* EMPTY */ }
 
 /**
@@ -49,26 +43,26 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   while (1) {
-    data_ = data::Data::getInstance();
-    comms_data_ = data_.getCommunicationsData();
-    nav_data_ = data_.getNavigationData();
-    sm_data_ = data_.getStateMachineData();
-    motor_data_ = data_.getMotorData();
+    comms_data_     = data_.getCommunicationsData();
+    nav_data_       = data_.getNavigationData();
+    sm_data_        = data_.getStateMachineData();
+    motor_data_     = data_.getMotorData();
     batteries_data_ = data_.getBatteriesData();
-    sensors_data_ = data_.getSensorsData();
+    sensors_data_   = data_.getSensorsData();
 
     if (sm_data_.current_state == data::kIdle) {
       checkInit();
     }
     if (sm_data_.current_state != data::kEmergencyBraking
         && sm_data_.current_state != data::kFailureStopped) {
-    checkFailure();
+      checkFailure();
     }
     checkReady();
     if (sm_data_.current_state != data::kIdle) {
       checkNavigation();
       checkCommunications();
     }
+    yield();
   }
 }
 
@@ -89,8 +83,7 @@ void Main::checkNavigation()
   if ((sm_data_.current_state == data::kDecelerating
       || sm_data_.current_state == data::kAccelerating)
       && ((nav_data_.distance + nav_data_.braking_distance)
-      + 20 >= comms_data_.run_length))
-      {
+      + 20 >= comms_data_.run_length)) {
     log_.INFO("STATE", "Critical failure caused by exceeding braking distance.");
     hypedMachine.handleEvent(kMaxDistanceReached);
   }
