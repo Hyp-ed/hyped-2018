@@ -44,23 +44,26 @@ class I2C {
    * @param addr  - sensor address
    * @param rx    - pointer to head of read buffer
    * @param len   - number of BYTES to be read, i.e. size of the read buffer
+   * @return true - iff transaction was successful
    */
-  void read(uint32_t addr, uint8_t* rx, uint16_t len);
+  bool read(uint32_t addr, uint8_t* rx, uint16_t len);
 
   /**
    * @brief Write data to sensor.
    * @param addr  - sensor address
    * @param rx    - pointer to head of write buffer
    * @param len   - number of BYTES to be written, i.e. size of the write buffer
+   * @return true - iff transaction was successful
    */
-  void write(uint32_t addr, uint8_t* tx, uint16_t len);
+  bool write(uint32_t addr, uint8_t* tx, uint16_t len);
 
   /**
    * @brief Write 1 BYTE to sensor.
    * @param addr  - sensor address
    * @param rx    - BYTE to be written
+   * @return true - iff transaction was successful
    */
-  void write(uint32_t addr, uint8_t tx);
+  bool write(uint32_t addr, uint8_t tx);
 
  private:
   explicit I2C(Logger& log);
