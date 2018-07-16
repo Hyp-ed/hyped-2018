@@ -492,7 +492,7 @@ void Controller::sendTargetVelocity(int32_t target_velocity)
   sdo_message_.data[7]   = (target_velocity >> 24) & 0xFF;
 
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity to %d", node_id_, target_velocity);
-  sendSdoMessage(sdo_message_);
+  can_.send(sdo_message_);
 }
 
 void Controller::sendTargetTorque(int16_t target_torque)
