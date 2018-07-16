@@ -61,6 +61,7 @@ Communications::Communications(Logger& log, const char* ip, int port_no)
   } else {
     log_.INFO("COMN", "TCP/IP connection established.");
     is_connected_ = true;
+    printlostconnection_ = true;
   }
 }
 
@@ -77,7 +78,10 @@ int Communications::sendData(std::string message)
   int n = write(sockfd_, data, message.length());  // ‘_size_t write(int, const void*, size_t)’
 
   if (n < 0) {
+    if (printlostconnection_) {
     log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
+    }
+    printlostconnection_ = false;
   }
 
   return atoi(buffer_);
@@ -101,8 +105,11 @@ int Communications::receiveMessage()
   int n = read(sockfd_, buffer_, 255);
 
   if (n < 0) {
+    if (printlostconnection_) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    }
     return 1;
+    printlostconnection_ = false;
   }
 
   int command = buffer_[0]-'0';

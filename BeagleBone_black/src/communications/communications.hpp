@@ -77,6 +77,7 @@ class Communications
   char buffer_[256];
   Logger& log_;
   bool is_connected_;
+  bool printlostconnection_;
   data::Data& data_;
 };
 

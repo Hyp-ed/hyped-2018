@@ -38,6 +38,7 @@ class ReceiverThread : public Thread {
   explicit ReceiverThread(Logger& log, Communications* base_communicator);
   void run() override;
 
+
  private:
   Logger& log_;
   Communications* base_communicator_;
