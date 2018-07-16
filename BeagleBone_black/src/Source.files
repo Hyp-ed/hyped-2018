@@ -61,3 +61,4 @@ MAINS := \
   demo_fake_gpio_counter \
   demo_imus \
   test_proxis \
+  test_imus \

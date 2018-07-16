@@ -37,7 +37,6 @@ using hyped::utils::concurrent::Thread;
 using hyped::utils::io::I2C;
 using hyped::sensors::ProxiInterface;
 using hyped::utils::math::RollingStatistics;
-using hyped::utils::Timer;
 
  constexpr uint8_t kNumOfProxis = 8;
 
