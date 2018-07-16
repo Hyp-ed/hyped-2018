@@ -61,7 +61,6 @@ Communications::Communications(Logger& log, const char* ip, int port_no)
   } else {
     log_.INFO("COMN", "TCP/IP connection established.");
     is_connected_ = true;
-    printlostconnection_ = true;
   }
 }
 
