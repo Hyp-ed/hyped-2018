@@ -86,8 +86,7 @@ void Main::checkNavigation()
     hypedMachine.handleEvent(kCriticalFailure);
   }
 
-  if ((sm_data_.current_state == data::kDecelerating
-      || sm_data_.current_state == data::kAccelerating)
+  if (sm_data_.current_state == data::kAccelerating
       && ((nav_data_.distance + nav_data_.braking_distance)
       + 20 >= comms_data_.run_length))
       {
