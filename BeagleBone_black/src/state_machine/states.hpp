@@ -32,8 +32,11 @@
 #include "state_machine/hyped-machine.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
+#include "utils/io/gpio.hpp"
 
 namespace hyped {
+
+using utils::io::GPIO;
 
 namespace state_machine {
 
@@ -54,8 +57,6 @@ class Idle : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
- private:
-  utils::System& sys_ = utils::System::getSystem();
 };
 
 class Calibrating : public State {
@@ -86,8 +87,6 @@ class EmergencyBraking : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
-  private:
-  utils::System& sys_ = utils::System::getSystem();
 };
 
 class RunComplete : public State {
