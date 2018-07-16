@@ -79,9 +79,11 @@ GPIO::GPIO(uint32_t pin, gpio::Direction direction, Logger& log)
       fd_(0)
 {
   if (!initialised_)  initialise();
-
   exportGPIO();
   attachGPIO();
+  if (direction == gpio::Direction::kOut) {
+    set();
+  }
 }
 
 void GPIO::initialise()

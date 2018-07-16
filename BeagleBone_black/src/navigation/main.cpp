@@ -96,6 +96,12 @@ void Main::run()
 
     // Data updates
     *readings = data_.getSensorsData();
+    // check if time goes backwards, ignore such readings
+    if (readings->imu.timestamp < last_readings->imu.timestamp) {
+      log_.ERR("NAV", "new reading has past timestamp %u", readings->imu.timestamp);
+      yield();
+      continue;
+    }
 
     // TODO(Brano): Accelerations and gyros should be in separate arrays in data::Sensors.
     if (!imuChanged(*last_readings, *readings)) {
@@ -133,7 +139,12 @@ bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
-  return new_data.keyence_stripe_counter.count.value != old_data.keyence_stripe_counter.count.value;
+  for (int i = 0; i < Sensors::kNumKeyence; i++) {
+    if (new_data.keyence_stripe_counter[i].count.value != old_data.keyence_stripe_counter[i].count.value) //NOLINT
+      return true;
+  }
+
+  return false;
 }
 
 void Main::updateData()

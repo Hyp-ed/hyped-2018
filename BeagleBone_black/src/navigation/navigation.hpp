@@ -54,6 +54,17 @@ using utils::System;
 
 namespace navigation {
 
+// Positions (in m) of proximity sensors w.r.t. IMUs
+// TODO(Brano): Update the positions once stuff is mounted
+const NavigationVector kGroundProxiFR({ 1, -0.5, -0.1});
+const NavigationVector kGroundProxiFL({ 1,  0.5, -0.1});
+const NavigationVector kGroundProxiRL({-2,  0.5, -0.1});
+const NavigationVector kGroundProxiRR({-2, -0.5, -0.1});
+const NavigationVector kRailProxiFR({ 1, -0.1, -0.1});
+const NavigationVector kRailProxiFL({ 1,  0.1, -0.1});
+const NavigationVector kRailProxiRL({-2,  0.1, -0.1});
+const NavigationVector kRailProxiRR({-2, -0.1, -0.1});
+
 constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
 constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
       30.48,   60.96,   91.44,  121.92,  152.4,  182.88,  213.36,  243.84,  274.32,  304.8,
@@ -63,6 +74,8 @@ constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
     1249.68};
 
 class Navigation {
+  friend class Main;
+
  public:
   typedef std::array<Imu,        Sensors::kNumImus>          ImuArray;
   typedef std::array<Proximity*, 2*Sensors::kNumProximities> ProximityArray;
@@ -74,8 +87,6 @@ class Navigation {
     float prox_vel_w = 0.01;  ///< Weight (from [0,1]) of proxi vs imu in velocity calculation
     float strp_vel_w = 0.0;  ///< Weight [0,1]  of stripe count vs imu in velocity calculation
   };
-
-  friend class Main;
 
   /**
    * @brief Construct a new Navigation object
@@ -187,7 +198,7 @@ class Navigation {
    * @param imus         Datapoint of an array of IMU readings
    * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus, StripeCounter sc);
+  void update(DataPoint<ImuArray> imus, array<StripeCounter, Sensors::kNumKeyence> sc);
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -196,14 +207,16 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param sc           Stripe counter reading
    */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc);
+  void update(DataPoint<ImuArray> imus,
+                        ProximityArray proxis,
+                        array<StripeCounter, Sensors::kNumKeyence> sc);
 
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
-  void stripeCounterUpdate(StripeCounter sc);  // Point number 7
+  void stripeCounterUpdate(array<StripeCounter, Sensors::kNumKeyence> sc);  // Point number 7
 
   // Admin stuff
   Barrier& post_calibration_barrier_;

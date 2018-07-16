@@ -21,6 +21,9 @@
 #include <algorithm>  // std::min
 #include <cmath>
 
+#include "Eigen/Dense"
+#include "Eigen/SVD"
+
 namespace hyped {
 namespace navigation {
 
@@ -219,7 +222,7 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
   proximityOrientationUpdate(ground, rail);
 }
 
-void Navigation::update(DataPoint<ImuArray> imus, StripeCounter sc)
+void Navigation::update(DataPoint<ImuArray> imus, array<StripeCounter, Sensors::kNumKeyence> sc)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
@@ -227,7 +230,9 @@ void Navigation::update(DataPoint<ImuArray> imus, StripeCounter sc)
     stripeCounterUpdate(sc);
 }
 
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounter sc)
+void Navigation::update(DataPoint<ImuArray> imus,
+                        ProximityArray proxis,
+                        array<StripeCounter, Sensors::kNumKeyence> sc)
 {
   update(imus, proxis);
   if (!is_calibrating_)
@@ -282,7 +287,54 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
 
 void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
-  // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
+  // Ground points
+  NavigationVector a = kGroundProxiRR;     a[2] -= ground.rr;
+  NavigationVector b = kGroundProxiFR;     b[2] -= ground.fr;
+  NavigationVector c = kGroundProxiFL;     c[2] -= ground.fl;
+  NavigationVector d = kGroundProxiRL;     d[2] -= ground.rl;
+
+  // Rail points
+  NavigationVector e_l = kRailProxiRL;     e_l[1] -= rail.rl;
+  NavigationVector e_r = kRailProxiRR;     e_r[1] += rail.rr;
+  NavigationVector f_l = kRailProxiFL;     f_l[1] -= rail.fl;
+  NavigationVector f_r = kRailProxiFR;     f_r[1] += rail.fr;
+
+  // Vector EF in the vertical plane of the I beam
+  NavigationVector temp_r = (f_l + f_r)/2 - (e_l + e_r)/2;
+  Eigen::Vector3d r(temp_r[0], temp_r[1], temp_r[2]);
+
+  // Calculate the normal n of the ground plane given by a, b, c, and d
+  Eigen::Matrix<double, 3, 4> m;
+  m << a[0], b[0], c[0], d[0],
+       a[1], b[1], c[1], d[1],
+       a[2], b[2], c[2], d[2];
+
+  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeThinU);
+  Eigen::Vector3d n = svd.matrixU().col(svd.matrixU().cols() - 1);
+  if (n(2) < 0.0)
+    n = -n;
+
+  // Calculate rejection of r on n and use cross product to complete the basis of tube ref. frame
+  Eigen::Vector3d x = r - r.dot(n)/n.dot(n)*n;
+  x /= x.norm();
+  Eigen::Vector3d y = n.cross(x);
+  y /= y.norm();
+  Eigen::Vector3d z = n/n.norm();
+  Eigen::Matrix3d rot;
+  rot << x, y, z;
+
+  // Calculate orientation quaternion
+  Eigen::Quaternion<double> q(rot);
+  q = q.conjugate();  // We want the opposite rotation
+  Eigen::Quaternion<double> orientation(
+      orientation_[0], orientation_[1], orientation_[2], orientation_[3]);
+
+  // SLERP (weighted average of the two orientation estimates)
+  orientation = q.slerp(settings_.prox_orient_w, orientation);
+  orientation_[0] = orientation.w();
+  orientation_[1] = orientation.x();
+  orientation_[2] = orientation.y();
+  orientation_[3] = orientation.z();
 }
 
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
@@ -323,7 +375,7 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
       displacement_[0], displacement_[1], displacement_[2]);
 }
 
-void Navigation::stripeCounterUpdate(StripeCounter sc)
+void Navigation::stripeCounterUpdate(array<StripeCounter, Sensors::kNumKeyence> sc)
 {
   log_.DBG2("NAV",
       "Before stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
@@ -333,24 +385,26 @@ void Navigation::stripeCounterUpdate(StripeCounter sc)
   // TODO(Brano): Update displacement and velocity
 
   // TODO(Brano): Change this once 2nd Keyence is added
-  if (!sc.operational) {
+  if (!sc[0].operational) {
     status_ = ModuleStatus::kCriticalFailure;
     log_.ERR("NAV", "Critical failure: stripe counter down");
     return;
   }
   auto dists = getNearestStripeDists();
+  // TODO(Brano): Change second keyence has been added
   if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
     // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
     // definitely gone wrong.
     status_ = ModuleStatus::kCriticalFailure;
     log_.ERR("NAV",
         "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
-        stripe_count_, sc.count.value, dists[0], dists[1], dists[2]);
+        stripe_count_, sc[0].count.value, dists[0], dists[1], dists[2]);
     return;
   }
 
-  stripe_count_ = sc.count.value;
-  DataPoint<NavigationType> dp(sc.count.timestamp, kStripeLocations[stripe_count_]);
+  // TODO(Brano): Change second keyence has been added
+  stripe_count_ = sc[0].count.value;
+  DataPoint<NavigationType> dp(sc[0].count.timestamp, kStripeLocations[stripe_count_]);
 
   // Update x-axis (forwards) displacement
   displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +

@@ -24,33 +24,33 @@
 #include "utils/system.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/i2c.hpp"
+#include "data/data.hpp"
 
 using hyped::sensors::VL6180;
 using hyped::utils::Logger;
+using hyped::utils::io::I2C;
 using hyped::utils::concurrent::Thread;
 
 
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
+  I2C& i2c = I2C::getInstance();
   Logger log(true, 1);
-  VL6180 vl6180 = VL6180(0x29, log);
+  i2c.write(0x70, 0x01);
+  VL6180 proxi = VL6180(0x29, log);
 
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
 
-  vl6180.setContinuousRangingMode();
   for (int i=0; i< 500; i++) {
-    double distance = vl6180.getDistance();
-    log.INFO("TEST-vl6180", "Continuous Distance: %f", distance);
-    Thread::sleep(20);
+    hyped::data::Proximity data;
+    proxi.singleRangeDistance();
+    proxi.getData(&data);
+    log.INFO("TEST-vl6180", "Continuous Distance: %d", data.val);
+    log.INFO("Multiplexer-test", "operational: %s", data.operational ? "true" : "false");
+    Thread::sleep(10);
   }
 
-  vl6180.setSingleShotMode();
-  for (int i=0; i< 100; i++) {
-    double distance = vl6180.getDistance();
-    log.INFO("TEST-vl6180", "Single-shot Distance: %f", distance);
-    Thread::sleep(7);
-  }
 
 
  	return 0;

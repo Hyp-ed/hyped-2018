@@ -20,9 +20,6 @@
  */
 #include "state_machine/states.hpp"
 #include <stdlib.h>
-#include "utils/io/gpio.hpp"
-
-
 
 namespace hyped {
 
@@ -42,12 +39,6 @@ void Idle::entry()
 
 void Idle::react(HypedMachine &machine, Event event)
 {
-  // Set pins high to prevent activation of ermergency brakes
-  GPIO pin_37(37, utils::io::gpio::kOut);
-  GPIO pin_38(38, utils::io::gpio::kOut);
-  pin_37.set();
-  pin_38.set();
-
   if (event == kInitialised) {
     machine.transition(new(alloc_) Calibrating());
   } else if (event == kCriticalFailure) {
@@ -114,19 +105,12 @@ void Decelerating::react(HypedMachine &machine, Event event)
 void EmergencyBraking::entry()
 {
   state_ = state::kEmergencyBraking;
+  pin_37_.clear();
+  pin_38_.clear();
 }
 
 void EmergencyBraking::react(HypedMachine &machine, Event event)
 {
-  // Set pins low to redundantly activate emergency brakes
-  if (!sys_.fake_embrakes) {
-    GPIO pin_37(78, utils::io::gpio::kOut);
-    GPIO pin_38(79, utils::io::gpio::kOut);
-    pin_37.clear();
-    pin_38.clear();
-  }
-
-
   if (event == kVelocityZeroReached) {
     machine.transition(new(alloc_) FailureStopped());
   }

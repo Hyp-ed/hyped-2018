@@ -39,6 +39,13 @@ class SPI {
  public:
   static SPI& getInstance();
 
+  enum class Clock {
+    k1MHz,
+    k4MHz
+  };
+
+  void setClock(Clock clk);
+
   /**
    * @brief simultaneous write and read. Write and read buffer should have the same length
    * @param tx  - pointer to head of write buffer

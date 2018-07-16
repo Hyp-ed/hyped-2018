@@ -1,28 +1,42 @@
 
 
 # define VERBOSE to see executed commands
-CC:=g++
-LL:=g++
+
 TARGET=hyped
 MAIN=main.cpp
 SRCS_DIR:=src
+LIBS_DIR:=lib
 OBJS_DIR:=bin
 
 CFLAGS:=-pthread -std=c++11 -O2 -Wall -Wno-unused-result
 LFLAGS:=-lpthread -pthread
 
-UNAME=$(shell uname)
-ifneq ($(UNAME),Linux)
-	# assume Windows
-	UNAME='Windows'
-	CFLAGS:=$(CFLAGS) -DWIN
-endif
-ARCH=$(shell uname -m)
-ifneq (,$(findstring 64,$(ARCH)))
-	CFLAGS:=$(CFLAGS) -DARCH_64
+CROSS=0
+
+ifeq ($(CROSS), 0)
+	CC:=g++
+	UNAME=$(shell uname)
+	ifneq ($(UNAME),Linux)
+		# assume Windows
+		UNAME='Windows'
+		CFLAGS:=$(CFLAGS) -DWIN
+	endif
+	ARCH=$(shell uname -m)
+	ifneq (,$(findstring 64,$(ARCH)))
+		CFLAGS:=$(CFLAGS) -DARCH_64
+	endif
 else
-  CFLAGS:=$(CFLAGS) -DARCH_32
+	CC:=arm-linux-gnueabihf-g++
+	CFLAGS:=$(CFLAGS) -DARCH_32
+$(info cross-compiling)
 endif
+
+# test if compiler is installed
+ifeq ($(shell which $(CC)), )
+$(error compiler $(CC) is not installed)
+endif
+LL:=$(CC)
+
 
 
 include $(SRCS_DIR)/Source.files
@@ -34,7 +48,7 @@ OBJS := $(patsubst %,$(OBJS_DIR)/%,$(OBJS))
 
 DEP_DIR := $(OBJS_DIR)
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEP_DIR)/$*.d
-INC_DIR := -I$(SRCS_DIR)
+INC_DIR := -I$(SRCS_DIR) -I$(LIBS_DIR)/eigen-git-mirror
 
 # run "make VERBOSE=1" to see all commands
 ifndef VERBOSE

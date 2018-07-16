@@ -35,12 +35,12 @@ namespace communications {
 
 class ReceiverThread : public Thread {
  public:
-  explicit ReceiverThread(Logger& log, Communications* baseCommunicator);
+  explicit ReceiverThread(Logger& log, Communications* base_communicator);
   void run() override;
 
  private:
   Logger& log_;
-  Communications* baseCommunicator_;
+  Communications* base_communicator_;
   data::Data& data_;
 };
 

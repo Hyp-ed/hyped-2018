@@ -122,34 +122,6 @@ bool MPU9250::whoAmI()
   return is_online_;
 }
 
-array<NavigationVector, 2> MPU9250::calcCalibrationData()
-{
-  array<NavigationVector, 2> stats;
-  if (is_online_) {
-    OnlineStatistics<NavigationVector> stats_acc = OnlineStatistics<NavigationVector>();
-    OnlineStatistics<NavigationVector> stats_gyr = OnlineStatistics<NavigationVector>();
-    for (int i = 0; i < 1000; i++) {
-      Imu imu;
-      getData(&imu);
-      stats_acc.update(imu.acc);
-      stats_gyr.update(imu.gyr);
-    }
-    stats[0] = stats_acc.getVariance();
-    stats[1] = stats_gyr.getVariance();
-    log_.INFO("MPU9250", "Calibration of variance complete.");
-    return stats;
-  } else {
-    log_.ERR("MPU9250", "Could not calibrate imu data, sensor not operational");
-    array<NavigationVector, 2> stats;
-    for (int i = 0; i < 2; i++) {
-      for (int j =0; j < 3; j++) {
-        stats[i][j] = -1.0;
-      }
-    }
-    return stats;
-  }
-}
-
 MPU9250::~MPU9250()
 {
   log_.INFO("MPU9250", "Deconstructing sensor object");
