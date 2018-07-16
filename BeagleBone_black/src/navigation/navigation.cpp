@@ -21,6 +21,9 @@
 #include <algorithm>  // std::min
 #include <cmath>
 
+#include "Eigen/Dense"
+#include "Eigen/SVD"
+
 namespace hyped {
 namespace navigation {
 
@@ -54,28 +57,28 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       orientation_(1, 0, 0, 0)
 {}
 
-NavigationType Navigation::getAcceleration()
+NavigationType Navigation::getAcceleration() const
 {
   return acceleration_[0];
 }
 
-NavigationType Navigation::getVelocity()
+NavigationType Navigation::getVelocity() const
 {
   return velocity_[0];
 }
 
-NavigationType Navigation::getDisplacement()
+NavigationType Navigation::getDisplacement() const
 {
   return displacement_[0];
 }
 
-NavigationType Navigation::getEmergencyBrakingDistance()
+NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
-ModuleStatus Navigation::getStatus()
+ModuleStatus Navigation::getStatus() const
 {
   return status_;
 }
@@ -269,7 +272,7 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
       acceleration_[0], acceleration_[1], acceleration_[2],
       velocity_[0], velocity_[1], velocity_[2],
       displacement_[0], displacement_[1], displacement_[2]);
-  acceleration_  = acceleration.value;
+  acceleration_ = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
   velocity_     = velocity.value;
   displacement_ = velocity_integrator_.update(velocity).value;
@@ -282,7 +285,54 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
 
 void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
-  // TODO(Adi): Calculate SLERP (Point 2 of the FDP).
+  // Ground points
+  NavigationVector a = kGroundProxiRR;     a[2] -= ground.rr;
+  NavigationVector b = kGroundProxiFR;     b[2] -= ground.fr;
+  NavigationVector c = kGroundProxiFL;     c[2] -= ground.fl;
+  NavigationVector d = kGroundProxiRL;     d[2] -= ground.rl;
+
+  // Rail points
+  NavigationVector e_l = kRailProxiRL;     e_l[1] -= rail.rl;
+  NavigationVector e_r = kRailProxiRR;     e_r[1] += rail.rr;
+  NavigationVector f_l = kRailProxiFL;     f_l[1] -= rail.fl;
+  NavigationVector f_r = kRailProxiFR;     f_r[1] += rail.fr;
+
+  // Vector EF in the vertical plane of the I beam
+  NavigationVector temp_r = (f_l + f_r)/2 - (e_l + e_r)/2;
+  Eigen::Vector3d r(temp_r[0], temp_r[1], temp_r[2]);
+
+  // Calculate the normal n of the ground plane given by a, b, c, and d
+  Eigen::Matrix<double, 3, 4> m;
+  m << a[0], b[0], c[0], d[0],
+       a[1], b[1], c[1], d[1],
+       a[2], b[2], c[2], d[2];
+
+  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeFullU);
+  Eigen::Vector3d n = svd.matrixU().col(svd.matrixU().cols() - 1);
+  if (n(2) < 0.0)
+    n = -n;
+
+  // Calculate rejection of r on n and use cross product to complete the basis of tube ref. frame
+  Eigen::Vector3d x = r - r.dot(n)/n.dot(n)*n;
+  x /= x.norm();
+  Eigen::Vector3d y = n.cross(x);
+  y /= y.norm();
+  Eigen::Vector3d z = n/n.norm();
+  Eigen::Matrix3d rot;
+  rot << x, y, z;
+
+  // Calculate orientation quaternion
+  Eigen::Quaternion<double> q(rot);
+  q = q.conjugate();  // We want the opposite rotation
+  Eigen::Quaternion<double> orientation(
+      orientation_[0], orientation_[1], orientation_[2], orientation_[3]);
+
+  // SLERP (weighted average of the two orientation estimates)
+  orientation = q.slerp(settings_.prox_orient_w, orientation);
+  orientation_[0] = orientation.w();
+  orientation_[1] = orientation.x();
+  orientation_[2] = orientation.y();
+  orientation_[3] = orientation.z();
 }
 
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)

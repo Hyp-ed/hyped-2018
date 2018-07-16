@@ -164,26 +164,26 @@ System::System(int argc, char* argv[])
         break;
       case 'i':
         if (optarg) fake_imu = atoi(optarg);
-        else        fake_imu = 0;
+        else        fake_imu = 1;
         break;
       case 'j':
         if (optarg) fake_proxi = atoi(optarg);
-        else        fake_proxi = 0;
+        else        fake_proxi = 1;
         break;
       case 'k':
         if (optarg) fake_sensors = atoi(optarg);
-        else        fake_sensors = 0;
+        else        fake_sensors = 1;
         break;
       case 'l':
         if (optarg) fake_keyence = atoi(optarg);
-        else        fake_keyence = 0;
+        else        fake_keyence = 1;
       case 'm':
         if (optarg) fake_motors = atoi(optarg);
-        else        fake_motors = 0;
+        else        fake_motors = 1;
         break;
       case 'n':
         if (optarg) fake_embrakes = atoi(optarg);
-        else        fake_embrakes = 0;
+        else        fake_embrakes = 1;
         break;
       default:
         printUsage();

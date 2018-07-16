@@ -36,13 +36,13 @@ namespace hyped {
 
 using data::DataPoint;
 using data::Imu;
-using data::Proximity;
-using data::Sensors;
-using data::SensorCalibration;
-using data::StripeCounter;
 using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
+using data::Proximity;
+using data::SensorCalibration;
+using data::Sensors;
+using data::StripeCounter;
 using utils::concurrent::Barrier;
 using utils::Logger;
 using utils::math::Differentiator;
@@ -54,6 +54,17 @@ using utils::System;
 
 namespace navigation {
 
+// Positions (in m) of proximity sensors w.r.t. IMUs
+// TODO(Brano): Update the positions once stuff is mounted
+const NavigationVector kGroundProxiFR({ 1, -0.5, -0.1});
+const NavigationVector kGroundProxiFL({ 1,  0.5, -0.1});
+const NavigationVector kGroundProxiRL({-2,  0.5, -0.1});
+const NavigationVector kGroundProxiRR({-2, -0.5, -0.1});
+const NavigationVector kRailProxiFR({ 1, -0.1, -0.1});
+const NavigationVector kRailProxiFL({ 1,  0.1, -0.1});
+const NavigationVector kRailProxiRL({-2,  0.1, -0.1});
+const NavigationVector kRailProxiRR({-2, -0.1, -0.1});
+
 constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
 constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
       30.48,   60.96,   91.44,  121.92,  152.4,  182.88,  213.36,  243.84,  274.32,  304.8,
@@ -63,6 +74,8 @@ constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
     1249.68};
 
 class Navigation {
+  friend class Main;
+
  public:
   typedef std::array<Imu,           Sensors::kNumImus>          ImuArray;
   typedef std::array<Proximity*,    2*Sensors::kNumProximities> ProximityArray;
@@ -75,8 +88,6 @@ class Navigation {
     float prox_vel_w = 0.01;  ///< Weight (from [0,1]) of proxi vs imu in velocity calculation
     float strp_vel_w = 0.0;  ///< Weight [0,1]  of stripe count vs imu in velocity calculation
   };
-
-  friend class Main;
 
   /**
    * @brief Construct a new Navigation object
@@ -95,31 +106,31 @@ class Navigation {
    * @return NavigationType Returns the forward component of acceleration vector (negative when
    *                        decelerating)
    */
-  NavigationType getAcceleration();
+  NavigationType getAcceleration() const;
   /**
    * @brief Get the velocity value
    *
    * @return NavigationType Returns the forward component of velocity vector
    */
-  NavigationType getVelocity();
+  NavigationType getVelocity() const;
   /**
    * @brief Get the displacement value
    *
    * @return NavigationType Returns the forward component of displacement vector
    */
-  NavigationType getDisplacement();
+  NavigationType getDisplacement() const;
   /**
    * @brief Get the emergency braking distance in metres
    *
    * @return NavigationType emergency braking distance in metres
    */
-  NavigationType getEmergencyBrakingDistance();
+  NavigationType getEmergencyBrakingDistance() const;
   /**
    * @brief Get the status of the nav module
    *
    * @return ModuleStatus Status of the nav module
    */
-  ModuleStatus getStatus();
+  ModuleStatus getStatus() const;
   /**
    * @brief Starts the calibration phase if the module's status is `kInit`.
    *
