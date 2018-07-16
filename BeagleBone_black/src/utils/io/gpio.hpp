@@ -25,10 +25,10 @@
 #include <cstdint>
 #include <vector>
 
-#include "utils/logger.hpp"
-
 namespace hyped {
 namespace utils {
+// Forward declaration
+class Logger;
 namespace io {
 
 namespace gpio {
