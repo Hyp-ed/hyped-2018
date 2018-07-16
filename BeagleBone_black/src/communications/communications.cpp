@@ -78,6 +78,7 @@ int Communications::sendData(std::string message)
 
   if (n < 0) {
     log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
+    return 1;
   }
 
   return atoi(buffer_);
@@ -90,7 +91,8 @@ int Communications::receiveRunLength()
   log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
 
   if (n < 0) {
-      log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    return 1;
   }
 
   return run_length;
