@@ -51,16 +51,12 @@ class State {
   virtual void entry() = 0;
   data::State   state_;
   static State* alloc_;   // allocate all states here
-  GPIO pin_37_ = GPIO(78, utils::io::gpio::kOut);
-  GPIO pin_38_ = GPIO(79, utils::io::gpio::kOut);
 };
 
 class Idle : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
- private:
-  utils::System& sys_ = utils::System::getSystem();
 };
 
 class Calibrating : public State {
@@ -91,8 +87,6 @@ class EmergencyBraking : public State {
  public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
-  private:
-  utils::System& sys_ = utils::System::getSystem();
 };
 
 class RunComplete : public State {
