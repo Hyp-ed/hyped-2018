@@ -86,6 +86,7 @@ void ImuManager::run()
   while (1) {
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
     imu_[i]->getData(&(sensors_imu_->value[i]));
+    if (is_fake_) Thread::sleep(10);
     }
     sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }

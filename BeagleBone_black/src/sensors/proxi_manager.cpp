@@ -54,7 +54,7 @@ ProxiManager::ProxiManager(Logger& log,
   if (is_fake_) {
     // TODO(anyone) add read to file after
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      FakeProxi* proxi = new FakeProxi(log_, 23, 1.5);
+      FakeProxi* proxi = new FakeProxi(log_, 23, 1.5, true);
       proxi_[i] = proxi;
     }
   } else if (is_front_) {

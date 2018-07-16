@@ -43,7 +43,6 @@ FakeImu::FakeImu(utils::Logger& log,
                                          std::string dec_file_path,
                                          std::string gyr_file_path)
     : log_(log),
-      acc_val_(0),
       gyr_val_(0),
       acc_noise_(1),
       gyr_noise_(1),
@@ -54,6 +53,11 @@ FakeImu::FakeImu(utils::Logger& log,
       dec_started_(false),
       data_(data::Data::getInstance())
 {
+  NavigationVector acc;
+  acc[0] = 0.0;
+  acc[1] = 0.0;
+  acc[2] = 9.8;
+  acc_val_ = acc;
   readDataFromFile(acc_file_path_, dec_file_path_, gyr_file_path_);
   log_.INFO("Fake-IMU-accl", "Fake IMU initialised");
 }
@@ -74,14 +78,15 @@ void FakeImu::startDec()
 void FakeImu::getData(Imu* imu)
 {
   data::State state = data_.getStateMachineData().current_state;
+  bool operational;
   if (state == data::State::kAccelerating) {
     // start acc
     if (!acc_started_) {
       acc_started_ = true;
       startAcc();
     }
+    acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
     if (accCheckTime()) {
-      acc_count_ = std::min(acc_count_, (int64_t) acc_val_read_.size());
       // Check so you don't go out of bounds
       if (acc_count_ == (int64_t) acc_val_read_.size()) {
         prev_acc_ = acc_val_read_[acc_count_-1];
@@ -89,7 +94,9 @@ void FakeImu::getData(Imu* imu)
         prev_acc_ = acc_val_read_[acc_count_];
       }
     }
-
+    if (acc_count_ == (int64_t) acc_val_read_.size())
+      operational = acc_val_opertional[acc_count_-1];
+    operational = acc_val_opertional[acc_count_-1];
     if (gyrCheckTime()) {
       gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
       // Check so you don't go out of bounds
@@ -105,8 +112,8 @@ void FakeImu::getData(Imu* imu)
       dec_started_ = true;
       startDec();
     }
+    acc_count_ = std::min(acc_count_, (int64_t) dec_val_read_.size());
     if (accCheckTime()) {
-      acc_count_ = std::min(acc_count_, (int64_t) dec_val_read_.size());
       // Check so you don't go out of bounds
       if (acc_count_ == (int64_t) dec_val_read_.size()) {
         prev_acc_ = dec_val_read_[acc_count_-1];
@@ -114,6 +121,9 @@ void FakeImu::getData(Imu* imu)
         prev_acc_ = dec_val_read_[acc_count_];
       }
     }
+    if (acc_count_ == (int64_t) acc_val_read_.size())
+      operational = dec_val_opertional[acc_count_-1];
+    operational = dec_val_opertional[acc_count_-1];
 
     if (gyrCheckTime()) {
       gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
@@ -127,14 +137,16 @@ void FakeImu::getData(Imu* imu)
   } else {
     if (accCheckTime()) {
       prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
+      operational = true;
     }
     if (gyrCheckTime()) {
       prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
+      operational = true;
     }
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
-  imu->operational = true;
+  imu->operational = operational;
 }
 
 NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVector noise)
@@ -155,19 +167,23 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
     std::string file_path;
     uint32_t timestamp;
     std::vector<NavigationVector>* val_read;
+    std::vector<bool>* bool_read;
 
     if (i == 0) {
       file_path = acc_file_path;
       timestamp = kAccTimeInterval;
       val_read  = &acc_val_read_;
+      bool_read = &acc_val_opertional;
     } else if (i == 1) {
       file_path = dec_file_path;
       timestamp = kAccTimeInterval;
       val_read  = &dec_val_read_;
+      bool_read = &dec_val_opertional;
     } else {
       file_path = gyr_file_path;
       timestamp = kGyrTimeInterval;
       val_read  = &gyr_val_read_;
+      bool_read = &gyr_val_opertional;
     }
 
     std::ifstream file;
@@ -195,7 +211,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
         value_counter++;
       }
 
-      if (value_counter != 6) {
+      if (value_counter != 7) {
         log_.ERR("Fake-IMU-accl", "Incomplete values for the argument timestamp: %d", temp_time);
       }
 
@@ -205,6 +221,7 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
         noise[i] = temp_value[i+3];
 
       val_read->push_back(addNoiseToData(value, noise));
+      bool_read->push_back(temp_value[6]);
 
       counter++;
     }
