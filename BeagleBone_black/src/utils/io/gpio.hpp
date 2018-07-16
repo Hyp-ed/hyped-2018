@@ -25,6 +25,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "utils/utils.hpp"
+
 namespace hyped {
 namespace utils {
 // Forward declaration
