@@ -37,7 +37,7 @@ int main()
   printf("from Sensors: %f %d %d at time %d\n",
       sens.imu.value[0].acc[0],
       sens.proxi_front.value[0].val,
-      sens.keyence_stripe_counter.count.value,
-      sens.keyence_stripe_counter.count.timestamp);
+      sens.keyence_stripe_counter[0].count.value,
+      sens.keyence_stripe_counter[0].count.timestamp);
   return 0;
 }

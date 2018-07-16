@@ -68,12 +68,14 @@ class Main: public Thread {
   data::StripeCounter stripe_counter_;
 
 
-  GpioInterface*                         keyence_;
+  GpioInterface*                         keyence_l_;
+  GpioInterface*                         keyence_r_;
   std::unique_ptr<ImuManagerInterface>   imu_manager_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;
   std::unique_ptr<ManagerInterface>      battery_manager_;
-  GpioInterface*                         optical_encoder_;
+  GpioInterface*                         optical_encoder_l_;
+  GpioInterface*                         optical_encoder_r_;
 
   bool sensor_init_;
   bool battery_init_;
