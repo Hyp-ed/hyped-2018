@@ -36,13 +36,13 @@ namespace hyped {
 
 using data::DataPoint;
 using data::Imu;
-using data::Proximity;
-using data::Sensors;
-using data::SensorCalibration;
-using data::StripeCounter;
 using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
+using data::Proximity;
+using data::SensorCalibration;
+using data::Sensors;
+using data::StripeCounter;
 using utils::concurrent::Barrier;
 using utils::Logger;
 using utils::math::Differentiator;
