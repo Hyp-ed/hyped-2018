@@ -55,6 +55,7 @@ void FakeGpioCounter::run()
 void FakeGpioCounter::readDataFromFile(std::string file_path)
 {
     std::vector<uint64_t>* val_read = &val_read_;
+    std::vector<bool>* val_operational = &val_operational_;
 
     std::ifstream file;
     file.open(file_path);
@@ -65,6 +66,7 @@ void FakeGpioCounter::readDataFromFile(std::string file_path)
     uint32_t temp_value;
     uint64_t counter = 0;
     uint32_t temp_time;
+    bool temp_operational;
     std::string line;
 
     while (getline(file, line)) {
@@ -76,7 +78,9 @@ void FakeGpioCounter::readDataFromFile(std::string file_path)
       }
 
       input >> temp_value;
+      input >> temp_operational;
       val_read->push_back(temp_value);
+      val_operational->push_back(temp_operational);
       counter++;
     }
 
@@ -106,26 +110,30 @@ bool FakeGpioCounter::checkTime()
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
   data::StripeCounter stripes;
+  bool operational = false;
   if (data_.getStateMachineData().current_state == data::State::kAccelerating || is_started_) {
     if (!is_started_) {
       is_started_ = true;
       init();
     }
+    gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
     if (checkTime()) {
-      gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
       if (gpio_count_ == (uint64_t) val_read_.size()) {
           prev_gpio_ = val_read_[gpio_count_-1];
       } else {
           prev_gpio_ = val_read_[gpio_count_];
       }
     }
+    if (gpio_count_ == (uint64_t) val_read_.size())
+      operational = val_operational_[gpio_count_-1];
+    operational = val_operational_[gpio_count_];
     stripes.count.value = prev_gpio_;
     stripes.count.timestamp = utils::Timer::getTimeMicros();
-    stripes.operational = true;
+    stripes.operational = operational;
   } else {
     stripes.count.value = prev_gpio_;
     stripes.count.timestamp = utils::Timer::getTimeMicros();
-    stripes.operational = true;
+    stripes.operational = operational;
   }
   // log_.INFO("Fake-Gpio", "stripe count: %d", stripes.count.value);
   return stripes;
