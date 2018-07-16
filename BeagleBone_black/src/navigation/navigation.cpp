@@ -153,7 +153,23 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists(uint16_t stripe_
   return arr;
 }
 
-void Navigation::update(DataPoint<ImuArray> imus)
+void Navigation::update(NavigationInput input)
+{
+  if (input.imus != nullptr) {
+    imuUpdate(*input.imus);
+  }
+  if (input.proxis != nullptr && !is_calibrating_) {
+    proximityUpdate(*input.proxis);
+  }
+  if (input.sc != nullptr && !is_calibrating_) {
+    stripeCounterUpdate(*input.sc);
+  }
+  if (input.optical_enc_distance != nullptr && !is_calibrating_) {
+    opticalEncoderUpdate(*input.optical_enc_distance);
+  }
+}
+
+void Navigation::imuUpdate(DataPoint<ImuArray> imus)
 {
   for (unsigned int i = 0; i < imus.value.size(); ++i) {
     log_.DBG3("NAV", "Before filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
@@ -189,11 +205,8 @@ void Navigation::update(DataPoint<ImuArray> imus)
   }
 }
 
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
+void Navigation::proximityUpdate(ProximityArray proxis)
 {
-  update(imus);
-  if (is_calibrating_) return;
-
   Proximities ground, rail;
   // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
   int num_ground_fail = 0;
@@ -220,21 +233,6 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
 
   proximityDisplacementUpdate(ground, rail);
   proximityOrientationUpdate(ground, rail);
-}
-
-void Navigation::update(DataPoint<ImuArray> imus, StripeCounterArray scs)
-{
-  update(imus);
-  // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
-  if (!is_calibrating_)
-    stripeCounterUpdate(scs);
-}
-
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounterArray scs)
-{
-  update(imus, proxis);
-  if (!is_calibrating_)
-    stripeCounterUpdate(scs);
 }
 
 void Navigation::calibrationUpdate(ImuArray imus)
@@ -461,6 +459,11 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
       acceleration_[0], acceleration_[1], acceleration_[2],
       velocity_[0], velocity_[1], velocity_[2],
       displacement_[0], displacement_[1], displacement_[2]);
+}
+
+void Navigation::opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance)
+{
+  // TODO(anyone): implement
 }
 
 }}  // namespace hyped::navigation
