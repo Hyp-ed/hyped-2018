@@ -67,7 +67,7 @@ void ReceiverThread::run()
         cmn_.service_propulsion_go = false;
         break;
       default:
-        log_.ERR("COMN", "Received %d (Should not reach here)", command);
+        log_.ERR("COMN", "Received NULL (STOP)", command);
         cmn_.module_status = data::ModuleStatus::kCriticalFailure;  // DEFAULT: Critical Failure
         return;
     }
