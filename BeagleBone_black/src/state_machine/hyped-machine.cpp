@@ -27,7 +27,11 @@ namespace state_machine {
 HypedMachine::HypedMachine(utils::Logger& log)
     : current_state_(State::alloc_)
     , log_(log)
+    , pin_em1_(78, utils::io::gpio::kOut)
+    , pin_em2_(79, utils::io::gpio::kOut)
 {
+  pin_em1_.set();
+  pin_em2_.set();
   log_.INFO("STATE", "State Machine initialised");
   transition(new(current_state_) Idle());
 }
@@ -43,6 +47,10 @@ void HypedMachine::transition(State *state)
   // NOTE, no use of argument state, as all react() functions allocate all new
   // states directly to current_state_ variable through common State::alloc_ pointer
   current_state_->entry();
+  if (current_state_->state_ == data::State::kEmergencyBraking) {
+    pin_em1_.clear();
+    pin_em2_.clear();
+  }
   log_.INFO("STATE", "Transitioned to %s"
     , data::states[current_state_->state_]);
   state_machine_.current_state = current_state_->state_;
