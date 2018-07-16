@@ -115,8 +115,9 @@ void SPI::setClock(Clock clk)
 {
   uint32_t data;
   switch (clk) {
-    case Clock::k1MHz: data = 1000000; break;
-    case Clock::k4MHz: data = 4000000; break;
+    case Clock::k1MHz:  data = 1000000;   break;
+    case Clock::k4MHz:  data = 4000000;   break;
+    case Clock::k20MHz: data = 20000000;  break;
   }
 
   if (ioctl(spi_fd_, SPI_IOC_WR_MAX_SPEED_HZ, &data) < 0) {
