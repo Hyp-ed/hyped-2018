@@ -21,6 +21,7 @@
 #include "state_machine/states.hpp"
 #include <stdlib.h>
 
+#include "utils/logger.hpp"
 namespace hyped {
 
 using state = data::State;
@@ -31,7 +32,9 @@ namespace state_machine {
 
 // statically allocate memory for current_state
 State* State::alloc_ = static_cast<State*>(malloc(sizeof(State)));
-
+utils::Logger log(true, 0);
+GPIO pin_37_ = GPIO(78, utils::io::gpio::kOut, log);
+GPIO pin_38_ = GPIO(79, utils::io::gpio::kOut, log);
 void Idle::entry()
 {
   state_ = state::kIdle;
