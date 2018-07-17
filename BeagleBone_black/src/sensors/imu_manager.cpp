@@ -85,6 +85,7 @@ ImuManager::ImuManager(Logger& log,
                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+        // imu_[i] = new FakeAccurateImu(log);
       }
     }
   }
