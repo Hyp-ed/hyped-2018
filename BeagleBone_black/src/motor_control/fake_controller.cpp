@@ -122,8 +122,8 @@ void FakeController::healthCheck()
 {
   // // if it is faulty this will choose a random time bewteen the 3 seconds and 23 seconds of the run
   // // to set critical_failure_ to true
-  data::State state = data_.getStateMachineData().current_state;
   if (faulty_) {
+    data::State state = data_.getStateMachineData().current_state;
     if (state == data::State::kAccelerating || is_timer_start_) {
       if (!is_timer_start_) {
         startTimer();

@@ -79,7 +79,8 @@ System::System(int argc, char* argv[])
       fake_motors(false),
       fake_embrakes(false),
       fail_dec_imu(false),
-      fail_acc_imu(false)
+      fail_acc_imu(false),
+      fail_motors(false)
 {
   int c;
   int option_index = 0;
