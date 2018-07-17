@@ -154,10 +154,12 @@ class Controller : public CanProccesor, public ControllerInterface {
    */
   void throwCriticalFailure();
   /*
-   * @brief { Checks to see if controller has transitioned to a new state,
-   *          if it hasn't it will go into critical failure }
+   * @brief { Sends state transition message to controller, leaving sufficient time for
+   *          controller to change state. If state does not change, throw critical failure }
+   *
+   * @param[in] { CAN message to be sent, Controller state requested}
    */
-  void checkStateTransition(ControllerState state);
+  void requestStateTransition(utils::io::can::Frame& message, ControllerState state);
   /*
    *  @brief { Called by processNewData if Emergency message is detected. }
    *

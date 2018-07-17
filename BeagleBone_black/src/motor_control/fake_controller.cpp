@@ -40,10 +40,9 @@ FakeController::FakeController(Logger& log, uint8_t id, bool faulty)
     node_id_(id),
     critical_failure_(false),
     actual_velocity_(0),
-    started_(false),
     faulty_(faulty),
-    timer_start_(0),
-    is_timer_start_(false)
+    start_time_(0),
+    timer_started_(false)
 {
 }
 
@@ -55,6 +54,7 @@ void FakeController::configure()
   log_.INFO("MOTOR", "Controller %d: Configuring...", node_id_);
   if(node_id_ == 1) {
     RPMvTime.open("RPMvTime.txt");
+    Thread::sleep(15);
     if(!RPMvTime.is_open()) {
       log_.ERR("MOTOR", "Could not open RPM v Time text file");
     } else {
@@ -71,15 +71,17 @@ void FakeController::enterOperational()
 
 void FakeController::startTimer()
 {
-  timer_start_ = Timer::getTimeMicros(); 
-  is_timer_start_ = true;
+  start_time_ = Timer::getTimeMicros(); 
+  timer_started_ = true;
   fail_time_ = std::rand()%20000000 + 1000000;
 }
 
 void FakeController::enterPreOperational()
 {
+  if (state_ != kSwitchOnDisabled) {
+   log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
+  }
   state_ = kSwitchOnDisabled;
-  log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
 }
 
 void FakeController::checkState()
@@ -89,17 +91,25 @@ void FakeController::checkState()
 
 void FakeController::sendTargetVelocity(int32_t target_velocity)
 {
+  if (!timer_started_) {
+    startTimer();
+  }
   // Write timestamp and target velocity data to text file (only need to use one
   // as all four fake controllers are identical)
-  if (!started_ && node_id_ == 1) {
-    timer.start();
-    started_ = true;
-  }
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity to %d", node_id_, target_velocity);
   actual_velocity_ = target_velocity;
-  if (node_id_ == 1) {
-    RPMvTime << (timer.getTimeMicros() / 1000) << "\t" << target_velocity;
+  static int counter = 0;
+  if (counter == 1000) {
+    if (node_id_ == 1) {
+      RPMvTime << ((timer.getTimeMicros() - start_time_) / 1000) << "\t" << target_velocity << "\n" ;
+    }
+    counter = 0;
+    data::State sm_state_ = data_.getStateMachineData().current_state;
+    if (sm_state_ == data::State::kRunComplete || sm_state_ == data::State::kFailureStopped) {
+      RPMvTime.close();
+    }
   }
+  counter++;
 }
 
 void FakeController::updateActualVelocity()
@@ -120,15 +130,12 @@ void FakeController::quickStop()
 
 void FakeController::healthCheck()
 {
-  // // if it is faulty this will choose a random time bewteen the 3 seconds and 23 seconds of the run
-  // // to set critical_failure_ to true
+  // If it is faulty this will choose a random time bewteen the 3 seconds and 23 seconds of the run
+  // to set critical_failure_ to true
   if (faulty_) {
     data::State state = data_.getStateMachineData().current_state;
-    if (state == data::State::kAccelerating || is_timer_start_) {
-      if (!is_timer_start_) {
-        startTimer();
-      }
-      if (fail_time_ <= (Timer::getTimeMicros() - timer_start_) ) {
+    if (state == data::State::kAccelerating || state == data::State::kDecelerating) {
+      if (fail_time_ <= (Timer::getTimeMicros() - start_time_) ) {
         critical_failure_ = true;
         log_.ERR("Fake-controller","fake critical failure");
       }
