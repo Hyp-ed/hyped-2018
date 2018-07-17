@@ -53,14 +53,18 @@ class Main: public Thread {
   bool checkOnExit();
   bool checkFinish();
   bool checkVelocityZeroReached();
+  bool checkTimer();
 
-  data::Data& data_;
-  data::Communications comms_data_;
-  data::Navigation nav_data_;
-  data::StateMachine sm_data_;
-  data::Motors motor_data_;
-  data::Batteries batteries_data_;
-  data::Sensors sensors_data_;
+  uint64_t time_start_;
+  uint64_t timeout_;
+
+  data::Data&           data_;
+  data::Communications  comms_data_;
+  data::Navigation      nav_data_;
+  data::StateMachine    sm_data_;
+  data::Motors          motor_data_;
+  data::Batteries       batteries_data_;
+  data::Sensors         sensors_data_;
 };
 
 }}  // namespace hyped::motor_control
