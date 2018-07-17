@@ -217,6 +217,7 @@ void Main::run()
     sen_ = data_.getSensorsData();
     stm_ = data_.getStateMachineData();
     bat_ = data_.getBatteriesData();
+    emb_ = data_.getEmergencyBrakesData();
     sendDistance(nav_.distance);
     sendVelocity(nav_.velocity);
     sendAcceleration(nav_.acceleration);
