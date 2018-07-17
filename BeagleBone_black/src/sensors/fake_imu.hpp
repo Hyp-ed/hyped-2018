@@ -113,8 +113,11 @@ class FakeImu : public ImuInterface {
   NavigationVector prev_gyr_;
 
   std::vector<NavigationVector> acc_val_read_;
+  std::vector<bool>             acc_val_operational_;
   std::vector<NavigationVector> dec_val_read_;
+  std::vector<bool>             dec_val_operational_;
   std::vector<NavigationVector> gyr_val_read_;
+  std::vector<bool>             gyr_val_operational_;
 
   int64_t acc_count_, gyr_count_;
   uint64_t imu_ref_time_;

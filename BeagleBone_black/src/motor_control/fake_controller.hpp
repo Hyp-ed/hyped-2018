@@ -26,6 +26,7 @@
 #include "data/data.hpp"
 #include "utils/timer.hpp"
 #include "motor_control/controller_interface.hpp"
+#include "data/data.hpp"
 
 namespace hyped {
 namespace utils { class Logger; }
@@ -37,7 +38,7 @@ using utils::Timer;
 class FakeController : public ControllerInterface {
  public:
 
-  FakeController(Logger& log, uint8_t id);
+  FakeController(Logger& log, uint8_t id, bool faulty);
   /**
     *  @brief  { Register controller to receive and transmit messages on CAN bus }
     */
@@ -92,7 +93,7 @@ class FakeController : public ControllerInterface {
   ControllerState getControllerState() override;
 
  private:
-
+  void startTimer();
   Logger&        log_;
   data::Data&    data_;
   data::Motors motor_data_;
@@ -103,6 +104,10 @@ class FakeController : public ControllerInterface {
   bool     critical_failure_;
   int32_t  actual_velocity_;
   bool     started_;
+  bool     faulty_;
+  uint64_t timer_start_;
+  bool is_timer_start_;
+  int fail_time_;
 };
 
 }}  // namespace hyped::motor_control
