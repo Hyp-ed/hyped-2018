@@ -157,7 +157,7 @@ inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_d
 inline bool Main::opticalEncDistChanged(const Sensors& old_data, const Sensors& new_data)
 {
   for (int i = 0; i < Sensors::kNumOptEnc; i++) {
-    if (new_data.optical_enc_distance[i] != old_data.optical_enc_distance[i]) //NOLINT
+    if (new_data.optical_enc_distance[i] != old_data.optical_enc_distance[i])
       return true;
   }
 
