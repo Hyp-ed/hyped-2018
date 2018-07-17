@@ -77,7 +77,10 @@ System::System(int argc, char* argv[])
       fake_proxi(false),
       fake_sensors(false),
       fake_motors(false),
-      fake_embrakes(false)
+      fake_embrakes(false),
+      fail_dec_imu(false),
+      fail_acc_imu(false),
+      fail_motors(false)
 {
   int c;
   int option_index = 0;
@@ -97,8 +100,11 @@ System::System(int argc, char* argv[])
       {"debug_cmn", optional_argument, 0, 'g'},
       {"help", no_argument, 0, 'h'},
       {"fake_imu", optional_argument, 0, 'i'},
+      {"fail_dec_imu", optional_argument, 0, 'I'},
       {"fake_proxi", optional_argument, 0, 'j'},
+      {"fail_acc_imu", optional_argument, 0, 'J'},
       {"fake_sensors", optional_argument, 0, 'k'},
+      {"fail_motors", optional_argument, 0, 'K'},
       {"fake_keyence", optional_argument, 0, 'l'},
       {"fake_motors", optional_argument, 0, 'm'},
       {"fake_embrakes", optional_argument, 0, 'n'},
@@ -166,13 +172,25 @@ System::System(int argc, char* argv[])
         if (optarg) fake_imu = atoi(optarg);
         else        fake_imu = 1;
         break;
+      case 'I':
+        if (optarg) fail_dec_imu = atoi(optarg);
+        else        fail_dec_imu = 1;
+        break;
       case 'j':
         if (optarg) fake_proxi = atoi(optarg);
         else        fake_proxi = 1;
         break;
+      case 'J':
+        if (optarg) fail_acc_imu = atoi(optarg);
+        else        fail_acc_imu = 1;
+        break;
       case 'k':
         if (optarg) fake_sensors = atoi(optarg);
         else        fake_sensors = 1;
+        break;
+      case 'K':
+        if (optarg) fail_motors = atoi(optarg);
+        else        fail_motors = 1;
         break;
       case 'l':
         if (optarg) fake_keyence = atoi(optarg);

@@ -137,19 +137,11 @@ void VL6180::turnOn()
   writeByte(kSystemInterruptClear, 0x01);
   log_.INFO("VL6180", "Clear interrupt");
 
-  setContinuousRangingMode();
-
+  writeByte(kSysrangeStart, 0x01);
 
   if (isOnline()) {
     // TODO(Jack) Redo this, there has to be a better way
     log_.INFO("VL6180", "Sensor is online");
-    Proximity proxi;
-    getData(&proxi);
-    if (timeout_) setContinuousRangingMode();
-    getData(&proxi);
-    if (timeout_) setContinuousRangingMode();
-    getData(&proxi);
-    if (timeout_) is_online_ = false;
   } else {
     log_.ERR("VL6180", "Sensor is not operational");
   }
@@ -209,7 +201,7 @@ uint8_t VL6180::continuousRangeDistance()
   uint64_t start = utils::Timer::getTimeMicros();
   uint8_t data = 1;
   uint8_t interrupt = 1;
-  uint64_t timeout = 50000;   // micro s
+  uint64_t timeout = 30000;   // micro s
   // Make sure we are in continuous ranging mode
   readByte(kResultInterruptStatusGpio, &interrupt);
 
