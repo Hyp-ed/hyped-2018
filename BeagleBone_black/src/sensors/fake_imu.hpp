@@ -139,10 +139,9 @@ class FakeAccurateImu: public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
-  utils::Logger& log_;
   data::Data&    data_;
-
   NavigationVector acc_noise_, gyr_noise_;
+  utils::Logger& log_;
 };
 
 }}  // namespace hyped::sensors

@@ -58,7 +58,6 @@ MAINS := \
   demo_mpu9250 \
   demo_fake_proxi \
   demo_optical_encoder \
-  demo_fake_gpio_counter \
   demo_imus \
   test_proxis \
   test_imus \
