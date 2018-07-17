@@ -135,7 +135,7 @@ void BMS::getData(Battery* battery)
 {
   battery->voltage = 0;
   for (uint16_t v: data_.voltage) battery->voltage += v;
-
+  battery->voltage /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
 }
 
@@ -146,14 +146,14 @@ std::vector<uint16_t> BMSHP::existing_ids_;   // NOLINT [build/include_what_you_
 
 BMSHP::BMSHP(uint16_t id, Logger& log)
     : log_(log),
-      id_(id + bms::kHPBase),
+      can_id_(id + bms::kHPBase),
       local_data_ {},
       last_update_time_(0)
 {
   // verify this BMSHP unit has not been instantiated
   for (uint16_t i : existing_ids_) {
-    if (id_ == i) {
-      log_.ERR("BMSHP", "BMSHP %d already exists, duplicate unit instantiation", id_);
+    if (id == i) {
+      log_.ERR("BMSHP", "BMSHP %d already exists, duplicate unit instantiation", id);
       return;
     }
   }
@@ -178,18 +178,18 @@ void BMSHP::getData(Battery* battery)
 bool BMSHP::hasId(uint32_t id, bool extended)
 {
   // only accept a single CAN message
-  return id == id_;
+  return id == can_id_;
 }
 
 void BMSHP::processNewData(utils::io::can::Frame& message)
 {
   // message format is expected to look like this:
-  // [current   , volage      , charge   , high_temp,
-  //  mean_temp , relay_state , isolation_threshold, failsafe_satate   ] - these are not used
-  local_data_.current     = message.data[0] * 1000;   // convert to mA
-  local_data_.voltage     = message.data[1] * 1000;   // convert to mV
-  local_data_.charge      = message.data[2];          // in %, 0 to 100
-  local_data_.temperature = message.data[3];          // in C
+  // [voltageH , volageL  , currentH   , currentL,
+  //  charge   , HighTemp , AverageTemp, state   ]
+  local_data_.voltage     = (message.data[0] << 8) | message.data[1];
+  local_data_.current     = (message.data[2] << 8) | message.data[3];
+  local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
+  local_data_.temperature = message.data[5];
 
   log_.DBG1("BMSHP", "received data Volt,Curr,Char,Temp %u,%u,%u,%d",
     local_data_.voltage,

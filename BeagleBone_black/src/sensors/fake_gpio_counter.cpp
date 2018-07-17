@@ -54,33 +54,34 @@ void FakeGpioCounter::run()
 
 void FakeGpioCounter::readDataFromFile(std::string file_path)
 {
-    std::vector<uint64_t>* val_read = &val_read_;
+  std::ifstream file;
+  file.open(file_path);
+  if (!file.is_open()) {
+    log_.ERR("Fake-keyence", "Wrong file path for argument");
+  }
 
-    std::ifstream file;
-    file.open(file_path);
-    if (!file.is_open()) {
-        log_.ERR("Fake-keyence", "Wrong file path for argument");
+  uint32_t temp_value;
+  uint64_t counter = 0;
+  uint32_t temp_time;
+  bool temp_operational;
+  std::string line;
+
+  while (getline(file, line)) {
+    std::stringstream input(line);
+    input >> temp_time;
+
+    if (temp_time != kTimeStamp*counter) {
+      log_.ERR("Fake-keyence", "Timestamp format invalid %d", temp_time);
     }
 
-    uint32_t temp_value;
-    uint64_t counter = 0;
-    uint32_t temp_time;
-    std::string line;
+    input >> temp_value;
+    input >> temp_operational;
+    val_read_.push_back(temp_value);
+    val_operational_.push_back(temp_operational);
+    counter++;
+  }
 
-    while (getline(file, line)) {
-      std::stringstream input(line);
-      input >> temp_time;
-
-      if (temp_time != kTimeStamp*counter) {
-        log_.ERR("Fake-keyence", "Timestamp format invalid %d", temp_time);
-      }
-
-      input >> temp_value;
-      val_read->push_back(temp_value);
-      counter++;
-    }
-
-    file.close();
+  file.close();
 }
 
 void FakeGpioCounter::init()
@@ -106,26 +107,33 @@ bool FakeGpioCounter::checkTime()
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
   data::StripeCounter stripes;
-  if (data_.getStateMachineData().current_state == data::State::kAccelerating || is_started_) {
+  bool operational = true;
+  if (data_.getStateMachineData().current_state == data::State::kAccelerating ||
+      data_.getStateMachineData().current_state == data::State::kDecelerating ||
+      is_started_) {
     if (!is_started_) {
       is_started_ = true;
       init();
     }
+
     if (checkTime()) {
       gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
       if (gpio_count_ == (uint64_t) val_read_.size()) {
           prev_gpio_ = val_read_[gpio_count_-1];
+          operational = val_operational_[gpio_count_-1];
       } else {
           prev_gpio_ = val_read_[gpio_count_];
+          operational = val_operational_[gpio_count_];
       }
     }
+
     stripes.count.value = prev_gpio_;
     stripes.count.timestamp = utils::Timer::getTimeMicros();
-    stripes.operational = true;
+    stripes.operational = operational;
   } else {
     stripes.count.value = prev_gpio_;
     stripes.count.timestamp = utils::Timer::getTimeMicros();
-    stripes.operational = true;
+    stripes.operational = operational;
   }
   // log_.INFO("Fake-Gpio", "stripe count: %d", stripes.count.value);
   return stripes;
