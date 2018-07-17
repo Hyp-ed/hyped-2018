@@ -33,7 +33,7 @@ int main()
 {
   Logger log(1, true);
   Proximity reading;
-  FakeProxi generator(log, 23, 1);
+  FakeProxi generator(log, 23, 1, true);
   FakeProxi file(log, "../BeagleBone_black/data/in/fake_proxi_input.txt");
 
   log.INFO("Fake-Proxi", "From file....");

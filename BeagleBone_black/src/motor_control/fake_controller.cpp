@@ -20,10 +20,11 @@
 
 #include "motor_control/fake_controller.hpp"
 #include <cstdint>
+#include <cstdlib>
 
 #include "utils/logger.hpp"
-#include "data/data.hpp"
 #include "utils/io/can.hpp"
+
 
 namespace hyped {
 namespace motor_control {
@@ -32,14 +33,17 @@ using utils::io::can::Frame;
 using utils::concurrent::Thread;
 using utils::Timer;
 
-FakeController::FakeController(Logger& log, uint8_t id)
+FakeController::FakeController(Logger& log, uint8_t id, bool faulty)
   : log_(log),
     data_(data::Data::getInstance()),
     motor_data_(data_.getMotorData()),
     node_id_(id),
     critical_failure_(false),
     actual_velocity_(0),
-    started_(false)
+    started_(false),
+    faulty_(faulty),
+    timer_start_(0),
+    is_timer_start_(false)
 {
 }
 
@@ -63,6 +67,13 @@ void FakeController::enterOperational()
 {
   state_ = kOperationEnabled;
   log_.DBG1("MOTOR", "Controller %d: Entering Operational");
+}
+
+void FakeController::startTimer()
+{
+  timer_start_ = Timer::getTimeMicros(); 
+  is_timer_start_ = true;
+  fail_time_ = std::rand()%20000000 + 1000000;
 }
 
 void FakeController::enterPreOperational()
@@ -108,7 +119,23 @@ void FakeController::quickStop()
 }
 
 void FakeController::healthCheck()
-{/*EMPTY*/}
+{
+  // // if it is faulty this will choose a random time bewteen the 3 seconds and 23 seconds of the run
+  // // to set critical_failure_ to true
+  if (faulty_) {
+    data::State state = data_.getStateMachineData().current_state;
+    if (state == data::State::kAccelerating || is_timer_start_) {
+      if (!is_timer_start_) {
+        startTimer();
+      }
+      if (fail_time_ <= (Timer::getTimeMicros() - timer_start_) ) {
+        critical_failure_ = true;
+        log_.ERR("Fake-controller","fake critical failure");
+      }
+    }
+  }
+  
+}
 
 bool FakeController::getFailure()
 {
