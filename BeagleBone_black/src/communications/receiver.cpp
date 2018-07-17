@@ -45,7 +45,7 @@ void ReceiverThread::run()
       case 1:
         log_.INFO("COMN", "Received 1 (STOP)");                     // 1: STOP
         cmn_.module_status = data::ModuleStatus::kCriticalFailure;
-        return;
+        break;
       case 2:
         log_.INFO("COMN", "Received 2 (LAUNCH)");                   // 2: LAUNCH
         cmn_.launch_command = true;
@@ -67,8 +67,9 @@ void ReceiverThread::run()
         cmn_.service_propulsion_go = false;
         break;
       default:
-        log_.ERR("COMN", "Received NULL (STOP)", command);
+        log_.ERR("COMN", "CONNECTION LOST (STOP)");
         cmn_.module_status = data::ModuleStatus::kCriticalFailure;  // DEFAULT: Critical Failure
+        data_.setCommunicationsData(cmn_);
         return;
     }
 
