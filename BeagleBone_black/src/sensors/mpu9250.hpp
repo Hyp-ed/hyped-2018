@@ -21,13 +21,10 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 
-#include <vector>
-
 #include "sensors/interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
 #include "utils/io/gpio.hpp"
-#include "utils/io/i2c.hpp"
 
 
 namespace hyped {
