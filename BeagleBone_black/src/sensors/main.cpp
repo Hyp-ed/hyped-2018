@@ -139,11 +139,65 @@ void Main::run()
 
     // Update battery data only when there is some change
     if (battery_manager_->updated()) {
-      data_.setBatteryData(batteries_);
       battery_manager_->resetTimestamp();
+
+      // check health of batteries
+      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure) {
+        if (!batteriesInRange()) {
+          log_.ERR("SENSORS", "battery failure detected");
+          batteries_.module_status = data::ModuleStatus::kCriticalFailure;
+        }
+      }
+
+      // publish the new data
+      data_.setBatteryData(batteries_);
     }
     yield();
   }
+}
+
+bool Main::batteriesInRange()
+{
+  // check all LP and HP battery values are in expected range
+
+  // check LP
+  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+    auto& battery = batteries_.low_power_batteries[i];
+    if (battery.voltage < 140 || battery.voltage > 294) {   // voltage in 14V to 29.4V
+      log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
+      return false;
+    }
+
+    if (battery.current < 0 || battery.current > 300) {       // current in 0A to 30A
+      log_.ERR("SENSORS", "BMS LP %d current out of range: %d", i, battery.current);
+      return false;
+    }
+
+    if (battery.temperature < -20 || battery.temperature > 70) {  // temperature in -20C to 70C
+      log_.ERR("SENSORS", "BMS LP %d temperature out of range: %d", i, battery.temperature);
+      return false;
+    }
+  }
+
+  // check HP
+  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
+    auto& battery = batteries_.low_power_batteries[i];
+    if (battery.voltage < 720 || battery.voltage > 1200) {   // voltage in 72V to 120V
+      log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
+      return false;
+    }
+
+    if (battery.current < 0 || battery.current > 15000) {       // current in 0A to 1500A
+      log_.ERR("SENSORS", "BMS LP %d current out of range: %d", i, battery.current);
+      return false;
+    }
+
+    if (battery.temperature < -20 || battery.temperature > 70) {  // temperature in -20C to 70C
+      log_.ERR("SENSORS", "BMS LP %d temperature out of range: %d", i, battery.temperature);
+      return false;
+    }
+  }
+  return true;
 }
 
 }}  // namespace hyped::sensors
