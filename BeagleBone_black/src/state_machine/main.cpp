@@ -50,7 +50,7 @@ void Main::run()
     sm_data_        = data_.getStateMachineData();
     motor_data_     = data_.getMotorData();
     batteries_data_ = data_.getBatteriesData();
-    sensors_data_   = data_.getSensorsData();
+    // sensors_data_   = data_.getSensorsData();
 
     switch (sm_data_.current_state) {
       case data::State::kIdle:
@@ -105,7 +105,7 @@ bool Main::checkInitialised()
   if (comms_data_.module_status     == data::ModuleStatus::kInit &&
       nav_data_.module_status       == data::ModuleStatus::kInit &&
       motor_data_.module_status     == data::ModuleStatus::kInit &&
-      sensors_data_.module_status   == data::ModuleStatus::kInit &&
+      // sensors_data_.module_status   == data::ModuleStatus::kInit &&
       batteries_data_.module_status == data::ModuleStatus::kInit) {
     log_.INFO("STATE", "all modules are initialised");
     hypedMachine.handleEvent(kInitialised);
@@ -168,6 +168,9 @@ bool Main::checkCriticalFailure()
       nav_data_.emergency_braking_distance +
       20 >= comms_data_.run_length) {
     log_.ERR("STATE", "Critical failure, emergency braking distance reached");
+    log_.ERR("STATE", "current distance, emergency distance: %f %f"
+      , nav_data_.distance
+      , comms_data_.run_length - nav_data_.emergency_braking_distance);
     hypedMachine.handleEvent(kCriticalFailure);
     return true;
   }
@@ -180,6 +183,9 @@ bool Main::checkMaxDistanceReached()
       nav_data_.braking_distance +
       20 >= comms_data_.run_length) {
     log_.INFO("STATE", "Max distance reached");
+    log_.INFO("STATE", "current distance, braking distance: %f %f"
+      , nav_data_.distance
+      , comms_data_.run_length - nav_data_.braking_distance);
     hypedMachine.handleEvent(kMaxDistanceReached);
     return true;
   }

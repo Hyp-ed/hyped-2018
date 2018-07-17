@@ -262,22 +262,27 @@ void FakeAccurateImu::getData(Imu* imu)
 {
   data::Navigation nav = data_.getNavigationData();
   data::Motors     mot = data_.getMotorData();
+  data::StateMachine      stm = data_.getStateMachineData();
 
-  // get average rmp
-  double rpm = 0;
-  rpm += mot.velocity_1;
-  rpm += mot.velocity_2;
-  rpm += mot.velocity_3;
-  rpm += mot.velocity_4;
-  rpm /= 4;
+  if (stm.current_state == data::State::kEmergencyBraking) {
+    imu->acc[0] = -10;
+  } else {
+    // get average rmp
+    double rpm = 0;
+    rpm += mot.velocity_1;
+    rpm += mot.velocity_2;
+    rpm += mot.velocity_3;
+    rpm += mot.velocity_4;
+    rpm /= 4;
 
-  // get angular velocity
-  double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
-  uint32_t scale = 4;
-  if (!isnan(nav.velocity))
-    imu->acc[0] = (velocity - nav.velocity)/scale;
-  else
-    imu->acc[0] = 0.0;
+    // get angular velocity
+    double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
+    uint32_t scale = 4;
+    if (!isnan(nav.velocity))
+      imu->acc[0] = (velocity - nav.velocity)/scale;
+    else
+      imu->acc[0] = 0.0;
+  }
   imu->acc[1] = 0;
   imu->acc[2] = 9.8;
 
