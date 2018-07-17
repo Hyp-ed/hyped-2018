@@ -97,8 +97,10 @@ class FakeImu : public ImuInterface {
    *
    * @return    Returns random data point value
    */
-  NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
+ public:
+  static NavigationVector addNoiseToData(NavigationVector value, NavigationVector noise);
 
+ private:
   /*
    * @brief     Checks to see if sufficient time has pass for the sensor to be updated and checks if
    *            some data points need to be skipped
@@ -124,6 +126,20 @@ class FakeImu : public ImuInterface {
   bool acc_started_;
   bool dec_started_;
   data::Data&  data_;
+};
+
+class FakeAccurateImu: public ImuInterface {
+ public:
+  explicit FakeAccurateImu(utils::Logger& log_);
+
+  bool isOnline() override { return true; }
+  void getData(Imu* imu) override;
+
+ private:
+  utils::Logger& log_;
+  data::Data&    data_;
+
+  NavigationVector acc_noise_, gyr_noise_;
 };
 
 }}  // namespace hyped::sensors
