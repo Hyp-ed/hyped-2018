@@ -144,11 +144,11 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
 }
 
 
-std::array<NavigationType, 3> Navigation::getNearestStripeDists()
+std::array<NavigationType, 3> Navigation::getNearestStripeDists(uint16_t stripe_count)
 {
   std::array<NavigationType, 3> arr;
   for (unsigned int i = 0; i < arr.size(); ++i)
-    arr[i] = kStripeLocations[std::min(stripe_count_ + i, (unsigned int)kStripeLocations.size())]
+    arr[i] = kStripeLocations[std::min(stripe_count + i, (unsigned int)kStripeLocations.size())]
              - getDisplacement();
   return arr;
 }
@@ -222,21 +222,19 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
   proximityOrientationUpdate(ground, rail);
 }
 
-void Navigation::update(DataPoint<ImuArray> imus, array<StripeCounter, Sensors::kNumKeyence> sc)
+void Navigation::update(DataPoint<ImuArray> imus, StripeCounterArray scs)
 {
   update(imus);
   // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
   if (!is_calibrating_)
-    stripeCounterUpdate(sc);
+    stripeCounterUpdate(scs);
 }
 
-void Navigation::update(DataPoint<ImuArray> imus,
-                        ProximityArray proxis,
-                        array<StripeCounter, Sensors::kNumKeyence> sc)
+void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounterArray scs)
 {
   update(imus, proxis);
   if (!is_calibrating_)
-    stripeCounterUpdate(sc);
+    stripeCounterUpdate(scs);
 }
 
 void Navigation::calibrationUpdate(ImuArray imus)
@@ -375,7 +373,7 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
       displacement_[0], displacement_[1], displacement_[2]);
 }
 
-void Navigation::stripeCounterUpdate(array<StripeCounter, Sensors::kNumKeyence> sc)
+void Navigation::stripeCounterUpdate(StripeCounterArray scs)
 {
   log_.DBG2("NAV",
       "Before stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
@@ -384,27 +382,71 @@ void Navigation::stripeCounterUpdate(array<StripeCounter, Sensors::kNumKeyence> 
       displacement_[0], displacement_[1], displacement_[2]);
   // TODO(Brano): Update displacement and velocity
 
-  // TODO(Brano): Change this once 2nd Keyence is added
-  if (!sc[0].operational) {
-    status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV", "Critical failure: stripe counter down");
-    return;
-  }
-  auto dists = getNearestStripeDists();
-  // TODO(Brano): Change second keyence has been added
-  if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
-    // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
-    // definitely gone wrong.
-    status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV",
-        "Critical failure: missed stripe (oldCnt=%d, newCnt=%d, nearestStripes=[%f, %f, %f])",
-        stripe_count_, sc[0].count.value, dists[0], dists[1], dists[2]);
+  if (scs[0].count.value <= stripe_count_ && scs[1].count.value <= stripe_count_) {
     return;
   }
 
-  // TODO(Brano): Change second keyence has been added
-  stripe_count_ = sc[0].count.value;
-  DataPoint<NavigationType> dp(sc[0].count.timestamp, kStripeLocations[stripe_count_]);
+  int num_operational = 0;
+  for (unsigned int i = 0; i < data::Sensors::kNumKeyence; ++i) {
+    if (scs[i].operational) {
+      // This operational check could be redundant since keyence is always operational (for now)
+      ++num_operational;
+    }
+  }
+  if (num_operational < 1) {
+    status_ = ModuleStatus::kCriticalFailure;
+    log_.ERR("NAV", "Critical failure: stripe counters down");
+    return;
+  }
+
+  uint16_t timestamp;
+  if (scs[0].count.value == scs[1].count.value) {
+    auto dists = getNearestStripeDists(scs[0].count.value - 1);
+    if (std::abs(dists[0]) < std::abs(dists[1]) || std::abs(dists[2]) < std::abs(dists[1])) {
+      // Ideally, we'd have dists[1]==0 but if dists[1] is not the closest stripe, something has
+      // definitely gone wrong.
+      status_ = ModuleStatus::kCriticalFailure;
+      log_.ERR("NAV",
+          "Critical failure: missed stripe (oldCnt=%d, newCnts=[%d, %d], nearestStripes=[%f, %f, %f])", //NOLINT
+          stripe_count_, scs[0].count.value, scs[1].count.value, dists[0], dists[1], dists[2]);
+      return;
+    }
+    timestamp = (scs[0].count.timestamp + scs[1].count.timestamp) / 2;
+    stripe_count_ = scs[0].count.value;
+    log_.DBG3("NAV", "Keyences are in sync (oldCnt=%d, newCnts=[%d, %d])");
+  } else {
+    // Distance given by the current stripe should match distance, therefore the dists array should
+    // provide [-ve, ~0, +ve] if the stripe count and distance are in agreement
+    auto dists_l = getNearestStripeDists(scs[0].count.value - 1);
+    auto dists_r = getNearestStripeDists(scs[1].count.value - 1);
+    if (std::abs(dists_l[0]) < std::abs(dists_l[1]) || std::abs(dists_l[2]) < std::abs(dists_l[1])) { //NOLINT
+      // dists_l is incorrect
+      if (std::abs(dists_r[0]) < std::abs(dists_r[1]) || std::abs(dists_r[2]) < std::abs(dists_r[1])) { //NOLINT
+        // dists_r is also incorrect
+        status_ = ModuleStatus::kCriticalFailure;
+        log_.ERR("NAV",
+            "Critical failure: missed stripe (oldCnt=%d, newCnts=[%d, %d], "
+            "nearestStripes=[[%f, %f, %f], [%f, %f, %f]]",
+            stripe_count_, scs[0].count.value, scs[1].count.value,
+            dists_l[0], dists_l[1], dists_l[2], dists_r[0], dists_r[1], dists_r[2]);
+        return;
+      } else {
+        // dists_r is the only correct one
+        timestamp = scs[1].count.timestamp;
+        stripe_count_ = scs[1].count.value;
+        log_.DBG3("NAV", "Keyences are not in sync (oldCnt=%d, newCnts=[%d, %d])",
+            stripe_count_, scs[0].count.value, scs[1].count.value);
+      }
+    } else {
+      // dists_l is the only correct one
+      timestamp = scs[0].count.timestamp;
+      stripe_count_ = scs[0].count.value;
+      log_.DBG3("NAV", "Keyences are not in sync (oldCnt=%d, newCnts=[%d, %d])",
+        stripe_count_, scs[0].count.value, scs[1].count.value);
+    }
+  }
+
+  DataPoint<NavigationType> dp(timestamp, kStripeLocations[stripe_count_]);
 
   // Update x-axis (forwards) displacement
   displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
