@@ -41,16 +41,17 @@ namespace sensors {
 
 ProxiManager::ProxiManager(Logger& log,
                            bool is_front,
-                           data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi)
+                           ProxiManager::DataArray *proxi)
     : ProxiManagerInterface(log),
-      sys_(System::getSystem()),
+      sensors_proxi_(proxi),
       i2c_(I2C::getInstance()),
       is_front_(is_front),
-      is_calib_(false),
-      calib_counter_(0)
+      is_calibrated_(false)
 {
+  System& sys = System::getSystem();
   old_timestamp_ = utils::Timer::getTimeMicros();
-  if (sys_.fake_proxi || sys_.fake_sensors) is_fake_ = true;
+  if (sys.fake_proxi || sys.fake_sensors) is_fake_ = true;
+
   if (is_fake_) {
     // TODO(anyone) add read to file after
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
@@ -58,6 +59,7 @@ ProxiManager::ProxiManager(Logger& log,
       proxi_[i] = proxi;
     }
   } else if (is_front_) {
+    // create real proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
       VL6180* proxi = new VL6180(0x29, log_);
@@ -71,39 +73,43 @@ ProxiManager::ProxiManager(Logger& log,
       proxi_[i] = proxi;
     }
   }
+
   for (int i = 0; i < data::Sensors::kNumProximities; i++) {
     stats_[i] = OnlineStatistics<float>();
   }
-  sensors_proxi_ = proxi;
 }
 
 void ProxiManager::run()
 {
-  while (!is_calib_) {
+  // collect calibration data
+  uint32_t calib_counter = 0;
+  while (!is_calibrated_) {
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       if (is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
       Proximity proxi;
       proxi_[i]->getData(&proxi);
       if (proxi.operational) stats_[i].update(proxi.val);
     }
-    calib_counter_++;
-    if (calib_counter_ >= 100) is_calib_ = true;
+    calib_counter++;
+    if (calib_counter >= 100) is_calibrated_ = true;
   }
   log_.INFO("PROXI-MANAGER", "Calibration complete!");
+
+  // collect real data
   while (1) {
-    // update front cluster of proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      if (is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
+      if (is_front_) {
+        i2c_.write(kMultiplexerAddr, 0x01 << i);
+      }
       proxi_[i]->getData(&(sensors_proxi_->value[i]));
     }
     sensors_proxi_->timestamp = utils::Timer::getTimeMicros();
   }
-  sleep(10);
 }
 
-array<float, data::Sensors::kNumProximities> ProxiManager::getCalibrationData()
+ProxiManager::CalibrationArray ProxiManager::getCalibrationData()
 {
-  while (!is_calib_) {
+  while (!is_calibrated_) {
     Thread::yield();
   }
   for (int i = 0; i < data::Sensors::kNumProximities; i++) {

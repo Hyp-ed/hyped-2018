@@ -51,8 +51,6 @@ class State {
   virtual void entry() = 0;
   data::State   state_;
   static State* alloc_;   // allocate all states here
-  GPIO pin_37_ = GPIO(78, utils::io::gpio::kOut);
-  GPIO pin_38_ = GPIO(79, utils::io::gpio::kOut);
 };
 
 class Idle : public State {
