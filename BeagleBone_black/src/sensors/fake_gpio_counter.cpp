@@ -67,7 +67,11 @@ void FakeGpioCounter::run()
       }
     } else if (double_stripe_) {
       if (time_out <= utils::Timer::getTimeMicros() - ref_time_) {
-        stripes_.count.value = std::floor(nav.distance/30.48) + 1;
+        if ((std::floor(nav.distance/30.48) - 1) == prev_stripe) {
+          stripes_.count.value = std::floor(nav.distance/30.48) + 1;
+        } else {
+          stripes_.count.value = std::floor(nav.distance/30.48) + 1;
+        }
       }
     } else {
       stripes_.count.value = std::floor(nav.distance/30.48);

@@ -59,14 +59,14 @@ Main::Main(uint8_t id, Logger& log)
   // @TODO (Anyone) Check THESE PINS
   if (sys_.fake_sensors || sys_.fake_keyence) {
     if (sys_.miss_keyence) {
-      keyence_l_ = new FakeGpioCounter(log, true, false); //NOLINT
+      keyence_l_ = new FakeGpioCounter(log, true, false);
       keyence_r_ = new FakeGpioCounter(log, true, false);
-    } else {
-      keyence_l_ = new FakeGpioCounter(log, false, false);
-      keyence_r_ = new FakeGpioCounter(log, false, false);
+    } else if (sys_.double_keyence) {
+      keyence_l_ = new FakeGpioCounter(log, false, true);
+      keyence_r_ = new FakeGpioCounter(log, false, true);
     }
-    optical_encoder_l_ = new FakeGpioCounter(log, false, false); //NOLINT
-    optical_encoder_r_ = new FakeGpioCounter(log, false, false); //NOLINT
+    optical_encoder_l_ = new FakeGpioCounter(log, false, false);
+    optical_encoder_r_ = new FakeGpioCounter(log, false, false);
   } else {
     // Pins for keyence GPIO_73 and GPIO_75
     keyence_l_ = new GpioCounter(log, 73);

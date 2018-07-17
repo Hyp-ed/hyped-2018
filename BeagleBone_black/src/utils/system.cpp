@@ -82,6 +82,7 @@ System::System(int argc, char* argv[])
       fail_acc_imu(false),
       fail_motors(false),
       miss_keyence(false),
+      double_keyence(false),
       accurate(false)
 {
   int c;
@@ -110,6 +111,7 @@ System::System(int argc, char* argv[])
       {"fake_keyence", optional_argument, 0, 'l'},
       {"miss_keyence", optional_argument, 0, 'L'},
       {"fake_motors", optional_argument, 0, 'm'},
+      {"double_keyence", optional_argument, 0, 'M'},
       {"fake_embrakes", optional_argument, 0, 'n'},
       {"accurate", optional_argument, 0, 'N'},
       {0, 0, 0, 0}
@@ -207,6 +209,10 @@ System::System(int argc, char* argv[])
       case 'm':
         if (optarg) fake_motors = atoi(optarg);
         else        fake_motors = 1;
+        break;
+      case 'M':
+        if (optarg) double_keyence = atoi(optarg);
+        else        double_keyence = 1;
         break;
       case 'n':
         if (optarg) fake_embrakes = atoi(optarg);
