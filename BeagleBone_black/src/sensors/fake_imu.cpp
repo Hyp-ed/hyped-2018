@@ -18,6 +18,7 @@
  *    limitations under the License.
  */
 
+#include <math.h>
 #include <random>
 #include <vector>
 #include <algorithm>
@@ -251,6 +252,46 @@ bool FakeImu::gyrCheckTime()
 
   gyr_count_ = time_span/kGyrTimeInterval + 1;
   return true;
+}
+
+
+FakeAccurateImu::FakeAccurateImu(utils::Logger& log)
+    : log_(log),
+      data_(data::Data::getInstance()),
+      acc_noise_(1),
+      gyr_noise_(1)
+{ /* EMPTY */ }
+
+void FakeAccurateImu::getData(Imu* imu)
+{
+  data::Navigation nav = data_.getNavigationData();
+  data::Motors     mot = data_.getMotorData();
+
+  // get average rmp
+  double rpm = 0;
+  rpm += mot.velocity_1;
+  rpm += mot.velocity_2;
+  rpm += mot.velocity_3;
+  rpm += mot.velocity_4;
+  rpm /= 4;
+
+  // get angular velocity
+  double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
+  uint32_t scale = 4;
+  if (!isnan(nav.velocity))
+    imu->acc[0] = (velocity - nav.velocity)/scale;
+  else
+    imu->acc[0] = 0.0;
+  imu->acc[1] = 0;
+  imu->acc[2] = 9.8;
+
+  imu->gyr[0] = 0;
+  imu->gyr[1] = 0;
+  imu->gyr[2] = 0;
+
+  imu->acc = FakeImu::addNoiseToData(imu->acc, acc_noise_);
+  imu->gyr = FakeImu::addNoiseToData(imu->gyr, gyr_noise_);
+  imu->operational = true;
 }
 
 }}  // namespace hyped::sensors
