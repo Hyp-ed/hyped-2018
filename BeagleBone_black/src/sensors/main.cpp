@@ -58,31 +58,38 @@ Main::Main(uint8_t id, Logger& log)
 {
   // @TODO (Anyone) Check THESE PINS
   if (sys_.fake_sensors || sys_.fake_keyence) {
-    if (sys_.miss_keyence) {
-      keyence_l_ = new FakeGpioCounter(log, true, false);
-      keyence_r_ = new FakeGpioCounter(log, true, false);
-    } else if (sys_.double_keyence) {
-      keyence_l_ = new FakeGpioCounter(log, false, true);
-      keyence_r_ = new FakeGpioCounter(log, false, true);
-    }
+    keyence_l_ = new FakeGpioCounter(log, sys_.miss_keyence, sys_.double_keyence);
+    keyence_r_ = new FakeGpioCounter(log, sys_.miss_keyence, sys_.double_keyence);
     optical_encoder_l_ = new FakeGpioCounter(log, false, false);
     optical_encoder_r_ = new FakeGpioCounter(log, false, false);
   } else {
     // Pins for keyence GPIO_73 and GPIO_75
-    keyence_l_ = new GpioCounter(log, 73);
-    keyence_r_ = new GpioCounter(log, 75);
-    optical_encoder_l_ = new GpioCounter(log, 76);
-    optical_encoder_r_ = new GpioCounter(log, 76);
+    GpioCounter* temp;
+    temp = new GpioCounter(73);
+    temp->start();
+    keyence_l_ = temp;
+
+    temp = new GpioCounter(73);
+    temp->start();
+    keyence_r_ = temp;
+
+    temp = new GpioCounter(73);
+    temp->start();
+    optical_encoder_l_ = temp;
+
+    temp = new GpioCounter(73);
+    temp->start();
+    optical_encoder_r_ = temp;
   }
 }
 
 void Main::run()
 {
   // start all managers
-  keyence_l_->start();
-  keyence_r_->start();
-  optical_encoder_l_->start();
-  optical_encoder_r_->start();
+  // keyence_l_->start();
+  // keyence_r_->start();
+  // optical_encoder_l_->start();
+  // optical_encoder_r_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
   proxi_manager_back_->start();

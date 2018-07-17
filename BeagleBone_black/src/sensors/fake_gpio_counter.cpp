@@ -38,60 +38,59 @@ using data::StripeCounter;
 namespace sensors {
 
 FakeGpioCounter::FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe)
-    : GpioInterface(log),
+    : log_(log),
       data_(Data::getInstance()),
+      ref_time_(0),
+      timeout_(5000000),  // 5 seconds
       miss_stripe_(miss_stripe),
       double_stripe_(double_stripe),
-      is_started_(false)
-{}
-
-void FakeGpioCounter::run()
+      is_accelerating_(false)
 {
-  while (1) {
-    data::Navigation nav = data_.getNavigationData();
-    data::State state = data_.getStateMachineData().current_state;
-    uint32_t  prev_stripe = data_.getSensorsData().keyence_stripe_counter[0].count.value;
-    uint64_t time_out_acc = 5000000;
-    uint64_t time_out_dec = 20000000;
-    if (state == data::State::kAccelerating && !is_started_) {
-      init();
-      is_started_ = true;
-    }
-
-    if (miss_stripe_) {
-      if (time_out_acc <= utils::Timer::getTimeMicros() - ref_time_) {
-        if ((std::floor(nav.distance/30.48) - 1) == prev_stripe) {
-           stripes_.count.value = std::floor(nav.distance/30.48) - 1;
-        } else {
-          stripes_.count.value = std::floor(nav.distance/30.48) - 1;
-        }
-      }
-    } else if (double_stripe_) {
-      if (time_out_dec <= utils::Timer::getTimeMicros() - ref_time_) {
-        if ((std::floor(nav.distance/30.48) - 1) == prev_stripe) {
-          stripes_.count.value = std::floor(nav.distance/30.48) + 1;
-        } else {
-          stripes_.count.value = std::floor(nav.distance/30.48) + 1;
-        }
-      }
-    } else {
-      stripes_.count.value = std::floor(nav.distance/30.48);
-    }
-    stripes_.count.timestamp = utils::Timer::getTimeMicros();
-    stripes_.operational = true;
-  }
-  Thread::sleep(50);
-}
-
-void FakeGpioCounter::init()
-{
-  log_.INFO("Fake-Gpio", "TIMER START");
-  ref_time_ = utils::Timer::getTimeMicros();
+  stripes_.operational = true;
 }
 
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
+  data::Navigation nav   = data_.getNavigationData();
+  data::State      state = data_.getStateMachineData().current_state;
+  uint32_t prev_count    = stripes_.count.value;
+
+  // create reference time only at transitions to dynamic states
+  if (state == data::State::kAccelerating && !is_accelerating_) {
+    ref_time_ = utils::Timer::getTimeMicros();
+    is_accelerating_ = true;
+  } else if (state == data::State::kDecelerating && is_accelerating_) {
+    ref_time_ = utils::Timer::getTimeMicros();
+    is_accelerating_ = false;
+  }
+
+  uint32_t new_count = std::floor(nav.distance/30.48);
+
+  switch (state) {
+    case data::State::kAccelerating:
+      if (timeout() && miss_stripe_) {
+        new_count--;
+      }
+      break;
+    case data::State::kDecelerating:
+      if (timeout() && double_stripe_) {
+        new_count++;
+      }
+      break;
+    default:
+      break;
+  }
+
+  if (new_count > prev_count) {
+    stripes_.count.value     = new_count;
+    stripes_.count.timestamp = utils::Timer::getTimeMicros();
+  }
   return stripes_;
+}
+
+bool FakeGpioCounter::timeout()
+{
+  return ref_time_ + timeout_ < utils::Timer::getTimeMicros();
 }
 
 }}  // namespace hyped::sensors

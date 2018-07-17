@@ -38,25 +38,20 @@ namespace sensors {
 
 class FakeGpioCounter:public GpioInterface {
  public:
-  explicit FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe);
+  FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe);
   data::StripeCounter getStripeCounter() override;
-  void run() override;
 
  private:
-  void init();
-  bool checkTime();
-  Data& data_;
-  std::string file_path_;
+  bool timeout();
+  Logger&     log_;
+  Data&       data_;
 
-  std::vector<uint64_t> val_read_;
-  std::vector<bool>     val_operational_;
-  uint64_t gpio_count_;
-
-  uint64_t ref_time_;
-  data::StripeCounter stripes_;
-  bool miss_stripe_;
-  bool double_stripe_;
-  bool is_started_;
+  uint64_t              ref_time_;
+  uint64_t              timeout_;
+  data::StripeCounter   stripes_;
+  bool                  miss_stripe_;
+  bool                  double_stripe_;
+  bool                  is_accelerating_;
 };
 }}    // namespace hyped::sensors
 

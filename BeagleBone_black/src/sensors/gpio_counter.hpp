@@ -31,18 +31,18 @@
 
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
-
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
 using utils::Logger;
-
+using utils::concurrent::Thread;
 namespace sensors {
 
 
-class GpioCounter: public GpioInterface {
+class GpioCounter: public GpioInterface, public Thread {
  public:
-  explicit GpioCounter(Logger& log, int pin);
+  explicit GpioCounter(int pin);
   data::StripeCounter getStripeCounter() override;
   void run() override;
 

@@ -182,7 +182,6 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
 
     std::ifstream file;
     file.open(file_path);
-    Thread::sleep(15);
     if (!file.is_open()) {
       log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
     }
