@@ -80,7 +80,8 @@ System::System(int argc, char* argv[])
       fake_embrakes(false),
       fail_dec_imu(false),
       fail_acc_imu(false),
-      fail_motors(false)
+      fail_motors(false),
+      miss_keyence(false)
 {
   int c;
   int option_index = 0;
@@ -106,6 +107,7 @@ System::System(int argc, char* argv[])
       {"fake_sensors", optional_argument, 0, 'k'},
       {"fail_motors", optional_argument, 0, 'K'},
       {"fake_keyence", optional_argument, 0, 'l'},
+      {"miss_keyence", optional_argument, 0, 'L'},
       {"fake_motors", optional_argument, 0, 'm'},
       {"fake_embrakes", optional_argument, 0, 'n'},
       {0, 0, 0, 0}
@@ -195,6 +197,11 @@ System::System(int argc, char* argv[])
       case 'l':
         if (optarg) fake_keyence = atoi(optarg);
         else        fake_keyence = 1;
+        break;
+      case 'L':
+        if (optarg) miss_keyence = atoi(optarg);
+        else        miss_keyence = 1;
+        break;
       case 'm':
         if (optarg) fake_motors = atoi(optarg);
         else        fake_motors = 1;

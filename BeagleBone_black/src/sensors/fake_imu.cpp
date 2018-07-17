@@ -130,11 +130,8 @@ void FakeImu::getData(Imu* imu)
     if (gyrCheckTime()) {
       gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
       // Check so you don't go out of bounds
-      if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
-        prev_gyr_ = gyr_val_read_[gyr_count_-1];
-      } else {
-        prev_gyr_ = gyr_val_read_[gyr_count_];
-      }
+      prev_gyr_ = gyr_val_read_[gyr_count_-1];
+      prev_gyr_ = gyr_val_read_[gyr_count_];
     }
   } else {
     if (accCheckTime()) {
