@@ -213,14 +213,14 @@ void Controller::configure()
     return;
   }
 
-  // Set motor rated current to 80,000 mA
+  // Set motor rated current to 800,000 mA
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0x75;
   sdo_message_.data[2]   = 0x60;
   sdo_message_.data[3]   = 0x00;
-  sdo_message_.data[4]   = 0x80;
-  sdo_message_.data[5]   = 0x38;
-  sdo_message_.data[6]   = 0x01;
+  sdo_message_.data[4]   = 0x00;
+  sdo_message_.data[5]   = 0x35;
+  sdo_message_.data[6]   = 0x0C;
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated current", node_id_);
@@ -229,14 +229,14 @@ void Controller::configure()
     return;
   }
 
-  // Set motor rated torque to 80N
+  // Set motor rated torque to 180N
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0x76;
   sdo_message_.data[2]   = 0x60;
   sdo_message_.data[3]   = 0x00;
-  sdo_message_.data[4]   = 0x80;
-  sdo_message_.data[5]   = 0x38;
-  sdo_message_.data[6]   = 0x01;
+  sdo_message_.data[4]   = 0x20;
+  sdo_message_.data[5]   = 0xBF;
+  sdo_message_.data[6]   = 0x02;
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
@@ -245,7 +245,6 @@ void Controller::configure()
     return;
   }
 
-  // TODO(anyone) needs to be changed after we calibrate PI with load
   // Set current control torque regulator P gain to 1200
   sdo_message_.data[0]   = kWriteTwoBytes;
   sdo_message_.data[1]   = 0xF6;
@@ -358,6 +357,22 @@ void Controller::configure()
     return;
   }
 
+  // Set maximum velocity to 7000 RPM
+  sdo_message_.data[0]   = kWriteFourBytes;
+  sdo_message_.data[1]   = 0x52;
+  sdo_message_.data[2]   = 0x20;
+  sdo_message_.data[3]   = 0x01;
+  sdo_message_.data[4]   = 0x58;
+  sdo_message_.data[5]   = 0x1B;
+  sdo_message_.data[6]   = 0x00;
+  sdo_message_.data[7]   = 0x00;
+
+  log_.DBG1("MOTOR", "Controller %d: Configuring maximum RPM", node_id_);
+  sendSdoMessage(sdo_message_);
+  if (critical_failure_) {
+    return;
+  }
+
   log_.INFO("MOTOR", "Controller %d: Configured", node_id_);
 }
 
@@ -370,6 +385,8 @@ void Controller::enterOperational()
 
   log_.INFO("MOTOR", "Controller %d: Sending NMT Operational command", node_id_);
   can_.send(nmt_message_);
+  // Leave sufficient time for controller to enter NMT Operational
+  Thread::sleep(100);
 
   // Enable velocity mode
   sdo_message_.data[0]   = kWriteOneByte;
@@ -418,33 +435,9 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Shutdown command sent", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
-  }
-  checkState();
-  checkStateTransition(kReadyToSwitchOn);
+  requestStateTransition(sdo_message_, kReadyToSwitchOn);
 
-  // Send switch on message to transition from state 2 (Ready to switch on)
-  // to state 3 (Switched on)
-  sdo_message_.data[0]   = kWriteTwoBytes;
-  sdo_message_.data[1]   = 0x40;
-  sdo_message_.data[2]   = 0x60;
-  sdo_message_.data[3]   = 0x00;
-  sdo_message_.data[4]   = 0x07;
-  sdo_message_.data[5]   = 0x00;
-  sdo_message_.data[6]   = 0x00;
-  sdo_message_.data[7]   = 0x00;
-
-  log_.DBG1("MOTOR", "Controller %d: Switch on command sent", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
-  }
-  checkState();
-  checkStateTransition(kSwitchedOn);
-
-  // Send enter operational message to transition from state 3 (Switched on)
+  // Send enter operational message to transition from state 2 (Ready to switch on)
   // to state 4 (Operation enabled)
   sdo_message_.data[0]   = kWriteTwoBytes;
   sdo_message_.data[1]   = 0x40;
@@ -456,12 +449,7 @@ void Controller::enterOperational()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Enabling drive function", node_id_);
-  sendSdoMessage(sdo_message_);
-  if (critical_failure_) {
-    return;
-  }
-  checkState();
-  checkStateTransition(kOperationEnabled);
+  requestStateTransition(sdo_message_, kOperationEnabled);
 }
 
 void Controller::enterPreOperational()
@@ -508,7 +496,6 @@ void Controller::checkState()
 void Controller::sendTargetVelocity(int32_t target_velocity)
 {
   // Send 32 bit integer in Little Edian bytes
-  // TODO(Anyone) Cover negative velocity case to control direction
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0xFF;
   sdo_message_.data[2]   = 0x60;
@@ -519,13 +506,12 @@ void Controller::sendTargetVelocity(int32_t target_velocity)
   sdo_message_.data[7]   = (target_velocity >> 24) & 0xFF;
 
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity to %d", node_id_, target_velocity);
-  sendSdoMessage(sdo_message_);
+  can_.send(sdo_message_);
 }
 
 void Controller::sendTargetTorque(int16_t target_torque)
 {
   // Send 32 bit integer in Little Edian bytes
-  // TODO(Anyone) Cover negative torque case to control direction
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0x71;
   sdo_message_.data[2]   = 0x60;
@@ -731,17 +717,17 @@ void Controller::throwCriticalFailure()
   data_.setMotorData(motor_data_);
 }
 
-void Controller::checkStateTransition(ControllerState state)
+void Controller::requestStateTransition(utils::io::can::Frame& message, ControllerState state)
 {
   uint8_t state_count;
   // Wait for maximum of three seconds, checking state each second.
   // If state doesn't change then throw critical failure
   for (state_count = 0; state_count < 3; state_count++) {
+    can_.send(message);
+    Thread::sleep(1000);
+    checkState();
     if (state_ == state) {
-      break;
-    } else {
-      Thread::sleep(1000);
-      checkState();
+      return;
     }
   }
   if (state_ != state) {
@@ -1197,6 +1183,10 @@ void Controller::processSdoMessage(utils::io::can::Frame& message)
   }
   if (index_1 == 0x51 && index_2 == 0x20 && sub_index == 0x00) {
     log_.DBG1("MOTOR", "Controller %d: Secondary current protection configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x52 && index_2 == 0x20 && sub_index == 0x01) {
+    log_.DBG1("MOTOR", "Controller %d: Maximum RPM configured", node_id_);
     return;
   }
 
