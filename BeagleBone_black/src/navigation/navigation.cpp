@@ -395,7 +395,7 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   }
   if (num_operational < 1) {
     status_ = ModuleStatus::kCriticalFailure;
-    log_.ERR("NAV", "Critical failure: stripe counter down", num_operational);
+    log_.ERR("NAV", "Critical failure: stripe counters down");
     return;
   }
 
