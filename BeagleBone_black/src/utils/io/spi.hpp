@@ -41,7 +41,8 @@ class SPI {
 
   enum class Clock {
     k1MHz,
-    k4MHz
+    k4MHz,
+    k20MHz
   };
 
   void setClock(Clock clk);

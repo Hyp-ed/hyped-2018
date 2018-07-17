@@ -71,6 +71,10 @@ Communications::~Communications()
 
 int Communications::sendData(std::string message)
 {
+  if (sockfd_ < 0) {
+    return 1;
+  }
+
   // Incoming strings should be terminated by "...\n".
   memset(buffer_, '\0', 256);
   const char *data = message.c_str();
@@ -78,6 +82,8 @@ int Communications::sendData(std::string message)
 
   if (n < 0) {
     log_.ERR("COMN", "CANNOT WRITE TO SOCKET.\n");
+    sockfd_ = -1;
+    return 1;
   }
 
   return atoi(buffer_);
@@ -85,24 +91,36 @@ int Communications::sendData(std::string message)
 
 int Communications::receiveRunLength()
 {
+  if (sockfd_ < 0) {
+    return 1;
+  }
+
   int n = read(sockfd_, buffer_, 255);
-  int run_length = atoi(buffer_);
-  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
 
   if (n < 0) {
-      log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
+    sockfd_ = -1;
+    return 1;  // TODO(Kofi): Need a mechanism for lost detection here (?)
   }
+
+  int run_length = atoi(buffer_);
+  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
 
   return run_length;
 }
 
 int Communications::receiveMessage()
 {
+  if (sockfd_ < 0) {
+    return 7;  // 7 indicates connection lost
+  }
+
   int n = read(sockfd_, buffer_, 255);
 
   if (n < 0) {
     log_.ERR("COMN", "CANNOT READ FROM SOCKET.\n");
-    return 1;
+    sockfd_ = -1;
+    return 7;
   }
 
   int command = buffer_[0]-'0';
@@ -114,4 +132,5 @@ bool Communications::isConnected()
 {
   return is_connected_;
 }
+
 }}  // namespace hyped::communcations

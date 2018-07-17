@@ -19,10 +19,6 @@
  */
 #include "sensors/mpu9250.hpp"
 
-#include <chrono>
-#include <cstdint>
-#include <unistd.h>
-
 #include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 #include "utils/math/statistics.hpp"
