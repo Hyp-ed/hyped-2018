@@ -213,14 +213,14 @@ void Controller::configure()
     return;
   }
 
-  // Set motor rated current to 80,000 mA
+  // Set motor rated current to 800,000 mA
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0x75;
   sdo_message_.data[2]   = 0x60;
   sdo_message_.data[3]   = 0x00;
-  sdo_message_.data[4]   = 0x80;
-  sdo_message_.data[5]   = 0x38;
-  sdo_message_.data[6]   = 0x01;
+  sdo_message_.data[4]   = 0x00;
+  sdo_message_.data[5]   = 0x35;
+  sdo_message_.data[6]   = 0x0C;
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated current", node_id_);
@@ -229,14 +229,14 @@ void Controller::configure()
     return;
   }
 
-  // Set motor rated torque to 80N
+  // Set motor rated torque to 180N
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0x76;
   sdo_message_.data[2]   = 0x60;
   sdo_message_.data[3]   = 0x00;
-  sdo_message_.data[4]   = 0x80;
-  sdo_message_.data[5]   = 0x38;
-  sdo_message_.data[6]   = 0x01;
+  sdo_message_.data[4]   = 0x20;
+  sdo_message_.data[5]   = 0xBF;
+  sdo_message_.data[6]   = 0x02;
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Configuring motor rated torque", node_id_);
@@ -245,7 +245,6 @@ void Controller::configure()
     return;
   }
 
-  // TODO(anyone) needs to be changed after we calibrate PI with load
   // Set current control torque regulator P gain to 1200
   sdo_message_.data[0]   = kWriteTwoBytes;
   sdo_message_.data[1]   = 0xF6;
@@ -353,6 +352,22 @@ void Controller::configure()
   sdo_message_.data[7]   = 0x00;
 
   log_.DBG1("MOTOR", "Controller %d: Configuring secondary current protection", node_id_);
+  sendSdoMessage(sdo_message_);
+  if (critical_failure_) {
+    return;
+  }
+
+  // Set maximum velocity to 7000 RPM
+  sdo_message_.data[0]   = kWriteFourBytes;
+  sdo_message_.data[1]   = 0x52;
+  sdo_message_.data[2]   = 0x20;
+  sdo_message_.data[3]   = 0x01;
+  sdo_message_.data[4]   = 0x58;
+  sdo_message_.data[5]   = 0x1B;
+  sdo_message_.data[6]   = 0x00;
+  sdo_message_.data[7]   = 0x00;
+
+  log_.DBG1("MOTOR", "Controller %d: Configuring maximum RPM", node_id_);
   sendSdoMessage(sdo_message_);
   if (critical_failure_) {
     return;
@@ -481,7 +496,6 @@ void Controller::checkState()
 void Controller::sendTargetVelocity(int32_t target_velocity)
 {
   // Send 32 bit integer in Little Edian bytes
-  // TODO(Anyone) Cover negative velocity case to control direction
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0xFF;
   sdo_message_.data[2]   = 0x60;
@@ -498,7 +512,6 @@ void Controller::sendTargetVelocity(int32_t target_velocity)
 void Controller::sendTargetTorque(int16_t target_torque)
 {
   // Send 32 bit integer in Little Edian bytes
-  // TODO(Anyone) Cover negative torque case to control direction
   sdo_message_.data[0]   = kWriteFourBytes;
   sdo_message_.data[1]   = 0x71;
   sdo_message_.data[2]   = 0x60;
@@ -1170,6 +1183,10 @@ void Controller::processSdoMessage(utils::io::can::Frame& message)
   }
   if (index_1 == 0x51 && index_2 == 0x20 && sub_index == 0x00) {
     log_.DBG1("MOTOR", "Controller %d: Secondary current protection configured", node_id_);
+    return;
+  }
+  if (index_1 == 0x52 && index_2 == 0x20 && sub_index == 0x01) {
+    log_.DBG1("MOTOR", "Controller %d: Maximum RPM configured", node_id_);
     return;
   }
 
