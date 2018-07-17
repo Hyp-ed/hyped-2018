@@ -51,14 +51,15 @@ void FakeGpioCounter::run()
     data::Navigation nav = data_.getNavigationData();
     data::State state = data_.getStateMachineData().current_state;
     uint32_t  prev_stripe = data_.getSensorsData().keyence_stripe_counter[0].count.value;
-    uint64_t time_out = 5000000;
+    uint64_t time_out_acc = 5000000;
+    uint64_t time_out_dec = 20000000;
     if (state == data::State::kAccelerating && !is_started_) {
       init();
       is_started_ = true;
     }
 
     if (miss_stripe_) {
-      if (time_out <= utils::Timer::getTimeMicros() - ref_time_) {
+      if (time_out_acc <= utils::Timer::getTimeMicros() - ref_time_) {
         if ((std::floor(nav.distance/30.48) - 1) == prev_stripe) {
            stripes_.count.value = std::floor(nav.distance/30.48) - 1;
         } else {
@@ -66,7 +67,7 @@ void FakeGpioCounter::run()
         }
       }
     } else if (double_stripe_) {
-      if (time_out <= utils::Timer::getTimeMicros() - ref_time_) {
+      if (time_out_dec <= utils::Timer::getTimeMicros() - ref_time_) {
         if ((std::floor(nav.distance/30.48) - 1) == prev_stripe) {
           stripes_.count.value = std::floor(nav.distance/30.48) + 1;
         } else {
@@ -76,7 +77,6 @@ void FakeGpioCounter::run()
     } else {
       stripes_.count.value = std::floor(nav.distance/30.48);
     }
-
     stripes_.count.timestamp = utils::Timer::getTimeMicros();
     stripes_.operational = true;
   }
