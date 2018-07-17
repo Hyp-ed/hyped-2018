@@ -152,7 +152,7 @@ class BMSHP : public CanProccesor, public BMSInterface {
 
  private:
   Logger&         log_;
-  uint16_t        id_;                // CAN id to be used
+  uint16_t        can_id_;            // CAN id to be used
   Battery         local_data_;        // stores values from CAN
   uint64_t        last_update_time_;  // stores arrival time of CAN message
   // for making sure only one object per BMS unit exist

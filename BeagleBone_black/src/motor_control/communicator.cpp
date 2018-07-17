@@ -42,10 +42,15 @@ Communicator::Communicator(Logger& log)
     controller3_ = new Controller(log, 3);
     controller4_ = new Controller(log, 4);
   } else {
-    controller1_ = new FakeController(log, 1);
-    controller2_ = new FakeController(log, 2);
-    controller3_ = new FakeController(log, 3);
-    controller4_ = new FakeController(log, 4);
+    if (sys_.fail_motors) {
+      controller1_ = new FakeController(log, 1, true);
+    } else {
+      controller1_ = new FakeController(log, 1, false);
+    }
+    controller2_ = new FakeController(log, 2, false);
+    controller3_ = new FakeController(log, 3, false);
+    controller4_ = new FakeController(log, 4, false);
+
     log_.INFO("MOTOR", "Fake motors created");
   }
 }

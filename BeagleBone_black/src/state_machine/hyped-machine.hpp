@@ -30,8 +30,9 @@
 #include "state_machine/states.hpp"
 
 #include "utils/logger.hpp"
-
+#include "utils/io/gpio.hpp"
 namespace hyped {
+using utils::io::GPIO;
 namespace state_machine {
 
 class State;
@@ -46,6 +47,9 @@ class HypedMachine {
   State*             current_state_;
   utils::Logger&     log_;
   data::StateMachine state_machine_;
+
+  GPIO pin_em1_;
+  GPIO pin_em2_;
 };
 
 }}   // namespace hyped::state_machine

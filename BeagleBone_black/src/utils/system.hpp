@@ -65,6 +65,10 @@ class System {
   bool fake_keyence;
   bool fake_motors;
   bool fake_embrakes;
+  bool fail_dec_imu;
+  bool fail_acc_imu;
+  bool fail_motors;
+  bool miss_keyence;
 
   // barriers
   /**

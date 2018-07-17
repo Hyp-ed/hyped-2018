@@ -44,7 +44,6 @@ int main(int argc, char* argv[])
 
   for (int i=0; i< 500; i++) {
     hyped::data::Proximity data;
-    proxi.singleRangeDistance();
     proxi.getData(&data);
     log.INFO("TEST-vl6180", "Continuous Distance: %d", data.val);
     log.INFO("Multiplexer-test", "operational: %s", data.operational ? "true" : "false");
