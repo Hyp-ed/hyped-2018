@@ -134,12 +134,8 @@ void FakeImu::getData(Imu* imu)
       prev_gyr_ = gyr_val_read_[gyr_count_];
     }
   } else {
-    if (accCheckTime()) {
-      prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
-    }
-    if (gyrCheckTime()) {
-      prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
-    }
+    prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
+    prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
     operational = true;
   }
   imu->acc = prev_acc_;
