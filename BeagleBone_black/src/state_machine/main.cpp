@@ -26,7 +26,7 @@
 #include "state_machine/main.hpp"
 
 #include "data/data.hpp"
-#include "utils/Timer.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 namespace state_machine {

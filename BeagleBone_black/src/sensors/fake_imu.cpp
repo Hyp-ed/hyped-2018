@@ -252,10 +252,10 @@ bool FakeImu::gyrCheckTime()
 
 
 FakeAccurateImu::FakeAccurateImu(utils::Logger& log)
-    : log_(log),
-      data_(data::Data::getInstance()),
+    : data_(data::Data::getInstance()),
       acc_noise_(1),
-      gyr_noise_(1)
+      gyr_noise_(1),
+      log_(log)
 { /* EMPTY */ }
 
 void FakeAccurateImu::getData(Imu* imu)
