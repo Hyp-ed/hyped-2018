@@ -29,24 +29,25 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "utils/logger.hpp"
 #include "utils/system.hpp"
+
 
 namespace hyped {
 namespace utils {
 namespace io {
 
 namespace gpio {
-constexpr const off_t bases[gpio::kBankNum] = {
+constexpr const off_t bases[kBankNum] = {
   0x44e07000,
   0x4804c000,
   0x481ac000,
   0x481ae000
 };
 constexpr uint32_t kMmapSize = 0x1000;
-// constexpr const char* kFSDir = "/sys/class/gpio";
 
 // register offsets
-constexpr uint32_t kOutputEnable  = 0x134;
+// constexpr uint32_t kOutputEnable  = 0x134;
 constexpr uint32_t kData          = 0x138;
 constexpr uint32_t kClear         = 0x190;
 constexpr uint32_t kSet           = 0x194;
@@ -79,6 +80,16 @@ GPIO::GPIO(uint32_t pin, gpio::Direction direction, Logger& log)
       fd_(0)
 {
   if (!initialised_)  initialise();
+
+  // check pin is not already allocated
+  for (uint32_t pin : exported_pins) {
+    if (pin_ == pin) {
+      log_.ERR("GPIO", "pin %d already in use", pin_);
+      return;
+    }
+  }
+  exported_pins.push_back(pin_);
+
   exportGPIO();
   attachGPIO();
   if (direction == gpio::Direction::kOut) {
@@ -91,7 +102,7 @@ void GPIO::initialise()
   int   fd;
   off_t offset;
   void* base;
-  Logger log(0, -1);
+  Logger log(false, -1);
 
   fd = open("/dev/mem", O_RDWR);
   if (fd < 0) {
@@ -134,7 +145,6 @@ void GPIO::uninitialise()
     write(fd, buf, strlen(buf) + 1);
   }
   close(fd);
-  // unmap gpio banks
 }
 
 void GPIO::exportGPIO()
@@ -155,14 +165,13 @@ void GPIO::exportGPIO()
     log_.ERR("GPIO", "could not open export file");
     return;
   }
-  snprintf(buf, sizeof(buf), "%i", pin_);
+  snprintf(buf, sizeof(buf), "%d", pin_);
   len = write(fd, buf, strlen(buf) + 1);
   close(fd);
   if (len != strlen(buf) +1) {
-    log_.INFO("GPIO", "could not export GPIO $d, might be already exported", pin_);
+    log_.INFO("GPIO", "could not export GPIO %d, might be already exported", pin_);
     // return;
   }
-  exported_pins.push_back(pin_);
 
   // set direction
   snprintf(buf, sizeof(buf), "/sys/class/gpio/gpio%i/direction", pin_);
@@ -182,6 +191,7 @@ void GPIO::exportGPIO()
   close(fd);
   if (len < 3) {
     log_.ERR("GPIO", "could not set direction for %i", pin_);
+    return;
   }
 
   log_.INFO("GPIO", "pin %d was successfully exported", pin_);

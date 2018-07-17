@@ -29,8 +29,8 @@ namespace hyped {
 namespace sensors {
 
 BmsManager::BmsManager(Logger& log,
-                       Batteries* lp_batteries,
-                       Batteries* hp_batteries)
+                       BatteriesLP* lp_batteries,
+                       BatteriesHP* hp_batteries)
     : ManagerInterface(log),
       lp_batteries_(lp_batteries),
       hp_batteries_(hp_batteries)
@@ -74,4 +74,5 @@ void BmsManager::resetTimestamp()
 {
   old_timestamp_ = timestamp;
 }
+
 }}  // namespace hyped::sensors
