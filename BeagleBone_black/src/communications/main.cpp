@@ -212,38 +212,61 @@ void Main::run()
   receiverThread->start();
 
   while (1) {
+    stm_ = data_.getStateMachineData();
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
     sen_ = data_.getSensorsData();
-    stm_ = data_.getStateMachineData();
     bat_ = data_.getBatteriesData();
-    sendDistance(nav_.distance);
-    sendVelocity(nav_.velocity);
-    sendAcceleration(nav_.acceleration);
-    sendRpmFl(mtr_.velocity_1);
-    sendRpmFr(mtr_.velocity_2);
-    sendRpmBl(mtr_.velocity_3);
-    sendRpmBr(mtr_.velocity_4);
+    emb_ = data_.getEmergencyBrakesData();
+
     sendState(stm_.current_state);
-    sendHpVoltage(bat_.high_power_batteries.at(0));
-    sendHpTemperature(bat_.high_power_batteries.at(0));
-    sendHpCharge(bat_.high_power_batteries.at(0));
-    sendHpVoltage1(bat_.high_power_batteries.at(1));
-    sendHpTemperature1(bat_.high_power_batteries.at(1));
-    sendHpCharge1(bat_.high_power_batteries.at(1));
-    sendLpCharge(bat_.low_power_batteries.at(0));
-    sendLpCharge1(bat_.low_power_batteries.at(1));
-    sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
-            sen_.imu.value[2].operational, sen_.imu.value[3].operational);
-    sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,
-                   sen_.proxi_front.value[2].operational, sen_.proxi_front.value[3].operational,
-                   sen_.proxi_front.value[4].operational, sen_.proxi_front.value[5].operational,
-                   sen_.proxi_front.value[6].operational, sen_.proxi_front.value[7].operational);
-    sendProxiRear(sen_.proxi_back.value[0].operational, sen_.proxi_back.value[1].operational,
-                  sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
-                  sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
-                  sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
-    sendEmBrakes(emb_.left_brakes, emb_.right_brakes);
+
+    if (nav_.module_status != data::ModuleStatus::kStart) {
+      log_.DBG3("COMN", "Send navigation data.");
+      sendDistance(nav_.distance);
+      sendVelocity(nav_.velocity);
+      sendAcceleration(nav_.acceleration);
+    }
+
+    if (mtr_.module_status != data::ModuleStatus::kStart) {
+      log_.DBG3("COMN", "Send motors data.");
+      sendRpmFl(mtr_.velocity_1);
+      sendRpmFr(mtr_.velocity_2);
+      sendRpmBl(mtr_.velocity_3);
+      sendRpmBr(mtr_.velocity_4);
+    }
+
+    if (sen_.module_status != data::ModuleStatus::kStart) {
+      log_.DBG3("COMN", "Send sensors data.");
+      sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
+              sen_.imu.value[2].operational, sen_.imu.value[3].operational);
+      sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,
+                    sen_.proxi_front.value[2].operational, sen_.proxi_front.value[3].operational,
+                    sen_.proxi_front.value[4].operational, sen_.proxi_front.value[5].operational,
+                    sen_.proxi_front.value[6].operational, sen_.proxi_front.value[7].operational);
+      sendProxiRear(sen_.proxi_back.value[0].operational, sen_.proxi_back.value[1].operational,
+                    sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
+                    sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
+                    sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
+    }
+
+    if (bat_.module_status != data::ModuleStatus::kStart) {
+      log_.DBG3("COMN", "Send batteries data.");
+      sendHpVoltage(bat_.high_power_batteries.at(0));
+      sendHpTemperature(bat_.high_power_batteries.at(0));
+      sendHpCharge(bat_.high_power_batteries.at(0));
+      sendHpVoltage1(bat_.high_power_batteries.at(1));
+      sendHpTemperature1(bat_.high_power_batteries.at(1));
+      sendHpCharge1(bat_.high_power_batteries.at(1));
+      sendLpCharge(bat_.low_power_batteries.at(0));
+      sendLpCharge1(bat_.low_power_batteries.at(1));
+    }
+
+    if (emb_.module_status != data::ModuleStatus::kStart) {
+      log_.DBG3("COMN", "Send emergency brakes data.");
+      sendEmBrakes(emb_.left_brakes, emb_.right_brakes);
+    }
+
     sleep(200);
   }
 }
