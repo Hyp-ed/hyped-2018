@@ -107,7 +107,7 @@ class FakeController : public ControllerInterface {
   bool     faulty_;
   uint64_t timer_start_;
   bool is_timer_start_;
-  int fail_time_;
+  uint64_t fail_time_;
 };
 
 }}  // namespace hyped::motor_control

@@ -58,10 +58,13 @@ Main::Main(uint8_t id, Logger& log)
 {
   // @TODO (Anyone) Check THESE PINS
   if (sys_.fake_sensors || sys_.fake_keyence) {
-    keyence_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
-    Thread::sleep(100);
-    keyence_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
-    Thread::sleep(100);
+    if (sys_.miss_keyence) {
+      keyence_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_miss1_then_2.txt"); //NOLINT
+      keyence_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_miss1.txt");
+    } else {
+      keyence_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+      keyence_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
+    }
     optical_encoder_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
     Thread::sleep(100);
     optical_encoder_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
@@ -146,7 +149,7 @@ void Main::run()
       battery_manager_->resetTimestamp();
 
       // check health of batteries
-      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure) {
+      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure && !sys_.fake_sensors) {
         if (!batteriesInRange()) {
           log_.ERR("SENSORS", "battery failure detected");
           batteries_.module_status = data::ModuleStatus::kCriticalFailure;
