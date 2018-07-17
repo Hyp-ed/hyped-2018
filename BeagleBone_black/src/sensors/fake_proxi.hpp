@@ -42,12 +42,12 @@ class FakeProxi : public ProxiInterface {
   /*
    * @brief    A constructor for the fake proximity class by reading from file
    */
-  explicit FakeProxi(utils::Logger& log, std::string file_path);
+  FakeProxi(utils::Logger& log, std::string file_path);
 
   /*
    * @brief    A constructor for the fake proximity class by generating random data
    */
-  explicit FakeProxi(utils::Logger& log, uint8_t value, float noise);
+  FakeProxi(utils::Logger& log, uint8_t value, float noise, bool operational);
 
   /*
    * @brief    A function to check if the proximity sensor is online
@@ -90,10 +90,12 @@ class FakeProxi : public ProxiInterface {
 
   uint8_t value_;
   float noise_;
+  bool operational_;
   DataPoint<uint8_t> prev_reading_;
 
   int64_t reading_counter_;
   std::vector<DataPoint<uint8_t>> val_read_;
+  std::vector<bool> val_operational_;
   high_resolution_clock::time_point ref_time_;
   utils::Logger& log_;
 };

@@ -54,10 +54,11 @@ FakeProxi::FakeProxi(Logger& log, std::string file_path)
   setData();
 }
 
-FakeProxi::FakeProxi(Logger& log, uint8_t value, float noise)
+FakeProxi::FakeProxi(Logger& log, uint8_t value, float noise, bool operational)
     : read_file_(false),
       value_(value),
       noise_(noise),
+      operational_(operational),
       log_(log)
 {
   setData();
@@ -73,19 +74,22 @@ void FakeProxi::setData()
 
 void FakeProxi::getData(Proximity* proxi)
 {
-  Thread::sleep(3);
+  bool operational = false;
+  Thread::sleep(10);
   bool update_time = checkTime();
+  reading_counter_ = std::min(reading_counter_, (int64_t) val_read_.size());
   if (read_file_ && update_time) {
-    reading_counter_ = std::min(reading_counter_, (int64_t) val_read_.size());
     prev_reading_ = val_read_[reading_counter_-1];
+    operational = val_operational_[reading_counter_-1];
   } else if (update_time) {
     prev_reading_ = DataPoint<uint8_t>(kProxiTimeInterval*(reading_counter_-1),
                                       addNoiseToData(value_, noise_));
+    operational = operational_;
   }
 
   // TODO(Anyone): Add timestamp
   proxi->val = prev_reading_.value;
-  proxi->operational = true;
+  proxi->operational = operational;
 }
 
 void FakeProxi::readDataFromFile(std::string file_path)
@@ -99,7 +103,7 @@ void FakeProxi::readDataFromFile(std::string file_path)
   int8_t timestamp = kProxiTimeInterval;
   int8_t counter;
   int32_t time_counter = 0;
-  int temp[4];
+  int temp[6];
   std::string line;
   while (getline(file, line)) {
     std::stringstream input(line);
@@ -109,15 +113,15 @@ void FakeProxi::readDataFromFile(std::string file_path)
       counter++;
     }
 
-    if (counter != 3) {
+    if (counter != 4) {
       throw std::invalid_argument("Incomplete values for the argument line");
     }
 
     if (temp[0] != timestamp*time_counter) {
       throw std::invalid_argument("Timestamp value incorrect");
     }
-
     val_read_.push_back(DataPoint<uint8_t>(temp[0], addNoiseToData(temp[1], temp[2])));
+    val_operational_.push_back(temp[3]);
     time_counter++;
   }
 
