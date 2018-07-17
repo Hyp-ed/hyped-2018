@@ -52,6 +52,7 @@ class FakeGpioCounter:public GpioInterface {
   uint64_t prev_gpio_;
 
   std::vector<uint64_t> val_read_;
+  std::vector<bool>     val_operational_;
   uint64_t gpio_count_;
 
   data::StripeCounter stripe_counter_;
