@@ -97,7 +97,7 @@ int Main::sendState(State state)
 int Main::sendHpVoltage(Battery hp_battery)
 {
   // Convert voltage reading units from mV to V
-  return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage / 1000.0) + "\n");
+  return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage / 10.0) + "\n");
 }
 
 int Main::sendHpTemperature(Battery hp_battery)
@@ -113,7 +113,7 @@ int Main::sendHpCharge(Battery hp_battery)
 int Main::sendHpVoltage1(Battery hp_battery1)
 {
   // Convert voltage reading units from mV to V
-  return base_communicator_->sendData("CMD12" + std::to_string(hp_battery1.voltage / 1000.0)
+  return base_communicator_->sendData("CMD12" + std::to_string(hp_battery1.voltage / 10.0)
                                       + "\n");
 }
 
