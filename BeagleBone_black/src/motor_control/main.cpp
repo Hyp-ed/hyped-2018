@@ -97,6 +97,7 @@ void Main::run()
       decelerateMotors();
     } else if (state_.current_state == data::State::kRunComplete) {
       // Wait for state machine to transition to kExiting
+      communicator_->sendTargetVelocity(0);
       updateMotorData();
       yield();
     } else if (state_.current_state == data::State::kExiting) {
@@ -297,8 +298,9 @@ void Main::decelerateMotors()
 
 void Main::stopMotors()
 {
-  // Quick stop the motors by setting the target velocity to 0
-  communicator_->sendTargetVelocity(0);
+  // Cut high power to motors in state of emergency
+  communicator_->enterPreOperational();
+
   // Updates the motor data while motors are stopping
   while (!all_motors_stopped_) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");
@@ -312,7 +314,6 @@ void Main::stopMotors()
     }
   }
   updateMotorData();
-  communicator_->enterPreOperational();
 }
 
 int32_t Main::accelerationVelocity(NavigationType velocity)
@@ -361,8 +362,8 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
 
 int32_t Main::decelerationVelocity(NavigationType velocity)
 {
-  // Decrease velocity from max RPM to 0, with updates every 30 milliseconds
-  while (timer.getTimeMicros() - time_of_update_ < 30000);
+  // Decrease velocity from max RPM to 0, with updates every 45 milliseconds
+  while (timer.getTimeMicros() - time_of_update_ < 45000);
   int32_t rpm;
   time_of_update_ = timer.getTimeMicros();
   if (dec_index_ < (int32_t) deceleration_slip_[1].size()) {

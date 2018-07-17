@@ -278,20 +278,21 @@ void FakeAccurateImu::getData(Imu* imu)
   // get angular velocity
   double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
   uint32_t scale = 4;
-  if (!isnan(nav.velocity))
+  if (!std::isnan(nav.velocity)) {
     imu->acc[0] = (velocity - nav.velocity)/scale;
-  else
+  } else {
     imu->acc[0] = 0.0;
-  imu->acc[1] = 0;
-  imu->acc[2] = 9.8;
+    imu->acc[1] = 0;
+    imu->acc[2] = 9.8;
 
-  imu->gyr[0] = 0;
-  imu->gyr[1] = 0;
-  imu->gyr[2] = 0;
+    imu->gyr[0] = 0;
+    imu->gyr[1] = 0;
+    imu->gyr[2] = 0;
 
-  imu->acc = FakeImu::addNoiseToData(imu->acc, acc_noise_);
-  imu->gyr = FakeImu::addNoiseToData(imu->gyr, gyr_noise_);
-  imu->operational = true;
+    imu->acc = FakeImu::addNoiseToData(imu->acc, acc_noise_);
+    imu->gyr = FakeImu::addNoiseToData(imu->gyr, gyr_noise_);
+    imu->operational = true;
+  }
 }
 
 }}  // namespace hyped::sensors
