@@ -66,7 +66,9 @@ Main::Main(uint8_t id, Logger& log)
       keyence_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt");
     }
     optical_encoder_l_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
+    Thread::sleep(100);
     optical_encoder_r_ = new FakeGpioCounter(log, "../BeagleBone_black/data/in/fake_keyence_input.txt"); //NOLINT
+    Thread::sleep(100);
   } else {
     // Pins for keyence GPIO_73 and GPIO_75
     keyence_l_ = new GpioCounter(log, 73);
