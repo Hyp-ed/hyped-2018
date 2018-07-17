@@ -105,8 +105,6 @@ void Decelerating::react(HypedMachine &machine, Event event)
 void EmergencyBraking::entry()
 {
   state_ = state::kEmergencyBraking;
-  pin_37_.clear();
-  pin_38_.clear();
 }
 
 void EmergencyBraking::react(HypedMachine &machine, Event event)

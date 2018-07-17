@@ -44,11 +44,16 @@ class Main: public Thread {
  private:
   HypedMachine hypedMachine;
 
-  void checkNavigation();
-  void checkCommunications();
-  void checkReady();
-  void checkFailure();
-  void checkInit();
+  // return true iff the event has been fired
+  bool checkInitialised();
+  bool checkSystemsChecked();
+  bool checkOnStart();
+  bool checkCriticalFailure();
+  bool checkMaxDistanceReached();
+  bool checkOnExit();
+  bool checkFinish();
+  bool checkVelocityZeroReached();
+
   data::Data& data_;
   data::Communications comms_data_;
   data::Navigation nav_data_;
