@@ -86,9 +86,14 @@ void FakeController::sendTargetVelocity(int32_t target_velocity)
   }
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity to %d", node_id_, target_velocity);
   actual_velocity_ = target_velocity;
-  if (node_id_ == 1) {
-    RPMvTime << (timer.getTimeMicros() / 1000) << "\t" << target_velocity;
+  static int counter = 0;
+  if (counter == 1000) {
+    if (node_id_ == 1) {
+      RPMvTime << (timer.getTimeMicros() / 1000) << "\t" << target_velocity << "\n" ;
+    }
+    counter = 0;
   }
+  counter++;
 }
 
 void FakeController::updateActualVelocity()

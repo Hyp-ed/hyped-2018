@@ -318,7 +318,7 @@ void Main::stopMotors()
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
   // Starting acceleration. TODO(Sean) Check with sims on this value
-  if (velocity == 0) {
+  if (velocity < 0.5) {
     prev_velocity_ = velocity;
     timer.start();
     time_of_update_ = timer.getTimeMicros();
@@ -352,6 +352,7 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
                                       velocity);
 
   // Use index to find corresponding RPM
+  if (upper_bound == acceleration_slip_[0].end()) upper_bound--;
   int index       = upper_bound - acceleration_slip_[0].begin();
   prev_index_     = index;
   time_of_update_ = timer.getTimeMicros();
