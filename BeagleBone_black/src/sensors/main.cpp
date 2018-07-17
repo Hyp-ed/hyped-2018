@@ -86,10 +86,6 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   // start all managers
-  // keyence_l_->start();
-  // keyence_r_->start();
-  // optical_encoder_l_->start();
-  // optical_encoder_r_->start();
   imu_manager_->start();
   proxi_manager_front_->start();
   proxi_manager_back_->start();
