@@ -170,13 +170,14 @@ class Navigation {
   static constexpr int kMinNumCalibrationSamples = 200000;
   static const Settings kDefaultSettings;
   /**
-   * @brief Calculates distance to the last stripe, the next stripe and the one after that.
+   * @brief Calculates distance to the given stripe, the next stripe and the one after that.
    *
+   * @param  stripe_count  Number of stripes.
    * @return std::array<NavigationType, 3> Index 0 contains distance to last stripe (should be
    *                                       negative); indices 1 and 2 contain distances to the
    *                                       next 2 stripes (both should be positive).
    */
-  std::array<NavigationType, 3> getNearestStripeDists();
+  std::array<NavigationType, 3> getNearestStripeDists(uint16_t stripe_count);
   /**
    * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
    *        reading is available but no other data has been updated.
