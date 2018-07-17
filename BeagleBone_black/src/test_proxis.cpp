@@ -62,14 +62,14 @@ int main(int argc, char* argv[])
     }
 
   uint64_t start = hyped::utils::Timer::getTimeMicros();
-    while (120000 > (hyped::utils::Timer::getTimeMicros() - start)) {
+  while (120000 > (hyped::utils::Timer::getTimeMicros() - start)) {
     myfile << std::to_string(hyped::utils::Timer::getTimeMicros() - start) << ",";
     for (int j = 0; j < kNumOfProxis; j++) {
       i2c.write(kMultiplexerAddr, 0x01 << j);  // open particular i2c channel
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
-
       myfile << std::to_string(proxi.val) << ",";
+
       if (j == 7) {
         if (proxi.operational) {
           myfile << "true";
@@ -80,10 +80,9 @@ int main(int argc, char* argv[])
         if (proxi.operational) {
           myfile << "true,";
         } else {
-         myfile << "false," ;
+          myfile << "false," ;
         }
       }
-      
     }
     myfile << "\n";
   }

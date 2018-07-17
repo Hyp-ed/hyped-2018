@@ -44,15 +44,12 @@ Communicator::Communicator(Logger& log)
   } else {
     if (sys_.fail_motors) {
       controller1_ = new FakeController(log, 1, true);
-      controller2_ = new FakeController(log, 2, false);
-      controller3_ = new FakeController(log, 3, false);
-      controller4_ = new FakeController(log, 4, false);
     } else {
       controller1_ = new FakeController(log, 1, false);
-      controller2_ = new FakeController(log, 2, false);
-      controller3_ = new FakeController(log, 3, false);
-      controller4_ = new FakeController(log, 4, false);
     }
+    controller2_ = new FakeController(log, 2, false);
+    controller3_ = new FakeController(log, 3, false);
+    controller4_ = new FakeController(log, 4, false);
 
     log_.INFO("MOTOR", "Fake motors created");
   }

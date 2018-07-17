@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
   
 
   for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
-      imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
+    imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
   }
   log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
 
