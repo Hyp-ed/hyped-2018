@@ -382,6 +382,10 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
       displacement_[0], displacement_[1], displacement_[2]);
   // TODO(Brano): Update displacement and velocity
 
+  if (scs[0].count.value == stripe_count_ && scs[1].count.value == stripe_count_) {
+    return;
+  }
+
   int num_operational = 0;
   for (unsigned int i = 0; i < data::Sensors::kNumKeyence; ++i) {
     if (scs[i].operational) {
