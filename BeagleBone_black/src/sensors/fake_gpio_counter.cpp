@@ -54,37 +54,34 @@ void FakeGpioCounter::run()
 
 void FakeGpioCounter::readDataFromFile(std::string file_path)
 {
-    std::vector<uint64_t>* val_read = &val_read_;
-    std::vector<bool>* val_operational = &val_operational_;
+  std::ifstream file;
+  file.open(file_path);
+  if (!file.is_open()) {
+    log_.ERR("Fake-keyence", "Wrong file path for argument");
+  }
 
-    std::ifstream file;
-    file.open(file_path);
-    if (!file.is_open()) {
-        log_.ERR("Fake-keyence", "Wrong file path for argument");
+  uint32_t temp_value;
+  uint64_t counter = 0;
+  uint32_t temp_time;
+  bool temp_operational;
+  std::string line;
+
+  while (getline(file, line)) {
+    std::stringstream input(line);
+    input >> temp_time;
+
+    if (temp_time != kTimeStamp*counter) {
+      log_.ERR("Fake-keyence", "Timestamp format invalid %d", temp_time);
     }
 
-    uint32_t temp_value;
-    uint64_t counter = 0;
-    uint32_t temp_time;
-    bool temp_operational;
-    std::string line;
+    input >> temp_value;
+    input >> temp_operational;
+    val_read_.push_back(temp_value);
+    val_operational_.push_back(temp_operational);
+    counter++;
+  }
 
-    while (getline(file, line)) {
-      std::stringstream input(line);
-      input >> temp_time;
-
-      if (temp_time != kTimeStamp*counter) {
-        log_.ERR("Fake-keyence", "Timestamp format invalid %d", temp_time);
-      }
-
-      input >> temp_value;
-      input >> temp_operational;
-      val_read->push_back(temp_value);
-      val_operational->push_back(temp_operational);
-      counter++;
-    }
-
-    file.close();
+  file.close();
 }
 
 void FakeGpioCounter::init()
