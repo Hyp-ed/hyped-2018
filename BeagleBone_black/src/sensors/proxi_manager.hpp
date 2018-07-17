@@ -42,26 +42,26 @@ namespace sensors {
 
 class ProxiManager: public ProxiManagerInterface {
   static constexpr uint8_t kMultiplexerAddr = 0x70;
+  typedef array<float, data::Sensors::kNumProximities>                      CalibrationArray;
+  typedef data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> DataArray;
  public:
   ProxiManager(Logger& log,
                bool isFront,
-               data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *proxi);
-  void run() override;
-  bool updated() override;
-  void resetTimestamp() override;
-  array<float, data::Sensors::kNumProximities> getCalibrationData() override;
+               DataArray *proxi);
+  void run()                            override;
+  bool updated()                        override;
+  void resetTimestamp()                 override;
+  CalibrationArray getCalibrationData() override;
 
  private:
-  utils::System& sys_;
-  data::DataPoint<array<Proximity, data::Sensors::kNumProximities>> *sensors_proxi_;
-  ProxiInterface* proxi_[data::Sensors::kNumProximities];
-  array<float, data::Sensors::kNumProximities> proxi_calibration_;
-  bool is_fake_;
-  I2C& i2c_;
-  bool is_front_;
+  DataArray*        sensors_proxi_;
+  CalibrationArray  proxi_calibration_;
+  ProxiInterface*   proxi_[data::Sensors::kNumProximities];
+  I2C&              i2c_;
+  bool              is_fake_;
+  bool              is_front_;
   OnlineStatistics<float> stats_[data::Sensors::kNumProximities];
-  bool is_calib_;
-  uint32_t calib_counter_;
+  bool              is_calibrated_;
 };
 
 }}  // namespace hyped::sensors

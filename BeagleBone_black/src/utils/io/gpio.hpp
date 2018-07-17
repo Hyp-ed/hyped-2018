@@ -25,10 +25,12 @@
 #include <cstdint>
 #include <vector>
 
-#include "utils/logger.hpp"
+#include "utils/utils.hpp"
 
 namespace hyped {
 namespace utils {
+// Forward declaration
+class Logger;
 namespace io {
 
 namespace gpio {
@@ -92,6 +94,8 @@ class GPIO {
   volatile uint32_t* data_;       // data register
   uint32_t           pin_mask_;   // mask for register access to this pin
   int                fd_;         // file pointer to /sys/class/gpio/gpioXX/value
+
+  NO_COPY_ASSIGN(GPIO);
 };
 
 }}}   // namespace hyped::utils::io

@@ -57,28 +57,28 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       orientation_(1, 0, 0, 0)
 {}
 
-NavigationType Navigation::getAcceleration()
+NavigationType Navigation::getAcceleration() const
 {
   return acceleration_[0];
 }
 
-NavigationType Navigation::getVelocity()
+NavigationType Navigation::getVelocity() const
 {
   return velocity_[0];
 }
 
-NavigationType Navigation::getDisplacement()
+NavigationType Navigation::getDisplacement() const
 {
   return displacement_[0];
 }
 
-NavigationType Navigation::getEmergencyBrakingDistance()
+NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
 }
 
-ModuleStatus Navigation::getStatus()
+ModuleStatus Navigation::getStatus() const
 {
   return status_;
 }
@@ -274,7 +274,7 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
       acceleration_[0], acceleration_[1], acceleration_[2],
       velocity_[0], velocity_[1], velocity_[2],
       displacement_[0], displacement_[1], displacement_[2]);
-  acceleration_  = acceleration.value;
+  acceleration_ = acceleration.value;
   auto velocity = acceleration_integrator_.update(acceleration);
   velocity_     = velocity.value;
   displacement_ = velocity_integrator_.update(velocity).value;
@@ -309,7 +309,7 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
        a[1], b[1], c[1], d[1],
        a[2], b[2], c[2], d[2];
 
-  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeThinU);
+  Eigen::JacobiSVD<Eigen::Matrix<double, 3, 4>> svd(m, Eigen::ComputeFullU);
   Eigen::Vector3d n = svd.matrixU().col(svd.matrixU().cols() - 1);
   if (n(2) < 0.0)
     n = -n;
