@@ -31,56 +31,58 @@
 #include "utils/timer.hpp"
 #include "data/data.hpp"
 
-// TODO(Jack) Find the least between stripes
-constexpr uint8_t kTimeStamp = 50;    // ms
-
 namespace hyped {
 
 using data::StripeCounter;
 
 namespace sensors {
 
-FakeGpioCounter::FakeGpioCounter(Logger& log, std::string file_path)
+FakeGpioCounter::FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe)
     : GpioInterface(log),
       data_(Data::getInstance()),
-      file_path_(file_path),
-      is_started_(false),
-      prev_gpio_(0)
+      miss_stripe_(miss_stripe),
+      double_stripe_(double_stripe),
+      is_started_(false)
 {}
 
 void FakeGpioCounter::run()
 {
-  data::Navigation nav = data_.getNavigationData();
-  data::State state = data_.getStateMachineData().current_state;
-  if (state == data::State::kAccelerating) {
-    init();
-  }
+  while (1) {
+    data::Navigation nav = data_.getNavigationData();
+    data::State state = data_.getStateMachineData().current_state;
+    uint32_t  prev_stripe = data_.getSensorsData().keyence_stripe_counter[0].count.value;
+    uint64_t time_out = 5000000;
+    if (state == data::State::kAccelerating && !is_started_) {
+      init();
+      is_started_ = true;
+    }
 
-  if (checkTime()) {
-    stripes_.count.value = std::floor(nav.distance/30.48);
+    if (miss_stripe_) {
+      if (time_out <= utils::Timer::getTimeMicros() - ref_time_) {
+        if ((std::floor(nav.distance/30.48) - 1) == prev_stripe) {
+           stripes_.count.value = std::floor(nav.distance/30.48) - 1;
+        } else {
+          stripes_.count.value = std::floor(nav.distance/30.48) - 1;
+        }
+      }
+    } else if (double_stripe_) {
+      if (time_out <= utils::Timer::getTimeMicros() - ref_time_) {
+        stripes_.count.value = std::floor(nav.distance/30.48) + 1;
+      }
+    } else {
+      stripes_.count.value = std::floor(nav.distance/30.48);
+    }
+
     stripes_.count.timestamp = utils::Timer::getTimeMicros();
     stripes_.operational = true;
   }
+  Thread::sleep(50);
 }
 
 void FakeGpioCounter::init()
 {
   log_.INFO("Fake-Gpio", "TIMER START");
   ref_time_ = utils::Timer::getTimeMicros();
-  gpio_count_ = 0;
-}
-
-bool FakeGpioCounter::checkTime()
-{
-  uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = (now - ref_time_) / 1000;
-
-  if (time_span < kTimeStamp * gpio_count_) {
-      return false;
-  }
-  gpio_count_ = time_span/kTimeStamp + 1;
-  // log_.INFO("Fake-Gpio", "Gpio-count: %d", gpio_count_);
-  return true;
 }
 
 StripeCounter FakeGpioCounter::getStripeCounter()
