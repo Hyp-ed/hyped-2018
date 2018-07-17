@@ -413,6 +413,7 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     }
     timestamp = (scs[0].count.timestamp + scs[1].count.timestamp) / 2;
     stripe_count_ = scs[0].count.value;
+    log_.DBG3("NAV", "Keyences are in sync (oldCnt=%d, newCnts=[%d, %d])");
   } else {
     // Distance given by the current stripe should match distance, therefore the dists array should
     // provide [-ve, ~0, +ve] if the stripe count and distance are in agreement
@@ -433,14 +434,14 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
         // dists_r is the only correct one
         timestamp = scs[1].count.timestamp;
         stripe_count_ = scs[1].count.value;
-        log_.DBG2("NAV", "Keyences are not in sync (oldCnt=%d, newCnts=[%d, %d])",
+        log_.DBG3("NAV", "Keyences are not in sync (oldCnt=%d, newCnts=[%d, %d])",
             stripe_count_, scs[0].count.value, scs[1].count.value);
       }
     } else {
       // dists_l is the only correct one
       timestamp = scs[0].count.timestamp;
       stripe_count_ = scs[0].count.value;
-      log_.DBG2("NAV", "Keyences are not in sync (oldCnt=%d, newCnts=[%d, %d])",
+      log_.DBG3("NAV", "Keyences are not in sync (oldCnt=%d, newCnts=[%d, %d])",
         stripe_count_, scs[0].count.value, scs[1].count.value);
     }
   }
