@@ -66,19 +66,19 @@ Main::Main(uint8_t id, Logger& log)
   } else {
     // Pins for keyence GPIO_73 and GPIO_75
     GpioCounter* temp;
-    temp = new GpioCounter(73);
+    temp = new GpioCounter(66);
     temp->start();
     keyence_l_ = temp;
 
-    temp = new GpioCounter(73);
+    temp = new GpioCounter(67);
     temp->start();
     keyence_r_ = temp;
 
-    temp = new GpioCounter(73);
+    temp = new GpioCounter(69);
     temp->start();
     optical_encoder_l_ = temp;
 
-    temp = new GpioCounter(73);
+    temp = new GpioCounter(68);
     temp->start();
     optical_encoder_r_ = temp;
   }
