@@ -25,6 +25,7 @@ SRCS := \
   sensors/fake_gpio_counter.cpp \
   sensors/gpio_counter.cpp \
   sensors/fake_proxi.cpp \
+  sensors/em_brake.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
