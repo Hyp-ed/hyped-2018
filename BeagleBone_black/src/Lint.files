@@ -46,6 +46,8 @@ sensors/gpio_counter.cpp
 sensors/gpio_counter.hpp
 sensors/fake_batteries.cpp
 sensors/fake_batteries.hpp
+sensors/em_brake.cpp
+sensors/em_brake.hpp
 communications/main.hpp
 communications/main.cpp
 communications/communications.hpp
