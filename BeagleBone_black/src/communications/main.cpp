@@ -25,13 +25,13 @@
 
 namespace hyped {
 
-using data::State;
-using data::Battery;
+using utils::System;
 
 namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
+      sys_(System::getSystem()),
       log_(log),
       data_(data::Data::getInstance())
 {
@@ -180,11 +180,11 @@ int Main::sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_
                                       sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
-int Main::sendEmBrakes(bool left_brakes, bool right_brakes)
+int Main::sendEmBrakes(bool front_brakes, bool rear_brakes)
 {
   std::string brake, brake1;
-  brake = left_brakes ? "1" : "2";
-  brake1 = right_brakes ? "1" : "2";
+  brake = front_brakes ? "1" : "2";
+  brake1 = rear_brakes ? "1" : "2";
 
   return base_communicator_->sendData("CMD20" + brake + brake1 + "\n");
 }
@@ -209,7 +209,7 @@ void Main::run()
   ReceiverThread* receiverThread = new ReceiverThread(log_, base_communicator_);
   receiverThread->start();
 
-  while (1) {
+  while (sys_.running_) {
     stm_ = data_.getStateMachineData();
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
@@ -255,7 +255,7 @@ void Main::run()
 
     if (emb_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send emergency brakes data.");
-      sendEmBrakes(emb_.left_brakes, emb_.right_brakes);
+      sendEmBrakes(emb_.front_brakes, emb_.rear_brakes);
     }
 
     sleep(200);

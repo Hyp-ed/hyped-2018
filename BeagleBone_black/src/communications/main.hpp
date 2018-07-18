@@ -23,6 +23,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "utils/system.hpp"
 #include "communications/communications.hpp"
 #include "communications/receiver.hpp"
 
@@ -61,12 +62,13 @@ class Main : public Thread {
   int sendImu(std::array<Imu, Sensors::kNumImus> imus);                               // CMD17
   int sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front);  // CMD18
   int sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear);    // CMD19
-  int sendEmBrakes(bool left_brakes, bool right_brakes);                              // CMD20
+  int sendEmBrakes(bool front_brakes, bool rear_brakes);                              // CMD20
 
  private:
   int state_code_;
   Communications* base_communicator_;
   Logger& log_;
+  utils::System& sys_;
   data::Data& data_;
   data::StateMachine stm_;
   data::Motors mtr_;
