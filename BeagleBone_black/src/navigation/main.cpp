@@ -55,7 +55,8 @@ void Main::run()
   }
   log_.INFO("NAV", "Main started");
 
-  while (1) {
+  System& sys = System::getSystem();
+  while (sys.running_) {
     // State updates
     State current_state = data_.getStateMachineData().current_state;
     switch (current_state) {

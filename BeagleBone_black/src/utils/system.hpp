@@ -79,6 +79,7 @@ class System {
    *        state. Navigation must finish calibration before motors start spinning.
    */
   Barrier navigation_motors_sync_ = Barrier(2);
+  bool running_;
 
  private:
   Logger* log_;
