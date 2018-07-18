@@ -23,7 +23,6 @@
 
 #include <string>
 #include "data/data.hpp"
-#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
@@ -31,7 +30,6 @@ using data::Imu;
 using data::Proximity;
 using data::Battery;
 using data::NavigationVector;
-using utils::concurrent::Thread;
 
 namespace sensors {
 
@@ -71,9 +69,8 @@ class BMSInterface: public SensorInterface {
   virtual void getData(Battery* battery) = 0;
 };
 
-class GpioInterface: public Thread {
+class GpioInterface {
  public:
-  explicit GpioInterface(utils::Logger& log) : Thread(log) {}
   /**
    * @brief Get GPIO data
    * @param

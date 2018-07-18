@@ -27,6 +27,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -48,6 +49,7 @@ class BmsManager: public ManagerInterface  {
   BatteriesLP*    lp_batteries_;
   BatteriesHP*    hp_batteries_;
   BMSInterface*   bms_[data::Batteries::kNumLPBatteries+data::Batteries::kNumHPBatteries];
+  utils::System&    sys_;
 
   uint64_t timestamp;
 };

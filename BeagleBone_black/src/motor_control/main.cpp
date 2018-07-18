@@ -79,30 +79,47 @@ void Main::run()
   log_.INFO("MOTOR", "Starting motor controllers");
   while (run_) {
     state_ = data_.getStateMachineData();
+
     if (state_.current_state == data::State::kIdle) {
-      initMotors();
+      if (!motors_init_) initMotors();
       yield();
+
     } else if (state_.current_state == data::State::kCalibrating) {
-      calculateSlip(kAccelerationData);
-      calculateSlip(kDecelerationData);
-      prepareMotors();
+      if (!slip_calculated_) {
+        calculateSlip(kAccelerationData);
+        calculateSlip(kDecelerationData);
+      }
+      if (!motors_ready_ && !motor_failure_) prepareMotors();
       yield();
+
     } else if (state_.current_state == data::State::kReady) {
       // Wait for launch command
+      updateMotorData();
       yield();
+
     } else if (state_.current_state == data::State::kAccelerating) {
       accelerateMotors();
+
     } else if (state_.current_state == data::State::kDecelerating) {
       decelerateMotors();
+
     } else if (state_.current_state == data::State::kRunComplete) {
       // Wait for state machine to transition to kExiting
+      communicator_->sendTargetVelocity(0);
+      updateMotorData();
       yield();
+
     } else if (state_.current_state == data::State::kExiting) {
       servicePropulsion();
+
     } else if (state_.current_state == data::State::kEmergencyBraking) {
       stopMotors();
+
     } else if (state_.current_state == data::State::kFailureStopped) {
       enterPreOperational();
+      updateMotorData();
+      yield();
+
     } else {
       run_ = false;
     }
@@ -111,23 +128,21 @@ void Main::run()
 
 void Main::initMotors()
 {
-  if (!motors_init_ && !motor_failure_) {
-    // Register controllers on CAN Bus
-    communicator_->registerControllers();
+  // Register controllers on CAN Bus
+  communicator_->registerControllers();
 
-    // Configure controller parameters
-    communicator_->configureControllers();
+  // Configure controller parameters
+  communicator_->configureControllers();
 
-    // If a failure occured during configuration, set motor status to critical failure
-    if (communicator_->getFailure()) {
-      updateMotorFailure();
-    // Otherwise update motor status to initialised
-    } else {
-      motor_data_.module_status = data::ModuleStatus::kInit;
-      data_.setMotorData(motor_data_);
-      motors_init_ = true;
-      log_.INFO("MOTOR", "Motor State: Idle");
-    }
+  // If a failure occured during configuration, set motor status to critical failure
+  if (communicator_->getFailure()) {
+    updateMotorFailure();
+  // Otherwise update motor status to initialised
+  } else {
+    motor_data_.module_status = data::ModuleStatus::kInit;
+    data_.setMotorData(motor_data_);
+    motors_init_ = true;
+    log_.INFO("MOTOR", "Motor State: Idle");
   }
 }
 
@@ -143,57 +158,55 @@ void Main::calculateSlip(std::string filepath)
    * Angular velocity       - rad/s
    * Radius                 - metres
    */
-  if (!slip_calculated_) {
-    double slip, translational_velocity, angular_velocity, rpm;
-    std::ifstream data;
-    data.open(filepath);
+  double slip, translational_velocity, angular_velocity, rpm;
+  std::ifstream data;
+  data.open(filepath);
 
-    if (!data.is_open()) {
-      log_.ERR("MOTOR", "Could not open file: %s", filepath.c_str());
-      updateMotorFailure();
-      return;
-    } else if (filepath == kAccelerationData) {
-      log_.INFO("MOTOR", "Calculating acceleration slip...");
+  if (!data.is_open()) {
+    log_.ERR("MOTOR", "Could not open file: %s", filepath.c_str());
+    updateMotorFailure();
+    return;
+  } else if (filepath == kAccelerationData) {
+    log_.INFO("MOTOR", "Calculating acceleration slip...");
+  } else {
+    log_.INFO("MOTOR", "Calculating deceleration slip...");
+  }
+
+  std::string line;
+  while (std::getline(data, line)) {
+    std::string split_line;
+    std::vector<double> temp_vec;
+    std::stringstream ss(line);
+    while (std::getline(ss, split_line, '\t')) {
+      temp_vec.push_back(std::move(stod(split_line)));
+    }
+
+    // Calculate angular velocity from slip, translational velocity and halbach wheel radius
+    slip = temp_vec[0];
+    translational_velocity = temp_vec[1];
+    angular_velocity = (slip + translational_velocity) / kHalbachRadius;
+
+    // Calculate RPM given calculated angular velocity
+    rpm = (angular_velocity * 60) / (2*M_PI);
+
+    // Use temporary vector to hold translational velocity and rpm
+    temp_vec[0] = translational_velocity;
+    temp_vec[1] = rpm;
+
+    // Add data to appropriate container
+    if (filepath == kAccelerationData) {
+      acceleration_slip_.push_back(temp_vec);
     } else {
-      log_.INFO("MOTOR", "Calculating deceleration slip...");
+      deceleration_slip_.push_back(temp_vec);
     }
+  }
 
-    std::string line;
-    while (std::getline(data, line)) {
-      std::string split_line;
-      std::vector<double> temp_vec;
-      std::stringstream ss(line);
-      while (std::getline(ss, split_line, '\t')) {
-        temp_vec.push_back(std::move(stod(split_line)));
-      }
-
-      // Calculate angular velocity from slip, translational velocity and halbach wheel radius
-      slip = temp_vec[0];
-      translational_velocity = temp_vec[1];
-      angular_velocity = (slip + translational_velocity) / kHalbachRadius;
-
-      // Calculate RPM given calculated angular velocity
-      rpm = (angular_velocity * 60) / (2*M_PI);
-
-      // Use temporary vector to hold translational velocity and rpm
-      temp_vec[0] = translational_velocity;
-      temp_vec[1] = rpm;
-
-      // Add data to appropriate container
-      if (filepath == kAccelerationData) {
-        acceleration_slip_.push_back(temp_vec);
-      } else {
-        deceleration_slip_.push_back(temp_vec);
-      }
-    }
-
-    // If both containers have been populated, set bool to true
-    if (!acceleration_slip_.empty() && !deceleration_slip_.empty()) {
-      acceleration_slip_ = transpose(acceleration_slip_);
-      deceleration_slip_ = transpose(deceleration_slip_);
-      slip_calculated_ = true;
-      log_.INFO("MOTOR", "All slip values calculated");
-    }
+  // If both containers have been populated, set bool to true
+  if (!acceleration_slip_.empty() && !deceleration_slip_.empty()) {
+    acceleration_slip_ = transpose(acceleration_slip_);
+    deceleration_slip_ = transpose(deceleration_slip_);
+    slip_calculated_ = true;
+    log_.INFO("MOTOR", "All slip values calculated");
   }
 }
 
@@ -210,23 +223,21 @@ std::vector<std::vector<double>> Main::transpose(std::vector<std::vector<double>
 
 void Main::prepareMotors()
 {
-  if (!motors_ready_ && !motor_failure_) {
-    // Set motors into operational mode
-    communicator_->prepareMotors();
+  // Set motors into operational mode
+  communicator_->prepareMotors();
 
-    // Check for any errors and warning
-    communicator_->healthCheck();
+  // Check for any errors and warning
+  communicator_->healthCheck();
 
-    // If there is an error or warning, set motor status to critical failure
-    if (communicator_->getFailure()) {
-      updateMotorFailure();
-    // Otherwise set motor status to ready
-    } else {
-      motor_data_.module_status = data::ModuleStatus::kReady;
-      data_.setMotorData(motor_data_);
-      motors_ready_ = true;
-      log_.INFO("MOTOR", "Motor State: Ready");
-    }
+  // If there is an error or warning, set motor status to critical failure
+  if (communicator_->getFailure()) {
+    updateMotorFailure();
+  // Otherwise set motor status to ready
+  } else {
+    motor_data_.module_status = data::ModuleStatus::kReady;
+    data_.setMotorData(motor_data_);
+    motors_ready_ = true;
+    log_.INFO("MOTOR", "Motor State: Ready");
   }
 }
 
@@ -293,8 +304,9 @@ void Main::decelerateMotors()
 
 void Main::stopMotors()
 {
-  // Quick stop the motors by setting the target velocity to 0
-  communicator_->sendTargetVelocity(0);
+  // Cut high power to motors in state of emergency
+  communicator_->enterPreOperational();
+
   // Updates the motor data while motors are stopping
   while (!all_motors_stopped_) {
     log_.DBG2("MOTOR", "Motor State: Stopping\n");
@@ -308,13 +320,12 @@ void Main::stopMotors()
     }
   }
   updateMotorData();
-  communicator_->enterPreOperational();
 }
 
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
   // Starting acceleration. TODO(Sean) Check with sims on this value
-  if (velocity == 0) {
+  if (velocity < 0.5) {
     prev_velocity_ = velocity;
     timer.start();
     time_of_update_ = timer.getTimeMicros();
@@ -348,6 +359,7 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
                                       velocity);
 
   // Use index to find corresponding RPM
+  if (upper_bound == acceleration_slip_[0].end()) upper_bound--;
   int index       = upper_bound - acceleration_slip_[0].begin();
   prev_index_     = index;
   time_of_update_ = timer.getTimeMicros();
@@ -356,8 +368,8 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
 
 int32_t Main::decelerationVelocity(NavigationType velocity)
 {
-  // Decrease velocity from max RPM to 0, with updates every 30 milliseconds
-  while (timer.getTimeMicros() - time_of_update_ < 30000);
+  // Decrease velocity from max RPM to 0, with updates every 45 milliseconds
+  while (timer.getTimeMicros() - time_of_update_ < 45000);
   int32_t rpm;
   time_of_update_ = timer.getTimeMicros();
   if (dec_index_ < (int32_t) deceleration_slip_[1].size()) {
@@ -378,8 +390,10 @@ void Main::servicePropulsion()
   // TODO(Anyone) Check that this is a sufficient velocity
   if (comms_.service_propulsion_go) {
     communicator_->sendTargetVelocity(200);
+    updateMotorData();
   } else {
     communicator_->sendTargetVelocity(0);
+    updateMotorData();
   }
 }
 
