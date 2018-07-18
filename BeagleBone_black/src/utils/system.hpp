@@ -69,6 +69,7 @@ class System {
   bool fail_acc_imu;
   bool fail_motors;
   bool miss_keyence;
+  bool fake_batteries;
   bool double_keyence;
   bool accurate;    // use accurate fake sensors
 
