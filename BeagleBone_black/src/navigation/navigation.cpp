@@ -80,8 +80,9 @@ NavigationType Navigation::getEmergencyBrakingDistance() const
 
 NavigationType Navigation::getBrakingDistance() const
 {
+  // A polynomial fit for the braking distance at a specific (normalised) velocity
   NavigationType norm_v = (getVelocity() - 45.5628) / 21.9511;
-  NavigationType braking_distance = 0.0;
+  NavigationType braking_distance = 2.0;
   for (unsigned int i = 0; i < coefficients.size(); ++i) {
     braking_distance += coefficients[i] * pow(norm_v, i);
   }
