@@ -25,13 +25,13 @@
 
 namespace hyped {
 
-using data::State;
-using data::Battery;
+using utils::System;
 
 namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
+      sys_(System::getSystem()),
       log_(log),
       data_(data::Data::getInstance())
 {
@@ -209,7 +209,7 @@ void Main::run()
   ReceiverThread* receiverThread = new ReceiverThread(log_, base_communicator_);
   receiverThread->start();
 
-  while (1) {
+  while (sys_.running_) {
     stm_ = data_.getStateMachineData();
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
