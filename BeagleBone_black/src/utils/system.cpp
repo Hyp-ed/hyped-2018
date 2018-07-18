@@ -62,8 +62,7 @@ System::~System()
 }
 
 System::System(int argc, char* argv[])
-    : running_(true),
-      verbose(false),
+    : verbose(false),
       verbose_motor(DEFAULT_VERBOSE),
       verbose_nav(DEFAULT_VERBOSE),
       verbose_sensor(DEFAULT_VERBOSE),
@@ -85,7 +84,8 @@ System::System(int argc, char* argv[])
       fail_motors(false),
       miss_keyence(false),
       double_keyence(false),
-      accurate(false)
+      accurate(false),
+      running_(true)
 {
   int c;
   int option_index = 0;
@@ -290,6 +290,10 @@ static void segfaultHandler(int x)
 {
   // first thing: engage embrakes
   state_machine::HypedMachine::engageEmbrakes();
+
+  // start turning the system off
+  System& sys = System::getSystem();
+  sys.running_ = false;
 
   Logger log(true, 0);
   log.ERR("SYSTEM", "forced termination detected (segfault?)");
