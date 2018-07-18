@@ -137,46 +137,44 @@ int Main::sendLpCharge1(Battery lp_battery1)
   return base_communicator_->sendData("CMD16" + std::to_string(lp_battery1.charge) + "\n");
 }
 
-int Main::sendImu(bool op, bool op1, bool op2, bool op3)
+int Main::sendImu(std::array<Imu, Sensors::kNumImus> imus)
 {
   std::string sen, sen1, sen2, sen3;
-  sen = op ? "1" : "2";
-  sen1 = op1 ? "1" : "2";
-  sen2 = op2 ? "1" : "2";
-  sen3 = op3 ? "1" : "2";
+  sen = imus[0].operational ? "1" : "2";
+  sen1 = imus[1].operational ? "1" : "2";
+  sen2 = imus[2].operational ? "1" : "2";
+  sen3 = imus[3].operational ? "1" : "2";
 
   return base_communicator_->sendData("CMD17" + sen + sen1 + sen2 + sen3 + "\n");
 }
 
-int Main::sendProxiFront(bool op, bool op1, bool op2, bool op3,
-                         bool op4, bool op5, bool op6, bool op7)
+int Main::sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
-  sen = op ? "1" : "2";
-  sen1 = op1 ? "1" : "2";
-  sen2 = op2 ? "1" : "2";
-  sen3 = op3 ? "1" : "2";
-  sen4 = op4 ? "1" : "2";
-  sen5 = op5 ? "1" : "2";
-  sen6 = op6 ? "1" : "2";
-  sen7 = op7 ? "1" : "2";
+  sen = proxies_front[0].operational ? "1" : "2";
+  sen1 = proxies_front[1].operational ? "1" : "2";
+  sen2 = proxies_front[2].operational ? "1" : "2";
+  sen3 = proxies_front[3].operational ? "1" : "2";
+  sen4 = proxies_front[4].operational ? "1" : "2";
+  sen5 = proxies_front[5].operational ? "1" : "2";
+  sen6 = proxies_front[6].operational ? "1" : "2";
+  sen7 = proxies_front[7].operational ? "1" : "2";
 
   return base_communicator_->sendData("CMD18" + sen + sen1 + sen2 + sen3 +
                                       sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
-int Main::sendProxiRear(bool op, bool op1, bool op2, bool op3,
-                        bool op4, bool op5, bool op6, bool op7)
+int Main::sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
-  sen = op ? "1" : "2";
-  sen1 = op1 ? "1" : "2";
-  sen2 = op2 ? "1" : "2";
-  sen3 = op3 ? "1" : "2";
-  sen4 = op4 ? "1" : "2";
-  sen5 = op5 ? "1" : "2";
-  sen6 = op6 ? "1" : "2";
-  sen7 = op7 ? "1" : "2";
+  sen = proxies_rear[0].operational ? "1" : "2";
+  sen1 = proxies_rear[1].operational ? "1" : "2";
+  sen2 = proxies_rear[2].operational ? "1" : "2";
+  sen3 = proxies_rear[3].operational ? "1" : "2";
+  sen4 = proxies_rear[4].operational ? "1" : "2";
+  sen5 = proxies_rear[5].operational ? "1" : "2";
+  sen6 = proxies_rear[6].operational ? "1" : "2";
+  sen7 = proxies_rear[7].operational ? "1" : "2";
 
   return base_communicator_->sendData("CMD19" + sen + sen1 + sen2 + sen3 +
                                       sen4 + sen5 + sen6 + sen7 + "\n");
@@ -238,16 +236,9 @@ void Main::run()
 
     if (sen_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send sensors data.");
-      sendImu(sen_.imu.value[0].operational, sen_.imu.value[1].operational,
-              sen_.imu.value[2].operational, sen_.imu.value[3].operational);
-      sendProxiFront(sen_.proxi_front.value[0].operational, sen_.proxi_front.value[1].operational,
-                    sen_.proxi_front.value[2].operational, sen_.proxi_front.value[3].operational,
-                    sen_.proxi_front.value[4].operational, sen_.proxi_front.value[5].operational,
-                    sen_.proxi_front.value[6].operational, sen_.proxi_front.value[7].operational);
-      sendProxiRear(sen_.proxi_back.value[0].operational, sen_.proxi_back.value[1].operational,
-                    sen_.proxi_back.value[2].operational, sen_.proxi_back.value[3].operational,
-                    sen_.proxi_back.value[4].operational, sen_.proxi_back.value[5].operational,
-                    sen_.proxi_back.value[6].operational, sen_.proxi_back.value[7].operational);
+      sendImu(sen_.imu.value);
+      sendProxiFront(sen_.proxi_front.value);
+      sendProxiRear(sen_.proxi_back.value);
     }
 
     if (bat_.module_status != data::ModuleStatus::kStart) {

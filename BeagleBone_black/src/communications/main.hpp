@@ -28,6 +28,9 @@
 
 namespace hyped {
 
+using data::Sensors;
+using data::Imu;
+using data::Proximity;
 using data::State;
 using data::Battery;
 using utils::concurrent::Thread;
@@ -55,11 +58,9 @@ class Main : public Thread {
   int sendHpCharge1(Battery hp_battery1);                                         // CMD14
   int sendLpCharge(Battery lp_battery);                                           // CMD15
   int sendLpCharge1(Battery lp_battery1);                                         // CMD16
-  int sendImu(bool op, bool op1, bool o2, bool op3);                              // CMD17
-  int sendProxiFront(bool op, bool op1, bool op2, bool op3, bool op4, bool op5,
-                     bool op6, bool op7);                                         // CMD18
-  int sendProxiRear(bool op, bool op1, bool op2, bool op3, bool op4, bool op5,
-                    bool op6, bool op7);                                          // CMD19
+  int sendImu(std::array<Imu, Sensors::kNumImus> imus);                              // CMD17
+  int sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front);  // CMD18
+  int sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear);    // CMD19
   int sendEmBrakes(bool left_brakes, bool right_brakes);                          // CMD20
 
  private:
