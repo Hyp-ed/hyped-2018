@@ -89,6 +89,12 @@ class Navigation {
     float prox_vel_w = 0.01;  ///< Weight (from [0,1]) of proxi vs imu in velocity calculation
     float strp_vel_w = 0.0;  ///< Weight [0,1]  of stripe count vs imu in velocity calculation
   };
+  struct Input {
+    DataPoint<ImuArray> *imus = nullptr;
+    ProximityArray *proxis = nullptr;
+    StripeCounterArray *sc = nullptr;
+    array<float, Sensors::kNumOptEnc> *optical_enc_distance = nullptr;
+    };
 
   /**
    * @brief Construct a new Navigation object
@@ -160,6 +166,7 @@ class Navigation {
    * @param readings  Latest sensor readings
    */
   void init(SensorCalibration sc, Sensors readings);
+  void update(Input);
 
  private:
   /**
@@ -185,29 +192,7 @@ class Navigation {
    *                                       next 2 stripes (both should be positive).
    */
   std::array<NavigationType, 3> getNearestStripeDists(uint16_t stripe_count);
-  /**
-   * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
-   *        reading is available but no other data has been updated.
-   *
-   * @param[in] imus Datapoint of an array of IMU readings
-   */
-  void update(DataPoint<ImuArray> imus);
-  /**
-   * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
-   *        proxi have been updated but there is no update from stripe counter.
-   *
-   * @param[in] imus   Datapoint of an array of IMU readings
-   * @param[in] proxis Array of proximity readings
-   */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis);
-  /**
-   * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
-   *        IMU and stripe counter have been updated but there is no update from proximity sensors.
-   *
-   * @param imus         Datapoint of an array of IMU readings
-   * @param scs          Array of stripe counter readings
-   */
-  void update(DataPoint<ImuArray> imus, StripeCounterArray scs);
+
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -216,14 +201,16 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param scs          Array of stripe counter readings
    */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounterArray scs);
 
+  void imuUpdate(DataPoint<ImuArray> imus);
+  void proximityUpdate(ProximityArray proxis);
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(StripeCounterArray scs);  // Point number 7
+  void opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance);
 
   // Admin stuff
   Barrier& post_calibration_barrier_;

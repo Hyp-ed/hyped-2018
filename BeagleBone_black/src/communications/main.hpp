@@ -23,6 +23,7 @@
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
+#include "utils/system.hpp"
 #include "communications/communications.hpp"
 #include "communications/receiver.hpp"
 
@@ -67,6 +68,7 @@ class Main : public Thread {
   int state_code_;
   Communications* base_communicator_;
   Logger& log_;
+  utils::System& sys_;
   data::Data& data_;
   data::StateMachine stm_;
   data::Motors mtr_;
