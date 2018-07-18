@@ -110,6 +110,7 @@ System::System(int argc, char* argv[])
       {"miss_keyence", optional_argument, 0, 'L'},
       {"fake_motors", optional_argument, 0, 'm'},
       {"fake_embrakes", optional_argument, 0, 'n'},
+      {"fake_batteries", optional_argument, 0, 'N'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -209,6 +210,10 @@ System::System(int argc, char* argv[])
       case 'n':
         if (optarg) fake_embrakes = atoi(optarg);
         else        fake_embrakes = 1;
+        break;
+      case 'N':
+        if (optarg) fake_batteries = atoi(optarg);
+        else        fake_batteries = 1;
         break;
       default:
         printUsage();
