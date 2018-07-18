@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     for (auto& imu_data : sens.imu.value) {
       auto& acc = imu_data.acc;
       auto& gyr = imu_data.gyr;
-      log.INFO("TEST", "Acceleration  (%2.4f %2.4f %2.4f)  Gyroscope  (%2.4f %2.4f %2.4f)",
+      log.INFO("TEST", "Acceleration  (% 2.4f % 2.4f % 2.4f)  Gyroscope  (% 2.4f % 2.4f % 2.4f)",
         acc[0],
         acc[1],
         acc[2],
