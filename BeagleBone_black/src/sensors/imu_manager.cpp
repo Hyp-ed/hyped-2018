@@ -40,7 +40,7 @@ ImuManager::ImuManager(Logger& log,
     : ImuManagerInterface(log),
       sys_(System::getSystem()),
       sensors_imu_(imu),
-      chip_select_ {31, 50, 48, 51},
+      chip_select_ {48, 49, 115, 117},
       is_calibrated_(false),
       calib_counter_(0)
 {
