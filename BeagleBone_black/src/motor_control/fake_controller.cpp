@@ -92,9 +92,6 @@ void FakeController::checkState()
 
 void FakeController::sendTargetVelocity(int32_t target_velocity)
 {
-  if (!timer_started_) {
-    startTimer();
-  }
   // Write timestamp and target velocity data to text file (only need to use one
   // as all four fake controllers are identical)
   log_.DBG2("MOTOR", "Controller %d: Updating target velocity to %d", node_id_, target_velocity);
@@ -131,6 +128,9 @@ void FakeController::quickStop()
 
 void FakeController::healthCheck()
 {
+  if (!timer_started_) {
+    startTimer();
+  }
   // If it is faulty this will choose a random time bewteen the 3 seconds and 23 seconds of the run
   // to set critical_failure_ to true
   if (faulty_) {

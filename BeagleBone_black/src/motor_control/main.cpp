@@ -52,6 +52,7 @@ Main::Main(uint8_t id, Logger& log)
       prev_velocity_(0),
       time_of_update_(0),
       target_velocity_(0),
+      prev_rpm_(0),
       prev_index_(0),
       dec_index_(0),
       run_(true),
@@ -325,11 +326,17 @@ void Main::stopMotors()
 
 int32_t Main::accelerationVelocity(NavigationType velocity)
 {
+  int32_t rpm = 0;
+
+  if (std::isnan(velocity)) {
+    return prev_rpm_;
+  }
   // Starting acceleration. TODO(Sean) Check with sims on this value
   if (velocity < 0.5) {
     prev_velocity_ = velocity;
     timer.start();
     time_of_update_ = timer.getTimeMicros();
+    prev_rpm_ = 250;
     return 250;
   }
 
@@ -337,7 +344,6 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
   // 0.2 m/s in 50 milliseconds, then it is likely that the slip is too low, so
   // we manually increase the RPM.
   if (timer.getTimeMicros() - time_of_update_ > 50000) {
-    int32_t rpm = 0;
     if (velocity - prev_velocity_ < 0.2) {
       prev_index_++;
       if (prev_index_ < (int32_t) acceleration_slip_[1].size()) {
@@ -350,7 +356,16 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
     }
     prev_velocity_ = velocity;
     time_of_update_ = timer.getTimeMicros();
-    return rpm;
+
+    // To ensure the calculated RPM is a reasonable value (i.e. to avoid
+    // jumps) we do not change the RPM if a newly calculated value is above
+    // a threshold of +- 300 RPM.
+    if (abs(rpm - prev_rpm_) < 300) {
+      prev_rpm_ = rpm;
+      return rpm;
+    } else {
+      return prev_rpm_;
+    }
   }
 
   // Otherwise, perform upper bound binary search to find the first element in the vector
@@ -364,7 +379,13 @@ int32_t Main::accelerationVelocity(NavigationType velocity)
   int index       = upper_bound - acceleration_slip_[0].begin();
   prev_index_     = index;
   time_of_update_ = timer.getTimeMicros();
-  return (int32_t) acceleration_slip_[1][index];
+  rpm = (int32_t) acceleration_slip_[1][index];
+  if (abs(rpm - prev_rpm_) < 300) {
+    prev_rpm_ = rpm;
+    return rpm;
+  } else {
+    return prev_rpm_;
+  }
 }
 
 int32_t Main::decelerationVelocity(NavigationType velocity)

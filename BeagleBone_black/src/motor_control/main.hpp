@@ -129,6 +129,7 @@ class Main: public Thread {
   NavigationType prev_velocity_;
   uint64_t time_of_update_;
   int32_t  target_velocity_;
+  int32_t  prev_rpm_;
   int32_t  prev_index_;
   int32_t  dec_index_;
   bool run_;
