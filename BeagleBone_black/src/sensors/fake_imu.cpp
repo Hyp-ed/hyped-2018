@@ -322,7 +322,7 @@ void FakeAccurateImu::getData(Imu* imu)
     // get angular velocity
     double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
     uint32_t scale = 4;
-    if (!isnan(nav.velocity))
+    if (!std::isnan(nav.velocity))
       imu->acc[0] = (velocity - nav.velocity)/scale;
     else
       imu->acc[0] = 0.0;
