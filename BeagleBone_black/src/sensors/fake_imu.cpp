@@ -264,7 +264,7 @@ void FakeAccurateImu::getData(Imu* imu)
   data::StateMachine      stm = data_.getStateMachineData();
 
   if (stm.current_state == data::State::kEmergencyBraking) {
-    imu->acc[0] = -10;
+    imu->acc[0] = -25;
   } else {
     // get average rmp
     double rpm = 0;
