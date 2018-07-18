@@ -26,6 +26,7 @@
 #include <getopt.h>
 #include <csignal>
 
+#include "state_machine/hyped-machine.hpp"
 
 #define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
@@ -255,8 +256,10 @@ System* System::system_ = 0;
 
 void System::parseArgs(int argc, char* argv[])
 {
-  if (system_) delete system_;
+  if (system_) return;
+
   system_ = new System(argc, argv);
+  state_machine::HypedMachine::setupEmbrakes();
 }
 
 System& System::getSystem()
@@ -277,11 +280,16 @@ Logger& System::getLogger()
 
 static void gracefulExit(int x)
 {
+  Logger log(true, 0);
+  log.INFO("SYSTEM", "termination signal received, exiting gracefully");
   exit(0);
 }
 
 static void segfaultHandler(int x)
 {
+  // first thing: engage embrakes
+  state_machine::HypedMachine::engageEmbrakes();
+
   Logger log(true, 0);
   log.ERR("SYSTEM", "forced termination detected (segfault?)");
   exit(0);
