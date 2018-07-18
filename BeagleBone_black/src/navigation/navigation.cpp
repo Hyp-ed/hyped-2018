@@ -82,9 +82,11 @@ NavigationType Navigation::getBrakingDistance() const
 {
   NavigationType norm_v = (getVelocity() - 45.5628) / 21.9511;
   NavigationType braking_distance = 0.0;
-  for (int i = 0; i < coefficients.size(); i++) {
+  for (unsigned int i = 0; i < coefficients.size(); ++i) {
     braking_distance += coefficients[i] * pow(norm_v, i);
   }
+
+  return braking_distance;
 }
 
 ModuleStatus Navigation::getStatus() const
