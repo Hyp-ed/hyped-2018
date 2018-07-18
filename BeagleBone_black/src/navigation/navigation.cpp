@@ -121,8 +121,12 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
                                       sc.imu_variance[i][0].sqrt(),
                                       NavigationVector(0.1));
     gyro_filter_[i].configure(readings.imu.value[i].gyr,
-                              sc.imu_variance[i][0].sqrt(),
+                              sc.imu_variance[i][1].sqrt(),
                               NavigationVector(0.1));
+    log_.INFO("NAV",
+              "IMU[%d]: accl variance = (%.3f, %.3f, %.3f), gyro variance = (%.3f, %.3f, %.3f)",
+              i, sc.imu_variance[i][0][0], sc.imu_variance[i][0][1], sc.imu_variance[i][0][1],
+              sc.imu_variance[i][1][0], sc.imu_variance[i][1][1], sc.imu_variance[i][1][1]);
   }
 
   for (int i = 0; i < Sensors::kNumProximities; ++i) {
@@ -132,8 +136,11 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
     proximity_filter_[i + Sensors::kNumProximities].configure(readings.proxi_back.value[i].val,
                                                               sqrt(sc.proxi_back_variance[i]),
                                                               0.1);
+    log_.INFO("NAV", "Proxi[%d]: front variance = %.3f, back variance = %.3f",
+              i, sc.proxi_front_variance[i], sc.proxi_back_variance[i]);
   }
 
+  log_.INFO("NAV", "Navigation initialised.");
   log_.DBG("NAV",
       "After init: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
