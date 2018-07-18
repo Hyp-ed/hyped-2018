@@ -134,12 +134,8 @@ void FakeImu::getData(Imu* imu)
       prev_gyr_ = gyr_val_read_[gyr_count_];
     }
   } else {
-    if (accCheckTime()) {
-      prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
-    }
-    if (gyrCheckTime()) {
-      prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
-    }
+    prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
+    prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
     operational = true;
   }
   imu->acc = prev_acc_;
@@ -186,7 +182,6 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
 
     std::ifstream file;
     file.open(file_path);
-    Thread::sleep(15);
     if (!file.is_open()) {
       log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
     }
@@ -256,43 +251,47 @@ bool FakeImu::gyrCheckTime()
 
 
 FakeAccurateImu::FakeAccurateImu(utils::Logger& log)
-    : log_(log),
-      data_(data::Data::getInstance()),
+    : data_(data::Data::getInstance()),
       acc_noise_(1),
-      gyr_noise_(1)
+      gyr_noise_(1),
+      log_(log)
 { /* EMPTY */ }
 
 void FakeAccurateImu::getData(Imu* imu)
 {
   data::Navigation nav = data_.getNavigationData();
   data::Motors     mot = data_.getMotorData();
+  data::StateMachine      stm = data_.getStateMachineData();
 
-  // get average rmp
-  double rpm = 0;
-  rpm += mot.velocity_1;
-  rpm += mot.velocity_2;
-  rpm += mot.velocity_3;
-  rpm += mot.velocity_4;
-  rpm /= 4;
-
-  // get angular velocity
-  double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
-  uint32_t scale = 4;
-  if (!std::isnan(nav.velocity)) {
-    imu->acc[0] = (velocity - nav.velocity)/scale;
+  if (stm.current_state == data::State::kEmergencyBraking) {
+    imu->acc[0] = -10;
   } else {
-    imu->acc[0] = 0.0;
-    imu->acc[1] = 0;
-    imu->acc[2] = 9.8;
+    // get average rmp
+    double rpm = 0;
+    rpm += mot.velocity_1;
+    rpm += mot.velocity_2;
+    rpm += mot.velocity_3;
+    rpm += mot.velocity_4;
+    rpm /= 4;
 
-    imu->gyr[0] = 0;
-    imu->gyr[1] = 0;
-    imu->gyr[2] = 0;
-
-    imu->acc = FakeImu::addNoiseToData(imu->acc, acc_noise_);
-    imu->gyr = FakeImu::addNoiseToData(imu->gyr, gyr_noise_);
-    imu->operational = true;
+    // get angular velocity
+    double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
+    uint32_t scale = 4;
+    if (!isnan(nav.velocity))
+      imu->acc[0] = (velocity - nav.velocity)/scale;
+    else
+      imu->acc[0] = 0.0;
   }
+  imu->acc[1] = 0;
+  imu->acc[2] = 9.8;
+
+  imu->gyr[0] = 0;
+  imu->gyr[1] = 0;
+  imu->gyr[2] = 0;
+
+  imu->acc = FakeImu::addNoiseToData(imu->acc, acc_noise_);
+  imu->gyr = FakeImu::addNoiseToData(imu->gyr, gyr_noise_);
+  imu->operational = true;
 }
 
 }}  // namespace hyped::sensors

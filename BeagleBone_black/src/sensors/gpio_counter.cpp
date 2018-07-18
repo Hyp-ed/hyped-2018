@@ -35,8 +35,8 @@ using utils::io::GPIO;
 
 namespace sensors {
 
-GpioCounter::GpioCounter(Logger& log, int pin)
-     : GpioInterface(log), pin_(pin)
+GpioCounter::GpioCounter(int pin)
+     : pin_(pin)
 {}
 
 void GpioCounter::run()

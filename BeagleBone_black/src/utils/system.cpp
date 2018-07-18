@@ -81,7 +81,9 @@ System::System(int argc, char* argv[])
       fail_dec_imu(false),
       fail_acc_imu(false),
       fail_motors(false),
-      miss_keyence(false)
+      miss_keyence(false),
+      double_keyence(false),
+      accurate(false)
 {
   int c;
   int option_index = 0;
@@ -109,8 +111,10 @@ System::System(int argc, char* argv[])
       {"fake_keyence", optional_argument, 0, 'l'},
       {"miss_keyence", optional_argument, 0, 'L'},
       {"fake_motors", optional_argument, 0, 'm'},
+      {"double_keyence", optional_argument, 0, 'M'},
       {"fake_embrakes", optional_argument, 0, 'n'},
-      {"fake_batteries", optional_argument, 0, 'N'},
+      {"accurate", optional_argument, 0, 'N'},
+      {"fake_batteries", optional_argument, 0, 'o'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -207,11 +211,19 @@ System::System(int argc, char* argv[])
         if (optarg) fake_motors = atoi(optarg);
         else        fake_motors = 1;
         break;
+      case 'M':
+        if (optarg) double_keyence = atoi(optarg);
+        else        double_keyence = 1;
+        break;
       case 'n':
         if (optarg) fake_embrakes = atoi(optarg);
         else        fake_embrakes = 1;
         break;
       case 'N':
+        if (optarg) accurate = atoi(optarg);
+        else        accurate = true;
+        break;
+      case 'o':
         if (optarg) fake_batteries = atoi(optarg);
         else        fake_batteries = 1;
         break;

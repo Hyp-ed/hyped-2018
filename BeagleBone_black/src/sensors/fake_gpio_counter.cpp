@@ -26,12 +26,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 #include "utils/timer.hpp"
 #include "data/data.hpp"
-
-// TODO(Jack) Find the least between stripes
-constexpr uint8_t kTimeStamp = 50;    // ms
 
 namespace hyped {
 
@@ -39,104 +37,60 @@ using data::StripeCounter;
 
 namespace sensors {
 
-FakeGpioCounter::FakeGpioCounter(Logger& log, std::string file_path)
-    : GpioInterface(log),
+FakeGpioCounter::FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe)
+    : log_(log),
       data_(Data::getInstance()),
-      file_path_(file_path),
-      is_started_(false),
-      prev_gpio_(0)
+      ref_time_(0),
+      timeout_(5000000),  // 5 seconds
+      miss_stripe_(miss_stripe),
+      double_stripe_(double_stripe),
+      is_accelerating_(false)
 {
-  readDataFromFile(file_path_);
-}
-
-void FakeGpioCounter::run()
-{}
-
-void FakeGpioCounter::readDataFromFile(std::string file_path)
-{
-  std::ifstream file;
-  file.open(file_path);
-  if (!file.is_open()) {
-    log_.ERR("Fake-keyence", "Wrong file path for argument");
-  }
-
-  uint32_t temp_value;
-  uint64_t counter = 0;
-  uint32_t temp_time;
-  bool temp_operational;
-  std::string line;
-
-  while (getline(file, line)) {
-    std::stringstream input(line);
-    input >> temp_time;
-
-    if (temp_time != kTimeStamp*counter) {
-      log_.ERR("Fake-keyence", "Timestamp format invalid %d", temp_time);
-    }
-
-    input >> temp_value;
-    input >> temp_operational;
-    val_read_.push_back(temp_value);
-    val_operational_.push_back(temp_operational);
-    counter++;
-  }
-
-  file.close();
-}
-
-void FakeGpioCounter::init()
-{
-  log_.INFO("Fake-Gpio", "TIMER START");
-  ref_time_ = utils::Timer::getTimeMicros();
-  gpio_count_ = 0;
-}
-
-bool FakeGpioCounter::checkTime()
-{
-  uint64_t now = utils::Timer::getTimeMicros();
-  uint64_t time_span = (now - ref_time_) / 1000;
-
-  if (time_span < kTimeStamp * gpio_count_) {
-      return false;
-  }
-  gpio_count_ = time_span/kTimeStamp + 1;
-  // log_.INFO("Fake-Gpio", "Gpio-count: %d", gpio_count_);
-  return true;
+  stripes_.operational = true;
 }
 
 StripeCounter FakeGpioCounter::getStripeCounter()
 {
-  data::StripeCounter stripes;
-  bool operational = true;
-  if (data_.getStateMachineData().current_state == data::State::kAccelerating ||
-      data_.getStateMachineData().current_state == data::State::kDecelerating ||
-      is_started_) {
-    if (!is_started_) {
-      is_started_ = true;
-      init();
-    }
+  data::Navigation nav   = data_.getNavigationData();
+  data::State      state = data_.getStateMachineData().current_state;
+  uint32_t prev_count    = stripes_.count.value;
 
-    if (checkTime()) {
-      gpio_count_ = std::min(gpio_count_, (uint64_t) val_read_.size());
-      if (gpio_count_ == (uint64_t) val_read_.size()) {
-          prev_gpio_ = val_read_[gpio_count_-1];
-          operational = val_operational_[gpio_count_-1];
-      } else {
-          prev_gpio_ = val_read_[gpio_count_];
-          operational = val_operational_[gpio_count_];
-      }
-    }
-
-    stripes.count.value = prev_gpio_;
-    stripes.count.timestamp = utils::Timer::getTimeMicros();
-    stripes.operational = operational;
-  } else {
-    stripes.count.value = prev_gpio_;
-    stripes.count.timestamp = utils::Timer::getTimeMicros();
-    stripes.operational = operational;
+  // create reference time only at transitions to dynamic states
+  if (state == data::State::kAccelerating && !is_accelerating_) {
+    ref_time_ = utils::Timer::getTimeMicros();
+    is_accelerating_ = true;
+  } else if (state == data::State::kDecelerating && is_accelerating_) {
+    ref_time_ = utils::Timer::getTimeMicros();
+    is_accelerating_ = false;
   }
-  // log_.INFO("Fake-Gpio", "stripe count: %d", stripes.count.value);
-  return stripes;
+
+  uint32_t new_count = std::floor(nav.distance/30.48);
+
+  switch (state) {
+    case data::State::kAccelerating:
+      if (timeout() && miss_stripe_) {
+        new_count--;
+      }
+      break;
+    case data::State::kDecelerating:
+      if (timeout() && double_stripe_) {
+        new_count++;
+      }
+      break;
+    default:
+      break;
+  }
+
+  if (new_count > prev_count) {
+    stripes_.count.value     = new_count;
+    stripes_.count.timestamp = utils::Timer::getTimeMicros();
+  }
+  return stripes_;
+}
+
+bool FakeGpioCounter::timeout()
+{
+  return ref_time_ + timeout_ < utils::Timer::getTimeMicros();
 }
 
 }}  // namespace hyped::sensors

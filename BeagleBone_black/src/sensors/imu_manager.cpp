@@ -81,11 +81,14 @@ ImuManager::ImuManager(Logger& log,
     } else {
       // Nominal fake IMUs
       for (int i = 0; i < data::Sensors::kNumImus; i++) {
-        imu_[i] = new FakeImu(log,
+        if (sys_.accurate) {
+          imu_[i] = new FakeAccurateImu(log);
+        } else {
+          imu_[i] = new FakeImu(log,
                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
-        // imu_[i] = new FakeAccurateImu(log);
+        }
       }
     }
   }
