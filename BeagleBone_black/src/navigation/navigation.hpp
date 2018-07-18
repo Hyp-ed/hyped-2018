@@ -21,6 +21,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cmath>
 
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
@@ -72,6 +73,10 @@ constexpr std::array<NavigationType, 42> kStripeLocations = {0.0,
      640.08,  670.56,  701.04,  731.52,  762.0,  792.48,  822.96,  853.44,  883.92,  914.4,
      944.88,  975.36, 1005.84, 1036.32, 1066.8, 1097.28, 1127.76, 1158.24, 1188.72, 1219.2,
     1249.68};
+constexpr std::array<float, 16> coefficients = {6.9888,
+              49.3553,   95.7824,  -78.3606, -437.5374, -196.3143,  657.6976,  568.6541,
+            -428.6747, -495.1209,  124.2188,  180.2587,   -9.2234,   10.6627,   93.8803,
+              80.7074};
 
 class Navigation {
   friend class Main;
@@ -125,6 +130,12 @@ class Navigation {
    * @return NavigationType emergency braking distance in metres
    */
   NavigationType getEmergencyBrakingDistance() const;
+  /**
+   * @brief Get the braking distances in metres
+   *
+   * @return NavigationType braking distance in metres
+   */
+  NavigationType getBrakingDistance() const;
   /**
    * @brief Get the status of the nav module
    *
