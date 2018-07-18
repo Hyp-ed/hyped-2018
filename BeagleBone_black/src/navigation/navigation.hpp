@@ -21,6 +21,7 @@
 
 #include <array>
 #include <cstdint>
+#include <cmath>
 
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
@@ -125,6 +126,12 @@ class Navigation {
    * @return NavigationType emergency braking distance in metres
    */
   NavigationType getEmergencyBrakingDistance() const;
+  /**
+   * @brief Get the braking distances in metres
+   *
+   * @return NavigationType braking distance in metres
+   */
+  NavigationType getBrakingDistance() const;
   /**
    * @brief Get the status of the nav module
    *
