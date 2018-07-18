@@ -88,6 +88,12 @@ class Navigation {
     float prox_vel_w = 0.01;  ///< Weight (from [0,1]) of proxi vs imu in velocity calculation
     float strp_vel_w = 0.0;  ///< Weight [0,1]  of stripe count vs imu in velocity calculation
   };
+  struct Input {
+    DataPoint<ImuArray> *imus = nullptr;
+    ProximityArray *proxis = nullptr;
+    StripeCounterArray *sc = nullptr;
+    array<float, Sensors::kNumOptEnc> *optical_enc_distance = nullptr;
+    };
 
   /**
    * @brief Construct a new Navigation object
@@ -153,6 +159,7 @@ class Navigation {
    * @param readings  Latest sensor readings
    */
   void init(SensorCalibration sc, Sensors readings);
+  void update(Input);
 
  private:
   /**
@@ -166,13 +173,6 @@ class Navigation {
     float rl;  // mm
     float fl;  // mm
   };
-
-  struct NavigationInput {
-    DataPoint<ImuArray> *imus = nullptr;
-    ProximityArray *proxis = nullptr;
-    StripeCounterArray *sc = nullptr;
-    array<float, Sensors::kNumOptEnc> *optical_enc_distance = nullptr;
-    };
 
   static constexpr int kMinNumCalibrationSamples = 200000;
   static const Settings kDefaultSettings;
@@ -194,7 +194,6 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param scs          Array of stripe counter readings
    */
-  void update(NavigationInput);
 
   void imuUpdate(DataPoint<ImuArray> imus);
   void proximityUpdate(ProximityArray proxis);

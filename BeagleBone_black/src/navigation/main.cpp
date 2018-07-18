@@ -109,7 +109,7 @@ void Main::run()
       yield();
       continue;
     }
-    Navigation::NavigationInput input;
+    Navigation::Input input;
      if (proxiChanged(*last_readings, *readings)) {
       input.proxis = &(*proxis);
      }
