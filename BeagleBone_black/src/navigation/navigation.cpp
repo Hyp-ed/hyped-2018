@@ -19,7 +19,6 @@
 #include "navigation.hpp"
 
 #include <algorithm>  // std::min
-#include <cmath>
 
 #include "Eigen/Dense"
 #include "Eigen/SVD"
@@ -76,6 +75,25 @@ NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
   return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
+}
+
+NavigationType Navigation::getBrakingDistance() const
+{
+  // A polynomial fit for the braking distance at a specific (normalised) velocity
+  static constexpr std::array<NavigationType, 16> kCoefficients = {80.7074,
+            93.8803,   10.6627,   -9.2234,  180.2587,  124.2188, -495.1209, -428.6747,
+           568.6541,  657.6976, -196.3143, -437.5374,  -78.3606,   95.7824,   49.3553,
+             6.9888};
+
+  NavigationType norm_v = (getVelocity() - 45.5628) / 21.9511;
+  NavigationType var = 1.0;
+  NavigationType braking_distance = 2.0;
+  for (unsigned int i = 0; i < kCoefficients.size(); ++i) {
+    braking_distance += kCoefficients[i] * var;
+    var *= norm_v;
+  }
+
+  return braking_distance;
 }
 
 ModuleStatus Navigation::getStatus() const
