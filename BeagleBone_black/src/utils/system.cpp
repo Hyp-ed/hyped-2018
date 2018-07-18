@@ -114,6 +114,7 @@ System::System(int argc, char* argv[])
       {"double_keyence", optional_argument, 0, 'M'},
       {"fake_embrakes", optional_argument, 0, 'n'},
       {"accurate", optional_argument, 0, 'N'},
+      {"fake_batteries", optional_argument, 0, 'o'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -221,6 +222,10 @@ System::System(int argc, char* argv[])
       case 'N':
         if (optarg) accurate = atoi(optarg);
         else        accurate = true;
+        break;
+      case 'o':
+        if (optarg) fake_batteries = atoi(optarg);
+        else        fake_batteries = 1;
         break;
       default:
         printUsage();

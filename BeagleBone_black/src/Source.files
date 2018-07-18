@@ -21,6 +21,7 @@ SRCS := \
   sensors/proxi_manager.cpp \
   sensors/bms_manager.cpp \
   sensors/fake_imu.cpp \
+  sensors/fake_batteries.cpp \
   sensors/fake_gpio_counter.cpp \
   sensors/gpio_counter.cpp \
   sensors/fake_proxi.cpp \
