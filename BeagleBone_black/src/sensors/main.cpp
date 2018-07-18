@@ -123,7 +123,7 @@ void Main::run()
   if (battery_init_) batteries_.module_status = data::ModuleStatus::kInit;
 
   // work loop
-  while (1) {
+  while (sys_.running_) {
     // Write sensor data to data structure only when all the imu or proxi values are different
     if (imu_manager_->updated()) {
       sensors_.keyence_stripe_counter[0] = keyence_l_->getStripeCounter();

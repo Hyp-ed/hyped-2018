@@ -27,6 +27,7 @@
 
 #include "data/data.hpp"
 #include "utils/timer.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 namespace state_machine {
@@ -44,7 +45,8 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
-  while (1) {
+  utils::System& sys = utils::System::getSystem();
+  while (sys.running_) {
     comms_data_     = data_.getCommunicationsData();
     nav_data_       = data_.getNavigationData();
     sm_data_        = data_.getStateMachineData();
