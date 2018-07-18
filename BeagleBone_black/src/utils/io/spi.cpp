@@ -107,8 +107,7 @@ SPI::SPI(Logger& log)
     log_.ERR("SPI", "could not set bit order");
   }
 
-  System::setExitFunction();
-  log_.INFO("SPI", "spi instance created, exit function registered with the system");
+  log_.INFO("SPI", "spi instance created");
 }
 
 void SPI::setClock(Clock clk)
