@@ -26,6 +26,7 @@
 #include <getopt.h>
 #include <csignal>
 
+#include "state_machine/hyped-machine.hpp"
 
 #define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
@@ -255,8 +256,10 @@ System* System::system_ = 0;
 
 void System::parseArgs(int argc, char* argv[])
 {
-  if (system_) delete system_;
+  if (system_) return;
+
   system_ = new System(argc, argv);
+  state_machine::HypedMachine::setupEmbrakes();
 }
 
 System& System::getSystem()
@@ -277,16 +280,40 @@ Logger& System::getLogger()
 
 static void gracefulExit(int x)
 {
+  Logger log(true, 0);
+  log.INFO("SYSTEM", "termination signal received, exiting gracefully");
   exit(0);
 }
 
-void System::setExitFunction()
+static void segfaultHandler(int x)
 {
-  static bool signal_set = false;
-  if (signal_set) return;
+  // first thing: engage embrakes
+  state_machine::HypedMachine::engageEmbrakes();
 
-  std::signal(SIGINT, &gracefulExit);
-  signal_set = true;
+  Logger log(true, 0);
+  log.ERR("SYSTEM", "forced termination detected (segfault?)");
+  exit(0);
 }
 
+bool System::setExitFunction()
+{
+  static bool signal_set = false;
+  if (signal_set) return true;
+
+  // nominal termination
+  std::signal(SIGINT, &gracefulExit);
+
+  // forced termination
+  std::signal(SIGSEGV, &segfaultHandler);
+  std::signal(SIGABRT, &segfaultHandler);
+  std::signal(SIGFPE,  &segfaultHandler);
+  std::signal(SIGILL,  &segfaultHandler);
+  std::signal(SIGTERM, &segfaultHandler);
+
+  signal_set = true;
+  return true;
+}
+
+
+bool handle_registeres = System::setExitFunction();
 }}  // namespace hyped::utils
