@@ -82,6 +82,7 @@ void FakeController::enterPreOperational()
    log_.DBG1("MOTOR", "Controller %d: Shutting down motor", node_id_);
   }
   state_ = kSwitchOnDisabled;
+  actual_velocity_ = 0;
 }
 
 void FakeController::checkState()
