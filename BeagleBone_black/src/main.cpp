@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   Data& data = Data::getInstance();
   Sensors sens;
   Navigation navs;
-  while (1) {
+  while (sys.running_) {
     // Monitoring
     sens = data.getSensorsData();
     for (auto& imu_data : sens.imu.value) {
