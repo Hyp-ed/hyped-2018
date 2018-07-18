@@ -1,8 +1,8 @@
 /*
- * Author: Jack Horsburgh and Ragnor Comerford
+ * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 28/05/18
- * Description: Main class for fake gpio_counters.
+ * Date: 17/07/18
+ * Description: Main class for fake IMUs.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_
+#ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_
 
 #include <string>
 #include <vector>
@@ -36,23 +36,25 @@ using data::Data;
 namespace sensors {
 
 
-class FakeGpioCounter:public GpioInterface {
+class FakeBatteries : public BMSInterface {
  public:
-  FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe);
-  data::StripeCounter getStripeCounter() override;
+  FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal);
+  void getData(Battery* battery) override;
+  bool isOnline() override;
 
  private:
-  bool timeout();
-  Logger&     log_;
-  Data&       data_;
+  void init();
+  bool checkTime();
 
-  uint64_t              ref_time_;
-  uint64_t              timeout_;
-  data::StripeCounter   stripes_;
-  bool                  miss_stripe_;
-  bool                  double_stripe_;
-  bool                  is_accelerating_;
+  Data& data_;
+  bool is_started_;
+  bool is_high_voltage_;
+  uint64_t ref_time_;
+
+  uint16_t voltage_;
+  int16_t current_;
+  int8_t temperature_;
 };
 }}    // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_
+#endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_

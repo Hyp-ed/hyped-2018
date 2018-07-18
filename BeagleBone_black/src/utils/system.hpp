@@ -42,7 +42,7 @@ class System {
   /**
    * Register custom signal handler for CTRL+C to make system exit gracefully
    */
-  static void setExitFunction();
+  static bool setExitFunction();
 
   // runtime arguments to configure the whole system
   int8_t verbose;
@@ -69,6 +69,9 @@ class System {
   bool fail_acc_imu;
   bool fail_motors;
   bool miss_keyence;
+  bool fake_batteries;
+  bool double_keyence;
+  bool accurate;    // use accurate fake sensors
 
   // barriers
   /**

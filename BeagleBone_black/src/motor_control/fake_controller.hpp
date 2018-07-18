@@ -103,10 +103,9 @@ class FakeController : public ControllerInterface {
   uint8_t  node_id_;
   bool     critical_failure_;
   int32_t  actual_velocity_;
-  bool     started_;
   bool     faulty_;
-  uint64_t timer_start_;
-  bool is_timer_start_;
+  uint64_t start_time_;
+  bool     timer_started_;
   uint64_t fail_time_;
 };
 

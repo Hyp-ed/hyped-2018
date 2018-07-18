@@ -96,9 +96,10 @@ int main(int argc, char* argv[])
         data.getBatteriesData().module_status,
         data.getMotorData().module_status,
         data.getCommunicationsData().module_status);
-    log_system.INFO("TEST", "Distance, Velocity (%f, %f)\n",
+    log_system.INFO("TEST", "Distance, Velocity, Acceleration (%f, %f, %f)\n",
         navs.distance,
-        navs.velocity);
+        navs.velocity,
+        navs.acceleration);
     Thread::sleep(500);
   }
   state_machine->join();

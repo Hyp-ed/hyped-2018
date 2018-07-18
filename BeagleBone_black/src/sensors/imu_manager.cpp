@@ -61,31 +61,39 @@ ImuManager::ImuManager(Logger& log,
         imu_[i] = new FakeImu(log,
                 "../BeagleBone_black/data/in/fake_imu_acc_offline_suddenly.txt",
                 "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                 "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       }
       imu_[data::Sensors::kNumImus-1] = new FakeImu(log,
                   "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                  "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
     } else if (sys_.fail_dec_imu) {
       for (int i = 0; i < data::Sensors::kNumImus - 1; i++) {
         imu_[i] = new FakeImu(log,
                 "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                 "../BeagleBone_black/data/in/fake_imu_dec_offline_suddenly.txt",
+                "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                 "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       }
       imu_[data::Sensors::kNumImus-1] = new FakeImu(log,
                   "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                  "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
     } else {
       // Nominal fake IMUs
       for (int i = 0; i < data::Sensors::kNumImus; i++) {
-        imu_[i] = new FakeImu(log,
+        if (sys_.accurate) {
+          imu_[i] = new FakeAccurateImu(log);
+        } else {
+          imu_[i] = new FakeImu(log,
                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                    "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
-        // imu_[i] = new FakeAccurateImu(log);
+        }
       }
     }
   }

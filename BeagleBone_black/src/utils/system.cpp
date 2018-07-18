@@ -26,6 +26,7 @@
 #include <getopt.h>
 #include <csignal>
 
+#include "state_machine/hyped-machine.hpp"
 
 #define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
@@ -81,7 +82,9 @@ System::System(int argc, char* argv[])
       fail_dec_imu(false),
       fail_acc_imu(false),
       fail_motors(false),
-      miss_keyence(false)
+      miss_keyence(false),
+      double_keyence(false),
+      accurate(false)
 {
   int c;
   int option_index = 0;
@@ -109,7 +112,10 @@ System::System(int argc, char* argv[])
       {"fake_keyence", optional_argument, 0, 'l'},
       {"miss_keyence", optional_argument, 0, 'L'},
       {"fake_motors", optional_argument, 0, 'm'},
+      {"double_keyence", optional_argument, 0, 'M'},
       {"fake_embrakes", optional_argument, 0, 'n'},
+      {"accurate", optional_argument, 0, 'N'},
+      {"fake_batteries", optional_argument, 0, 'o'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -206,9 +212,21 @@ System::System(int argc, char* argv[])
         if (optarg) fake_motors = atoi(optarg);
         else        fake_motors = 1;
         break;
+      case 'M':
+        if (optarg) double_keyence = atoi(optarg);
+        else        double_keyence = 1;
+        break;
       case 'n':
         if (optarg) fake_embrakes = atoi(optarg);
         else        fake_embrakes = 1;
+        break;
+      case 'N':
+        if (optarg) accurate = atoi(optarg);
+        else        accurate = true;
+        break;
+      case 'o':
+        if (optarg) fake_batteries = atoi(optarg);
+        else        fake_batteries = 1;
         break;
       default:
         printUsage();
@@ -238,8 +256,10 @@ System* System::system_ = 0;
 
 void System::parseArgs(int argc, char* argv[])
 {
-  if (system_) delete system_;
+  if (system_) return;
+
   system_ = new System(argc, argv);
+  state_machine::HypedMachine::setupEmbrakes();
 }
 
 System& System::getSystem()
@@ -260,16 +280,40 @@ Logger& System::getLogger()
 
 static void gracefulExit(int x)
 {
+  Logger log(true, 0);
+  log.INFO("SYSTEM", "termination signal received, exiting gracefully");
   exit(0);
 }
 
-void System::setExitFunction()
+static void segfaultHandler(int x)
 {
-  static bool signal_set = false;
-  if (signal_set) return;
+  // first thing: engage embrakes
+  state_machine::HypedMachine::engageEmbrakes();
 
-  std::signal(SIGINT, &gracefulExit);
-  signal_set = true;
+  Logger log(true, 0);
+  log.ERR("SYSTEM", "forced termination detected (segfault?)");
+  exit(0);
 }
 
+bool System::setExitFunction()
+{
+  static bool signal_set = false;
+  if (signal_set) return true;
+
+  // nominal termination
+  std::signal(SIGINT, &gracefulExit);
+
+  // forced termination
+  std::signal(SIGSEGV, &segfaultHandler);
+  std::signal(SIGABRT, &segfaultHandler);
+  std::signal(SIGFPE,  &segfaultHandler);
+  std::signal(SIGILL,  &segfaultHandler);
+  std::signal(SIGTERM, &segfaultHandler);
+
+  signal_set = true;
+  return true;
+}
+
+
+bool handle_registeres = System::setExitFunction();
 }}  // namespace hyped::utils

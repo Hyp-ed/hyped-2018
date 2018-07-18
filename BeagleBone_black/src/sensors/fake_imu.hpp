@@ -60,7 +60,11 @@ class FakeImu : public ImuInterface {
    * @param[in] acc_file_path    A string to the file location of the accelerometer data points
    * @param[in] gyr_file_path    A string to the file location of the gyroscope data points
    */
-  FakeImu(utils::Logger& log_, std::string acc_file_path, std::string dec_file_path, std::string gyr_file_path); //NOLINT
+  FakeImu(utils::Logger& log_,
+          std::string acc_file_path,
+          std::string dec_file_path,
+          std::string em_file_path,
+          std::string gyr_file_path);
 
   bool isOnline() override { return true; }
   /*
@@ -77,6 +81,7 @@ class FakeImu : public ImuInterface {
   const uint64_t kGyrTimeInterval = 50;
   void startAcc();
   void startDec();
+  void startEm();
 
   /*
    * @brief     A function that reads data from file directory. This function also validates them
@@ -87,7 +92,10 @@ class FakeImu : public ImuInterface {
    *
    * @param[in]    The file format is as stated in the constructor comments
    */
-  void readDataFromFile(std::string acc_file_path, std::string dec_file_path, std::string gyr_file_path); //NOLINT
+  void readDataFromFile(std::string acc_file_path,
+                        std::string dec_file_path,
+                        std::string em_file_path,
+                        std::string gyr_file_path);
 
   /*
    * @brief     A function that adds noise to the imu data using normal distribution
@@ -120,14 +128,18 @@ class FakeImu : public ImuInterface {
   std::vector<bool>             dec_val_operational_;
   std::vector<NavigationVector> gyr_val_read_;
   std::vector<bool>             gyr_val_operational_;
+  std::vector<NavigationVector> em_val_read_;
+  std::vector<bool>             em_val_operational_;
 
   int64_t acc_count_, gyr_count_;
   uint64_t imu_ref_time_;
   std::string acc_file_path_;
   std::string gyr_file_path_;
   std::string dec_file_path_;
+  std::string em_file_path_;
   bool acc_started_;
   bool dec_started_;
+  bool em_started_;
   data::Data&  data_;
 };
 
@@ -139,10 +151,9 @@ class FakeAccurateImu: public ImuInterface {
   void getData(Imu* imu) override;
 
  private:
-  utils::Logger& log_;
   data::Data&    data_;
-
   NavigationVector acc_noise_, gyr_noise_;
+  utils::Logger& log_;
 };
 
 }}  // namespace hyped::sensors

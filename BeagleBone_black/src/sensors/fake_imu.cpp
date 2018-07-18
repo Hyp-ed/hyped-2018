@@ -42,6 +42,7 @@ namespace sensors {
 FakeImu::FakeImu(utils::Logger& log,
                 std::string acc_file_path,
                 std::string dec_file_path,
+                std::string em_file_path,
                 std::string gyr_file_path)
     : log_(log),
       gyr_val_(0),
@@ -50,8 +51,10 @@ FakeImu::FakeImu(utils::Logger& log,
       acc_file_path_(acc_file_path),
       gyr_file_path_(gyr_file_path),
       dec_file_path_(dec_file_path),
+      em_file_path_(em_file_path),
       acc_started_(false),
       dec_started_(false),
+      em_started_(false),
       data_(data::Data::getInstance())
 {
   NavigationVector acc;
@@ -59,7 +62,7 @@ FakeImu::FakeImu(utils::Logger& log,
   acc[1] = 0.0;
   acc[2] = 9.8;
   acc_val_ = acc;
-  readDataFromFile(acc_file_path_, dec_file_path_, gyr_file_path_);
+  readDataFromFile(acc_file_path_, dec_file_path_, em_file_path_, gyr_file_path_);
   log_.INFO("Fake-IMU", "Fake IMU initialised");
 }
 
@@ -71,6 +74,12 @@ void FakeImu::startAcc()
 }
 
 void FakeImu::startDec()
+{
+  imu_ref_time_ = utils::Timer::getTimeMicros();
+  acc_count_ = gyr_count_ = 0;
+}
+
+void FakeImu::startEm()
 {
   imu_ref_time_ = utils::Timer::getTimeMicros();
   acc_count_ = gyr_count_ = 0;
@@ -108,7 +117,7 @@ void FakeImu::getData(Imu* imu)
         prev_gyr_ = gyr_val_read_[gyr_count_];
       }
     }
-  } else if (state == data::State::kDecelerating || state == data::State::kEmergencyBraking) {
+  } else if (state == data::State::kDecelerating) {
     if (!dec_started_) {
       log_.INFO("Fake-IMUs", "Start decelerating...");
       dec_started_ = true;
@@ -129,17 +138,41 @@ void FakeImu::getData(Imu* imu)
 
     if (gyrCheckTime()) {
       gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
+      if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
+        prev_gyr_ = gyr_val_read_[gyr_count_-1];
+      } else {
+        prev_gyr_ = gyr_val_read_[gyr_count_];
+      }
+    }
+  } else if (state == data::State::kEmergencyBraking) {
+    if (!em_started_) {
+      log_.INFO("Fake-IMUs", "Start emergency breaking...");
+      em_started_ = true;
+      startEm();
+    }
+
+    if (accCheckTime()) {
+      acc_count_ = std::min(acc_count_, (int64_t) em_val_read_.size());
       // Check so you don't go out of bounds
-      prev_gyr_ = gyr_val_read_[gyr_count_-1];
-      prev_gyr_ = gyr_val_read_[gyr_count_];
+      if (acc_count_ == (int64_t) em_val_read_.size()) {
+        prev_acc_ = em_val_read_[acc_count_-1];
+      } else {
+        prev_acc_ = em_val_read_[acc_count_];
+      }
+      operational = true;
+    }
+
+    if (gyrCheckTime()) {
+      gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
+      if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
+        prev_gyr_ = gyr_val_read_[gyr_count_-1];
+      } else {
+        prev_gyr_ = gyr_val_read_[gyr_count_];
+      }
     }
   } else {
-    if (accCheckTime()) {
-      prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
-    }
-    if (gyrCheckTime()) {
-      prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
-    }
+    prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
+    prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
     operational = true;
   }
   imu->acc = prev_acc_;
@@ -159,9 +192,12 @@ NavigationVector FakeImu::addNoiseToData(NavigationVector value, NavigationVecto
   return temp;
 }
 
-void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_path, std::string gyr_file_path) //NOLINT
+void FakeImu::readDataFromFile(std::string acc_file_path,
+                               std::string dec_file_path,
+                               std::string em_file_path,
+                               std::string gyr_file_path)
 {
-  for (int i = 0; i < 3; i++) {
+  for (int i = 0; i < 4; i++) {
     std::string file_path;
     uint32_t timestamp;
     std::vector<NavigationVector>* val_read;
@@ -177,6 +213,11 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
       timestamp = kAccTimeInterval;
       val_read  = &dec_val_read_;
       bool_read = &dec_val_operational_;
+    } else if (i == 2) {
+      file_path = em_file_path;
+      timestamp = kAccTimeInterval;
+      val_read  = &em_val_read_;
+      bool_read = &em_val_operational_;   // not needed
     } else {
       file_path = gyr_file_path;
       timestamp = kGyrTimeInterval;
@@ -186,7 +227,6 @@ void FakeImu::readDataFromFile(std::string acc_file_path, std::string dec_file_p
 
     std::ifstream file;
     file.open(file_path);
-    Thread::sleep(15);
     if (!file.is_open()) {
       log_.ERR("Fake-IMU", "Wrong file path for argument: %d", i);
     }
@@ -256,32 +296,37 @@ bool FakeImu::gyrCheckTime()
 
 
 FakeAccurateImu::FakeAccurateImu(utils::Logger& log)
-    : log_(log),
-      data_(data::Data::getInstance()),
+    : data_(data::Data::getInstance()),
       acc_noise_(1),
-      gyr_noise_(1)
+      gyr_noise_(1),
+      log_(log)
 { /* EMPTY */ }
 
 void FakeAccurateImu::getData(Imu* imu)
 {
   data::Navigation nav = data_.getNavigationData();
   data::Motors     mot = data_.getMotorData();
+  data::StateMachine      stm = data_.getStateMachineData();
 
-  // get average rmp
-  double rpm = 0;
-  rpm += mot.velocity_1;
-  rpm += mot.velocity_2;
-  rpm += mot.velocity_3;
-  rpm += mot.velocity_4;
-  rpm /= 4;
+  if (stm.current_state == data::State::kEmergencyBraking) {
+    imu->acc[0] = -25;
+  } else {
+    // get average rmp
+    double rpm = 0;
+    rpm += mot.velocity_1;
+    rpm += mot.velocity_2;
+    rpm += mot.velocity_3;
+    rpm += mot.velocity_4;
+    rpm /= 4;
 
-  // get angular velocity
-  double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
-  uint32_t scale = 4;
-  if (!isnan(nav.velocity))
-    imu->acc[0] = (velocity - nav.velocity)/scale;
-  else
-    imu->acc[0] = 0.0;
+    // get angular velocity
+    double velocity = (rpm*2*3.14159265358979323846*0.148)/60;
+    uint32_t scale = 4;
+    if (!std::isnan(nav.velocity))
+      imu->acc[0] = (velocity - nav.velocity)/scale;
+    else
+      imu->acc[0] = 0.0;
+  }
   imu->acc[1] = 0;
   imu->acc[2] = 9.8;
 
