@@ -61,7 +61,7 @@ class Main : public Thread {
   int sendImu(std::array<Imu, Sensors::kNumImus> imus);                               // CMD17
   int sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front);  // CMD18
   int sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear);    // CMD19
-  int sendEmBrakes(bool left_brakes, bool right_brakes);                              // CMD20
+  int sendEmBrakes(bool front_brakes, bool rear_brakes);                              // CMD20
 
  private:
   int state_code_;

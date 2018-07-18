@@ -30,6 +30,7 @@
 #include "sensors/proxi_manager.hpp"
 #include "sensors/fake_gpio_counter.hpp"
 #include "sensors/gpio_counter.hpp"
+#include "sensors/em_brake.hpp"
 
 constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
@@ -81,6 +82,10 @@ Main::Main(uint8_t id, Logger& log)
     temp->start();
     optical_encoder_r_ = temp;
   }
+  EmBrake* em_brake_front_ = new EmBrake(log, true);
+  EmBrake* em_brake_rear_ = new EmBrake(log, false);
+  em_brake_front_->start();
+  em_brake_rear_->start();
 }
 
 void Main::run()
