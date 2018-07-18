@@ -162,7 +162,7 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists(uint16_t stripe_
   return arr;
 }
 
-void Navigation::update(NavigationInput input)
+void Navigation::update(Input input)
 {
   if (input.imus != nullptr) {
     imuUpdate(*input.imus);
