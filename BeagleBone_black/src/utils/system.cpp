@@ -280,13 +280,32 @@ static void gracefulExit(int x)
   exit(0);
 }
 
-void System::setExitFunction()
+static void segfaultHandler(int x)
 {
-  static bool signal_set = false;
-  if (signal_set) return;
-
-  std::signal(SIGINT, &gracefulExit);
-  signal_set = true;
+  Logger log(true, 0);
+  log.ERR("SYSTEM", "forced termination detected (segfault?)");
+  exit(0);
 }
 
+bool System::setExitFunction()
+{
+  static bool signal_set = false;
+  if (signal_set) return true;
+
+  // nominal termination
+  std::signal(SIGINT, &gracefulExit);
+
+  // forced termination
+  std::signal(SIGSEGV, &segfaultHandler);
+  std::signal(SIGABRT, &segfaultHandler);
+  std::signal(SIGFPE,  &segfaultHandler);
+  std::signal(SIGILL,  &segfaultHandler);
+  std::signal(SIGTERM, &segfaultHandler);
+
+  signal_set = true;
+  return true;
+}
+
+
+bool handle_registeres = System::setExitFunction();
 }}  // namespace hyped::utils
