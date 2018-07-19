@@ -29,12 +29,18 @@ using hyped::utils::math::Vector;
 
 int main()
 {
-  int timestamp, value, p, q;
+  double value, p, q = 0.1;
+  int total;
 
-  std::cin >> p >> q;
-  Kalman<int> kalman(0, p, q);
+  std::cin >> total >> p;
+  Kalman<double> kalman(0, p, q);
 
-  while (std::cin >> timestamp >> value) {
-    std::cout << timestamp << '\t' << kalman.filter(value) << '\n';
+  for (int i = 0; i < total; i++) {
+    std::cin >> value;
+  }
+
+  for (int i = 0; i < total; i++) {
+    std::cin >> value;
+    std::cout << kalman.filter(value) << '\n';
   }
 }
