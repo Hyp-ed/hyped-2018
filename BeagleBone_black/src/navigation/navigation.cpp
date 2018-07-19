@@ -57,6 +57,17 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       orientation_(1, 0, 0, 0)
 {
   readDataFromFile(file_path);
+  out_.status              = &status_;
+  out_.is_calibrating      = &is_calibrating_;
+  out_.num_gravity_samples = &num_gravity_samples_;
+  out_.g                   = &g_;
+  out_.num_gyro_samples    = &num_gyro_samples_;
+  out_.gyro_offsets        = &gyro_offsets_;
+  out_.acceleration        = &acceleration_;
+  out_.displacement        = &displacement_;
+  out_.velocity            = &velocity_;
+  out_.stripe_count        = &stripe_count_;
+  out_.orientation         = &orientation_;
 }
 
 void Navigation::readDataFromFile(std::string file_path)
@@ -80,15 +91,10 @@ void Navigation::readDataFromFile(std::string file_path)
   file.close();
 
   settings_.prox_orient_w = map_settings["prox_orient_w"];
-  log_.INFO("NAV", "%f", map_settings["prox_orient_w"]);
   settings_.prox_displ_w  = map_settings["prox_displ_w"];
-  log_.INFO("NAV", "%f", map_settings["prox_displ_w"]);
   settings_.strp_displ_w  = map_settings["strp_displ_w"];
-  log_.INFO("NAV", "%f", map_settings["strp_displ_w"]);
   settings_.prox_vel_w    = map_settings["prox_vel_w"];
-  log_.INFO("NAV", "%f", map_settings["prox_vel_w"]);
   settings_.strp_vel_w    = map_settings["strp_vel_w"];
-  log_.INFO("NAV", "%f", map_settings["strp_vel_w"]);
 }
 
 NavigationType Navigation::getAcceleration() const
@@ -134,6 +140,13 @@ NavigationType Navigation::getBrakingDistance() const
 ModuleStatus Navigation::getStatus() const
 {
   return status_;
+}
+
+const Navigation::FullOutput& Navigation::getAll()
+{
+  out_.braking_dist    = getBrakingDistance();
+  out_.em_braking_dist = getEmergencyBrakingDistance();
+  return out_;
 }
 
 bool Navigation::startCalibration()
