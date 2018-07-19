@@ -23,11 +23,13 @@
 
 #include "data/data.hpp"
 #include "navigation/navigation.hpp"
+#include "utils/concurrent/lock.hpp"
 #include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
 using data::Sensors;
+using utils::concurrent::Lock;
 using utils::concurrent::Thread;
 using utils::Logger;
 
@@ -37,6 +39,7 @@ class Main: public Thread {
  public:
   Main(uint8_t id, Logger& log);
   void run() override;
+  const Navigation::FullOutput& getAllNavData();
 
  private:
   bool imuChanged(const Sensors& old_data, const Sensors& new_data);
@@ -48,6 +51,7 @@ class Main: public Thread {
 
   data::Data& data_;
   Navigation nav_;
+  Lock l_;
 };
 
 }}  // namespace hyped::navigation
