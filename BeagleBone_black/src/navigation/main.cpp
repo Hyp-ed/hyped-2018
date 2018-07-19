@@ -26,6 +26,7 @@ namespace hyped {
 
 using data::ModuleStatus;
 using data::State;
+using utils::concurrent::ScopedLock;
 using utils::System;
 
 namespace navigation {
@@ -57,6 +58,7 @@ void Main::run()
 
   System& sys = System::getSystem();
   while (sys.running_) {
+    ScopedLock L(&l_);
     // State updates
     State current_state = data_.getStateMachineData().current_state;
     switch (current_state) {
@@ -130,6 +132,12 @@ void Main::run()
     readings.swap(last_readings);
     proxis.swap(last_proxis);
   }
+}
+
+const Navigation::FullOutput& Main::getAllNavData()
+{
+  ScopedLock L(&l_);
+  return nav_.getAll();
 }
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)

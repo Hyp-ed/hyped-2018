@@ -94,7 +94,25 @@ class Navigation {
     ProximityArray *proxis = nullptr;
     StripeCounterArray *sc = nullptr;
     array<float, Sensors::kNumOptEnc> *optical_enc_distance = nullptr;
-    };
+  };
+  struct FullOutput {
+    const ModuleStatus*     status;
+    const bool*             is_calibrating;
+    const int*              num_gravity_samples;
+    const NavigationVector* g;  // Acceleration due to gravity. Measured during calibration.
+    const int*              num_gyro_samples;
+    const std::array<NavigationVector, Sensors::kNumImus>* gyro_offsets;
+
+    // Most up-to-date values of pod's acceleration, velocity and displacement in 3D
+    const NavigationVector* acceleration;
+    const NavigationVector* velocity;
+    const NavigationVector* displacement;
+    const uint16_t*        stripe_count;
+
+    const Quaternion<NavigationType>* orientation;
+    NavigationType braking_dist;
+    NavigationType em_braking_dist;
+  };
 
   /**
    * @brief Construct a new Navigation object
@@ -144,6 +162,12 @@ class Navigation {
    * @return ModuleStatus Status of the nav module
    */
   ModuleStatus getStatus() const;
+  /**
+   * @brief Get the all nav data. Useful for debugging and analysis
+   *
+   * @return const FullOutput&
+   */
+  const FullOutput& getAll();
   /**
    * @brief Starts the calibration phase if the module's status is `kInit`.
    *
@@ -217,6 +241,7 @@ class Navigation {
   Logger& log_;
   const Settings settings_;
   ModuleStatus status_;
+  FullOutput out_;
 
   // Calibration variables
   bool is_calibrating_;
