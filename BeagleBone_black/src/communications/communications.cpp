@@ -28,8 +28,8 @@ namespace communications {
 
 Communications::Communications(Logger& log, const char* ip, int port_no)
     : log_(log),
-      is_connected_(false),
-      data_(data::Data::getInstance())
+      data_(data::Data::getInstance()),
+      is_connected_(false)
 {
   log_.INFO("COMN", "BaseCommunicator initialised.");
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);   // socket(int domain, int type, int protocol)
