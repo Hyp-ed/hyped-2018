@@ -67,8 +67,8 @@ class Main : public Thread {
  private:
   int state_code_;
   Communications* base_communicator_;
-  Logger& log_;
   utils::System& sys_;
+  Logger& log_;
   data::Data& data_;
   data::StateMachine stm_;
   data::Motors mtr_;
