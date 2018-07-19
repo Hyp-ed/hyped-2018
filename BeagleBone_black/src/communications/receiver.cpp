@@ -30,8 +30,8 @@ ReceiverThread::ReceiverThread(Logger& log, Communications* base_communicator)
     : Thread(),
       sys_(System::getSystem()),
       log_(log),
-      base_communicator_(base_communicator),
-      data_(data::Data::getInstance())
+      data_(data::Data::getInstance()),
+      base_communicator_(base_communicator)
 { /* Empty */ }
 
 void ReceiverThread::run()

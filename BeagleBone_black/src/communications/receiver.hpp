@@ -41,9 +41,9 @@ class ReceiverThread : public Thread {
 
 
  private:
-  utils::System&   sys_;
-  data::Data&      data_;
-  Logger& log_;
+  utils::System&  sys_;
+  Logger&         log_;
+  data::Data&     data_;
   Communications* base_communicator_;
 };
 
