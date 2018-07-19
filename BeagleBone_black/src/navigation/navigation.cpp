@@ -55,7 +55,19 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       stripe_count_(0),
       prev_angular_velocity_(0 , NavigationVector()),
       orientation_(1, 0, 0, 0)
-{}
+{
+  out_.status              = &status_;
+  out_.is_calibrating      = &is_calibrating_;
+  out_.num_gravity_samples = &num_gravity_samples_;
+  out_.g                   = &g_;
+  out_.num_gyro_samples    = &num_gyro_samples_;
+  out_.gyro_offsets        = &gyro_offsets_;
+  out_.acceleration        = &acceleration_;
+  out_.displacement        = &displacement_;
+  out_.velocity            = &velocity_;
+  out_.stripe_count        = &stripe_count_;
+  out_.orientation         = &orientation_;
+}
 
 NavigationType Navigation::getAcceleration() const
 {
@@ -100,6 +112,13 @@ NavigationType Navigation::getBrakingDistance() const
 ModuleStatus Navigation::getStatus() const
 {
   return status_;
+}
+
+const Navigation::FullOutput& Navigation::getAll()
+{
+  out_.braking_dist    = getBrakingDistance();
+  out_.em_braking_dist = getEmergencyBrakingDistance();
+  return out_;
 }
 
 bool Navigation::startCalibration()
