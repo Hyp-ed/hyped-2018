@@ -61,10 +61,7 @@ ProxiManager::ProxiManager(Logger& log,
   } else if (is_front_) {
     // create real proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      if (!i2c_.write(kMultiplexerAddr, 0x01 << i)) {
-        log_.ERR("Proxi-Manager", "No Multiplexer connection");
-        Thread::yield();
-      }
+      i2c_.write(kMultiplexerAddr, 0x01 << i);
       VL6180* proxi = new VL6180(0x29, log_);
       proxi_[i] = proxi;
     }
@@ -97,8 +94,7 @@ void ProxiManager::run()
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       if (is_front_) {
         if (!i2c_.write(kMultiplexerAddr, 0x01 << i)) {
-          log_.ERR("Proxi-Manager", "No Multiplexer connection");
-          return;
+          if (!is_fake_)log_.ERR("Proxi-Manager", "No Multiplexer connection");
         }
       }
       proxi_[i]->getData(&proxi);
