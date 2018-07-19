@@ -22,6 +22,8 @@
 #include <array>
 #include <cstdint>
 #include <cmath>
+#include <string>
+#include <fstream>
 
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
@@ -105,7 +107,7 @@ class Navigation {
    */
   Navigation(Barrier& post_calibration_barrier,
              Logger& log = System::getLogger(),
-             const Settings& settings = kDefaultSettings);
+             std::string file_path = "../BeagleBone_black/data/configuration/NavSettings.txt");
 
   /**
    * @brief Get the acceleration value
@@ -211,11 +213,12 @@ class Navigation {
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(StripeCounterArray scs);  // Point number 7
   void opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance);
+  void readDataFromFile(std::string file_path);
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
   Logger& log_;
-  const Settings settings_;
+  Settings settings_;
   ModuleStatus status_;
 
   // Calibration variables
