@@ -72,7 +72,10 @@ void VL6180::turnOn()
 {
   log_.INFO("VL6180", "Trying to turn sensor on");
 
-  waitDeviceBooted();
+  if (!waitDeviceBooted()) {
+    is_online_ = false;
+    return;
+  }
 
   writeByte(kSysrangeStart, 0x01);
   Thread::sleep(100);
@@ -281,7 +284,7 @@ bool VL6180::waitDeviceBooted()
   uint8_t fresh_out_of_reset;
   int send_counter;
 
-  for (send_counter = 0; send_counter < 10; send_counter++) {
+  for (send_counter = 0; send_counter < 5; send_counter++) {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
     if (fresh_out_of_reset == 1) {
       log_.DBG("VL6180", "Sensor out of reset");
