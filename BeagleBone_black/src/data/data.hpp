@@ -85,7 +85,7 @@ struct Navigation : public Module {
   NavigationType  velocity;
   NavigationType  acceleration;
   NavigationType  emergency_braking_distance;
-  NavigationType  braking_distance = 650;  // TODO(Brano): Remove default,publish the actual dist.
+  NavigationType  braking_distance = 0;  // TODO(Brano): Remove default,publish the actual dist.
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -144,8 +144,8 @@ struct Batteries : public Module {
 };
 
 struct EmergencyBrakes : public Module {
-  bool front_brakes;       // true if front facing emergency brakes deploy
-  bool rear_brakes;      // true if rear facing emergency brakes deploy
+  bool left_brakes;       // true if left facing emergency brakes deploy
+  bool right_brakes;      // true if right facing emergency brakes deploy
 };
 
 // -------------------------------------------------------------------------------------------------

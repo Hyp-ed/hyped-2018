@@ -73,7 +73,7 @@ void FakeController::startTimer()
 {
   start_time_ = Timer::getTimeMicros(); 
   timer_started_ = true;
-  fail_time_ = std::rand()%20000000 + 1000000;
+  fail_time_ = std::rand()%25000000 + 1000000;
 }
 
 void FakeController::enterPreOperational()
