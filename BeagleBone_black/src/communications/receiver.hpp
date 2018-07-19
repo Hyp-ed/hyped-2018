@@ -42,9 +42,9 @@ class ReceiverThread : public Thread {
 
  private:
   utils::System&   sys_;
-  data::Data&      data_;
   Logger& log_;
   Communications* base_communicator_;
+  data::Data&      data_;
 };
 
 }}  //   namespace hyped::communications
