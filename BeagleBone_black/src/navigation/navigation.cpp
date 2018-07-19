@@ -408,7 +408,7 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
 
   if (scs[0].count.value <= stripe_count_ && scs[1].count.value <= stripe_count_) {
     log_.DBG3("NAV", "Stripe count not updated (oldCnt=%d, newCnts=[%d, %d])",
-          stripe_count_, scs[0], scs[1]);
+          stripe_count_, scs[0].count.value, scs[1].count.value);
     return;
   }
 
