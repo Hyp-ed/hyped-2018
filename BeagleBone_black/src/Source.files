@@ -63,3 +63,4 @@ MAINS := \
   demo_imus \
   test_proxis \
   test_imus \
+  demo_sensors \
