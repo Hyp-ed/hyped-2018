@@ -287,9 +287,10 @@ bool VL6180::waitDeviceBooted()
   for (send_counter = 0; send_counter < 5; send_counter++) {
     readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
     if (fresh_out_of_reset == 1) {
-      log_.DBG("VL6180", "Sensor out of reset");
+      log_.INFO("VL6180", "Sensor out of reset");
       return true;
     }
+    log_.DBG("VL6180", "Sensor failed to get out of reset");
     Thread::sleep(20);
   }
   log_.ERR("VL6180", "Sensor failed to get of reset");
