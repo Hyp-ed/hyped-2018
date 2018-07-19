@@ -73,11 +73,11 @@ class Communications
   bool isConnected();
 
  private:
-  int sockfd_;
-  char buffer_[256];
-  Logger& log_;
-  bool is_connected_;
+  Logger&     log_;
   data::Data& data_;
+  bool is_connected_;
+  int  sockfd_;
+  char buffer_[256];
 };
 
 }}  //  namespace hyped::communications
