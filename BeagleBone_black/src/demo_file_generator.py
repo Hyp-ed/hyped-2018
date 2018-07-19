@@ -7,8 +7,9 @@ def myprint(values):
 
 total = 100
 std = 10.0
+process_noise = 1.0
 
-print(total, std)
+print(total, std, process_noise)
 
 # actual_value = list(map(round, np.random.random(total) * 100))
 actual_value = [0]

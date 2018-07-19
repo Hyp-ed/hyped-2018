@@ -29,10 +29,10 @@ using hyped::utils::math::Vector;
 
 int main()
 {
-  double value, p, q = 0.1;
+  double value, p, q;
   int total;
 
-  std::cin >> total >> p;
+  std::cin >> total >> p >> q;
   Kalman<double> kalman(0, p, q);
 
   for (int i = 0; i < total; i++) {

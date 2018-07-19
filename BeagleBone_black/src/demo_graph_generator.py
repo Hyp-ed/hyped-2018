@@ -8,7 +8,7 @@ real_values = []
 filter_values = []
 
 with open('data.txt') as input_file:
-  total, std = [float(x) for x in next(input_file).split()]
+  total, std, process_noise = [float(x) for x in next(input_file).split()]
   for _ in range(0, int(total)):
     real_values.append([float(x) for x in next(input_file).split()])
   for _ in range(0, int(total)):
