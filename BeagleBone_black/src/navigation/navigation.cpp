@@ -52,6 +52,7 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       acceleration_(0),  // TODO(Brano): Should this be g or 0?
       velocity_(0),
       displacement_(0),
+      stripe_count_(0),
       prev_angular_velocity_(0 , NavigationVector()),
       orientation_(1, 0, 0, 0)
 {}
@@ -406,6 +407,8 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   // TODO(Brano): Update displacement and velocity
 
   if (scs[0].count.value <= stripe_count_ && scs[1].count.value <= stripe_count_) {
+    log_.DBG3("NAV", "Stripe count not updated (oldCnt=%d, newCnts=[%d, %d])",
+          stripe_count_, scs[0], scs[1]);
     return;
   }
 
