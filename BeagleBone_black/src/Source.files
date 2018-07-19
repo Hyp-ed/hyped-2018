@@ -48,6 +48,7 @@ MAINS := \
   demo_machine \
   demo_motor \
   demo_motor_testing \
+  demo_navigation \
   demo_communications \
   demo_threading \
   demo_vector \
