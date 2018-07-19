@@ -62,6 +62,7 @@ int main(int argc, char* argv[])
                                                                         battery.current);
     }
 
+    std::printf("\n");
     log.INFO("Test", "High Power Batteries");
     for (auto& battery : batteries.high_power_batteries) {
       log.INFO("TEST", "Charge: %u, Temp: %d, Voltage: %u, Current %d", battery.charge,
@@ -70,6 +71,7 @@ int main(int argc, char* argv[])
                                                                         battery.current);
     }
 
+    std::printf("\n");
     auto imus = sens.imu.value;
     log.INFO("Test", "IMUs online: %d,%d,%d,%d", imus[0].operational,
                                                  imus[1].operational,
@@ -86,6 +88,8 @@ int main(int argc, char* argv[])
         gyr[1],
         gyr[2]);
     }
+
+    std::printf("\n");
     auto proxis_front = sens.proxi_front.value;
     log.INFO("Test", "Proxi-front online: %d,%d,%d,%d,%d,%d,%d,%d", proxis_front[0].operational,
                                                              proxis_front[1].operational,
@@ -100,6 +104,7 @@ int main(int argc, char* argv[])
       log.INFO("TEST", "Distance front:  %u", proxi);
     }
 
+    std::printf("\n");
     auto proxis_back = sens.proxi_back.value;
     log.INFO("Test", "Proxi-back online: %d,%d,%d,%d,%d,%d,%d,%d", proxis_back[0].operational,
                                                              proxis_back[1].operational,
@@ -117,4 +122,3 @@ int main(int argc, char* argv[])
   }
  	return 0;
 }
-
