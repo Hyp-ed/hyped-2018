@@ -27,20 +27,14 @@
 using hyped::utils::math::Kalman;
 using hyped::utils::math::Vector;
 
-template <typename T, int dimension>
-void print(const Vector<T, dimension>& vector)
-{
-  for (int i = 0; i < dimension; i++)
-    std::cout << vector[i] << '\t';
-  std::cout << '\n';
-}
-
 int main()
 {
-  Kalman<Vector<double, 1>> kalman(Vector<double, 1>(0), Vector<double, 1>(1),
-                                   Vector<double, 1>(1));
+  int timestamp, value, p, q;
 
-  for (int i = 0; i < 100; i++)
-    print(kalman.filter(Vector<double, 1>(i)));
-  std::cout << '\n';
+  std::cin >> p >> q;
+  Kalman<int> kalman(0, p, q);
+
+  while (std::cin >> timestamp >> value) {
+    std::cout << timestamp << '\t' << kalman.filter(value) << '\n';
+  }
 }
