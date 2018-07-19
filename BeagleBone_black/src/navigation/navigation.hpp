@@ -192,6 +192,10 @@ class Navigation {
    *                                       next 2 stripes (both should be positive).
    */
   std::array<NavigationType, 3> getNearestStripeDists(uint16_t stripe_count);
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -210,6 +214,10 @@ class Navigation {
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
   void stripeCounterUpdate(StripeCounterArray scs);  // Point number 7
   void opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance);
+<<<<<<< HEAD
+=======
+
+>>>>>>> develop
   // Admin stuff
   Barrier& post_calibration_barrier_;
   Logger& log_;
