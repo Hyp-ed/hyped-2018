@@ -61,9 +61,11 @@ ProxiManager::ProxiManager(Logger& log,
   } else if (is_front_) {
     // create real proximities
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      i2c_.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
+      if (!i2c_.write(kMultiplexerAddr, 0x01 << i)) {
+        log_.ERR("Proxi-Manager", "No Multiplexer connection");
+        Thread::yield();
+      }
       VL6180* proxi = new VL6180(0x29, log_);
-      proxi->setContinuousRangingMode();
       proxi_[i] = proxi;
     }
   } else {
@@ -83,10 +85,22 @@ void ProxiManager::run()
 {
   // collect calibration data
   uint32_t calib_counter = 0;
+  Proximity proxi;
   while (!is_calibrated_) {
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
-      if (is_front_) i2c_.write(kMultiplexerAddr, 0x01 << i);
-      Proximity proxi;
+      if (is_front_) {
+        i2c_.write(kMultiplexerAddr, 0x01 << i);
+      }
+      proxi_[i]->startRanging();
+    }
+
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      if (is_front_) {
+        if (!i2c_.write(kMultiplexerAddr, 0x01 << i)) {
+          log_.ERR("Proxi-Manager", "No Multiplexer connection");
+          return;
+        }
+      }
       proxi_[i]->getData(&proxi);
       if (proxi.operational) stats_[i].update(proxi.val);
     }
@@ -97,6 +111,12 @@ void ProxiManager::run()
 
   // collect real data
   while (1) {
+    for (int i = 0; i < data::Sensors::kNumProximities; i++) {
+      if (is_front_) {
+        i2c_.write(kMultiplexerAddr, 0x01 << i);
+      }
+      proxi_[i]->startRanging();
+    }
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       if (is_front_) {
         i2c_.write(kMultiplexerAddr, 0x01 << i);
