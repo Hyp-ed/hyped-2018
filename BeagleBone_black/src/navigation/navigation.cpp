@@ -234,13 +234,14 @@ void Navigation::update(Input input)
   if (input.imus != nullptr) {
     imuUpdate(*input.imus);
   }
-  if (input.proxis != nullptr && !is_calibrating_) {
+  if (input.proxis != nullptr && !is_calibrating_ &&
+      (settings_.proxi_displ_enable || settings_.proxi_orient_enable)) {  // NOLINT[whitespace/braces]
     proximityUpdate(*input.proxis);
   }
-  if (input.sc != nullptr && !is_calibrating_) {
+  if (input.sc != nullptr && !is_calibrating_ && settings_.keyence_enable) {
     stripeCounterUpdate(*input.sc);
   }
-  if (input.optical_enc_distance != nullptr && !is_calibrating_) {
+  if (input.optical_enc_distance != nullptr && !is_calibrating_ && settings_.opt_enc_enable) {
     opticalEncoderUpdate(*input.optical_enc_distance);
   }
 }
@@ -251,8 +252,11 @@ void Navigation::imuUpdate(DataPoint<ImuArray> imus)
     log_.DBG3("NAV", "Before filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
         i, imus.value[i].acc[0], imus.value[i].acc[1], imus.value[i].acc[2],
         i, imus.value[i].gyr[0], imus.value[i].gyr[1], imus.value[i].gyr[2]);
+
     imus.value[i].acc = acceleration_filter_[i].filter(imus.value[i].acc);
-    imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
+    if (settings_.gyro_enable)
+      imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
+
     log_.DBG3("NAV", " After filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
         i, imus.value[i].acc[0], imus.value[i].acc[1], imus.value[i].acc[2],
         i, imus.value[i].gyr[0], imus.value[i].gyr[1], imus.value[i].gyr[2]);
@@ -271,12 +275,15 @@ void Navigation::imuUpdate(DataPoint<ImuArray> imus)
   if (num_operational < 2) {
     status_ = ModuleStatus::kCriticalFailure;
     log_.ERR("NAV", "Critical failure: num operational IMUs = %d < 2", num_operational);
+    if (num_operational <= 0)
+      return;
   }
 
   if (is_calibrating_) {
     calibrationUpdate(imus.value);
   } else {
     accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
+    if (settings_.gyro_enable)
              gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
   }
 }
@@ -306,9 +313,10 @@ void Navigation::proximityUpdate(ProximityArray proxis)
     log_.ERR("NAV", "Critical failure: insufficient rail proxis");
     return;
   }
-
-  proximityDisplacementUpdate(ground, rail);
-  proximityOrientationUpdate(ground, rail);
+  if (settings_.proxi_displ_enable)
+    proximityDisplacementUpdate(ground, rail);
+  if (settings_.proxi_orient_enable)
+    proximityOrientationUpdate(ground, rail);
 }
 
 void Navigation::calibrationUpdate(ImuArray imus)
@@ -347,6 +355,7 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
       velocity_.value[0], velocity_.value[1], velocity_.value[2],
       displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 
+  // TODO(Brano): Rotate acceleration if gyro enabled. Need to add conj to Quaternion.
   acceleration_ = acceleration.value;
   acceleration_integrator_.update(acceleration);  // Updates velocity
   velocity_integrator_.update(velocity_);  // Updates displacement

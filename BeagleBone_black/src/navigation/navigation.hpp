@@ -84,6 +84,11 @@ class Navigation {
   typedef std::array<Proximity*,    2*Sensors::kNumProximities> ProximityArray;
   typedef std::array<StripeCounter, Sensors::kNumKeyence>       StripeCounterArray;
   struct Settings {
+    bool proxi_displ_enable = false;  // Needs updated proxi positions
+    bool proxi_orient_enable = false;  // Needs updated proxi positions
+    bool gyro_enable = false;  // Not fully implemented (rotate a)
+    bool opt_enc_enable = false;  // Not implemented
+    bool keyence_enable = true;
     // TODO(Brano): Change the default values
     float prox_orient_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in orientation calculation
     float prox_displ_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in displacement calculation
