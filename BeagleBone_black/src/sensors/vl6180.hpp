@@ -42,7 +42,7 @@ class VL6180: public ProxiInterface {
   /**
     *  @brief  Sets the the ranging mode to continuous
     */
-  void setContinuousRangingMode();
+  void startRanging() override;
 
  private:
   /**
@@ -72,11 +72,11 @@ class VL6180: public ProxiInterface {
   /**
     *  @brief  Reads a single byte register and returns its status
     */
-  void readByte(uint16_t reg_add, uint8_t *data);
+  bool readByte(uint16_t reg_add, uint8_t *data);
   /**
     *  @brief  Writes a byte to the register and returns its status
     */
-  void writeByte(uint16_t reg_add, char data);
+  bool writeByte(uint16_t reg_add, char data);
   /**
     *  @brief  Checks the status register and sets the error_status_
     */

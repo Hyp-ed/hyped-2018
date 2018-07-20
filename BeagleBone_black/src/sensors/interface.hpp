@@ -49,6 +49,7 @@ class ProxiInterface: public SensorInterface {
    * @param proxi - output pointer to be filled by this sensor
    */
   virtual void getData(Proximity* proxi) = 0;
+  virtual void startRanging() = 0;
 };
 
 class ImuInterface: public SensorInterface {
