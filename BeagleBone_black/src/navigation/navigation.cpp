@@ -123,12 +123,11 @@ NavigationType Navigation::getEmergencyBrakingDistance() const
 NavigationType Navigation::getBrakingDistance() const
 {
   // A polynomial fit for the braking distance at a specific (normalised) velocity
-  static constexpr std::array<NavigationType, 16> kCoefficients = {80.7074,
-            93.8803,   10.6627,   -9.2234,  180.2587,  124.2188, -495.1209, -428.6747,
-           568.6541,  657.6976, -196.3143, -437.5374,  -78.3606,   95.7824,   49.3553,
-             6.9888};
+  static constexpr std::array<NavigationType, 16> kCoefficients = {
+       136.3132, 158.9403,  63.6093, -35.4894, -149.2755, 152.6967, 502.5464, -218.4689,
+      -779.534,   95.7285, 621.1013,  50.4598, -245.099,  -54.5,     38.0642,   12.3548};
 
-  NavigationType norm_v = (getVelocity() - 45.5628) / 21.9511;
+  NavigationType norm_v = (getVelocity() - 30.0079) / 17.2325;
   NavigationType var = 1.0;
   NavigationType braking_distance = 2.0;
   for (unsigned int i = 0; i < kCoefficients.size(); ++i) {
