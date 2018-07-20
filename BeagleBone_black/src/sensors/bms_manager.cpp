@@ -52,7 +52,8 @@ BmsManager::BmsManager(Logger& log,
     if (sys_.fake_batteries) {
       bms_[i + data::Batteries::kNumLPBatteries] = new FakeBatteries(log, true, true);
     } else {
-      bms_[i + data::Batteries::kNumLPBatteries] = new BMSHP(i, log_);
+      // need id and id + 1 for CAN ids TODO(anyone) fix this quick fix
+      bms_[i + data::Batteries::kNumLPBatteries] = new BMSHP(i+1, log_);
     }
   }
 }

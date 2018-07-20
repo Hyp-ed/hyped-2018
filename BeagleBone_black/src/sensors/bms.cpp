@@ -159,7 +159,13 @@ void BMS::getData(Battery* battery)
 
   // charge calculation, linear from 15V to 25.2V
   // C = 0.98V - 147
-  battery->charge = 0.98*battery->voltage - 147;
+  if (battery->voltage > 24) {
+    battery->charge = 95;
+  } else if (24 >= battery->voltage >= 18) {
+    battery->charge = battery->voltage * 80/6 - 225;
+  } else {
+    battery->charge = battery->voltage * 5 - 75;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,28 +207,31 @@ void BMSHP::getData(Battery* battery)
 bool BMSHP::hasId(uint32_t id, bool extended)
 {
   // only accept a single CAN message
-  return id == can_id_;
+  return id == can_id_ || id == (can_id_ - 1);
 }
 
 void BMSHP::processNewData(utils::io::can::Frame& message)
 {
   // message format is expected to look like this:
-  // [voltageH , volageL  , currentH   , currentL,
-  //  charge   , HighTemp , AverageTemp, state   ]
-  local_data_.voltage     = (message.data[0] << 8) | message.data[1];
-  local_data_.current     = (message.data[2] << 8) | message.data[3];
-  local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
-  local_data_.temperature = message.data[5];
-  local_data_.low_voltage_cell  = message.data[6];
-  local_data_.high_voltage_cell  = message.data[7];
+  // [ voltageH , volageL  , currentH   , currentL,
+  //  charge   , HighTemp , AverageTemp, state, lowVoltageCellH,
+  //  lowVoltageCellL ]
+  if (message.id == can_id_) {
+    local_data_.voltage     = (message.data[0] << 8) | message.data[1];
+    local_data_.current     = (message.data[2] << 8) | message.data[3];
+    local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
+    local_data_.temperature = message.data[5];
+    local_data_.low_voltage_cell  = (message.data[6] << 8) | message.data[7];
+    last_update_time_ = utils::Timer::getTimeMicros();
+  } else {
+    local_data_.high_voltage_cell = (message.data[0] << 8) | message.data[1];
+  }
 
   log_.DBG1("BMSHP", "received data Volt,Curr,Char,Temp %u,%u,%u,%d",
     local_data_.voltage,
     local_data_.current,
     local_data_.charge,
     local_data_.temperature);
-
-  last_update_time_ = utils::Timer::getTimeMicros();
 }
 
 
