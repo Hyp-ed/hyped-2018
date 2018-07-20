@@ -212,7 +212,8 @@ bool Main::checkFinish()
 
 bool Main::checkVelocityZeroReached()
 {
-  if (motor_data_.velocity_1 == 0 && motor_data_.velocity_2 == 0 && motor_data_.velocity_3 == 0 && motor_data_.velocity_4 == 0) {
+  if (motor_data_.velocity_1 == 0 && motor_data_.velocity_2 == 0
+      && motor_data_.velocity_3 == 0 && motor_data_.velocity_4 == 0) {
     log_.INFO("STATE", "RPM reached zero.");
     hypedMachine.handleEvent(kVelocityZeroReached);
     return true;
