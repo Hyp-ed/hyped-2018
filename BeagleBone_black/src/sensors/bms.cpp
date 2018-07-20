@@ -153,18 +153,19 @@ void BMS::getData(Battery* battery)
 {
   battery->voltage = 0;
   for (uint16_t v: data_.voltage) battery->voltage += v;
-  battery->voltage /= 100;  // scale to 0.1V
+  battery->voltage    /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
   battery->current     = current_ / 100;
 
-  // charge calculation, linear from 15V to 25.2V
-  // C = 0.98V - 147
-  if (battery->voltage > 24) {
+  // charge calculation
+  if (battery->voltage > 240) {                                       // constant high
     battery->charge = 95;
-  } else if (24 >= battery->voltage >= 18) {
-    battery->charge = battery->voltage * 80/6 - 225;
-  } else {
-    battery->charge = battery->voltage * 5 - 75;
+  } else if (240 >= battery->voltage && battery->voltage >= 180) {    // linear high
+    battery->charge = battery->voltage / 0.75 - 225;
+  } else if (180 >= battery->voltage && battery->voltage >= 150) {    // linear low
+    battery->charge = battery->voltage / 2 - 75;
+  } else {                                                            // constant low
+    battery->charge = 0;
   }
 }
 
@@ -175,7 +176,7 @@ std::vector<uint16_t> BMSHP::existing_ids_;   // NOLINT [build/include_what_you_
 
 BMSHP::BMSHP(uint16_t id, Logger& log)
     : log_(log),
-      can_id_(id + bms::kHPBase),
+      can_id_(id*2 + bms::kHPBase),
       local_data_ {},
       last_update_time_(0)
 {
@@ -207,7 +208,7 @@ void BMSHP::getData(Battery* battery)
 bool BMSHP::hasId(uint32_t id, bool extended)
 {
   // only accept a single CAN message
-  return id == can_id_ || id == (can_id_ - 1);
+  return id == can_id_ || id == static_cast<uint16_t>(can_id_ + 1);
 }
 
 void BMSHP::processNewData(utils::io::can::Frame& message)
