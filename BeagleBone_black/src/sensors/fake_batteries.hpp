@@ -55,6 +55,8 @@ class FakeBatteries : public BMSInterface {
   int16_t current_;
   int8_t temperature_;
   uint8_t charge_;
+  uint16_t low_voltage_cell_;
+  uint16_t high_voltage_cell_;
 };
 }}    // namespace hyped::sensors
 
