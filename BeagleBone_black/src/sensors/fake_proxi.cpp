@@ -72,6 +72,8 @@ void FakeProxi::setData()
   srand(time(NULL));
 }
 
+void FakeProxi::startRanging() {}
+
 void FakeProxi::getData(Proximity* proxi)
 {
   bool operational = false;
