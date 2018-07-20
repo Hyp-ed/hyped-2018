@@ -189,6 +189,16 @@ int Main::sendEmBrakes(bool front_brakes, bool rear_brakes)
   return base_communicator_->sendData("CMD20" + brake + brake1 + "\n");
 }
 
+int Main::sendHpCurrent(Battery hp_battery)
+{
+  return base_communicator_->sendData("CMD21" + std::to_string(hp_battery.current) + "\n");
+}
+
+int Main::sendHpCurrent1(Battery hp_battery1)
+{
+  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery1.current) + "\n");
+}
+
 void Main::run()
 {
   cmn_.launch_command = false;
@@ -251,6 +261,10 @@ void Main::run()
       sendHpCharge1(bat_.high_power_batteries.at(1));
       sendLpCharge(bat_.low_power_batteries.at(0));
       sendLpCharge1(bat_.low_power_batteries.at(1));
+      sendHpCurrent((bat_.high_power_batteries.at(0));
+      sendHpCurrent1((bat_.high_power_batteries.at(1));
+      sendLpCurrent((bat_.low_high_power_batteries.at(0));
+      sendLpCurrent1((bat_.high_power_batteries.at(1));
     }
 
     if (emb_.module_status != data::ModuleStatus::kStart) {
