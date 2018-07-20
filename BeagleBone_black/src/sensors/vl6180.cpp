@@ -72,7 +72,10 @@ void VL6180::turnOn()
 {
   log_.INFO("VL6180", "Trying to turn sensor on");
 
-  waitDeviceBooted();
+  if (!waitDeviceBooted()) {
+    is_online_ = false;
+    return;
+  }
 
   writeByte(kSysrangeStart, 0x01);
   Thread::sleep(100);
@@ -156,7 +159,15 @@ void VL6180::getData(Proximity* proxi)
 {
   proxi->val = continuousRangeDistance();
   proxi->operational = is_online_;
-  writeByte(kSysrangeStart, 0x01);
+}
+
+void VL6180::startRanging()
+{
+  if (!writeByte(kSysrangeStart, 0x01)) {
+    is_online_ = false;
+  } else {
+    is_online_ = true;
+  }
 }
 
 
@@ -165,7 +176,11 @@ bool VL6180::isOnline()
   uint8_t data;
   uint8_t status;
 
-  readByte(kResultRangeStatus, &data);
+  if (!readByte(kResultRangeStatus, &data)) {
+    is_online_ = false;
+    log_.ERR("Vl6180", "No I2C connection");
+    return false;
+  }
   status = data >> 4;
 
   if (status == 0) {
@@ -174,30 +189,12 @@ bool VL6180::isOnline()
     checkStatus();
     is_online_ = false;
   }
-
-  // Check to see if i2c transaction is working by checking model ID
-  readByte(kIdentificationModelId, &data);
-
-  // Value should be 0xB4 after reset
-  if (data != 0xB4) {
-    log_.ERR("VL6180", "Data should of been: %d, but was %d", 0xB4, data);
-    is_online_ = false;
-  }
   return is_online_;
-}
-
-void VL6180::setContinuousRangingMode()
-{
-  // Write to sensor and set to continuous ranging mode
-  writeByte(kSysrangeStart, kModeStartStop | kModeContinuous);
-  uint8_t inter_measurement_time = 1;
-  writeByte(kSysrangeIntermeasurementPeriod, inter_measurement_time);
-  log_.INFO("VL6180", "Sensor is in continuous ranging mode\n");
-  timeout_ = false;
 }
 
 uint8_t VL6180::continuousRangeDistance()
 {
+  if (!is_online_) return 255;
   uint64_t start = utils::Timer::getTimeMicros();
   uint8_t data = 1;
   uint8_t interrupt = 1;
@@ -206,7 +203,11 @@ uint8_t VL6180::continuousRangeDistance()
   readByte(kResultInterruptStatusGpio, &interrupt);
 
   while ((interrupt & 0x04) == 0) {
-    readByte(kResultInterruptStatusGpio, &interrupt);
+    if (!readByte(kResultInterruptStatusGpio, &interrupt)) {
+      log_.ERR("Vl6180", "No I2C connection");
+      is_online_ = false;
+      return 0;
+    }
     if ((utils::Timer::getTimeMicros() - start) > timeout) {
       log_.ERR("Vl6180", "TIMEOUT");
       is_online_ = false;
@@ -281,12 +282,17 @@ bool VL6180::waitDeviceBooted()
   uint8_t fresh_out_of_reset;
   int send_counter;
 
-  for (send_counter = 0; send_counter < 10; send_counter++) {
-    readByte(kSystemFreshOutOfReset, &fresh_out_of_reset);
+  for (send_counter = 0; send_counter < 5; send_counter++) {
+    if (!readByte(kSystemFreshOutOfReset, &fresh_out_of_reset)) {
+      log_.ERR("VL6180", "No I2C connection");
+      is_online_ = false;
+      return false;
+    }
     if (fresh_out_of_reset == 1) {
-      log_.DBG("VL6180", "Sensor out of reset");
+      log_.INFO("VL6180", "Sensor out of reset");
       return true;
     }
+    log_.DBG("VL6180", "Sensor failed to get out of reset");
     Thread::sleep(20);
   }
   log_.ERR("VL6180", "Sensor failed to get of reset");
@@ -294,24 +300,24 @@ bool VL6180::waitDeviceBooted()
   return false;
 }
 
-void VL6180::readByte(uint16_t reg_add, uint8_t *data)
+bool VL6180::readByte(uint16_t reg_add, uint8_t *data)
 {
   uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
 
   i2c_.write(i2c_addr_, buffer, 2);
-  i2c_.read(i2c_addr_, data, 1);
+  return i2c_.read(i2c_addr_, data, 1);
 }
 
-void VL6180::writeByte(uint16_t reg_add, char data)
+bool VL6180::writeByte(uint16_t reg_add, char data)
 {
   uint8_t buffer[3];
   buffer[0]=reg_add>>8;
   buffer[1]=reg_add&0xFF;
   buffer[2]=data;
 
-  i2c_.write(i2c_addr_, buffer, 3);
+  return i2c_.write(i2c_addr_, buffer, 3);
 }
 
 }}   // namespace hyped::sensors

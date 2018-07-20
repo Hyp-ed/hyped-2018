@@ -126,6 +126,7 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
 
   // for making sure only one object per BMS unit exist
   static std::vector<uint8_t> existing_ids_;
+  static int16_t current_;
   NO_COPY_ASSIGN(BMS);
 };
 

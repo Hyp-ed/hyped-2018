@@ -50,8 +50,12 @@ void printUsage()
     "    Set system-wide debug level. All DBG[n] where n <= level messages are printed.\n"
     "\n  --debug_motor, --debug_nav, --debug_sensor, --debug_state, --debug_cmn\n"
     "    Set module-specific debug level. All DBG[n] where n <= level messages are printed.\n"
-    "\n  --fake_imu --fake_proxi --fake_motors --fake_sensors --fake_keyence --fake_embrakes\n"
+    "\n  --fake_imu --fake_proxi --fake_motors --fake_sensors --fake_keyence --fake_batteries\n"
     "    Make the system use the fake data drivers.\n"
+    "\n  --fail_dec_imu --fail_acc_imu --fail_motors --miss_keyence --double_keyence\n"
+    "    Make the system use the fake data drivers and fail them for testing.\n"
+    "\n  --accurate\n"
+    "    Make the system use the accurate fake system\n"
     "");
 }
 }
