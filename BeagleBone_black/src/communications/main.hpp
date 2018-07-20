@@ -41,28 +41,28 @@ namespace communications {
 
 class Main : public Thread {
  public:
+  typedef std::array<Imu, Sensors::kNumImus>              ImuArray;
+  typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
+
   explicit Main(uint8_t id, Logger& log);
   void run() override;
-  int sendDistance(NavigationType distance);                                          // CMD01
-  int sendVelocity(NavigationType speed);                                             // CMD02
-  int sendAcceleration(NavigationType accel);                                         // CMD03
-  int sendRpmFl(float rpm_fl);                                                        // CMD04
-  int sendRpmFr(float rpm_fr);                                                        // CMD05
-  int sendRpmBl(float rpm_bl);                                                        // CMD06
-  int sendRpmBr(float rpm_br);                                                        // CMD07
-  int sendState(State state);                                                         // CMD08
-  int sendHpVoltage(Battery hp_battery);                                              // CMD09
-  int sendHpTemperature(Battery hp_battery);                                          // CMD10
-  int sendHpCharge(Battery hp_battery);                                               // CMD11
-  int sendHpVoltage1(Battery hp_battery1);                                            // CMD12
-  int sendHpTemperature1(Battery hp_battery1);                                        // CMD13
-  int sendHpCharge1(Battery hp_battery1);                                             // CMD14
-  int sendLpCharge(Battery lp_battery);                                               // CMD15
-  int sendLpCharge1(Battery lp_battery1);                                             // CMD16
-  int sendImu(std::array<Imu, Sensors::kNumImus> imus);                               // CMD17
-  int sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front);  // CMD18
-  int sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear);    // CMD19
-  int sendEmBrakes(bool front_brakes, bool rear_brakes);                              // CMD20
+  int sendDistance(NavigationType distance);                // CMD01
+  int sendVelocity(NavigationType speed);                   // CMD02
+  int sendAcceleration(NavigationType accel);               // CMD03
+  int sendRpmFl(float rpm_fl);                              // CMD04
+  int sendRpmFr(float rpm_fr);                              // CMD05
+  int sendRpmBl(float rpm_bl);                              // CMD06
+  int sendRpmBr(float rpm_br);                              // CMD07
+  int sendState(State state);                               // CMD08
+  int sendImu(ImuArray imus);                               // CMD09
+  int sendProxiFront(ProximityArray proxies_front);         // CMD10
+  int sendProxiRear(ProximityArray proxies_rear);           // CMD11
+  int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD12
+  int sendHpBattery(Battery hpb);                           // CMD13-18
+  int sendHpBattery_1(Battery hpb_1);                       // CMD19-24
+  int sendLpBattery(Battery lpb);                           // CMD25-27
+  int sendLpBattery_1(Battery lpb_1);                       // CMD28-30
+
 
  private:
   int state_code_;
