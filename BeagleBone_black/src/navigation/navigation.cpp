@@ -19,6 +19,8 @@
 #include "navigation.hpp"
 
 #include <algorithm>  // std::min
+#include <map>
+#include <string>
 
 #include "Eigen/Dense"
 #include "Eigen/SVD"
@@ -40,10 +42,9 @@ float proxiMean(const Proximity* const a, const Proximity* const b)
 
 Navigation::Navigation(Barrier& post_calibration_barrier,
                        Logger& log,
-                       const Settings& settings)
+                       std::string file_path)
     : post_calibration_barrier_(post_calibration_barrier),
       log_(log),
-      settings_(settings),
       status_(ModuleStatus::kStart),
       is_calibrating_(false),
       num_gravity_samples_(0),
@@ -56,6 +57,7 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       prev_angular_velocity_(0 , NavigationVector()),
       orientation_(1, 0, 0, 0)
 {
+  readDataFromFile(file_path);
   out_.status              = &status_;
   out_.is_calibrating      = &is_calibrating_;
   out_.num_gravity_samples = &num_gravity_samples_;
@@ -67,6 +69,33 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
   out_.velocity            = &velocity_;
   out_.stripe_count        = &stripe_count_;
   out_.orientation         = &orientation_;
+}
+
+void Navigation::readDataFromFile(std::string file_path)
+{
+  std::map<std::string, float> map_settings;
+  std::string variable_name;
+  float value;
+  std::ifstream file;
+  file.open(file_path);
+  if (!file.is_open()) {
+    throw std::invalid_argument("Wrong file path");
+  }
+
+  std::string line;
+  while (getline(file, line)) {
+    std::stringstream input(line);
+    input >> variable_name;
+    input >> value;
+    map_settings[variable_name] = value;
+  }
+  file.close();
+
+  settings_.prox_orient_w = map_settings["prox_orient_w"];
+  settings_.prox_displ_w  = map_settings["prox_displ_w"];
+  settings_.strp_displ_w  = map_settings["strp_displ_w"];
+  settings_.prox_vel_w    = map_settings["prox_vel_w"];
+  settings_.strp_vel_w    = map_settings["strp_vel_w"];
 }
 
 NavigationType Navigation::getAcceleration() const
