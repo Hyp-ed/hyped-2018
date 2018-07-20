@@ -212,8 +212,8 @@ bool Main::checkFinish()
 
 bool Main::checkVelocityZeroReached()
 {
-  if (nav_data_.velocity <= 0.1) {
-    log_.INFO("STATE", "Zero velocity reached");
+  if (motor_data_.velocity_1 == 0 && motor_data_.velocity_2 == 0 && motor_data_.velocity_3 == 0 && motor_data_.velocity_4 == 0) {
+    log_.INFO("STATE", "RPM reached zero.");
     hypedMachine.handleEvent(kVelocityZeroReached);
     return true;
   }
