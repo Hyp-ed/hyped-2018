@@ -136,7 +136,7 @@ int Main::sendLpCharge1(Battery lp_battery1)
   return base_communicator_->sendData("CMD16" + std::to_string(lp_battery1.charge) + "\n");
 }
 
-int Main::sendImu(std::array<Imu, Sensors::kNumImus> imus)
+int Main::sendImu(ImuArray imus)
 {
   std::string sen, sen1, sen2, sen3;
   sen = imus[0].operational ? "1" : "2";
@@ -147,7 +147,7 @@ int Main::sendImu(std::array<Imu, Sensors::kNumImus> imus)
   return base_communicator_->sendData("CMD17" + sen + sen1 + sen2 + sen3 + "\n");
 }
 
-int Main::sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front)
+int Main::sendProxiFront(ProximityArray proxies_front)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
   sen = proxies_front[0].operational ? "1" : "2";
@@ -163,7 +163,7 @@ int Main::sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies
                                       sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
-int Main::sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear)
+int Main::sendProxiRear(ProximityArray proxies_rear)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
   sen = proxies_rear[0].operational ? "1" : "2";
