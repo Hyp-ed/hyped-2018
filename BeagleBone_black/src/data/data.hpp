@@ -133,8 +133,8 @@ struct Battery {
   int16_t   current;      // in 0.1A (can be negative)
   uint8_t   charge;       // in % (from 0 to 100)
   int8_t    temperature;  // in C
-  uint8_t   low_voltage_cell;  // in ?
-  uint8_t   high_voltage_cell;  // in ?
+  uint8_t   low_voltage_cell;  // in mV
+  uint8_t   high_voltage_cell;  // in mV
 };
 
 struct Batteries : public Module {
