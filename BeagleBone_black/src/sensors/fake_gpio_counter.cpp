@@ -47,6 +47,7 @@ FakeGpioCounter::FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stri
       is_accelerating_(false)
 {
   stripes_.operational = true;
+  stripes_.count.value = 0;
 }
 
 StripeCounter FakeGpioCounter::getStripeCounter()
@@ -65,6 +66,7 @@ StripeCounter FakeGpioCounter::getStripeCounter()
   }
 
   uint32_t new_count = std::floor(nav.distance/30.48);
+  log_.DBG2("FAKE_GPCNTR", "nav.distance=%f, new_count=%d", nav.distance, new_count);
 
   switch (state) {
     case data::State::kAccelerating:
@@ -85,6 +87,7 @@ StripeCounter FakeGpioCounter::getStripeCounter()
     stripes_.count.value     = new_count;
     stripes_.count.timestamp = utils::Timer::getTimeMicros();
   }
+  log_.DBG2("FAKE_GPCNTR", "Returning count %d", stripes_.count.value);
   return stripes_;
 }
 
