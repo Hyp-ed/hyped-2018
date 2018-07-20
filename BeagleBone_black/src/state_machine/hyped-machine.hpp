@@ -52,6 +52,7 @@ class HypedMachine {
   data::StateMachine state_machine_;
 
   static GPIO* pin_embrake_;
+  static GPIO* pin_water_;
 };
 
 }}   // namespace hyped::state_machine
