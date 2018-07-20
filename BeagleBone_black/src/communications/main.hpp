@@ -54,28 +54,14 @@ class Main : public Thread {
   int sendRpmBl(float rpm_bl);                              // CMD06
   int sendRpmBr(float rpm_br);                              // CMD07
   int sendState(State state);                               // CMD08
-  int sendHpVoltage(Battery hp_battery);                    // CMD09
-  int sendHpMaxTemperature(Battery hp_battery);             // CMD10
-  int sendHpCharge(Battery hp_battery);                     // CMD11
-  int sendHpVoltage_1(Battery hp_battery_1);                // CMD12
-  int sendHpMaxTemperature_1(Battery hp_battery_1);          // CMD13
-  int sendHpCharge_1(Battery hp_battery_1);                 // CMD14
-  int sendLpCharge(Battery lp_battery);                     // CMD15
-  int sendLpCharge_1(Battery lp_battery_1);                 // CMD16
-  int sendImu(ImuArray imus);                               // CMD17
-  int sendProxiFront(ProximityArray proxies_front);         // CMD18
-  int sendProxiRear(ProximityArray proxies_rear);           // CMD19
-  int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD20
-  int sendHpCurrent(Battery hp_battery);                    // CMD21
-  int sendHpCurrent_1(Battery hp_battery_1);                // CMD22
-  int sendHpLowVoltageCell(Battery hp_battery);             // CMD23
-  int sendHpHighVoltageCell(Battery hp_battery);            // CMD24
-  int sendHpLowVoltageCell_1(Battery hp_battery_1);         // CMD25
-  int sendHpHighVoltageCell_1(Battery hp_battery_1);        // CMD26
-  int sendLpVoltage(Battery lp_battery);                    // CMD27
-  int sendLpVoltage_1(Battery lp_battery_1);                // CMD28
-  int sendLpCurrent(Battery lp_battery);                    // CMD29
-  int sendLpCurrent_1(Battery lp_battery_1);                // CMD30
+  int sendImu(ImuArray imus);                               // CMD09
+  int sendProxiFront(ProximityArray proxies_front);         // CMD10
+  int sendProxiRear(ProximityArray proxies_rear);           // CMD11
+  int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD12
+  int sendHpBattery(Battery hpb);                           // CMD13-18
+  int sendHpBattery_1(Battery hpb_1);                       // CMD19-24
+  int sendLpBattery(Battery lpb);                           // CMD25-27
+  int sendLpBattery_1(Battery lpb_1);                       // CMD28-30
 
 
  private:
