@@ -122,9 +122,13 @@ int main(int argc, char* argv[])
         !!proxis_back[2].operational, !!proxis_back[3].operational,
         !!proxis_back[4].operational, !!proxis_back[5].operational,
         !!proxis_back[6].operational, !!proxis_back[7].operational);
-    log_system.INFO("TST_SEN", "Proxi-back data:   %3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d\n",
+    log_system.INFO("TST_SEN", "Proxi-back data:   %3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d",
         proxis_back[0].val, proxis_back[1].val, proxis_back[2].val, proxis_back[3].val,
         proxis_back[4].val, proxis_back[5].val, proxis_back[6].val, proxis_back[7].val);
+    
+    auto scs = sens.keyence_stripe_counter;
+    log_system.INFO("TST_SEN", "stripe count 1 = %2d, stripe count 2 = %2d\n",
+        scs[0].count.value, scs[1].count.value);
 
 
     log_system.INFO("TST_NAV", "status = %d, is_calibrating = %d",
