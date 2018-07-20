@@ -191,22 +191,22 @@ int Main::sendEmBrakes(bool front_brakes, bool rear_brakes)
 
 int Main::sendHpCurrent(Battery hp_battery)
 {
-  return base_communicator_->sendData("CMD21" + std::to_string(hp_battery.current /10.0) + "\n");
+  return base_communicator_->sendData("CMD21" + std::to_string(hp_battery.current *100.0) + "\n");
 }
 
 int Main::sendHpCurrent1(Battery hp_battery1)
 {
-  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery1.current /10.0) + "\n");
+  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery1.current *100.0) + "\n");
 }
 
 int Main::sendLpCurrent(Battery lp_battery)
 {
-  return base_communicator_->sendData("CMD23" + std::to_string(lp_battery.current 10.0 ) + "\n");
+  return base_communicator_->sendData("CMD23" + std::to_string(lp_battery.current * 100.0 ) + "\n");
 }
 
 int Main::sendLpCurrent1(Battery lp_battery1)
 {
-  return base_communicator_->sendData("CMD24" + std::to_string(lp_battery1.current /10.0) + "\n");
+  return base_communicator_->sendData("CMD24" + std::to_string(lp_battery1.current *100.0) + "\n");
 }
 
 
