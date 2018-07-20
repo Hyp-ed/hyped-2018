@@ -48,6 +48,7 @@ class Main: public Thread {
   bool checkInitialised();
   bool checkSystemsChecked();
   bool checkOnStart();
+  bool checkCommsCriticalFailure();
   bool checkCriticalFailure();
   bool checkMaxDistanceReached();
   bool checkOnExit();

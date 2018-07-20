@@ -46,9 +46,6 @@ void HypedMachine::transition(State *state)
   // NOTE, no use of argument state, as all react() functions allocate all new
   // states directly to current_state_ variable through common State::alloc_ pointer
   current_state_->entry();
-  if (current_state_->state_ == data::State::kEmergencyBraking) {
-    engageEmbrakes();
-  }
   log_.INFO("STATE", "Transitioned to %s"
     , data::states[current_state_->state_]);
   state_machine_.current_state = current_state_->state_;
