@@ -1,0 +1,5 @@
+prox_orient_w	0.1
+prox_displ_w	0.1
+strp_displ_w	1.0
+prox_vel_w	0.01
+strp_vel_w	0.0
