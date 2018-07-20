@@ -106,7 +106,7 @@ class Navigation {
     const ModuleStatus*     status;
     const bool*             is_calibrating;
     const int*              num_gravity_samples;
-    const NavigationVector* g;  // Acceleration due to gravity. Measured during calibration.
+    const std::array<NavigationVector, Sensors::kNumImus>* g;  // Acc offsets (gravitational acc)
     const int*              num_gyro_samples;
     const std::array<NavigationVector, Sensors::kNumImus>* gyro_offsets;
 
@@ -254,7 +254,7 @@ class Navigation {
   // Calibration variables
   bool is_calibrating_;
   int num_gravity_samples_;
-  NavigationVector g_;  // Acceleration due to gravity. Measured during calibration.
+  std::array<NavigationVector, Sensors::kNumImus> g_;  // Acc offsets (gravitational acc)
   int num_gyro_samples_;
   std::array<NavigationVector, Sensors::kNumImus> gyro_offsets_;  // Measured during calibration
 

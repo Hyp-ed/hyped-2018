@@ -48,7 +48,6 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       status_(ModuleStatus::kStart),
       is_calibrating_(false),
       num_gravity_samples_(0),
-      g_(0),
       num_gyro_samples_(0),
       acceleration_(0),  // TODO(Brano): Should this be g or 0?
       velocity_(0, NavigationVector(0)),
@@ -168,11 +167,6 @@ bool Navigation::finishCalibration()
   if (!is_calibrating_ || status_ != ModuleStatus::kReady)
     return false;
 
-  // Finalize calibration
-  g_ /= num_gravity_samples_;
-  for (NavigationVector& v : gyro_offsets_)
-    v /= num_gyro_samples_;
-
   // Update state
   is_calibrating_ = false;
 
@@ -254,8 +248,11 @@ void Navigation::imuUpdate(DataPoint<ImuArray> imus)
         i, imus.value[i].gyr[0], imus.value[i].gyr[1], imus.value[i].gyr[2]);
 
     imus.value[i].acc = acceleration_filter_[i].filter(imus.value[i].acc);
-    if (settings_.gyro_enable)
+    imus.value[i].acc -= g_[i];
+    if (settings_.gyro_enable) {
       imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
+      imus.value[i].gyr -= gyro_offsets_[i];
+    }
 
     log_.DBG3("NAV", " After filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
         i, imus.value[i].acc[0], imus.value[i].acc[1], imus.value[i].acc[2],
@@ -323,9 +320,9 @@ void Navigation::calibrationUpdate(ImuArray imus)
 {
   // Online mean algorithm
   ++num_gyro_samples_;
+  ++num_gravity_samples_;
   for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
-    ++num_gravity_samples_;
-    g_ = g_ + (imus[i].acc - g_)/num_gravity_samples_;
+    g_[i] = g_[i] + (imus[i].acc - g_[i])/num_gravity_samples_;
     gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr - gyro_offsets_[i])/num_gyro_samples_;
   }
 
