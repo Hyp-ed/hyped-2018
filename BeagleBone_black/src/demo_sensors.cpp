@@ -65,10 +65,12 @@ int main(int argc, char* argv[])
     std::printf("\n");
     log.INFO("Test", "High Power Batteries");
     for (auto& battery : batteries.high_power_batteries) {
-      log.INFO("TEST", "Charge: %u, Temp: %d, Voltage: %u, Current %d", battery.charge,
+      log.INFO("TEST", "Charge: %u, Temp: %d, Voltage: %u, Current %d, Min: %u, Max: %u", battery.charge,
                                                                         battery.temperature,
                                                                         battery.voltage,
-                                                                        battery.current);
+                                                                        battery.current,
+                                                                        battery.low_voltage_cell,
+                                                                        battery.high_voltage_cell);
     }
 
     std::printf("\n");

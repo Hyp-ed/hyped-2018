@@ -155,7 +155,7 @@ void BMS::getData(Battery* battery)
   for (uint16_t v: data_.voltage) battery->voltage += v;
   battery->voltage    /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
-  battery->current     = current_ / 100;
+  battery->current     = (-1*current_);
 
   // charge calculation
   if (battery->voltage > 240) {                                       // constant high
@@ -222,10 +222,10 @@ void BMSHP::processNewData(utils::io::can::Frame& message)
     local_data_.current     = (message.data[2] << 8) | message.data[3];
     local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
     local_data_.temperature = message.data[5];
-    local_data_.low_voltage_cell  = (message.data[6] << 8) | message.data[7];
+    local_data_.low_voltage_cell  = ((message.data[6] << 8) | message.data[7])/10;
     last_update_time_ = utils::Timer::getTimeMicros();
   } else {
-    local_data_.high_voltage_cell = (message.data[0] << 8) | message.data[1];
+    local_data_.high_voltage_cell = ((message.data[0] << 8) | message.data[1])/10;
   }
 
   log_.DBG1("BMSHP", "received data Volt,Curr,Char,Temp %u,%u,%u,%d",
