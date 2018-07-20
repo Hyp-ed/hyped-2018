@@ -67,6 +67,10 @@ class Main : public Thread {
   int sendHpCurrent1(Battery hp_battery);                                             // CMD22
   int sendLpCurrent(Battery lp_battery);                                              // CMD23
   int sendLpCurrent1(Battery lp_battery);                                             // CMD24
+  int sendHpLvc(Battery hp_battery);   // CMD 25
+  int sendHpHvc(Battery hp_battery);  // CMD 26
+  int sendHpLvc1(Battery hp_battery1);  // CMD 27
+  int sendHpHvc1(Battery hp_battery1);  // CMD 28
 
  private:
   int state_code_;

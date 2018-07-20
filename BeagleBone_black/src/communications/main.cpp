@@ -209,6 +209,29 @@ int Main::sendLpCurrent1(Battery lp_battery1)
   return base_communicator_->sendData("CMD24" + std::to_string(lp_battery1.current / 10.0) + "\n");
 }
 
+int Main::sendHpLvc(Battery hp_battery)
+{
+  // convert mV to V
+  return base_communicator_->sendData("CMD25" + std::to_string(hp_battery.low_voltage_cell * 1000.0) + "\n");//NOLINT
+}
+
+int Main::sendHpHvc(Battery hp_battery)
+{
+  // convert mV to V
+  return base_communicator_->sendData("CMD26" + std::to_string(hp_battery.high_voltage_cell * 1000.0) + "\n");//NOLINT
+}
+
+int Main::sendHpLvc1(Battery hp_battery1)
+{
+  // convert mV to V
+  return base_communicator_->sendData("CMD27" + std::to_string(hp_battery1.low_voltage_cell * 1000.0) + "\n");//NOLINT
+}
+
+int Main::sendHpHvc1(Battery hp_battery1)
+{
+  // convert mV to V
+  return base_communicator_->sendData("CMD28" + std::to_string(hp_battery1.high_voltage_cell * 1000.0) + "\n");//NOLINT
+}
 
 void Main::run()
 {
@@ -276,6 +299,10 @@ void Main::run()
       sendHpCurrent1(bat_.high_power_batteries.at(1));
       sendLpCurrent(bat_.low_power_batteries.at(0));
       sendLpCurrent1(bat_.low_power_batteries.at(1));
+      sendHpLvc(bat_.high_power_batteries.at(0));
+      sendHpHvc(bat_.high_power_batteries.at(0));
+      sendHpLvc1(bat_.high_power_batteries.at(1));
+      sendHpHvc1(bat_.high_power_batteries.at(1));
     }
 
     if (emb_.module_status != data::ModuleStatus::kStart) {
