@@ -63,6 +63,10 @@ class Main : public Thread {
   int sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front);  // CMD18
   int sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear);    // CMD19
   int sendEmBrakes(bool front_brakes, bool rear_brakes);                              // CMD20
+  int sendHpCurrent(Battery hp_battery);                                          // CMD10
+  int sendHpCurrent1(Battery hp_battery);
+  int sendLpCurrent(Battery lp_battery);                                          // CMD10
+  int sendLpCurrent1(Battery lp_battery);
 
  private:
   int state_code_;
