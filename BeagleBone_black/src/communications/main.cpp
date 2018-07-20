@@ -153,8 +153,8 @@ int Main::sendHpBattery(Battery hpb)
   int j = base_communicator_->sendData("CMD14" + std::to_string(hpb.current / 10.0) + "\n");
   int k = base_communicator_->sendData("CMD15" + std::to_string(hpb.charge) + "\n");
   int l = base_communicator_->sendData("CMD16" + std::to_string(hpb.temperature) + "\n");
-  int m = base_communicator_->sendData("CMD17" + std::to_string(hpb.low_voltage_cell / 1000.0) + "\n");//NOLINT
-  int n = base_communicator_->sendData("CMD18" + std::to_string(hpb.high_voltage_cell / 1000.0) + "\n");//NOLINT
+  int m = base_communicator_->sendData("CMD17" + std::to_string(hpb.low_voltage_cell) + "\n");
+  int n = base_communicator_->sendData("CMD18" + std::to_string(hpb.high_voltage_cell) + "\n");
 
   return (i && j && k && l && m && n);
 }
@@ -165,8 +165,8 @@ int Main::sendHpBattery_1(Battery hpb_1)
   int j = base_communicator_->sendData("CMD20" + std::to_string(hpb_1.current / 10.0) + "\n");
   int k = base_communicator_->sendData("CMD21" + std::to_string(hpb_1.charge) + "\n");
   int l = base_communicator_->sendData("CMD22" + std::to_string(hpb_1.temperature) + "\n");
-  int m = base_communicator_->sendData("CMD23" + std::to_string(hpb_1.low_voltage_cell / 1000.0) + "\n");//NOLINT
-  int n = base_communicator_->sendData("CMD24" + std::to_string(hpb_1.high_voltage_cell / 1000.0) + "\n");//NOLINT
+  int m = base_communicator_->sendData("CMD23" + std::to_string(hpb_1.low_voltage_cell) + "\n");
+  int n = base_communicator_->sendData("CMD24" + std::to_string(hpb_1.high_voltage_cell) + "\n");
 
   return (i && j && k && l && m && n);
 }
