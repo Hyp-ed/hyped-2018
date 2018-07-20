@@ -255,8 +255,8 @@ class Navigation {
 
   // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
   NavigationVector acceleration_;
-  NavigationVector velocity_;
-  NavigationVector displacement_;
+  DataPoint<NavigationVector> velocity_;
+  DataPoint<NavigationVector> displacement_;
   uint16_t stripe_count_;
 
   // Internal data that is not published

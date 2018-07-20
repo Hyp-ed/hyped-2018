@@ -51,11 +51,13 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
       g_(0),
       num_gyro_samples_(0),
       acceleration_(0),  // TODO(Brano): Should this be g or 0?
-      velocity_(0),
-      displacement_(0),
+      velocity_(0, NavigationVector(0)),
+      displacement_(0, NavigationVector(0)),
       stripe_count_(0),
       prev_angular_velocity_(0 , NavigationVector()),
-      orientation_(1, 0, 0, 0)
+      orientation_(1, 0, 0, 0),
+      acceleration_integrator_(&velocity_),
+      velocity_integrator_(&displacement_)
 {
   readDataFromFile(file_path);
   out_.status              = &status_;
@@ -65,8 +67,8 @@ Navigation::Navigation(Barrier& post_calibration_barrier,
   out_.num_gyro_samples    = &num_gyro_samples_;
   out_.gyro_offsets        = &gyro_offsets_;
   out_.acceleration        = &acceleration_;
-  out_.displacement        = &displacement_;
-  out_.velocity            = &velocity_;
+  out_.displacement        = &displacement_.value;
+  out_.velocity            = &velocity_.value;
   out_.stripe_count        = &stripe_count_;
   out_.orientation         = &orientation_;
 }
@@ -105,18 +107,18 @@ NavigationType Navigation::getAcceleration() const
 
 NavigationType Navigation::getVelocity() const
 {
-  return velocity_[0];
+  return velocity_.value[0];
 }
 
 NavigationType Navigation::getDisplacement() const
 {
-  return displacement_[0];
+  return displacement_.value[0];
 }
 
 NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
-  return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
+  return velocity_.value[0]*velocity_.value[0] / kEmergencyDeceleration;
 }
 
 NavigationType Navigation::getBrakingDistance() const
@@ -211,8 +213,8 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
   log_.DBG("NAV",
       "After init: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 
   status_ = ModuleStatus::kInit;
 }
@@ -342,17 +344,18 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
   log_.DBG2("NAV",
       "Before accl update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
+
   acceleration_ = acceleration.value;
-  auto velocity = acceleration_integrator_.update(acceleration);
-  velocity_     = velocity.value;
-  displacement_ = velocity_integrator_.update(velocity).value;
+  acceleration_integrator_.update(acceleration);  // Updates velocity
+  velocity_integrator_.update(velocity_);  // Updates displacement
+
   log_.DBG2("NAV",
       " After accl update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
 
 void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
@@ -412,9 +415,9 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
   log_.DBG2("NAV",
       "Before proxi displ update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
-  NavigationVector proxi_displ = displacement_;
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
+  NavigationVector proxi_displ = displacement_.value;
   // TODO(Brano): Make this a weighted average based on the actual positions of the 4 sensors with
   //              respect to IMUs
   proxi_displ[2] = (ground.fr + ground.rr + ground.rl + ground.fl) / 4.0;
@@ -427,7 +430,8 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
   proxi_displ[1] = proxi_displ[1]/1000.0;
 
   // Update displacement
-  displacement_ = (1 - settings_.prox_displ_w)*displacement_ + settings_.prox_displ_w*proxi_displ;
+  displacement_.value = (1 - settings_.prox_displ_w)*displacement_.value +
+                              settings_.prox_displ_w*proxi_displ;
 
   // Update velocity
   DataPoint<Vector<NavigationType, 2>> dp(
@@ -435,14 +439,16 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
       Vector<NavigationType, 2>({proxi_displ[1], proxi_displ[2]}));
   auto proxi_vel = proxi_differentiator_.update(dp).value;
 
-  velocity_[1] = (1 - settings_.prox_vel_w)*velocity_[1] + settings_.prox_vel_w*proxi_vel[0];
-  velocity_[2] = (1 - settings_.prox_vel_w)*velocity_[2] + settings_.prox_vel_w*proxi_vel[1];
+  velocity_.value[1] = (1 - settings_.prox_vel_w)*velocity_.value[1] +
+                             settings_.prox_vel_w*proxi_vel[0];
+  velocity_.value[2] = (1 - settings_.prox_vel_w)*velocity_.value[2] +
+                             settings_.prox_vel_w*proxi_vel[1];
 
   log_.DBG2("NAV",
       " After proxi displ update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
 
 void Navigation::stripeCounterUpdate(StripeCounterArray scs)
@@ -450,8 +456,8 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   log_.DBG2("NAV",
       "Before stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
   // TODO(Brano): Update displacement and velocity
 
   if (scs[0].count.value <= stripe_count_ && scs[1].count.value <= stripe_count_) {
@@ -524,18 +530,18 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   DataPoint<NavigationType> dp(timestamp, kStripeLocations[stripe_count_]);
 
   // Update x-axis (forwards) displacement
-  displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
+  displacement_.value[0] = (1 - settings_.strp_displ_w) * displacement_.value[0] +
                           settings_.strp_displ_w  * dp.value;
 
   // Update x-axis velocity
-  velocity_[0] = (1 - settings_.strp_vel_w) * velocity_[0] +
-                      settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
+  velocity_.value[0] = (1 - settings_.strp_vel_w) * velocity_.value[0] +
+                            settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
 
   log_.DBG2("NAV",
       " After stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
 
 void Navigation::opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance)

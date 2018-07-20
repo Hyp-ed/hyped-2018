@@ -188,8 +188,8 @@ void Main::updateData()
       "Update: ms=%d, a=(%.2f, %.2f, %.2f), v=(%.2f, %.2f, %.2f), d=(%.2f, %.2f, %.2f), bd=%.2f, ebd=%.2f", //NOLINT
       nav_.status_,
       nav_.acceleration_[0], nav_.acceleration_[1], nav_.acceleration_[2],
-      nav_.velocity_[0], nav_.velocity_[1], nav_.velocity_[2],
-      nav_.displacement_[0], nav_.displacement_[1], nav_.displacement_[2],
+      nav_.velocity_.value[0], nav_.velocity_.value[1], nav_.velocity_.value[2],
+      nav_.displacement_.value[0], nav_.displacement_.value[1], nav_.displacement_.value[2],
       nav_.getBrakingDistance(), nav_.getEmergencyBrakingDistance());
 }
 
