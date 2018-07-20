@@ -268,7 +268,7 @@ void Main::accelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Accelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = accelerationVelocity(nav_.velocity);
-    communicator_->sendTargetVelocity(target_velocity_);
+    communicator_->sendTargetVelocity(100);
     updateMotorData();
 
     // Update state machine data
@@ -295,7 +295,7 @@ void Main::decelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Deccelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = decelerationVelocity(nav_.velocity);
-    communicator_->sendTargetVelocity(target_velocity_);
+    communicator_->sendTargetVelocity(0);
     updateMotorData();
 
     // Update state machine data
