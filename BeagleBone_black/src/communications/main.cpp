@@ -97,7 +97,7 @@ int Main::sendState(State state)
 int Main::sendHpVoltage(Battery hp_battery)
 {
   // Convert voltage reading units from decivolts to volts
-  return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage / 10.0) + "\n");
+  return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage /10.0) + "\n");
 }
 
 int Main::sendHpTemperature(Battery hp_battery)
@@ -129,7 +129,7 @@ int Main::sendHpCharge1(Battery hp_battery1)
 
 int Main::sendLpCharge(Battery lp_battery)
 {
-  return base_communicator_->sendData("CMD15" + std::to_string(lp_battery.charge) + "\n");
+  return base_communicator_->sendData("CMD15" + std::to_string(lp_battery1.charge) + "\n");
 }
 
 int Main::sendLpCharge1(Battery lp_battery1)
@@ -191,22 +191,22 @@ int Main::sendEmBrakes(bool front_brakes, bool rear_brakes)
 
 int Main::sendHpCurrent(Battery hp_battery)
 {
-  return base_communicator_->sendData("CMD21" + std::to_string(hp_battery.current /10) + "\n");
+  return base_communicator_->sendData("CMD21" + std::to_string(hp_battery.current) + "\n");
 }
 
 int Main::sendHpCurrent1(Battery hp_battery1)
 {
-  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery1.current /10) + "\n");
+  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery1.current) + "\n");
 }
 
 int Main::sendLpCurrent(Battery lp_battery)
 {
-  return base_communicator_->sendData("CMD23" + std::to_string(lp_battery.current /10) + "\n");
+  return base_communicator_->sendData("CMD23" + std::to_string(lp_battery.current) + "\n");
 }
 
 int Main::sendLpCurrent1(Battery lp_battery1)
 {
-  return base_communicator_->sendData("CMD24" + std::to_string(lp_battery1.current/ 10) + "\n");
+  return base_communicator_->sendData("CMD24" + std::to_string(lp_battery1.current) + "\n");
 }
 
 
