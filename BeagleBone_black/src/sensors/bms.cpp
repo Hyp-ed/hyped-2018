@@ -190,6 +190,8 @@ void BMSHP::processNewData(utils::io::can::Frame& message)
   local_data_.current     = (message.data[2] << 8) | message.data[3];
   local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
   local_data_.temperature = message.data[5];
+  local_data_.low_voltage_cell  = message.data[6];
+  local_data_.high_voltage_cell  = message.data[7];
 
   log_.DBG1("BMSHP", "received data Volt,Curr,Char,Temp %u,%u,%u,%d",
     local_data_.voltage,
