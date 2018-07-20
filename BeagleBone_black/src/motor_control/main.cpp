@@ -295,7 +295,7 @@ void Main::decelerateMotors()
     log_.DBG2("MOTOR", "Motor State: Deccelerating\n");
     data::Navigation nav_ = data_.getNavigationData();
     target_velocity_      = decelerationVelocity(nav_.velocity);
-    communicator_->sendTargetVelocity(0);
+    communicator_->sendTargetVelocity(50);
     updateMotorData();
 
     // Update state machine data
