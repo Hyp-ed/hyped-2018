@@ -100,7 +100,7 @@ int Main::sendHpVoltage(Battery hp_battery)
   return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage / 10.0) + "\n");
 }
 
-int Main::sendHpTemperature(Battery hp_battery)
+int Main::sendHpMaxTemperature(Battery hp_battery)
 {
   return base_communicator_->sendData("CMD10" + std::to_string(hp_battery.temperature) + "\n");
 }
@@ -110,20 +110,20 @@ int Main::sendHpCharge(Battery hp_battery)
   return base_communicator_->sendData("CMD11" + std::to_string(hp_battery.charge) + "\n");
 }
 
-int Main::sendHpVoltage1(Battery hp_battery1)
+int Main::sendHpVoltage_1(Battery hp_battery_1)
 {
   // Convert voltage reading units from decivolts to volts
-  return base_communicator_->sendData("CMD12" + std::to_string(hp_battery1.voltage / 10.0) + "\n");
+  return base_communicator_->sendData("CMD12" + std::to_string(hp_battery_1.voltage / 10.0) + "\n");
 }
 
-int Main::sendHpTemperature1(Battery hp_battery1)
+int Main::sendHpMaxTemperature_1(Battery hp_battery_1)
 {
-  return base_communicator_->sendData("CMD13" + std::to_string(hp_battery1.temperature) + "\n");
+  return base_communicator_->sendData("CMD13" + std::to_string(hp_battery_1.temperature) + "\n");
 }
 
-int Main::sendHpCharge1(Battery hp_battery1)
+int Main::sendHpCharge_1(Battery hp_battery_1)
 {
-  return base_communicator_->sendData("CMD14" + std::to_string(hp_battery1.charge) + "\n");
+  return base_communicator_->sendData("CMD14" + std::to_string(hp_battery_1.charge) + "\n");
 }
 
 int Main::sendLpCharge(Battery lp_battery)
@@ -131,9 +131,9 @@ int Main::sendLpCharge(Battery lp_battery)
   return base_communicator_->sendData("CMD15" + std::to_string(lp_battery.charge) + "\n");
 }
 
-int Main::sendLpCharge1(Battery lp_battery1)
+int Main::sendLpCharge_1(Battery lp_battery_1)
 {
-  return base_communicator_->sendData("CMD16" + std::to_string(lp_battery1.charge) + "\n");
+  return base_communicator_->sendData("CMD16" + std::to_string(lp_battery_1.charge) + "\n");
 }
 
 int Main::sendImu(ImuArray imus)
@@ -193,9 +193,9 @@ int Main::sendHpCurrent(Battery hp_battery)
   return base_communicator_->sendData("CMD21" + std::to_string(hp_battery.current / 10.0) + "\n");
 }
 
-int Main::sendHpCurrent1(Battery hp_battery1)
+int Main::sendHpCurrent_1(Battery hp_battery_1)
 {
-  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery1.current / 10.0) + "\n");
+  return base_communicator_->sendData("CMD22" + std::to_string(hp_battery_1.current / 10.0) + "\n");
 }
 
 int Main:: sendHpLowVoltageCell(Battery hp_battery)
@@ -208,14 +208,14 @@ int Main::sendHpHighVoltageCell(Battery hp_battery)
   return base_communicator_->sendData("CMD24" + std::to_string(hp_battery.high_voltage_cell / 1000.0) + "\n");//NOLINT
 }
 
-int Main::sendHpLowVoltageCell1(Battery hp_battery1)
+int Main::sendHpLowVoltageCell_1(Battery hp_battery_1)
 {
-  return base_communicator_->sendData("CMD25" + std::to_string(hp_battery1.low_voltage_cell / 1000.0) + "\n");//NOLINT
+  return base_communicator_->sendData("CMD25" + std::to_string(hp_battery_1.low_voltage_cell / 1000.0) + "\n");//NOLINT
 }
 
-int Main::sendHpHighVoltageCell1(Battery hp_battery1)
+int Main::sendHpHighVoltageCell_1(Battery hp_battery_1)
 {
-  return base_communicator_->sendData("CMD26" + std::to_string(hp_battery1.high_voltage_cell / 1000.0) + "\n");//NOLINT
+  return base_communicator_->sendData("CMD26" + std::to_string(hp_battery_1.high_voltage_cell / 1000.0) + "\n");//NOLINT
 }
 
 int Main::sendLpVoltage(Battery lp_battery)
@@ -223,9 +223,9 @@ int Main::sendLpVoltage(Battery lp_battery)
   return base_communicator_->sendData("CMD27" + std::to_string(lp_battery.voltage / 10.0) + "\n");
 }
 
-int Main::sendLpVoltage1(Battery lp_battery1)
+int Main::sendLpVoltage_1(Battery lp_battery_1)
 {
-  return base_communicator_->sendData("CMD28" + std::to_string(lp_battery1.voltage / 10.0) + "\n");
+  return base_communicator_->sendData("CMD28" + std::to_string(lp_battery_1.voltage / 10.0) + "\n");
 }
 
 int Main::sendLpCurrent(Battery lp_battery)
@@ -233,9 +233,9 @@ int Main::sendLpCurrent(Battery lp_battery)
   return base_communicator_->sendData("CMD29" + std::to_string(lp_battery.current / 10.0) + "\n");
 }
 
-int Main::sendLpCurrent1(Battery lp_battery1)
+int Main::sendLpCurrent_1(Battery lp_battery_1)
 {
-  return base_communicator_->sendData("CMD30" + std::to_string(lp_battery1.current / 10.0) + "\n");
+  return base_communicator_->sendData("CMD30" + std::to_string(lp_battery_1.current / 10.0) + "\n");
 }
 
 void Main::run()
@@ -293,23 +293,23 @@ void Main::run()
     if (bat_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send batteries data.");
       sendHpVoltage(bat_.high_power_batteries.at(0));
-      sendHpTemperature(bat_.high_power_batteries.at(0));
+      sendHpMaxTemperature(bat_.high_power_batteries.at(0));
       sendHpCharge(bat_.high_power_batteries.at(0));
-      sendHpVoltage1(bat_.high_power_batteries.at(1));
-      sendHpTemperature1(bat_.high_power_batteries.at(1));
-      sendHpCharge1(bat_.high_power_batteries.at(1));
+      sendHpVoltage_1(bat_.high_power_batteries.at(1));
+      sendHpMaxTemperature_1(bat_.high_power_batteries.at(1));
+      sendHpCharge_1(bat_.high_power_batteries.at(1));
       sendLpCharge(bat_.low_power_batteries.at(0));
-      sendLpCharge1(bat_.low_power_batteries.at(1));
+      sendLpCharge_1(bat_.low_power_batteries.at(1));
       sendHpCurrent(bat_.high_power_batteries.at(0));
-      sendHpCurrent1(bat_.high_power_batteries.at(1));
+      sendHpCurrent_1(bat_.high_power_batteries.at(1));
       sendHpLowVoltageCell(bat_.high_power_batteries.at(0));
       sendHpHighVoltageCell(bat_.high_power_batteries.at(0));
-      sendHpLowVoltageCell1(bat_.high_power_batteries.at(1));
-      sendHpHighVoltageCell1(bat_.high_power_batteries.at(1));
+      sendHpLowVoltageCell_1(bat_.high_power_batteries.at(1));
+      sendHpHighVoltageCell_1(bat_.high_power_batteries.at(1));
       sendLpVoltage(bat_.low_power_batteries.at(0));
-      sendLpVoltage1(bat_.low_power_batteries.at(1));
+      sendLpVoltage_1(bat_.low_power_batteries.at(1));
       sendLpCurrent(bat_.low_power_batteries.at(0));
-      sendLpCurrent1(bat_.low_power_batteries.at(1));
+      sendLpCurrent_1(bat_.low_power_batteries.at(1));
     }
 
     if (emb_.module_status != data::ModuleStatus::kStart) {
