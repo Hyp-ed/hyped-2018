@@ -129,7 +129,7 @@ int Main::sendHpCharge1(Battery hp_battery1)
 
 int Main::sendLpCharge(Battery lp_battery)
 {
-  return base_communicator_->sendData("CMD15" + std::to_string(lp_battery1.charge) + "\n");
+  return base_communicator_->sendData("CMD15" + std::to_string(lp_battery.charge) + "\n");
 }
 
 int Main::sendLpCharge1(Battery lp_battery1)
