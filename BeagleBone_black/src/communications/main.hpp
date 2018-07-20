@@ -64,13 +64,16 @@ class Main : public Thread {
   int sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear);    // CMD19
   int sendEmBrakes(bool front_brakes, bool rear_brakes);                              // CMD20
   int sendHpCurrent(Battery hp_battery);                                              // CMD21
-  int sendHpCurrent1(Battery hp_battery);                                             // CMD22
-  int sendLpCurrent(Battery lp_battery);                                              // CMD23
-  int sendLpCurrent1(Battery lp_battery);                                             // CMD24
-  int sendHpLvc(Battery hp_battery);   // CMD 25
-  int sendHpHvc(Battery hp_battery);  // CMD 26
-  int sendHpLvc1(Battery hp_battery1);  // CMD 27
-  int sendHpHvc1(Battery hp_battery1);  // CMD 28
+  int sendHpCurrent1(Battery hp_battery1);                                            // CMD22
+  int sendHpLowVoltageCell(Battery hp_battery);                                       // CMD23
+  int sendHpHighVoltageCell(Battery hp_battery);                                      // CMD24
+  int sendHpLowVoltageCell1(Battery hp_battery1);                                     // CMD25
+  int sendHpHighVoltageCell1(Battery hp_battery1);                                    // CMD26
+  int sendLpVoltage(Battery lp_battery);                                              // CMD27
+  int sendLpVoltage1(Battery lp_battery1);                                            // CMD28
+  int sendLpCurrent(Battery lp_battery);                                              // CMD29
+  int sendLpCurrent1(Battery lp_battery1);                                            // CMD30
+
 
  private:
   int state_code_;
