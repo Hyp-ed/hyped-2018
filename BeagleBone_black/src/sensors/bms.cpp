@@ -31,7 +31,7 @@ namespace hyped {
 namespace sensors {
 
 std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
-
+int16_t BMS::current_ = 0;
 BMS::BMS(uint8_t id, Logger& log)
     : Thread(log),
       data_({}),
@@ -92,12 +92,30 @@ bool BMS::hasId(uint32_t id, bool extended)
 {
   if (!extended) return false;  // this BMS only understands extended IDs
 
-  return id_base_ <= id && id < id_base_ + bms::kIdSize;
+  // LP BMS CAN messages
+  if (id_base_ <= id && id < id_base_ + bms::kIdSize) return true;
+
+  // LP current CAN message
+  if (id == 0x28) return true;
+
+  return false;
 }
 
 void BMS::processNewData(utils::io::can::Frame& message)
 {
   log_.DBG1("BMS", "module %u: received CAN message with id %d", id_, message.id);
+
+  // check current CAN message
+  if (message.id == 0x28) {
+    if (message.len < 3) {
+      log_.ERR("BMS", "module %u: current reading not enough data", id_);
+      return;
+    }
+
+    current_ = (message.data[1] << 8) | (message.data[2]);
+    return;
+  }
+
   log_.DBG2("BMS", "message data[0,1] %d %d", message.data[0], message.data[1]);
   uint8_t offset = message.id - (bms::kIdBase + (bms::kIdIncrement * id_));
   switch (offset) {
@@ -137,6 +155,11 @@ void BMS::getData(Battery* battery)
   for (uint16_t v: data_.voltage) battery->voltage += v;
   battery->voltage /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
+  battery->current     = current_;
+
+  // charge calculation, linear from 15V to 25.2V
+  // C = 0.98V - 147
+  battery->charge = 0.98*battery->voltage - 147;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
