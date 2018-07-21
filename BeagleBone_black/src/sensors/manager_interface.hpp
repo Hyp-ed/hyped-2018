@@ -27,7 +27,9 @@
 namespace hyped {
 
 using data::Imu;
+#ifdef PROXI
 using data::Proximity;
+#endif
 using data::Battery;
 using utils::concurrent::Thread;
 using data::NavigationVector;
@@ -52,13 +54,13 @@ class ImuManagerInterface : public ManagerInterface {
   ImuManagerInterface(utils::Logger& log) : ManagerInterface(log) {}
   virtual array<array<NavigationVector, 2>, data::Sensors::kNumImus> getCalibrationData() = 0;
 };
-
+#ifdef PROXI
 class ProxiManagerInterface : public ManagerInterface {
  public:
   ProxiManagerInterface(utils::Logger& log) : ManagerInterface(log) {}
   virtual array<float, data::Sensors::kNumProximities> getCalibrationData() = 0;
 };
-
+#endif
 }}  // namespace hyped::sensors
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_MANAGER_INTERFACE_HPP_

@@ -133,8 +133,14 @@ int main(int argc, char* argv[])
 
     log_system.INFO("TST_NAV", "status = %d, is_calibrating = %d",
         *navs.status, *navs.is_calibrating);
-    log_system.INFO("TST_NAV", "After %7d grav samples, g=(%8.4f %8.4f %8.4f)",
-        *navs.num_gravity_samples, (*navs.g)[0], (*navs.g)[1], (*navs.g)[2]);
+    log_system.INFO("TST_NAV",
+        "After %7d grav samples, g=[(%8.4f %8.4f %8.4f), (%8.4f %8.4f %8.4f), "
+        "(%8.4f %8.4f %8.4f), (%8.4f %8.4f %8.4f)]",
+        *navs.num_gravity_samples,
+        (*navs.g)[0][0], (*navs.g)[0][1], (*navs.g)[0][2],
+        (*navs.g)[1][0], (*navs.g)[1][1], (*navs.g)[1][2],
+        (*navs.g)[2][0], (*navs.g)[2][1], (*navs.g)[2][2],
+        (*navs.g)[3][0], (*navs.g)[3][1], (*navs.g)[3][2]);
     log_system.INFO("TST_NAV",
         "After %7d gyro samples: gyro_offsets=[(%8.4f %8.4f %8.4f), (%8.4f %8.4f %8.4f), "
         "(%8.4f %8.4f %8.4f), (%8.4f %8.4f %8.4f)]",

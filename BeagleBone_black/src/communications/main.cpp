@@ -104,7 +104,7 @@ int Main::sendImu(ImuArray imus)
 
   return base_communicator_->sendData("CMD09" + sen + sen1 + sen2 + sen3 + "\n");
 }
-
+#ifdef PROXI
 int Main::sendProxiFront(ProximityArray proxies_front)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
@@ -136,7 +136,7 @@ int Main::sendProxiRear(ProximityArray proxies_rear)
   return base_communicator_->sendData("CMD11" + sen + sen1 + sen2 + sen3 +
                                       sen4 + sen5 + sen6 + sen7 + "\n");
 }
-
+#endif
 int Main::sendEmBrakes(bool front_brakes, bool rear_brakes)
 {
   std::string brake, brake1;
@@ -237,8 +237,10 @@ void Main::run()
     if (sen_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send sensors data.");
       sendImu(sen_.imu.value);
+#ifdef PROXI
       sendProxiFront(sen_.proxi_front.value);
       sendProxiRear(sen_.proxi_back.value);
+#endif
     }
 
     if (bat_.module_status != data::ModuleStatus::kStart) {

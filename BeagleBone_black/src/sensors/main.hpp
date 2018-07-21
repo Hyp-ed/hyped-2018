@@ -71,8 +71,10 @@ class Main: public Thread {
   GpioInterface*                         keyence_l_;
   GpioInterface*                         keyence_r_;
   std::unique_ptr<ImuManagerInterface>   imu_manager_;
+  #ifdef PROXI
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;
+  #endif
   std::unique_ptr<ManagerInterface>      battery_manager_;
   GpioInterface*                         optical_encoder_l_;
   GpioInterface*                         optical_encoder_r_;

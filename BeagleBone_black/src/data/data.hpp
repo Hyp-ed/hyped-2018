@@ -100,10 +100,11 @@ struct Imu : public Sensor {
   NavigationVector acc;
   NavigationVector gyr;
 };
-
+#ifdef PROXI
 struct Proximity : public Sensor {
   uint8_t val;
 };
+#endif
 
 struct StripeCounter : public Sensor {
   DataPoint<uint32_t> count;
@@ -111,20 +112,26 @@ struct StripeCounter : public Sensor {
 
 struct Sensors : public Module {
   static constexpr int kNumImus = 4;
+#ifdef PROXI
   static constexpr int kNumProximities = 8;
+#endif
   static constexpr int kNumKeyence = 2;
   static constexpr int kNumOptEnc = 2;
 
   DataPoint<array<Imu, kNumImus>> imu;
+#ifdef PROXI
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
+#endif
   array<StripeCounter, kNumKeyence>  keyence_stripe_counter;   //  l = 0, r = 1
   array<float, kNumOptEnc> optical_enc_distance;   // l = 0, r =1
 };
 
 struct SensorCalibration {
+#ifdef PROXI
   array<float, Sensors::kNumProximities> proxi_front_variance;
   array<float, Sensors::kNumProximities> proxi_back_variance;
+#endif
   array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;  // x[i][0]=acc, x[i][1]=gyr
 };
 

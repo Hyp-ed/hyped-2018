@@ -56,6 +56,7 @@ DataPoint<T> Differentiator<T>::update(DataPoint<T> point)
   if (!initialised_) {
     prev_point_ = point;
     initialised_ = true;
+    return DataPoint<T>(point.timestamp, T(0));
   }
   // Assume timestamp in microseconds and convert to seconds
   T gradient = (point.value - prev_point_.value) / ((point.timestamp - prev_point_.timestamp)/1e6);
