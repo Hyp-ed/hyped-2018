@@ -254,10 +254,8 @@ void Navigation::imuUpdate(DataPoint<ImuArray> imus)
         i, imus.value[i].gyr[0], imus.value[i].gyr[1], imus.value[i].gyr[2]);
 
     imus.value[i].acc = acceleration_filter_[i].filter(imus.value[i].acc);
-    imus.value[i].acc -= g_[i];
     if (settings_.gyro_enable) {
       imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
-      imus.value[i].gyr -= gyro_offsets_[i];
     }
 
     log_.DBG3("NAV", " After filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
@@ -270,8 +268,8 @@ void Navigation::imuUpdate(DataPoint<ImuArray> imus)
   for (unsigned int i = 0; i < imus.value.size(); ++i) {
     if (imus.value[i].operational) {
       ++num_operational;
-      acc += imus.value[i].acc;
-      gyr += imus.value[i].gyr;
+      acc += imus.value[i].acc - g_[i];
+      gyr += imus.value[i].gyr - gyro_offsets_[i];
     }
   }
 
@@ -363,6 +361,14 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
   acceleration_ = acceleration.value;
   acceleration_integrator_.update(acceleration);  // Updates velocity
   velocity_integrator_.update(velocity_);  // Updates displacement
+
+  auto dists = getNearestStripeDists(stripe_count_);
+  if (std::abs(dists[2]) < std::abs(dists[1])) {
+    if (status_ != ModuleStatus::kCriticalFailure)
+      log_.ERR("NAV", "Critical failure: missed stripe (oldCnt=%d, nearestStripes=[%f, %f, %f])",
+            stripe_count_, dists[0], dists[1], dists[2]);
+    status_ = ModuleStatus::kCriticalFailure;
+  }
 
   log_.DBG2("NAV",
       " After accl update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
@@ -513,11 +519,15 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   } else {
     // Distance given by the current stripe should match distance, therefore the dists array should
     // provide [-ve, ~0, +ve] if the stripe count and distance are in agreement
-    auto dists_l = getNearestStripeDists(scs[0].count.value - 1);
-    auto dists_r = getNearestStripeDists(scs[1].count.value - 1);
-    if (std::abs(dists_l[0]) < std::abs(dists_l[1]) || std::abs(dists_l[2]) < std::abs(dists_l[1])) { //NOLINT
+    auto dists_l = getNearestStripeDists(std::max(0U, scs[0].count.value - 1));
+    auto dists_r = getNearestStripeDists(std::max(0U, scs[1].count.value - 1));
+    if (std::abs(dists_l[0]) < std::abs(dists_l[1]) ||
+        std::abs(dists_l[2]) < std::abs(dists_l[1]) ||
+        scs[0].count.value == 0) {
       // dists_l is incorrect
-      if (std::abs(dists_r[0]) < std::abs(dists_r[1]) || std::abs(dists_r[2]) < std::abs(dists_r[1])) { //NOLINT
+      if (std::abs(dists_r[0]) < std::abs(dists_r[1]) ||
+          std::abs(dists_r[2]) < std::abs(dists_r[1]) ||
+          scs[1].count.value == 0) {
         // dists_r is also incorrect
         status_ = ModuleStatus::kCriticalFailure;
         log_.ERR("NAV",
@@ -549,8 +559,8 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
                           settings_.strp_displ_w  * dp.value;
 
   // Update x-axis velocity
-  velocity_.value[0] = (1 - settings_.strp_vel_w) * velocity_.value[0] +
-                            settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
+  // velocity_.value[0] = (1 - settings_.strp_vel_w) * velocity_.value[0] +
+  //                           settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
 
   log_.DBG2("NAV",
       " After stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
