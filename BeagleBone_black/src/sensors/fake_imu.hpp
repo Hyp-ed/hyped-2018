@@ -141,6 +141,7 @@ class FakeImu : public ImuInterface {
   bool dec_started_;
   bool em_started_;
   data::Data&  data_;
+  bool operational_;
 };
 
 class FakeAccurateImu: public ImuInterface {
