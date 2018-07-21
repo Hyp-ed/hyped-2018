@@ -193,8 +193,8 @@ bool Main::batteriesInRange()
   }
 
   // check HP
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    auto& battery = batteries_.low_power_batteries[i];
+  for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
+    auto& battery = batteries_.high_power_batteries[i];
     if (battery.voltage < 720 || battery.voltage > 1246) {   // voltage in 72V to 124.6V
       log_.ERR("SENSORS", "BMS HP %d voltage out of range: %d", i, battery.voltage);
       return false;
