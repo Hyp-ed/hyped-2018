@@ -129,10 +129,10 @@ void FakeImu::getData(Imu* imu)
       acc_count_ = std::min(acc_count_, (int64_t) dec_val_read_.size());
       // Check so you don't go out of bounds
       if (acc_count_ == (int64_t) dec_val_read_.size()) {
-        prev_acc_ = dec_val_read_[acc_count_-1];
+        prev_acc_ = dec_val_read_[acc_count_-1] - 0.5;
         operational_ = dec_val_operational_[acc_count_-1];
       } else {
-        prev_acc_ = dec_val_read_[acc_count_];
+        prev_acc_ = dec_val_read_[acc_count_] - 0.5;
         operational_ = dec_val_operational_[acc_count_];
       }
     }
