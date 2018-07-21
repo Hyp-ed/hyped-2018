@@ -127,19 +127,31 @@ NavigationType Navigation::getEmergencyBrakingDistance() const
 
 NavigationType Navigation::getBrakingDistance() const
 {
-  // A polynomial fit for the braking distance at a specific (normalised) velocity
-  static constexpr std::array<NavigationType, 16> kCoefficients = {
+  // A polynomial fit for the braking distance at a specific (normalised) velocity, where
+  // kCoeffSlow for < 50m/s and kCoeffFast for > 50m/s because kCoeffFast is inaccurate
+  // at < 10m/s but they both agree between ~10 and ~50m/s.
+  static constexpr std::array<NavigationType, 16> kCoeffSlow = {
        136.3132, 158.9403,  63.6093, -35.4894, -149.2755, 152.6967, 502.5464, -218.4689,
       -779.534,   95.7285, 621.1013,  50.4598, -245.099,  -54.5,     38.0642,   12.3548};
+  static constexpr std::array<NavigationType, 16> kCoeffFast = {
+       258.6,  299.2,  115.2, -104.7, -260.9, 488.5, 940.8, -808.5, -1551.9,  551.7,
+      1315.7,  -61.4, -551.4,  -84.5,   90.7,  26.2};
 
-  NavigationType norm_v = (getVelocity() - 30.0079) / 17.2325;
-  NavigationType var = 1.0;
   NavigationType braking_distance = 2.0;
-  for (unsigned int i = 0; i < kCoefficients.size(); ++i) {
-    braking_distance += kCoefficients[i] * var;
-    var *= norm_v;
+  NavigationType var = 1.0;
+  if (getVelocity() < 50.0) {
+    NavigationType norm_v = (getVelocity() - 30.0079) / 17.2325;
+    for (unsigned int i = 0; i < kCoeffSlow.size(); ++i) {
+      braking_distance += kCoeffSlow[i] * var;
+      var *= norm_v;
+    }
+  } else {
+    NavigationType norm_v = (getVelocity() - 41.4985) / 23.5436;
+    for (unsigned int i = 0; i < kCoeffFast.size(); ++i) {
+      braking_distance += kCoeffFast[i] * var;
+      var *= norm_v;
+    }
   }
-
   return braking_distance;
 }
 
