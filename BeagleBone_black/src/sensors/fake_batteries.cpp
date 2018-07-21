@@ -52,9 +52,10 @@ void FakeBatteries::getData(Battery* battery)
     battery->low_voltage_cell  = low_voltage_cell_;
     battery->high_voltage_cell = high_voltage_cell_;
   } else {
-    battery->voltage           = 170;
     if (sm_data_.current_state == data::State::kAccelerating) {
-      battery->voltage     = 350;
+      battery->voltage     = 150;   //  300
+    } else {
+      battery->voltage           = 170;
     }
     battery->temperature       = temperature_;
     battery->current           = 200;

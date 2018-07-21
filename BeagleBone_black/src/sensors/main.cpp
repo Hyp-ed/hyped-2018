@@ -167,7 +167,7 @@ void Main::run()
       battery_manager_->resetTimestamp();
 
       // check health of batteries
-      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure && !sys_.fake_sensors) {
+      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure) {
         if (!batteriesInRange()) {
           log_.ERR("SENSORS", "battery failure detected");
           batteries_.module_status = data::ModuleStatus::kCriticalFailure;
@@ -205,20 +205,20 @@ bool Main::batteriesInRange()
   }
 
   // check HP
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    auto& battery = batteries_.low_power_batteries[i];
+  for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
+    auto& battery = batteries_.high_power_batteries[i];
     if (battery.voltage < 720 || battery.voltage > 1200) {   // voltage in 72V to 120V
-      log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
+      log_.ERR("SENSORS", "BMS HP %d voltage out of range: %d", i, battery.voltage);
       return false;
     }
 
     if (battery.current < 0 || battery.current > 15000) {       // current in 0A to 1500A
-      log_.ERR("SENSORS", "BMS LP %d current out of range: %d", i, battery.current);
+      log_.ERR("SENSORS", "BMS HP %d current out of range: %d", i, battery.current);
       return false;
     }
 
     if (battery.temperature < -20 || battery.temperature > 70) {  // temperature in -20C to 70C
-      log_.ERR("SENSORS", "BMS LP %d temperature out of range: %d", i, battery.temperature);
+      log_.ERR("SENSORS", "BMS HP %d temperature out of range: %d", i, battery.temperature);
       return false;
     }
   }
