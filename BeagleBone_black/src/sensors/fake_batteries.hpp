@@ -47,6 +47,7 @@ class FakeBatteries : public BMSInterface {
   bool checkTime();
 
   Data& data_;
+  data::StateMachine    sm_data_;
   bool is_started_;
   bool is_high_voltage_;
   uint64_t ref_time_;

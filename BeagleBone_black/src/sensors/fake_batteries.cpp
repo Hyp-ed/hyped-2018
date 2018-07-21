@@ -43,6 +43,7 @@ FakeBatteries::FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal)
 
 void FakeBatteries::getData(Battery* battery)
 {
+  sm_data_ = data_.getStateMachineData();
   if (is_high_voltage_) {
     battery->voltage           = voltage_;
     battery->temperature       = temperature_;
@@ -52,6 +53,9 @@ void FakeBatteries::getData(Battery* battery)
     battery->high_voltage_cell = high_voltage_cell_;
   } else {
     battery->voltage           = 170;
+    if (sm_data_.current_state == data::State::kAccelerating) {
+      battery->voltage     = 350;
+    }
     battery->temperature       = temperature_;
     battery->current           = 200;
     battery->charge            = charge_;
