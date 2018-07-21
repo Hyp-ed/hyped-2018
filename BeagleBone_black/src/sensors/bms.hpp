@@ -115,6 +115,7 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
   void processNewData(utils::io::can::Frame& message) override;
 
  private:
+  void startTimer();
   bms::Data       data_;
   uint8_t         id_;                // my BMS id in (0,..,15)
   uint32_t        id_base_;           // my starting CAN id
@@ -128,6 +129,13 @@ class BMS : public Thread, public CanProccesor, public BMSInterface {
   static std::vector<uint8_t> existing_ids_;
   static int16_t current_;
   NO_COPY_ASSIGN(BMS);
+  data::Data& d_;
+  bool start_;
+  float  voltage_;      // in 0.1V (deciV)
+  int16_t   currentf_;      // (can be negative) (for LP mA ) (for HP deciA)
+  uint8_t   charge_;       // in % (from 0 to 100)
+  int8_t    temperature_;
+  float start_time_;
 };
 
 class BMSHP : public CanProccesor, public BMSInterface {

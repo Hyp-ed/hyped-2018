@@ -30,6 +30,8 @@
 namespace hyped {
 namespace sensors {
 
+using data::Data;
+
 std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
 int16_t BMS::current_ = 0;
 BMS::BMS(uint8_t id, Logger& log)
@@ -39,7 +41,10 @@ BMS::BMS(uint8_t id, Logger& log)
       id_base_(bms::kIdBase + (bms::kIdIncrement * id_)),
       last_update_time_(0),
       can_(Can::getInstance()),
-      running_(false)
+      running_(false),
+      d_(Data::getInstance()),
+      start_(false),
+      voltage_(242)
 {
   ASSERT(id < data::Batteries::kNumLPBatteries);
   // verify this BMS unit has not been instantiated
@@ -151,22 +156,62 @@ bool BMS::isOnline()
 
 void BMS::getData(Battery* battery)
 {
-  battery->voltage = 0;
+  // battery->voltage = 0;
   for (uint16_t v: data_.voltage) battery->voltage += v;
   battery->voltage    /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
   battery->current     = (-1*current_)/2;
 
-  // charge calculation
-  if (battery->voltage > 240) {                                       // constant high
-    battery->charge = 95;
-  } else if (240 >= battery->voltage && battery->voltage >= 180) {    // linear high
-    battery->charge = battery->voltage / 0.75 - 225;
-  } else if (180 >= battery->voltage && battery->voltage >= 150) {    // linear low
-    battery->charge = battery->voltage / 2 - 75;
-  } else {                                                            // constant low
-    battery->charge = 0;
+  if (!utils::System::getSystem().lp_batteries) {
+    // charge calculation
+    if (battery->voltage > 240) {                                       // constant high
+      battery->charge = 95;
+    } else if (240 >= battery->voltage && battery->voltage >= 180) {    // linear high
+      battery->charge = battery->voltage / 0.75 - 225;
+    } else if (180 >= battery->voltage && battery->voltage >= 150) {    // linear low
+      battery->charge = battery->voltage / 2 - 75;
+    } else {                                                            // constant low
+      battery->charge = 0;
+    }
+  } else {
+    data::State state = d_.getStateMachineData().current_state;
+    uint64_t timer = utils::Timer::getTimeMicros();
+    if (state == data::State::kIdle && !start_) {
+      startTimer();
+    }
+    if (state == data::State::kAccelerating || state == data::State::kAccelerating ||
+        state == data::State::kEmergencyBraking) {
+      currentf_ = 5000/2;
+    } else {
+      currentf_ = 4000/2;
+    }
+    float a = (-54.0/3599.0);
+    int b = 242;
+    if (((((timer-start_time_)/1000000 + 1)+1)*a + b) <= 188.0) {
+      voltage_ = 188.0;
+    } else {
+      voltage_ = (((timer-start_time_ + 1)/1000000)+1)*a + b;
+    }
+    battery->voltage = static_cast<uint16_t>(voltage_);
+    battery->current = currentf_;
+    battery->temperature = temperature_;
+
+    if (battery->voltage > 240) {                                       // constant high
+      battery->charge = 95;
+    } else if (240 >= battery->voltage && battery->voltage >= 180) {    // linear high
+      battery->charge = battery->voltage / 0.75 - 225;
+    } else if (180 >= battery->voltage && battery->voltage >= 150) {    // linear low
+      battery->charge = battery->voltage / 2 - 75;
+    } else {                                                            // constant low
+      battery->charge = 0;
+    }
   }
+}
+
+void BMS::startTimer()
+{
+  start_time_ = utils::Timer::getTimeMicros();
+  start_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

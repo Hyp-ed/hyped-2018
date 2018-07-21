@@ -72,7 +72,7 @@ class System {
   bool fake_batteries;
   bool double_keyence;
   bool accurate;    // use accurate fake sensors
-
+  bool lp_batteries;
   // barriers
   /**
    * @brief Barrier used by navigation and motor control modules on stm transition to accelerating

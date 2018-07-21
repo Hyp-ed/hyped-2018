@@ -63,7 +63,7 @@ void BmsManager::run()
     // keep updating data_ based on values read from sensors
     for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
       bms_[i]->getData(&((*lp_batteries_)[i]));
-      if (!bms_[i]->isOnline()) (*lp_batteries_)[i].voltage = 0;
+      // if (!bms_[i]->isOnline()) (*lp_batteries_)[i].voltage = 0;
     }
     for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
       bms_[i + data::Batteries::kNumLPBatteries]->getData(&(*hp_batteries_)[i]);
