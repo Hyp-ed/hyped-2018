@@ -51,8 +51,11 @@ int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
   Frame data = {14, false, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
+  Demo d;
+  // d.start();
 
   Can& can = Can::getInstance();
+  can.registerProcessor(&d);
   can.start();
   can.send(data);
   for (int i = 0; i < 5; i++) {
@@ -63,5 +66,7 @@ int main(int argc, char* argv[])
     can.send(data);
   }
 
-  delay(10);
+  while (1);
+
+  delay(100);
 }

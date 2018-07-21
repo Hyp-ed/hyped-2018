@@ -101,6 +101,23 @@ Can::Can()
     }
   } else {
     int temp = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+    // fd_ = stdin;
+    int ret;
+    struct termios ts;
+    
+    bzero(&ts, sizeof(ts));
+    cfmakeraw(&ts);
+    cfsetspeed(&ts, BAUD);
+    ts.c_cflag |= (CLOCAL | CREAD | CSTOPB);
+    tcflush(temp, TCIOFLUSH);
+
+    ret = tcsetattr(temp, TCSANOW, &ts);
+    if (ret == -1)
+    {
+      perror("tcsetattr: ");
+      exit(1);
+    }
+    printf("set attrs\n");
     fd_ = fdopen(temp, "w+");
   }
 
@@ -225,26 +242,9 @@ int Can::receive(can::Frame* frame)
       }
       log_.DBG2("Uart-CAN", "opened port");
 
-      // int ret;
-      // struct termios ts;
-      
-      // bzero(&ts, sizeof(ts));
-      // cfmakeraw(&ts);
-      // cfsetspeed(&ts, BAUD);
-      // ts.c_cflag |= (CLOCAL | CREAD | CSTOPB);
-      // tcflush(fd_, TCIOFLUSH);
-
-      // ret = tcsetattr(fd_, TCSANOW, &ts);
-      // if (ret == -1)
-      // {
-      //     perror("tcsetattr: ");
-      //     exit(1);
-      // }
-      // printf("set attrs\n");
-
       char c;
       uint8_t data[8];
-      fscanf(fd, "%c%X %X %X %X %X %X %X %X %X", &c, 
+      fscanf(fd_, "%c%X %X %X %X %X %X %X %X %X\r", &c, 
             &frame->id, &frame->data[0], &frame->data[1], &frame->data[2],
             &frame->data[3], &frame->data[4], &frame->data[5], &frame->data[6],
             &frame->data[7]);
