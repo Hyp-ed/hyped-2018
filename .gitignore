@@ -44,5 +44,7 @@ BeagleBone_black/main*
 BeagleBone_black/demo_*
 .vscode
 RPMvTime.txt
+BeagleBone_black/data/test/filtered
+BeagleBone_black/data/test/com_fil.zip
 
 .idea
