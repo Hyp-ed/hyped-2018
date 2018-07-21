@@ -2,4 +2,4 @@
 
 echo "Running pre-commit hook"
 
-make -C BeagleBone_black all -j --silent
+make -C BeagleBone_black -j --silent

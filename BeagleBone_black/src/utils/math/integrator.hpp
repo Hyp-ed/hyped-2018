@@ -28,10 +28,21 @@ namespace math {
 
 using hyped::data::DataPoint;
 
+/**
+ * @brief Calculates an integral. Supports shared output variables that are modifiable by other code
+ *        as well.
+ *
+ * @tparam T Underlying numeric type
+ */
 template <typename T>
 class Integrator {
  public:
-  Integrator();
+  /**
+   * @brief Construct a new Integrator object
+   *
+   * @param output Where the result is stored. Caller is responsible for freeing the memory
+   */
+  explicit Integrator(DataPoint<T>* output);
 
   /**
    * @brief    Calculates the area given two points for time T_(N)
@@ -43,13 +54,13 @@ class Integrator {
 
  private:
   DataPoint<T> previous_point_;
-  DataPoint<T> previous_output_;
+  DataPoint<T>* output_;
   bool initialised_;
 };
 
 template <typename T>
-Integrator<T>::Integrator()
-    : previous_point_(0, T(0)), previous_output_(0, T(0)), initialised_(false)
+Integrator<T>::Integrator(DataPoint<T>* output)
+    : previous_point_(0, T(0)), output_(output), initialised_(false)
 {}
 
 template <typename T>
@@ -64,12 +75,12 @@ DataPoint<T> Integrator<T>::update(const DataPoint<T>& point)
   T area = (point.value + previous_point_.value)/2 *
            ((point.timestamp - previous_point_.timestamp)/1e6);
 
-  previous_output_.value += area;
-  previous_output_.timestamp = point.timestamp;
+  output_->value += area;
+  output_->timestamp = point.timestamp;
 
   previous_point_ = point;
 
-  return previous_output_;
+  return *output_;
 }
 
 }}}  // hyped::utils::math

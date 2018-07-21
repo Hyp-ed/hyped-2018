@@ -21,6 +21,7 @@
 
 #ifndef BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
+#ifdef PROXI
 
 #include <cstdint>
 
@@ -73,6 +74,6 @@ class CanProxi : public ProxiInterface, public CanProccesor {
 };
 
 }}  // namespace hyped::sensors
-
+#endif
 #endif  // BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
 

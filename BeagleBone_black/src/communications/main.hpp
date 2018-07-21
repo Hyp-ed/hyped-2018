@@ -32,7 +32,9 @@ namespace hyped {
 using data::ModuleStatus;
 using data::Sensors;
 using data::Imu;
+#ifdef PROXI
 using data::Proximity;
+#endif
 using data::State;
 using data::Battery;
 using utils::concurrent::Thread;
@@ -43,8 +45,9 @@ namespace communications {
 class Main : public Thread {
  public:
   typedef std::array<Imu, Sensors::kNumImus>              ImuArray;
+#ifdef PROXI
   typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
-
+#endif
   explicit Main(uint8_t id, Logger& log);
   void run() override;
   int getModuleStatusCode(ModuleStatus mod_status);
@@ -66,8 +69,10 @@ class Main : public Thread {
   int sendRpmBr(float rpm_br);                              // CMD30
   int sendImu(ImuArray imus);                               // CMD31
   int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD32
+#ifdef PROXI
   int sendProxiFront(ProximityArray proxies_front);         // CMD33
   int sendProxiRear(ProximityArray proxies_rear);           // CMD34
+#endif
 
 
  private:

@@ -18,6 +18,7 @@
  *    limitations under the License.
  */
 
+#ifdef PROXI
 #include "sensors/proxi_manager.hpp"
 
 #include "sensors/can_proxi.hpp"
@@ -147,3 +148,4 @@ void ProxiManager::resetTimestamp()
   old_timestamp_ = sensors_proxi_->timestamp;
 }
 }}  // namespace hyped::sensors
+#endif
