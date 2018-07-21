@@ -90,7 +90,7 @@ void BMS::run()
 
 bool BMS::hasId(uint32_t id, bool extended)
 {
-  if (!extended) return false;  // this BMS only understands extended IDs
+  // if (!extended) return false;  // this BMS only understands extended IDs
 
   // LP BMS CAN messages
   if (id_base_ <= id && id < id_base_ + bms::kIdSize) return true;

@@ -72,6 +72,7 @@ class System {
   bool fake_batteries;
   bool double_keyence;
   bool accurate;    // use accurate fake sensors
+  bool uart;
 
   // barriers
   /**

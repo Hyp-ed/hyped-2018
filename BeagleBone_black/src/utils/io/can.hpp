@@ -136,7 +136,6 @@ class Can : public concurrent::Thread {
   concurrent::Lock            socket_lock_;
   int temp;
   FILE* fd;
-
 };
 
 }}}   // namespace hyped::utils::io

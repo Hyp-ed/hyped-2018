@@ -32,10 +32,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <cstdio>
+#include "utils/system.hpp"
 
 #include <sys/socket.h>
 #include <net/if.h>
-#define BAUD 115200
 #ifndef WIN
 #include <linux/can.h>
 #else
@@ -64,14 +64,17 @@ struct sockaddr_can {
   } can_addr;
 };
 
+
 #endif   // CAN
+
+#define BAUD 115200
 namespace hyped {
 namespace utils {
 namespace io {
 
 Can::Can()
     : concurrent::Thread(0),
-      uart_(false)
+      uart_(System::getSystem().uart)
 {
   if (!uart_) {
     if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
