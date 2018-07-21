@@ -29,6 +29,7 @@
 
 namespace hyped {
 
+using data::ModuleStatus;
 using data::Sensors;
 using data::Imu;
 using data::Proximity;
@@ -46,22 +47,27 @@ class Main : public Thread {
 
   explicit Main(uint8_t id, Logger& log);
   void run() override;
-  int sendDistance(NavigationType distance);                // CMD01
-  int sendVelocity(NavigationType speed);                   // CMD02
-  int sendAcceleration(NavigationType accel);               // CMD03
-  int sendRpmFl(float rpm_fl);                              // CMD04
-  int sendRpmFr(float rpm_fr);                              // CMD05
-  int sendRpmBl(float rpm_bl);                              // CMD06
-  int sendRpmBr(float rpm_br);                              // CMD07
-  int sendState(State state);                               // CMD08
-  int sendImu(ImuArray imus);                               // CMD09
-  int sendProxiFront(ProximityArray proxies_front);         // CMD10
-  int sendProxiRear(ProximityArray proxies_rear);           // CMD11
-  int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD12
-  int sendHpBattery(Battery hpb);                           // CMD13-18
-  int sendHpBattery_1(Battery hpb_1);                       // CMD19-24
-  int sendLpBattery(Battery lpb);                           // CMD25-27
-  int sendLpBattery_1(Battery lpb_1);                       // CMD28-30
+  int getModuleStatusCode(ModuleStatus mod_status);
+  int sendState(State state);                               // CMD01
+  int sendBmsStatus(ModuleStatus bms_status);               // CMD02
+  int sendNavStatus(ModuleStatus nav_status);               // CMD03
+  int sendSenStatus(ModuleStatus sen_status);               // CMD04
+  int sendMtrStatus(ModuleStatus mtr_status);               // CMD05
+  int sendDistance(NavigationType distance);                // CMD06
+  int sendVelocity(NavigationType speed);                   // CMD07
+  int sendAcceleration(NavigationType accel);               // CMD08
+  int sendHpBattery(Battery hpb);                           // CMD09-14
+  int sendHpBattery_1(Battery hpb_1);                       // CMD15-20
+  int sendLpBattery(Battery lpb);                           // CMD21-23
+  int sendLpBattery_1(Battery lpb_1);                       // CMD24-26
+  int sendRpmFl(float rpm_fl);                              // CMD27
+  int sendRpmFr(float rpm_fr);                              // CMD28
+  int sendRpmBl(float rpm_bl);                              // CMD29
+  int sendRpmBr(float rpm_br);                              // CMD30
+  int sendImu(ImuArray imus);                               // CMD31
+  int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD32
+  int sendProxiFront(ProximityArray proxies_front);         // CMD33
+  int sendProxiRear(ProximityArray proxies_rear);           // CMD34
 
 
  private:
