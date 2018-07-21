@@ -222,7 +222,7 @@ bool Main::checkFinish()
 
 bool Main::checkVelocityZeroReached()
 {
-  if (nav_data_.velocity <= 0.1) {
+  if (nav_data_.velocity <= 1) {
     log_.INFO("STATE", "velocity reached zero.");
     hypedMachine.handleEvent(kVelocityZeroReached);
     return true;
