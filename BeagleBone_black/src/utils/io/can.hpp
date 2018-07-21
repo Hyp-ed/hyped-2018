@@ -30,6 +30,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <stdio.h>
 
 #include "utils/concurrent/lock.hpp"
 #include "utils/concurrent/thread.hpp"
@@ -130,8 +131,12 @@ class Can : public concurrent::Thread {
  private:
   int   socket_;
   bool  running_;
+  bool  uart_;
   std::vector<CanProccesor*>  processors_;
   concurrent::Lock            socket_lock_;
+  int temp;
+  FILE* fd;
+
 };
 
 }}}   // namespace hyped::utils::io
