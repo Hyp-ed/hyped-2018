@@ -100,8 +100,8 @@ Can::Can()
       return;
     }
   } else {
-    temp = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
-    FILE* fd = fdopen(temp, "w+");
+    int temp = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+    fd_ = fdopen(temp, "w+");
   }
 
   log_.INFO("CAN", "socket successfully created");
@@ -153,7 +153,7 @@ int Can::send(const can::Frame& frame)
         frame.id, frame.extended);
     return 1;
   } else {
-    if (temp == -1) {
+    if (fd_ == 0) {
       log_.ERR("Uart-CAN", "Unable to open /dev/ttyS1: ");
     }
     log_.DBG2("Uart-CAN", "opened port");
@@ -166,11 +166,11 @@ int Can::send(const can::Frame& frame)
     }
 
     if (frame.extended) {
-      fprintf(fd, "E%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
+      fprintf(fd_, "E%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
       frame.data[2], frame.data[3], frame.data[4],frame.data[5], frame.data[6],
       frame.data[7]);
     } else {
-      fprintf(fd, "S%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
+      fprintf(fd_, "S%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
       frame.data[2], frame.data[3], frame.data[4],frame.data[5], frame.data[6],
       frame.data[7]);
     }
@@ -220,7 +220,7 @@ int Can::receive(can::Frame* frame)
       return 1;
     } else {
       //   // open the port
-      if (temp == -1) {
+      if (fd_ == 0) {
         log_.ERR("Uart-CAN", "Unable to open /dev/ttyS1: ");
       }
       log_.DBG2("Uart-CAN", "opened port");
@@ -232,9 +232,9 @@ int Can::receive(can::Frame* frame)
       // cfmakeraw(&ts);
       // cfsetspeed(&ts, BAUD);
       // ts.c_cflag |= (CLOCAL | CREAD | CSTOPB);
-      // tcflush(fd, TCIOFLUSH);
+      // tcflush(fd_, TCIOFLUSH);
 
-      // ret = tcsetattr(fd, TCSANOW, &ts);
+      // ret = tcsetattr(fd_, TCSANOW, &ts);
       // if (ret == -1)
       // {
       //     perror("tcsetattr: ");
