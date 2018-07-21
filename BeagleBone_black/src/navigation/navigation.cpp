@@ -323,6 +323,9 @@ void Navigation::proximityUpdate(ProximityArray proxis)
 
 void Navigation::calibrationUpdate(ImuArray imus)
 {
+  if ((num_gravity_samples_ % 5000) == 0)
+    log_.INFO("NAV", "No. of gravity samples: %d", num_gravity_samples_);
+
   // Online mean algorithm
   ++num_gyro_samples_;
   ++num_gravity_samples_;
