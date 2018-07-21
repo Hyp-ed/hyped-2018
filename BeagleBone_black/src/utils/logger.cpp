@@ -75,68 +75,74 @@ Logger::Logger(bool verbose, int8_t debug)
 
 void Logger::ERR(const char* module, const char* format, ...)
 {
+  static FILE* file = stdout;
   ScopedLock L(&logger_lock);
-  logHead(stderr, "ERR", module);
+  logHead(file, "ERR", module);
   va_list args;
   va_start(args, format);
-  myPrint(stderr, format, args);
+  myPrint(file, format, args);
   va_end(args);
 }
 
 void Logger::INFO(const char* module, const char* format, ...)
 {
+  static FILE* file = stdout;
   if (verbose_) {
     ScopedLock L(&logger_lock);
-    logHead(stdout, "INFO", module);
+    logHead(file, "INFO", module);
     va_list args;
     va_start(args, format);
-    myPrint(stdout, format, args);
+    myPrint(file, format, args);
     va_end(args);
   }
 }
 
 void Logger::DBG(const char* module, const char* format, ...)
 {
+  static FILE* file = stderr;
   if (debug_ >= 0) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG0", module);
+    logHead(file, "DBG0", module);
     va_list args;
     va_start(args, format);
-    myPrint(stderr, format, args);
+    myPrint(file, format, args);
     va_end(args);
   }
 }
 
 void Logger::DBG1(const char* module, const char* format, ...)
 {
+  static FILE* file = stderr;
   if (debug_ >= 1) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG1", module);
+    logHead(file, "DBG1", module);
     va_list args;
     va_start(args, format);
-    myPrint(stderr, format, args);
+    myPrint(file, format, args);
     va_end(args);
   }
 }
 void Logger::DBG2(const char* module, const char* format, ...)
 {
+  static FILE* file = stderr;
   if (debug_ >= 2) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG2", module);
+    logHead(file, "DBG2", module);
     va_list args;
     va_start(args, format);
-    myPrint(stderr, format, args);
+    myPrint(file, format, args);
     va_end(args);
   }
 }
 void Logger::DBG3(const char* module, const char* format, ...)
 {
+  static FILE* file = stderr;
   if (debug_ >= 3) {
     ScopedLock L(&logger_lock);
-    logHead(stderr, "DBG3", module);
+    logHead(file, "DBG3", module);
     va_list args;
     va_start(args, format);
-    myPrint(stderr, format, args);
+    myPrint(file, format, args);
     va_end(args);
   }
 }
