@@ -188,7 +188,7 @@ bool Main::batteriesInRange()
   // check LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
     auto& battery = batteries_.low_power_batteries[i];
-    if (battery.voltage < 140 || battery.voltage > 294) {   // voltage in 14V to 29.4V
+    if (battery.voltage < 140 || battery.voltage > 252) {   // voltage in 14V to 25.2V
       log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
       return false;
     }
@@ -207,12 +207,12 @@ bool Main::batteriesInRange()
   // check HP
   for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
     auto& battery = batteries_.high_power_batteries[i];
-    if (battery.voltage < 720 || battery.voltage > 1200) {   // voltage in 72V to 120V
+    if (battery.voltage < 720 || battery.voltage > 1246) {   // voltage in 72V to 124.6V
       log_.ERR("SENSORS", "BMS HP %d voltage out of range: %d", i, battery.voltage);
       return false;
     }
 
-    if (battery.current < 0 || battery.current > 15000) {       // current in 0A to 1500A
+    if (battery.current < -4000 || battery.current > 13500) {       // current in -400A to 1350A
       log_.ERR("SENSORS", "BMS HP %d current out of range: %d", i, battery.current);
       return false;
     }
