@@ -100,13 +100,13 @@ Can::Can()
       return;
     }
   } else {
-    int temp = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
+    temp_ = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
     // fd_ = stdin;
     int ret;
     struct termios tty = {};
 
-    cfsetosspeed(&tty, (speed_t)B115200);
-    cfsetisspeed(&tty, (speed_t)B115200);
+    cfsetospeed(&tty, (speed_t)B115200);
+    cfsetispeed(&tty, (speed_t)B115200);
     tty.c_cflag     &=  ~PARENB;            // Make 8n1
     tty.c_cflag     &=  ~CSTOPB;
     tty.c_cflag     &=  ~CSIZE;
@@ -118,15 +118,15 @@ Can::Can()
     tty.c_cflag     |=  CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
 
     cfmakeraw(&tty);
-    tcflush(temp, TCIFLUSH);
-    ret = tcsetattr(temp, TCSANOW, &tty);
+    tcflush(temp_, TCIFLUSH);
+    ret = tcsetattr(temp_, TCSANOW, &tty);
     if (ret == -1)
     {
       perror("tcsetattr: ");
       exit(1);
     }
     printf("set attrs\n");
-    fd_ = fdopen(temp, "w+");
+    fd_ = fdopen(temp_, "w+");
   }
 
   log_.INFO("CAN", "socket successfully created");
@@ -144,6 +144,12 @@ void Can::start()
 
   running_ = true;
   concurrent::Thread::start();
+}
+
+uint8_t charToVal(char c)
+{
+  if (c>='0' && c <= '9') return c - '0';
+  else                    return (c-'A') + 10;
 }
 
 int Can::send(const can::Frame& frame)
@@ -189,15 +195,17 @@ int Can::send(const can::Frame& frame)
       log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
       return 0;
     }
-
-    if (frame.extended) {
-      fprintf(fd_, "E%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
-      frame.data[2], frame.data[3], frame.data[4],frame.data[5], frame.data[6],
-      frame.data[7]);
-    } else {
-      fprintf(fd_, "S%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
-      frame.data[2], frame.data[3], frame.data[4],frame.data[5], frame.data[6],
-      frame.data[7]);
+    {
+      concurrent::ScopedLock L(&socket_lock_);
+      if (frame.extended) {
+        fprintf(fd_, "E%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
+        frame.data[2], frame.data[3], frame.data[4],frame.data[5], frame.data[6],
+        frame.data[7]);
+      } else {
+        fprintf(fd_, "S%X %X %X %X %X %X %X %X %X\n", frame.id, frame.data[0], frame.data[1],
+        frame.data[2], frame.data[3], frame.data[4],frame.data[5], frame.data[6],
+        frame.data[7]);
+      }
     }
 
 
@@ -214,8 +222,10 @@ void Can::run()
 
   log_.INFO("CAN", "starting continuous reading");
   while (running_ && socket_ >= 0) {
-    receive(&data);
-    processNewData(&data);
+    if (receive(&data)) {
+      processNewData(&data);
+      sleep(20);
+    }
   }
   log_.INFO("CAN", "stopped continuous reading");
 
@@ -248,20 +258,78 @@ int Can::receive(can::Frame* frame)
       if (fd_ == 0) {
         log_.ERR("Uart-CAN", "Unable to open /dev/ttyS1: ");
       }
-      log_.DBG2("Uart-CAN", "opened port");
+      // log_.DBG2("Uart-CAN", "opened port");
 
+      // char c;
+      // uint8_t data[8];
+      // int ret = fscanf(fd_, "%c%X %X %X %X %X %X %X %X %X", &c, 
+      //       &frame->id, &frame->data[0], &frame->data[1], &frame->data[2],
+      //       &frame->data[3], &frame->data[4], &frame->data[5], &frame->data[6],
+      //       &frame->data[7]);
+      // if (ret < 9) return 0;
+      // frame->len      = 8;
+
+      // log_.DBG1("CAN", "received %u, extended %d",
+      //   frame->id, frame->extended);
+
+      // return 1;
       char c;
+      uint32_t id = 0x50;
       uint8_t data[8];
-      fscanf(fd_, "%c%X %X %X %X %X %X %X %X %X\r", &c, 
-            &frame->id, &frame->data[0], &frame->data[1], &frame->data[2],
-            &frame->data[3], &frame->data[4], &frame->data[5], &frame->data[6],
-            &frame->data[7]);
-      frame->len      = 8;
-
-      log_.DBG1("CAN", "received %u, extended %d",
-        frame->id, frame->extended);
-
-      return 1;
+      int extended = 0;
+      int id_set = 0;
+      int i = 0;
+      int ret = 0;
+      while(1) {
+        {
+          // concurrent::ScopedLock L(&socket_lock_);
+          // c = fgetc(fd_);
+          int ret = read(temp_, &c, 1);
+          if (!ret) continue;
+        }
+        if (c == 'S') {
+            //printf("starting standard\r\n");
+            extended = 0;
+            i = 0;
+            id = 0;
+            id_set = 0;
+        } else if (c == 'E') {
+            extended = 1;
+            i = 0;
+            id = 0;
+            id_set = 0;
+        } else {
+            if (id_set) {  // load data
+                
+                if (c == ' ' || c == '\r' || c == '\n') {
+                    i++;
+                    if (i == 8) { // data loaded
+                        frame->id = id;
+                        for (int i = 0; i < 8; i++)
+                          frame->data[i] = data[i];
+                        return 1;
+                    } else {
+                        data[i] = 0;
+                    }
+                } else {
+                    data[i] <<= 4;
+                    data[i] |= charToVal(c);
+                
+                }
+            } else {
+                if (c == ' ') {
+                    id_set = 1;
+                    data[i] = 0;
+                    //printf("id set to %x", id);
+                } else {
+                    uint8_t val = charToVal(c);
+                    id <<= 4;
+                    id |= charToVal(c);
+                    //printf("added %x to id %x", val, id);
+                }
+            }
+        }
+      }
       }
 }
 

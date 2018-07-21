@@ -134,7 +134,7 @@ class Can : public concurrent::Thread {
   bool  uart_;
   std::vector<CanProccesor*>  processors_;
   concurrent::Lock            socket_lock_;
-  // int temp_;
+  int temp_;
   FILE* fd_;
 
 };
