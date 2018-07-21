@@ -29,6 +29,7 @@ namespace hyped {
 namespace navigation {
 
 const Navigation::Settings Navigation::kDefaultSettings;
+#ifdef PROXI
 float proxiMean(const Proximity* const a, const Proximity* const b)
 {
   if (a->operational && b->operational)
@@ -39,6 +40,7 @@ float proxiMean(const Proximity* const a, const Proximity* const b)
     return b->val;
   return -1;
 }
+#endif
 
 Navigation::Navigation(Barrier& post_calibration_barrier,
                        Logger& log,
@@ -190,7 +192,7 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
               i, sc.imu_variance[i][0][0], sc.imu_variance[i][0][1], sc.imu_variance[i][0][1],
               sc.imu_variance[i][1][0], sc.imu_variance[i][1][1], sc.imu_variance[i][1][1]);
   }
-
+#ifdef PROXI
   for (int i = 0; i < Sensors::kNumProximities; ++i) {
     proximity_filter_[i].configure(readings.proxi_front.value[i].val,
                                    sqrt(sc.proxi_front_variance[i]),
@@ -201,7 +203,7 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
     log_.INFO("NAV", "Proxi[%d]: front variance = %.3f, back variance = %.3f",
               i, sc.proxi_front_variance[i], sc.proxi_back_variance[i]);
   }
-
+#endif
   log_.INFO("NAV", "Navigation initialised.");
   log_.DBG("NAV",
       "After init: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
@@ -227,10 +229,12 @@ void Navigation::update(Input input)
   if (input.imus != nullptr) {
     imuUpdate(*input.imus);
   }
+#ifdef PROXI
   if (input.proxis != nullptr && !is_calibrating_ &&
       (settings_.proxi_displ_enable || settings_.proxi_orient_enable)) {  // NOLINT[whitespace/braces]
     proximityUpdate(*input.proxis);
   }
+#endif
   if (input.sc != nullptr && !is_calibrating_ && settings_.keyence_enable) {
     stripeCounterUpdate(*input.sc);
   }
@@ -283,7 +287,7 @@ void Navigation::imuUpdate(DataPoint<ImuArray> imus)
              gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
   }
 }
-
+#ifdef PROXI
 void Navigation::proximityUpdate(ProximityArray proxis)
 {
   Proximities ground, rail;
@@ -314,6 +318,7 @@ void Navigation::proximityUpdate(ProximityArray proxis)
   if (settings_.proxi_orient_enable)
     proximityOrientationUpdate(ground, rail);
 }
+#endif
 
 void Navigation::calibrationUpdate(ImuArray imus)
 {
@@ -362,7 +367,7 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
       velocity_.value[0], velocity_.value[1], velocity_.value[2],
       displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
-
+#ifdef PROXI
 void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
   // Ground points
@@ -415,6 +420,7 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
   orientation_[3] = orientation.z();
 }
 
+
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
   log_.DBG2("NAV",
@@ -455,6 +461,7 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
       velocity_.value[0], velocity_.value[1], velocity_.value[2],
       displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
+#endif
 
 void Navigation::stripeCounterUpdate(StripeCounterArray scs)
 {

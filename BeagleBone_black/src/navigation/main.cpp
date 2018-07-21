@@ -45,6 +45,7 @@ void Main::run()
   std::unique_ptr<Sensors> readings(new Sensors());
 
   // Views of the Sensors structs
+#ifdef PROXI
   std::unique_ptr<Navigation::ProximityArray> last_proxis(new Navigation::ProximityArray());
   std::unique_ptr<Navigation::ProximityArray> proxis(new Navigation::ProximityArray());
   // Set up pointers as to unify the front and rear proxis in a single array
@@ -54,6 +55,7 @@ void Main::run()
     (*last_proxis)[i] = &(last_readings->proxi_front.value[i]);
     (*last_proxis)[i + Sensors::kNumProximities] = &(last_readings->proxi_back.value[i]);
   }
+#endif
   log_.INFO("NAV", "Main started");
 
   System& sys = System::getSystem();
@@ -113,9 +115,11 @@ void Main::run()
       continue;
     }
     Navigation::Input input;
+#ifdef PROXI
      if (proxiChanged(*last_readings, *readings)) {
       input.proxis = &(*proxis);
      }
+#endif
      if (stripeCntChanged(*last_readings, *readings)) {
       input.sc = &readings->keyence_stripe_counter;
      }
@@ -130,7 +134,9 @@ void Main::run()
     updateData();
 
     readings.swap(last_readings);
+#ifdef PROXI
     proxis.swap(last_proxis);
+#endif
   }
 }
 
@@ -145,12 +151,14 @@ bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
   return new_data.imu.timestamp != old_data.imu.timestamp;
 }
 
+#ifdef PROXI
 bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 {
   // Both front and back should be always updated at the same time
   return old_data.proxi_front.timestamp != new_data.proxi_front.timestamp &&
          old_data.proxi_back.timestamp  != new_data.proxi_back.timestamp;
 }
+#endif
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
