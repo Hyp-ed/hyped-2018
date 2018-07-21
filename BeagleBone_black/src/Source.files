@@ -62,6 +62,5 @@ MAINS := \
   demo_optical_encoder \
   demo_sensors \
   test_proxis \
-  demo_fake_proxis \
   demo_imus \
   test_imus \

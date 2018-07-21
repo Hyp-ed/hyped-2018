@@ -106,6 +106,7 @@ int main(int argc, char* argv[])
           acc[0], acc[1], acc[2], gyr[0], gyr[1], gyr[2]);
     }
 
+#ifdef PROXI
     auto proxis_front = sens.proxi_front.value;
     log_system.INFO("TST_SEN", "Proxi-front online: %3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d",
         !!proxis_front[0].operational, !!proxis_front[1].operational,
@@ -125,7 +126,7 @@ int main(int argc, char* argv[])
     log_system.INFO("TST_SEN", "Proxi-back data:   %3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d",
         proxis_back[0].val, proxis_back[1].val, proxis_back[2].val, proxis_back[3].val,
         proxis_back[4].val, proxis_back[5].val, proxis_back[6].val, proxis_back[7].val);
-    
+#endif
     auto scs = sens.keyence_stripe_counter;
     log_system.INFO("TST_SEN", "stripe count 1 = %2d, stripe count 2 = %2d\n",
         scs[0].count.value, scs[1].count.value);

@@ -34,9 +34,15 @@ int main()
 
   printf("Hello hyped, here are some shared data\n");
   printf("from Navigation: %f %f %f\n", nav.distance, nav.velocity, nav.acceleration);
-  printf("from Sensors: %f %d %d at time %d\n",
+  printf("from Sensors: %f"
+#ifdef PROXI
+  " %d"
+#endif
+         " %d at time %d\n",
       sens.imu.value[0].acc[0],
+#ifdef PROXI
       sens.proxi_front.value[0].val,
+#endif
       sens.keyence_stripe_counter[0].count.value,
       sens.keyence_stripe_counter[0].count.timestamp);
   return 0;

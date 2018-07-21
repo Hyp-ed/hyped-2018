@@ -92,6 +92,7 @@ int main(int argc, char* argv[])
     }
 
     std::printf("\n");
+#ifdef PROXI
     auto proxis_front = sens.proxi_front.value;
     log.INFO("Test", "Proxi-front online: %d,%d,%d,%d,%d,%d,%d,%d", proxis_front[0].operational,
                                                              proxis_front[1].operational,
@@ -105,7 +106,6 @@ int main(int argc, char* argv[])
       auto proxi = proxi_data.val;
       log.INFO("TEST", "Distance front:  %u", proxi);
     }
-
     std::printf("\n");
     auto proxis_back = sens.proxi_back.value;
     log.INFO("Test", "Proxi-back online: %d,%d,%d,%d,%d,%d,%d,%d", proxis_back[0].operational,
@@ -120,6 +120,7 @@ int main(int argc, char* argv[])
       auto proxi = proxi_data.val;
       log.INFO("TEST", "Distance back: %u", proxi);
     }
+#endif
     Thread::sleep(500);
   }
  	return 0;

@@ -30,19 +30,21 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
+#ifdef PROXI
 using hyped::sensors::VL6180;
+using hyped::sensors::ProxiInterface;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::io::I2C;
-using hyped::sensors::ProxiInterface;
 using hyped::utils::math::RollingStatistics;
+#endif
 
  constexpr uint8_t kNumOfProxis = 8;
 
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
+#ifdef PROXI
   I2C& i2c = I2C::getInstance();
   Logger log(true, 1);
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
@@ -88,6 +90,6 @@ int main(int argc, char* argv[])
   }
 
   myfile.close();
-
+#endif
   return 0;
 }
