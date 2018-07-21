@@ -244,10 +244,10 @@ int Can::receive(can::Frame* frame)
 
       char c;
       uint8_t data[8];
-      fscanf(fd, "%c%X %X %X %X %X %X %X %X %X", c, 
-            frame->id, frame->data[0], frame->data[1], frame->data[2],
-            frame->data[3], frame->data[4], frame->data[5], frame->data[6],
-            frame->data[7]);
+      fscanf(fd, "%c%X %X %X %X %X %X %X %X %X", &c, 
+            &frame->id, &frame->data[0], &frame->data[1], &frame->data[2],
+            &frame->data[3], &frame->data[4], &frame->data[5], &frame->data[6],
+            &frame->data[7]);
       frame->len      = 8;
 
       log_.DBG1("CAN", "received %u, extended %d",
