@@ -22,7 +22,7 @@
 
 #ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
-
+#ifdef PROXI
 #include <string>
 #include <vector>
 
@@ -104,5 +104,5 @@ class FakeProxi : public ProxiInterface {
 
 }}  // namespace hyped::sensors
 
-
+#endif
 #endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_

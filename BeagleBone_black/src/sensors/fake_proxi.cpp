@@ -17,7 +17,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
+#ifdef PROXI
 #include "sensors/fake_proxi.hpp"
 
 #include <random>
@@ -159,4 +159,4 @@ bool FakeProxi::checkTime()
 }
 
 }}   // namespace hyped::sensors
-
+#endif

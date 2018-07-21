@@ -18,8 +18,10 @@
  *    limitations under the License.
  */
 
+
 #ifndef BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
+#ifdef  PROXI
 
 #include "sensors/interface.hpp"
 #include "utils/logger.hpp"
@@ -91,6 +93,6 @@ class VL6180: public ProxiInterface {
 };
 
 }}  // namespace hyped::sensors
-
+#endif
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_VL6180_HPP_
