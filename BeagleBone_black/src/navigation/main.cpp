@@ -86,8 +86,10 @@ void Main::run()
             continue;
           }
         }
-      case State::kReady :
         break;
+      case State::kReady :
+        yield();
+        continue;
       case State::kAccelerating :
         if (nav_.is_calibrating_) {
           if (nav_.finishCalibration())
@@ -193,12 +195,12 @@ void Main::updateData()
 
   data_.setNavigationData(nav_data);
   log_.DBG1("NAV",
-      "Update: ms=%d, a=(%.2f, %.2f, %.2f), v=(%.2f, %.2f, %.2f), d=(%.2f, %.2f, %.2f), bd=%.2f, ebd=%.2f", //NOLINT
+      "Update: ms=%d, a=(%.2f, %.2f, %.2f), v=(%.2f, %.2f, %.2f), d=(%.2f, %.2f, %.2f), bd=%.2f, ebd=%.2f, calib=%d", //NOLINT
       nav_.status_,
       nav_.acceleration_[0], nav_.acceleration_[1], nav_.acceleration_[2],
       nav_.velocity_.value[0], nav_.velocity_.value[1], nav_.velocity_.value[2],
       nav_.displacement_.value[0], nav_.displacement_.value[1], nav_.displacement_.value[2],
-      nav_.getBrakingDistance(), nav_.getEmergencyBrakingDistance());
+      nav_.getBrakingDistance(), nav_.getEmergencyBrakingDistance(), nav_.num_gravity_samples_);
 }
 
 }}  // namespace hyped::navigation
