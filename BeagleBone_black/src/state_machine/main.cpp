@@ -149,6 +149,7 @@ if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure)
     hypedMachine.handleEvent(kCriticalFailure);
     return true;
   }
+  return false;
 }
 
 bool Main::checkCriticalFailure()
