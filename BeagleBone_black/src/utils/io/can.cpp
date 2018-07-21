@@ -103,15 +103,23 @@ Can::Can()
     int temp = open("/dev/ttyACM0", O_RDWR | O_NOCTTY);
     // fd_ = stdin;
     int ret;
-    struct termios ts;
-    
-    bzero(&ts, sizeof(ts));
-    cfmakeraw(&ts);
-    cfsetspeed(&ts, BAUD);
-    ts.c_cflag |= (CLOCAL | CREAD | CSTOPB);
-    tcflush(temp, TCIOFLUSH);
+    struct termios tty = {};
 
-    ret = tcsetattr(temp, TCSANOW, &ts);
+    cfsetosspeed(&tty, (speed_t)B115200);
+    cfsetisspeed(&tty, (speed_t)B115200);
+    tty.c_cflag     &=  ~PARENB;            // Make 8n1
+    tty.c_cflag     &=  ~CSTOPB;
+    tty.c_cflag     &=  ~CSIZE;
+    tty.c_cflag     |=  CS8;
+
+    tty.c_cflag     &=  ~CRTSCTS;           // no flow control
+    tty.c_cc[VMIN]   =  1;                  // read doesn't block
+    tty.c_cc[VTIME]  =  5;                  // 0.5 seconds read timeout
+    tty.c_cflag     |=  CREAD | CLOCAL;     // turn on READ & ignore ctrl lines
+
+    cfmakeraw(&tty);
+    tcflush(temp, TCIFLUSH);
+    ret = tcsetattr(temp, TCSANOW, &tty);
     if (ret == -1)
     {
       perror("tcsetattr: ");
