@@ -519,8 +519,8 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   } else {
     // Distance given by the current stripe should match distance, therefore the dists array should
     // provide [-ve, ~0, +ve] if the stripe count and distance are in agreement
-    auto dists_l = getNearestStripeDists(std::max(0U, scs[0].count.value - 1));
-    auto dists_r = getNearestStripeDists(std::max(0U, scs[1].count.value - 1));
+    auto dists_l = getNearestStripeDists(scs[0].count.value - 1);
+    auto dists_r = getNearestStripeDists(scs[1].count.value - 1);
     if (std::abs(dists_l[0]) < std::abs(dists_l[1]) ||
         std::abs(dists_l[2]) < std::abs(dists_l[1]) ||
         scs[0].count.value == 0) {
