@@ -31,6 +31,7 @@ namespace sensors {
 
 FakeBatteries::FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal)
     : data_(Data::getInstance()),
+      sys_(utils::System::getSystem()),
       is_started_(false),
       is_high_voltage_(is_high_voltage),
       voltage_(1100),
@@ -52,8 +53,8 @@ void FakeBatteries::getData(Battery* battery)
     battery->low_voltage_cell  = low_voltage_cell_;
     battery->high_voltage_cell = high_voltage_cell_;
   } else {
-    if (sm_data_.current_state == data::State::kDecelerating) {
-      battery->voltage     = 170;   //  @TEST 300
+    if (sm_data_.current_state == data::State::kDecelerating && sys_.fail_batteries) {
+      battery->voltage     = 350;
     } else {
       battery->voltage           = 170;
     }

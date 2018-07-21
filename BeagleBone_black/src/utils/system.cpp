@@ -121,6 +121,7 @@ System::System(int argc, char* argv[])
       {"fake_embrakes", optional_argument, 0, 'n'},
       {"accurate", optional_argument, 0, 'N'},
       {"fake_batteries", optional_argument, 0, 'o'},
+      {"fail_batteries", optional_argument, 0, 'O'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -232,6 +233,10 @@ System::System(int argc, char* argv[])
       case 'o':
         if (optarg) fake_batteries = atoi(optarg);
         else        fake_batteries = 1;
+        break;
+        case 'O':
+        if (optarg) fail_batteries = atoi(optarg);
+        else        fail_batteries = 1;
         break;
       default:
         printUsage();

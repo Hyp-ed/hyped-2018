@@ -27,6 +27,7 @@
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
@@ -45,7 +46,7 @@ class FakeBatteries : public BMSInterface {
  private:
   void init();
   bool checkTime();
-
+  utils::System&  sys_;
   Data& data_;
   data::StateMachine    sm_data_;
   bool is_started_;
