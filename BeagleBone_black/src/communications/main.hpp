@@ -31,7 +31,9 @@ namespace hyped {
 
 using data::Sensors;
 using data::Imu;
+#ifdef PROXI
 using data::Proximity;
+#endif
 using data::State;
 using data::Battery;
 using utils::concurrent::Thread;
@@ -42,8 +44,9 @@ namespace communications {
 class Main : public Thread {
  public:
   typedef std::array<Imu, Sensors::kNumImus>              ImuArray;
+#ifdef PROXI
   typedef std::array<Proximity, Sensors::kNumProximities> ProximityArray;
-
+#endif
   explicit Main(uint8_t id, Logger& log);
   void run() override;
   int sendDistance(NavigationType distance);                // CMD01
@@ -55,8 +58,10 @@ class Main : public Thread {
   int sendRpmBr(float rpm_br);                              // CMD07
   int sendState(State state);                               // CMD08
   int sendImu(ImuArray imus);                               // CMD09
+#ifdef PROXI
   int sendProxiFront(ProximityArray proxies_front);         // CMD10
   int sendProxiRear(ProximityArray proxies_rear);           // CMD11
+#endif
   int sendEmBrakes(bool front_brakes, bool rear_brakes);    // CMD12
   int sendHpBattery(Battery hpb);                           // CMD13-18
   int sendHpBattery_1(Battery hpb_1);                       // CMD19-24
