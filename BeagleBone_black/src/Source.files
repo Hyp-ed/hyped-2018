@@ -44,8 +44,10 @@ SRCS := \
 
 MAINS := \
   main \
+  demo_data \
   demo_machine \
   demo_motor \
+  demo_navigation \
   demo_motor_testing \
   demo_communications \
   demo_threading \
@@ -58,5 +60,8 @@ MAINS := \
   demo_can \
   demo_mpu9250 \
   demo_optical_encoder \
+  demo_sensors \
+  test_proxis \
+  demo_fake_proxis \
   demo_imus \
   test_imus \
