@@ -21,9 +21,12 @@
 #include <algorithm>  // std::min
 #include <map>
 #include <string>
+#include <sstream>
 
+#ifdef PROXI
 #include "Eigen/Dense"
 #include "Eigen/SVD"
+#endif
 
 namespace hyped {
 namespace navigation {

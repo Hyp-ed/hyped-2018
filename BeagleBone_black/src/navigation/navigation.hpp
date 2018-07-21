@@ -88,8 +88,10 @@ class Navigation {
 #endif
   typedef std::array<StripeCounter, Sensors::kNumKeyence>       StripeCounterArray;
   struct Settings {
+#ifdef PROXI
     bool proxi_displ_enable = false;  // Needs updated proxi positions
     bool proxi_orient_enable = false;  // Needs updated proxi positions
+#endif
     bool gyro_enable = false;  // Not fully implemented (rotate a)
     bool opt_enc_enable = false;  // Not implemented
     bool keyence_enable = true;
@@ -211,7 +213,7 @@ class Navigation {
    *        likely temporary and will be replaced by an array or other suitable data structure once
    *        the algorithm using it is complete.
    */
-  #ifdef PROXI
+#ifdef PROXI
   struct Proximities {
     float fr;  // mm
     float rr;  // mm
