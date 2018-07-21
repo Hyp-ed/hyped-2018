@@ -25,13 +25,13 @@
 
 namespace hyped {
 
-using data::State;
-using data::Battery;
+using utils::System;
 
 namespace communications {
 
 Main::Main(uint8_t id, Logger& log)
     : Thread(id, log),
+      sys_(System::getSystem()),
       log_(log),
       data_(data::Data::getInstance())
 {
@@ -40,39 +40,18 @@ Main::Main(uint8_t id, Logger& log)
   base_communicator_ = new Communications(log, ipAddress, port_no);
 }
 
-int Main::sendDistance(NavigationType distance)
+int Main::getModuleStatusCode(ModuleStatus mod_status)
 {
-  return base_communicator_->sendData("CMD01" + std::to_string(distance) + "\n");
-}
+  int code = 0;
+  switch (mod_status) {
+    case ModuleStatus::kStart           : code = 0; break;
+    case ModuleStatus::kInit            : code = 1; break;
+    case ModuleStatus::kReady           : code = 1; break;
+    case ModuleStatus::kCriticalFailure : code = 2; break;
+    default: break;
+  }
 
-int Main::sendVelocity(NavigationType speed)
-{
-  return base_communicator_->sendData("CMD02" + std::to_string(speed) + "\n");
-}
-
-int Main::sendAcceleration(NavigationType accel)
-{
-  return base_communicator_->sendData("CMD03" + std::to_string(accel) + "\n");
-}
-
-int Main::sendRpmFl(float rpm_fl)
-{
-  return base_communicator_->sendData("CMD04" + std::to_string(rpm_fl) + "\n");
-}
-
-int Main::sendRpmFr(float rpm_fr)
-{
-  return base_communicator_->sendData("CMD05" + std::to_string(rpm_fr) + "\n");
-}
-
-int Main::sendRpmBl(float rpm_bl)
-{
-  return base_communicator_->sendData("CMD06" + std::to_string(rpm_bl) + "\n");
-}
-
-int Main::sendRpmBr(float rpm_br)
-{
-  return base_communicator_->sendData("CMD07" + std::to_string(rpm_br) + "\n");
+  return code;
 }
 
 int Main::sendState(State state)
@@ -91,53 +70,112 @@ int Main::sendState(State state)
     default: break;
   }
 
-  return base_communicator_->sendData("CMD08" + std::to_string(state_code_) + "\n");
+  return base_communicator_->sendData("CMD01" + std::to_string(state_code_) + "\n");
 }
 
-int Main::sendHpVoltage(Battery hp_battery)
+int Main::sendBmsStatus(ModuleStatus bms_status)
 {
-  // Convert voltage reading units from decivolts to volts
-  return base_communicator_->sendData("CMD09" + std::to_string(hp_battery.voltage / 10.0) + "\n");
+  int bms_code = getModuleStatusCode(bms_status);
+  return base_communicator_->sendData("CMD02" + std::to_string(bms_code) + "\n");
 }
 
-int Main::sendHpTemperature(Battery hp_battery)
+int Main::sendNavStatus(ModuleStatus nav_status)
 {
-  return base_communicator_->sendData("CMD10" + std::to_string(hp_battery.temperature) + "\n");
+  int nav_code = getModuleStatusCode(nav_status);
+  return base_communicator_->sendData("CMD03" + std::to_string(nav_code) + "\n");
 }
 
-int Main::sendHpCharge(Battery hp_battery)
+int Main::sendSenStatus(ModuleStatus sen_status)
 {
-  return base_communicator_->sendData("CMD11" + std::to_string(hp_battery.charge) + "\n");
+  int sen_code = getModuleStatusCode(sen_status);
+  return base_communicator_->sendData("CMD04" + std::to_string(sen_code) + "\n");
 }
 
-int Main::sendHpVoltage1(Battery hp_battery1)
+int Main::sendMtrStatus(ModuleStatus mtr_status)
 {
-  // Convert voltage reading units from decivolts to volts
-  return base_communicator_->sendData("CMD12" + std::to_string(hp_battery1.voltage / 10.0)
-                                      + "\n");
+  int mtr_code = getModuleStatusCode(mtr_status);
+  return base_communicator_->sendData("CMD05" + std::to_string(mtr_code) + "\n");
 }
 
-int Main::sendHpTemperature1(Battery hp_battery1)
+int Main::sendDistance(NavigationType distance)
 {
-  return base_communicator_->sendData("CMD13" + std::to_string(hp_battery1.temperature) + "\n");
+  return base_communicator_->sendData("CMD06" + std::to_string(distance) + "\n");
 }
 
-int Main::sendHpCharge1(Battery hp_battery1)
+int Main::sendVelocity(NavigationType speed)
 {
-  return base_communicator_->sendData("CMD14" + std::to_string(hp_battery1.charge) + "\n");
+  return base_communicator_->sendData("CMD07" + std::to_string(speed) + "\n");
 }
 
-int Main::sendLpCharge(Battery lp_battery)
+int Main::sendAcceleration(NavigationType accel)
 {
-  return base_communicator_->sendData("CMD15" + std::to_string(lp_battery.charge) + "\n");
+  return base_communicator_->sendData("CMD08" + std::to_string(accel) + "\n");
 }
 
-int Main::sendLpCharge1(Battery lp_battery1)
+int Main::sendHpBattery(Battery hpb)
 {
-  return base_communicator_->sendData("CMD16" + std::to_string(lp_battery1.charge) + "\n");
+  log_.DBG1("COMN", "temperature %d", hpb.temperature);
+  int i = base_communicator_->sendData("CMD09" + std::to_string(hpb.voltage / 10.0) + "\n");
+  int j = base_communicator_->sendData("CMD10" + std::to_string(hpb.current / 10.0) + "\n");
+  int k = base_communicator_->sendData("CMD11" + std::to_string(hpb.charge) + "\n");
+  int l = base_communicator_->sendData("CMD12" + std::to_string(hpb.temperature) + "\n");
+  int m = base_communicator_->sendData("CMD13" + std::to_string(hpb.low_voltage_cell) + "\n");
+  int n = base_communicator_->sendData("CMD14" + std::to_string(hpb.high_voltage_cell) + "\n");
+
+  return (i && j && k && l && m && n);
 }
 
-int Main::sendImu(std::array<Imu, Sensors::kNumImus> imus)
+int Main::sendHpBattery_1(Battery hpb_1)
+{
+  int i = base_communicator_->sendData("CMD15" + std::to_string(hpb_1.voltage / 10.0) + "\n");
+  int j = base_communicator_->sendData("CMD16" + std::to_string(hpb_1.current / 10.0) + "\n");
+  int k = base_communicator_->sendData("CMD17" + std::to_string(hpb_1.charge) + "\n");
+  int l = base_communicator_->sendData("CMD18" + std::to_string(hpb_1.temperature) + "\n");
+  int m = base_communicator_->sendData("CMD19" + std::to_string(hpb_1.low_voltage_cell) + "\n");
+  int n = base_communicator_->sendData("CMD20" + std::to_string(hpb_1.high_voltage_cell) + "\n");
+
+  return (i && j && k && l && m && n);
+}
+
+int Main::sendLpBattery(Battery lpb)
+{
+  int i = base_communicator_->sendData("CMD21" + std::to_string(lpb.voltage / 10.0) + "\n");
+  int j = base_communicator_->sendData("CMD22" + std::to_string(lpb.current) + "\n");
+  int k = base_communicator_->sendData("CMD23" + std::to_string(lpb.charge) + "\n");
+
+  return (i && j && k);
+}
+
+int Main::sendLpBattery_1(Battery lpb_1)
+{
+  int i = base_communicator_->sendData("CMD24" + std::to_string(lpb_1.voltage / 10.0) + "\n");
+  int j = base_communicator_->sendData("CMD25" + std::to_string(lpb_1.current) + "\n");
+  int k = base_communicator_->sendData("CMD26" + std::to_string(lpb_1.charge) + "\n");
+
+  return (i && j && k);
+}
+
+int Main::sendRpmFl(float rpm_fl)
+{
+  return base_communicator_->sendData("CMD27" + std::to_string(rpm_fl) + "\n");
+}
+
+int Main::sendRpmFr(float rpm_fr)
+{
+  return base_communicator_->sendData("CMD28" + std::to_string(rpm_fr) + "\n");
+}
+
+int Main::sendRpmBl(float rpm_bl)
+{
+  return base_communicator_->sendData("CMD29" + std::to_string(rpm_bl) + "\n");
+}
+
+int Main::sendRpmBr(float rpm_br)
+{
+  return base_communicator_->sendData("CMD30" + std::to_string(rpm_br) + "\n");
+}
+
+int Main::sendImu(ImuArray imus)
 {
   std::string sen, sen1, sen2, sen3;
   sen = imus[0].operational ? "1" : "2";
@@ -145,10 +183,19 @@ int Main::sendImu(std::array<Imu, Sensors::kNumImus> imus)
   sen2 = imus[2].operational ? "1" : "2";
   sen3 = imus[3].operational ? "1" : "2";
 
-  return base_communicator_->sendData("CMD17" + sen + sen1 + sen2 + sen3 + "\n");
+  return base_communicator_->sendData("CMD31" + sen + sen1 + sen2 + sen3 + "\n");
 }
 
-int Main::sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies_front)
+int Main::sendEmBrakes(bool front_brakes, bool rear_brakes)
+{
+  std::string brake, brake1;
+  brake = front_brakes ? "1" : "2";
+  brake1 = rear_brakes ? "1" : "2";
+
+  return base_communicator_->sendData("CMD32" + brake + brake1 + "\n");
+}
+#ifdef PROXI
+int Main::sendProxiFront(ProximityArray proxies_front)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
   sen = proxies_front[0].operational ? "1" : "2";
@@ -160,11 +207,11 @@ int Main::sendProxiFront(std::array<Proximity, Sensors::kNumProximities> proxies
   sen6 = proxies_front[6].operational ? "1" : "2";
   sen7 = proxies_front[7].operational ? "1" : "2";
 
-  return base_communicator_->sendData("CMD18" + sen + sen1 + sen2 + sen3 +
+  return base_communicator_->sendData("CMD33" + sen + sen1 + sen2 + sen3 +
                                       sen4 + sen5 + sen6 + sen7 + "\n");
 }
 
-int Main::sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_rear)
+int Main::sendProxiRear(ProximityArray proxies_rear)
 {
   std::string sen, sen1, sen2, sen3, sen4, sen5, sen6, sen7;
   sen = proxies_rear[0].operational ? "1" : "2";
@@ -176,18 +223,10 @@ int Main::sendProxiRear(std::array<Proximity, Sensors::kNumProximities> proxies_
   sen6 = proxies_rear[6].operational ? "1" : "2";
   sen7 = proxies_rear[7].operational ? "1" : "2";
 
-  return base_communicator_->sendData("CMD19" + sen + sen1 + sen2 + sen3 +
+  return base_communicator_->sendData("CMD34" + sen + sen1 + sen2 + sen3 +
                                       sen4 + sen5 + sen6 + sen7 + "\n");
 }
-
-int Main::sendEmBrakes(bool left_brakes, bool right_brakes)
-{
-  std::string brake, brake1;
-  brake = left_brakes ? "1" : "2";
-  brake1 = right_brakes ? "1" : "2";
-
-  return base_communicator_->sendData("CMD20" + brake + brake1 + "\n");
-}
+#endif
 
 void Main::run()
 {
@@ -209,7 +248,7 @@ void Main::run()
   ReceiverThread* receiverThread = new ReceiverThread(log_, base_communicator_);
   receiverThread->start();
 
-  while (1) {
+  while (sys_.running_) {
     stm_ = data_.getStateMachineData();
     nav_ = data_.getNavigationData();
     mtr_ = data_.getMotorData();
@@ -218,6 +257,10 @@ void Main::run()
     emb_ = data_.getEmergencyBrakesData();
 
     sendState(stm_.current_state);
+    sendBmsStatus(bat_.module_status);
+    sendNavStatus(nav_.module_status);
+    sendSenStatus(sen_.module_status);
+    sendMtrStatus(mtr_.module_status);
 
     if (nav_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send navigation data.");
@@ -237,25 +280,23 @@ void Main::run()
     if (sen_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send sensors data.");
       sendImu(sen_.imu.value);
+#ifdef PROXI
       sendProxiFront(sen_.proxi_front.value);
       sendProxiRear(sen_.proxi_back.value);
+#endif
     }
 
     if (bat_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send batteries data.");
-      sendHpVoltage(bat_.high_power_batteries.at(0));
-      sendHpTemperature(bat_.high_power_batteries.at(0));
-      sendHpCharge(bat_.high_power_batteries.at(0));
-      sendHpVoltage1(bat_.high_power_batteries.at(1));
-      sendHpTemperature1(bat_.high_power_batteries.at(1));
-      sendHpCharge1(bat_.high_power_batteries.at(1));
-      sendLpCharge(bat_.low_power_batteries.at(0));
-      sendLpCharge1(bat_.low_power_batteries.at(1));
+      sendHpBattery(bat_.high_power_batteries.at(0));
+      sendHpBattery_1(bat_.high_power_batteries.at(1));
+      sendLpBattery(bat_.low_power_batteries.at(0));
+      sendLpBattery_1(bat_.low_power_batteries.at(1));
     }
 
     if (emb_.module_status != data::ModuleStatus::kStart) {
       log_.DBG3("COMN", "Send emergency brakes data.");
-      sendEmBrakes(emb_.left_brakes, emb_.right_brakes);
+      sendEmBrakes(emb_.front_brakes, emb_.rear_brakes);
     }
 
     sleep(200);

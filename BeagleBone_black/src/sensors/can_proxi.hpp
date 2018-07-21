@@ -21,6 +21,7 @@
 
 #ifndef BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
+#ifdef PROXI
 
 #include <cstdint>
 
@@ -62,7 +63,7 @@ class CanProxi : public ProxiInterface, public CanProccesor {
   // from CanProcessor
   void processNewData(Frame& message) override;
   bool hasId(uint32_t id, bool extended) override;
-
+  void startRanging() override;
  private:
   Logger& log_;
   uint8_t id_;
@@ -73,6 +74,6 @@ class CanProxi : public ProxiInterface, public CanProccesor {
 };
 
 }}  // namespace hyped::sensors
-
+#endif
 #endif  // BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
 

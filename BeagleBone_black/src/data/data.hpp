@@ -85,7 +85,7 @@ struct Navigation : public Module {
   NavigationType  velocity;
   NavigationType  acceleration;
   NavigationType  emergency_braking_distance;
-  NavigationType  braking_distance = 0;  // TODO(Brano): Remove default and publish the actual dist
+  NavigationType  braking_distance = 750;  // TODO(Brano): Remove default,publish the actual dist.
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -100,10 +100,11 @@ struct Imu : public Sensor {
   NavigationVector acc;
   NavigationVector gyr;
 };
-
+#ifdef PROXI
 struct Proximity : public Sensor {
   uint8_t val;
 };
+#endif
 
 struct StripeCounter : public Sensor {
   DataPoint<uint32_t> count;
@@ -111,28 +112,36 @@ struct StripeCounter : public Sensor {
 
 struct Sensors : public Module {
   static constexpr int kNumImus = 4;
+#ifdef PROXI
   static constexpr int kNumProximities = 8;
+#endif
   static constexpr int kNumKeyence = 2;
   static constexpr int kNumOptEnc = 2;
 
   DataPoint<array<Imu, kNumImus>> imu;
+#ifdef PROXI
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
+#endif
   array<StripeCounter, kNumKeyence>  keyence_stripe_counter;   //  l = 0, r = 1
   array<float, kNumOptEnc> optical_enc_distance;   // l = 0, r =1
 };
 
 struct SensorCalibration {
+#ifdef PROXI
   array<float, Sensors::kNumProximities> proxi_front_variance;
   array<float, Sensors::kNumProximities> proxi_back_variance;
+#endif
   array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;  // x[i][0]=acc, x[i][1]=gyr
 };
 
 struct Battery {
-  uint16_t  voltage;      // in 0.1V
-  int16_t   current;      // in 0.1A (can be negative)
+  uint16_t  voltage;      // in 0.1V (deciV)
+  int16_t   current;      // (can be negative) (for LP mA ) (for HP deciA)
   uint8_t   charge;       // in % (from 0 to 100)
-  int8_t    temperature;  // in C
+  int8_t    temperature;  // max temp in C
+  uint16_t  low_voltage_cell;    // in mV
+  uint16_t  high_voltage_cell;   // in mV
 };
 
 struct Batteries : public Module {
@@ -144,8 +153,8 @@ struct Batteries : public Module {
 };
 
 struct EmergencyBrakes : public Module {
-  bool left_brakes;       // true if left facing emergency brakes deploy
-  bool right_brakes;      // true if right facing emergency brakes deploy
+  bool front_brakes;       // true if front facing emergency brakes deploy
+  bool rear_brakes;      // true if rear facing emergency brakes deploy
 };
 
 // -------------------------------------------------------------------------------------------------

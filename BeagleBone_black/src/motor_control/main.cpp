@@ -77,7 +77,8 @@ Main::Main(uint8_t id, Logger& log)
 void Main::run()
 {
   log_.INFO("MOTOR", "Starting motor controllers");
-  while (run_) {
+  System& sys = System::getSystem();
+  while (run_ && sys.running_) {
     state_ = data_.getStateMachineData();
 
     if (state_.current_state == data::State::kIdle) {

@@ -17,7 +17,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
+#ifdef PROXI
 #include "sensors/fake_proxi.hpp"
 
 #include <random>
@@ -71,6 +71,8 @@ void FakeProxi::setData()
   reading_counter_ = 0;
   srand(time(NULL));
 }
+
+void FakeProxi::startRanging() {}
 
 void FakeProxi::getData(Proximity* proxi)
 {
@@ -157,4 +159,4 @@ bool FakeProxi::checkTime()
 }
 
 }}   // namespace hyped::sensors
-
+#endif

@@ -19,15 +19,20 @@
 #include "navigation.hpp"
 
 #include <algorithm>  // std::min
-#include <cmath>
+#include <map>
+#include <string>
+#include <sstream>
 
+#ifdef PROXI
 #include "Eigen/Dense"
 #include "Eigen/SVD"
+#endif
 
 namespace hyped {
 namespace navigation {
 
 const Navigation::Settings Navigation::kDefaultSettings;
+#ifdef PROXI
 float proxiMean(const Proximity* const a, const Proximity* const b)
 {
   if (a->operational && b->operational)
@@ -38,24 +43,66 @@ float proxiMean(const Proximity* const a, const Proximity* const b)
     return b->val;
   return -1;
 }
+#endif
 
 Navigation::Navigation(Barrier& post_calibration_barrier,
                        Logger& log,
-                       const Settings& settings)
+                       std::string file_path)
     : post_calibration_barrier_(post_calibration_barrier),
       log_(log),
-      settings_(settings),
       status_(ModuleStatus::kStart),
       is_calibrating_(false),
       num_gravity_samples_(0),
-      g_(0),
       num_gyro_samples_(0),
       acceleration_(0),  // TODO(Brano): Should this be g or 0?
-      velocity_(0),
-      displacement_(0),
+      velocity_(0, NavigationVector(0)),
+      displacement_(0, NavigationVector(0)),
+      stripe_count_(0),
       prev_angular_velocity_(0 , NavigationVector()),
-      orientation_(1, 0, 0, 0)
-{}
+      orientation_(1, 0, 0, 0),
+      acceleration_integrator_(&velocity_),
+      velocity_integrator_(&displacement_)
+{
+  readDataFromFile(file_path);
+  out_.status              = &status_;
+  out_.is_calibrating      = &is_calibrating_;
+  out_.num_gravity_samples = &num_gravity_samples_;
+  out_.g                   = &g_;
+  out_.num_gyro_samples    = &num_gyro_samples_;
+  out_.gyro_offsets        = &gyro_offsets_;
+  out_.acceleration        = &acceleration_;
+  out_.displacement        = &displacement_.value;
+  out_.velocity            = &velocity_.value;
+  out_.stripe_count        = &stripe_count_;
+  out_.orientation         = &orientation_;
+}
+
+void Navigation::readDataFromFile(std::string file_path)
+{
+  std::map<std::string, float> map_settings;
+  std::string variable_name;
+  float value;
+  std::ifstream file;
+  file.open(file_path);
+  if (!file.is_open()) {
+    throw std::invalid_argument("Wrong file path");
+  }
+
+  std::string line;
+  while (getline(file, line)) {
+    std::stringstream input(line);
+    input >> variable_name;
+    input >> value;
+    map_settings[variable_name] = value;
+  }
+  file.close();
+
+  settings_.prox_orient_w = map_settings["prox_orient_w"];
+  settings_.prox_displ_w  = map_settings["prox_displ_w"];
+  settings_.strp_displ_w  = map_settings["strp_displ_w"];
+  settings_.prox_vel_w    = map_settings["prox_vel_w"];
+  settings_.strp_vel_w    = map_settings["strp_vel_w"];
+}
 
 NavigationType Navigation::getAcceleration() const
 {
@@ -64,23 +111,60 @@ NavigationType Navigation::getAcceleration() const
 
 NavigationType Navigation::getVelocity() const
 {
-  return velocity_[0];
+  return velocity_.value[0];
 }
 
 NavigationType Navigation::getDisplacement() const
 {
-  return displacement_[0];
+  return displacement_.value[0];
 }
 
 NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
-  return velocity_[0]*velocity_[0] / kEmergencyDeceleration;
+  return velocity_.value[0]*velocity_.value[0] / kEmergencyDeceleration;
+}
+
+NavigationType Navigation::getBrakingDistance() const
+{
+  // A polynomial fit for the braking distance at a specific (normalised) velocity, where
+  // kCoeffSlow for < 50m/s and kCoeffFast for > 50m/s because kCoeffFast is inaccurate
+  // at < 10m/s but they both agree between ~10 and ~50m/s.
+  static constexpr std::array<NavigationType, 16> kCoeffSlow = {
+       136.3132, 158.9403,  63.6093, -35.4894, -149.2755, 152.6967, 502.5464, -218.4689,
+      -779.534,   95.7285, 621.1013,  50.4598, -245.099,  -54.5,     38.0642,   12.3548};
+  static constexpr std::array<NavigationType, 16> kCoeffFast = {
+       258.6,  299.2,  115.2, -104.7, -260.9, 488.5, 940.8, -808.5, -1551.9,  551.7,
+      1315.7,  -61.4, -551.4,  -84.5,   90.7,  26.2};
+
+  NavigationType braking_distance = 2.0;
+  NavigationType var = 1.0;
+  if (getVelocity() < 50.0) {
+    NavigationType norm_v = (getVelocity() - 30.0079) / 17.2325;
+    for (unsigned int i = 0; i < kCoeffSlow.size(); ++i) {
+      braking_distance += kCoeffSlow[i] * var;
+      var *= norm_v;
+    }
+  } else {
+    NavigationType norm_v = (getVelocity() - 41.4985) / 23.5436;
+    for (unsigned int i = 0; i < kCoeffFast.size(); ++i) {
+      braking_distance += kCoeffFast[i] * var;
+      var *= norm_v;
+    }
+  }
+  return braking_distance;
 }
 
 ModuleStatus Navigation::getStatus() const
 {
   return status_;
+}
+
+const Navigation::FullOutput& Navigation::getAll()
+{
+  out_.braking_dist    = getBrakingDistance();
+  out_.em_braking_dist = getEmergencyBrakingDistance();
+  return out_;
 }
 
 bool Navigation::startCalibration()
@@ -99,11 +183,6 @@ bool Navigation::finishCalibration()
   if (!is_calibrating_ || status_ != ModuleStatus::kReady)
     return false;
 
-  // Finalize calibration
-  g_ /= num_gravity_samples_;
-  for (NavigationVector& v : gyro_offsets_)
-    v /= num_gyro_samples_;
-
   // Update state
   is_calibrating_ = false;
 
@@ -121,10 +200,14 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
                                       sc.imu_variance[i][0].sqrt(),
                                       NavigationVector(0.1));
     gyro_filter_[i].configure(readings.imu.value[i].gyr,
-                              sc.imu_variance[i][0].sqrt(),
+                              sc.imu_variance[i][1].sqrt(),
                               NavigationVector(0.1));
+    log_.INFO("NAV",
+              "IMU[%d]: accl variance = (%.3f, %.3f, %.3f), gyro variance = (%.3f, %.3f, %.3f)",
+              i, sc.imu_variance[i][0][0], sc.imu_variance[i][0][1], sc.imu_variance[i][0][1],
+              sc.imu_variance[i][1][0], sc.imu_variance[i][1][1], sc.imu_variance[i][1][1]);
   }
-
+#ifdef PROXI
   for (int i = 0; i < Sensors::kNumProximities; ++i) {
     proximity_filter_[i].configure(readings.proxi_front.value[i].val,
                                    sqrt(sc.proxi_front_variance[i]),
@@ -132,13 +215,16 @@ void Navigation::init(SensorCalibration sc, Sensors readings)
     proximity_filter_[i + Sensors::kNumProximities].configure(readings.proxi_back.value[i].val,
                                                               sqrt(sc.proxi_back_variance[i]),
                                                               0.1);
+    log_.INFO("NAV", "Proxi[%d]: front variance = %.3f, back variance = %.3f",
+              i, sc.proxi_front_variance[i], sc.proxi_back_variance[i]);
   }
-
+#endif
+  log_.INFO("NAV", "Navigation initialised.");
   log_.DBG("NAV",
       "After init: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 
   status_ = ModuleStatus::kInit;
 }
@@ -153,14 +239,37 @@ std::array<NavigationType, 3> Navigation::getNearestStripeDists(uint16_t stripe_
   return arr;
 }
 
-void Navigation::update(DataPoint<ImuArray> imus)
+void Navigation::update(Input input)
+{
+  if (input.imus != nullptr) {
+    imuUpdate(*input.imus);
+  }
+#ifdef PROXI
+  if (input.proxis != nullptr && !is_calibrating_ &&
+      (settings_.proxi_displ_enable || settings_.proxi_orient_enable)) {  // NOLINT[whitespace/braces]
+    proximityUpdate(*input.proxis);
+  }
+#endif
+  if (input.sc != nullptr && !is_calibrating_ && settings_.keyence_enable) {
+    stripeCounterUpdate(*input.sc);
+  }
+  if (input.optical_enc_distance != nullptr && !is_calibrating_ && settings_.opt_enc_enable) {
+    opticalEncoderUpdate(*input.optical_enc_distance);
+  }
+}
+
+void Navigation::imuUpdate(DataPoint<ImuArray> imus)
 {
   for (unsigned int i = 0; i < imus.value.size(); ++i) {
     log_.DBG3("NAV", "Before filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
         i, imus.value[i].acc[0], imus.value[i].acc[1], imus.value[i].acc[2],
         i, imus.value[i].gyr[0], imus.value[i].gyr[1], imus.value[i].gyr[2]);
+
     imus.value[i].acc = acceleration_filter_[i].filter(imus.value[i].acc);
-    imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
+    if (settings_.gyro_enable) {
+      imus.value[i].gyr = gyro_filter_[i].filter(imus.value[i].gyr);
+    }
+
     log_.DBG3("NAV", " After filtering: a[%d]=(%.3f, %.3f, %.3f), omega[%d]=(%.3f, %.3f, %.3f)",
         i, imus.value[i].acc[0], imus.value[i].acc[1], imus.value[i].acc[2],
         i, imus.value[i].gyr[0], imus.value[i].gyr[1], imus.value[i].gyr[2]);
@@ -171,29 +280,29 @@ void Navigation::update(DataPoint<ImuArray> imus)
   for (unsigned int i = 0; i < imus.value.size(); ++i) {
     if (imus.value[i].operational) {
       ++num_operational;
-      acc += imus.value[i].acc;
-      gyr += imus.value[i].gyr;
+      acc += imus.value[i].acc - g_[i];
+      gyr += imus.value[i].gyr - gyro_offsets_[i];
     }
   }
 
   if (num_operational < 2) {
     status_ = ModuleStatus::kCriticalFailure;
     log_.ERR("NAV", "Critical failure: num operational IMUs = %d < 2", num_operational);
+    if (num_operational <= 0)
+      return;
   }
 
   if (is_calibrating_) {
     calibrationUpdate(imus.value);
   } else {
     accelerometerUpdate(DataPoint<NavigationVector>(imus.timestamp, acc/num_operational));
+    if (settings_.gyro_enable)
              gyroUpdate(DataPoint<NavigationVector>(imus.timestamp, gyr/num_operational));
   }
 }
-
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
+#ifdef PROXI
+void Navigation::proximityUpdate(ProximityArray proxis)
 {
-  update(imus);
-  if (is_calibrating_) return;
-
   Proximities ground, rail;
   // TODO(Brano,Martin): Make sure proxis are in correct order (define index constants)
   int num_ground_fail = 0;
@@ -217,33 +326,23 @@ void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis)
     log_.ERR("NAV", "Critical failure: insufficient rail proxis");
     return;
   }
-
-  proximityDisplacementUpdate(ground, rail);
-  proximityOrientationUpdate(ground, rail);
+  if (settings_.proxi_displ_enable)
+    proximityDisplacementUpdate(ground, rail);
+  if (settings_.proxi_orient_enable)
+    proximityOrientationUpdate(ground, rail);
 }
-
-void Navigation::update(DataPoint<ImuArray> imus, StripeCounterArray scs)
-{
-  update(imus);
-  // TODO(Brano,Adi): Do something with stripe cnt timestamp as well?
-  if (!is_calibrating_)
-    stripeCounterUpdate(scs);
-}
-
-void Navigation::update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounterArray scs)
-{
-  update(imus, proxis);
-  if (!is_calibrating_)
-    stripeCounterUpdate(scs);
-}
+#endif
 
 void Navigation::calibrationUpdate(ImuArray imus)
 {
+  if ((num_gravity_samples_ % 5000) == 0)
+    log_.INFO("NAV", "No. of gravity samples: %d", num_gravity_samples_);
+
   // Online mean algorithm
   ++num_gyro_samples_;
+  ++num_gravity_samples_;
   for (unsigned int i = 0; i < data::Sensors::kNumImus; ++i) {
-    ++num_gravity_samples_;
-    g_ = g_ + (imus[i].acc - g_)/num_gravity_samples_;
+    g_[i] = g_[i] + (imus[i].acc - g_[i])/num_gravity_samples_;
     gyro_offsets_[i] = gyro_offsets_[i] + (imus[i].gyr - gyro_offsets_[i])/num_gyro_samples_;
   }
 
@@ -270,19 +369,29 @@ void Navigation::accelerometerUpdate(DataPoint<NavigationVector> acceleration)
   log_.DBG2("NAV",
       "Before accl update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
+
+  // TODO(Brano): Rotate acceleration if gyro enabled. Need to add conj to Quaternion.
   acceleration_ = acceleration.value;
-  auto velocity = acceleration_integrator_.update(acceleration);
-  velocity_     = velocity.value;
-  displacement_ = velocity_integrator_.update(velocity).value;
+  acceleration_integrator_.update(acceleration);  // Updates velocity
+  velocity_integrator_.update(velocity_);  // Updates displacement
+
+  auto dists = getNearestStripeDists(stripe_count_);
+  if (std::abs(dists[2]) < std::abs(dists[1])) {
+    if (status_ != ModuleStatus::kCriticalFailure)
+      log_.ERR("NAV", "Critical failure: missed stripe (oldCnt=%d, nearestStripes=[%f, %f, %f])",
+            stripe_count_, dists[0], dists[1], dists[2]);
+    status_ = ModuleStatus::kCriticalFailure;
+  }
+
   log_.DBG2("NAV",
       " After accl update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
-
+#ifdef PROXI
 void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail)
 {
   // Ground points
@@ -335,14 +444,15 @@ void Navigation::proximityOrientationUpdate(Proximities ground, Proximities rail
   orientation_[3] = orientation.z();
 }
 
+
 void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rail)
 {
   log_.DBG2("NAV",
       "Before proxi displ update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
-  NavigationVector proxi_displ = displacement_;
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
+  NavigationVector proxi_displ = displacement_.value;
   // TODO(Brano): Make this a weighted average based on the actual positions of the 4 sensors with
   //              respect to IMUs
   proxi_displ[2] = (ground.fr + ground.rr + ground.rl + ground.fl) / 4.0;
@@ -355,7 +465,8 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
   proxi_displ[1] = proxi_displ[1]/1000.0;
 
   // Update displacement
-  displacement_ = (1 - settings_.prox_displ_w)*displacement_ + settings_.prox_displ_w*proxi_displ;
+  displacement_.value = (1 - settings_.prox_displ_w)*displacement_.value +
+                              settings_.prox_displ_w*proxi_displ;
 
   // Update velocity
   DataPoint<Vector<NavigationType, 2>> dp(
@@ -363,26 +474,31 @@ void Navigation::proximityDisplacementUpdate(Proximities ground, Proximities rai
       Vector<NavigationType, 2>({proxi_displ[1], proxi_displ[2]}));
   auto proxi_vel = proxi_differentiator_.update(dp).value;
 
-  velocity_[1] = (1 - settings_.prox_vel_w)*velocity_[1] + settings_.prox_vel_w*proxi_vel[0];
-  velocity_[2] = (1 - settings_.prox_vel_w)*velocity_[2] + settings_.prox_vel_w*proxi_vel[1];
+  velocity_.value[1] = (1 - settings_.prox_vel_w)*velocity_.value[1] +
+                             settings_.prox_vel_w*proxi_vel[0];
+  velocity_.value[2] = (1 - settings_.prox_vel_w)*velocity_.value[2] +
+                             settings_.prox_vel_w*proxi_vel[1];
 
   log_.DBG2("NAV",
       " After proxi displ update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
 }
+#endif
 
 void Navigation::stripeCounterUpdate(StripeCounterArray scs)
 {
   log_.DBG2("NAV",
       "Before stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
   // TODO(Brano): Update displacement and velocity
 
   if (scs[0].count.value <= stripe_count_ && scs[1].count.value <= stripe_count_) {
+    log_.DBG3("NAV", "Stripe count not updated (oldCnt=%d, newCnts=[%d, %d])",
+          stripe_count_, scs[0].count.value, scs[1].count.value);
     return;
   }
 
@@ -413,15 +529,20 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
     }
     timestamp = (scs[0].count.timestamp + scs[1].count.timestamp) / 2;
     stripe_count_ = scs[0].count.value;
-    log_.DBG3("NAV", "Keyences are in sync (oldCnt=%d, newCnts=[%d, %d])");
+    log_.DBG3("NAV", "Keyences are in sync (oldCnt=%d, newCnts=[%d, %d])",
+        stripe_count_, scs[0].count.value, scs[1].count.value);
   } else {
     // Distance given by the current stripe should match distance, therefore the dists array should
     // provide [-ve, ~0, +ve] if the stripe count and distance are in agreement
     auto dists_l = getNearestStripeDists(scs[0].count.value - 1);
     auto dists_r = getNearestStripeDists(scs[1].count.value - 1);
-    if (std::abs(dists_l[0]) < std::abs(dists_l[1]) || std::abs(dists_l[2]) < std::abs(dists_l[1])) { //NOLINT
+    if (std::abs(dists_l[0]) < std::abs(dists_l[1]) ||
+        std::abs(dists_l[2]) < std::abs(dists_l[1]) ||
+        scs[0].count.value == 0) {
       // dists_l is incorrect
-      if (std::abs(dists_r[0]) < std::abs(dists_r[1]) || std::abs(dists_r[2]) < std::abs(dists_r[1])) { //NOLINT
+      if (std::abs(dists_r[0]) < std::abs(dists_r[1]) ||
+          std::abs(dists_r[2]) < std::abs(dists_r[1]) ||
+          scs[1].count.value == 0) {
         // dists_r is also incorrect
         status_ = ModuleStatus::kCriticalFailure;
         log_.ERR("NAV",
@@ -449,18 +570,23 @@ void Navigation::stripeCounterUpdate(StripeCounterArray scs)
   DataPoint<NavigationType> dp(timestamp, kStripeLocations[stripe_count_]);
 
   // Update x-axis (forwards) displacement
-  displacement_[0] = (1 - settings_.strp_displ_w) * displacement_[0] +
+  displacement_.value[0] = (1 - settings_.strp_displ_w) * displacement_.value[0] +
                           settings_.strp_displ_w  * dp.value;
 
   // Update x-axis velocity
-  velocity_[0] = (1 - settings_.strp_vel_w) * velocity_[0] +
-                      settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
+  // velocity_.value[0] = (1 - settings_.strp_vel_w) * velocity_.value[0] +
+  //                           settings_.strp_vel_w  * stripe_differentiator_.update(dp).value;
 
   log_.DBG2("NAV",
       " After stripe update: a=(%.3f, %.3f, %.3f), v=(%.3f, %.3f, %.3f), d=(%.3f, %.3f, %.3f)",
       acceleration_[0], acceleration_[1], acceleration_[2],
-      velocity_[0], velocity_[1], velocity_[2],
-      displacement_[0], displacement_[1], displacement_[2]);
+      velocity_.value[0], velocity_.value[1], velocity_.value[2],
+      displacement_.value[0], displacement_.value[1], displacement_.value[2]);
+}
+
+void Navigation::opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance)
+{
+  // TODO(anyone): implement
 }
 
 }}  // namespace hyped::navigation

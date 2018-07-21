@@ -22,7 +22,7 @@
 
 #ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
-
+#ifdef PROXI
 #include <string>
 #include <vector>
 
@@ -53,6 +53,8 @@ class FakeProxi : public ProxiInterface {
    * @brief    A function to check if the proximity sensor is online
    */
   bool isOnline() override { return true; }
+
+  void startRanging() override;
 
   /*
    * @brief    A function to get the proximity data
@@ -102,5 +104,5 @@ class FakeProxi : public ProxiInterface {
 
 }}  // namespace hyped::sensors
 
-
+#endif
 #endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_

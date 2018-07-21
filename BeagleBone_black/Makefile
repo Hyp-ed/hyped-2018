@@ -31,6 +31,11 @@ else
 $(info cross-compiling)
 endif
 
+ifdef PROXI
+$(info using proximities)
+	CFLAGS:=$(CFLAGS) -DPROXI
+endif
+
 # test if compiler is installed
 ifeq ($(shell which $(CC)), )
 $(error compiler $(CC) is not installed)

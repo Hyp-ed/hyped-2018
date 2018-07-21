@@ -24,14 +24,13 @@
 namespace hyped {
 namespace state_machine {
 
+GPIO* HypedMachine::pin_embrake_ = nullptr;
+GPIO* HypedMachine::pin_water_   = nullptr;
+
 HypedMachine::HypedMachine(utils::Logger& log)
     : current_state_(State::alloc_)
     , log_(log)
-    , pin_em1_(78, utils::io::gpio::kOut)
-    , pin_em2_(79, utils::io::gpio::kOut)
 {
-  pin_em1_.set();
-  pin_em2_.set();
   log_.INFO("STATE", "State Machine initialised");
   transition(new(current_state_) Idle());
 }
@@ -47,10 +46,6 @@ void HypedMachine::transition(State *state)
   // NOTE, no use of argument state, as all react() functions allocate all new
   // states directly to current_state_ variable through common State::alloc_ pointer
   current_state_->entry();
-  if (current_state_->state_ == data::State::kEmergencyBraking) {
-    pin_em1_.clear();
-    pin_em2_.clear();
-  }
   log_.INFO("STATE", "Transitioned to %s"
     , data::states[current_state_->state_]);
   state_machine_.current_state = current_state_->state_;
@@ -64,6 +59,25 @@ void HypedMachine::reset()
 {
   log_.INFO("STATE", "State Machine resetted");
   transition(new(current_state_) Idle());
+}
+
+void HypedMachine::setupEmbrakes()
+{
+  pin_embrake_ = new GPIO(46, utils::io::gpio::Direction::kOut);
+  pin_water_   = new GPIO(47, utils::io::gpio::Direction::kOut);
+  pin_embrake_->set();
+  pin_water_->set();
+}
+
+void HypedMachine::engageEmbrakes()
+{
+  utils::Logger log(true, 0);
+  if (pin_embrake_) {
+    pin_embrake_->clear();
+    log.INFO("STATE", "Emergency brakes engaged");
+  } else {
+    log.INFO("STATE", "Emergency brakes not initialised, we are going to die");
+  }
 }
 
 }}   // namespace hyped::state_machine

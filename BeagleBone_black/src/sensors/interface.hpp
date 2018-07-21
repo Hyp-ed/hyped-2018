@@ -27,7 +27,9 @@
 namespace hyped {
 
 using data::Imu;
+#ifdef PROXI
 using data::Proximity;
+#endif
 using data::Battery;
 using data::NavigationVector;
 
@@ -41,7 +43,7 @@ class SensorInterface {
    */
   virtual bool isOnline() = 0;
 };
-
+#ifdef PROXI
 class ProxiInterface: public SensorInterface {
  public:
   /**
@@ -49,7 +51,9 @@ class ProxiInterface: public SensorInterface {
    * @param proxi - output pointer to be filled by this sensor
    */
   virtual void getData(Proximity* proxi) = 0;
+  virtual void startRanging() = 0;
 };
+#endif
 
 class ImuInterface: public SensorInterface {
  public:

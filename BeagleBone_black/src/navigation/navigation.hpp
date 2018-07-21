@@ -21,6 +21,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cmath>
+#include <string>
+#include <fstream>
 
 #include "data/data.hpp"
 #include "utils/concurrent/barrier.hpp"
@@ -39,7 +42,9 @@ using data::Imu;
 using data::ModuleStatus;
 using data::NavigationType;
 using data::NavigationVector;
+#ifdef PROXI
 using data::Proximity;
+#endif
 using data::SensorCalibration;
 using data::Sensors;
 using data::StripeCounter;
@@ -78,15 +83,50 @@ class Navigation {
 
  public:
   typedef std::array<Imu,           Sensors::kNumImus>          ImuArray;
+#ifdef PROXI
   typedef std::array<Proximity*,    2*Sensors::kNumProximities> ProximityArray;
+#endif
   typedef std::array<StripeCounter, Sensors::kNumKeyence>       StripeCounterArray;
   struct Settings {
+#ifdef PROXI
+    bool proxi_displ_enable = false;  // Needs updated proxi positions
+    bool proxi_orient_enable = false;  // Needs updated proxi positions
+#endif
+    bool gyro_enable = false;  // Not fully implemented (rotate a)
+    bool opt_enc_enable = false;  // Not implemented
+    bool keyence_enable = true;
     // TODO(Brano): Change the default values
     float prox_orient_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in orientation calculation
     float prox_displ_w = 0.1;  ///< Weight (from [0,1]) of proxi vs imu in displacement calculation
     float strp_displ_w = 1.0;  ///< Weight [0,1] of stripe count vs imu in displacement calculation
     float prox_vel_w = 0.01;  ///< Weight (from [0,1]) of proxi vs imu in velocity calculation
     float strp_vel_w = 0.0;  ///< Weight [0,1]  of stripe count vs imu in velocity calculation
+  };
+  struct Input {
+    DataPoint<ImuArray> *imus = nullptr;
+#ifdef PROXI
+    ProximityArray *proxis = nullptr;
+#endif
+    StripeCounterArray *sc = nullptr;
+    array<float, Sensors::kNumOptEnc> *optical_enc_distance = nullptr;
+  };
+  struct FullOutput {
+    const ModuleStatus*     status;
+    const bool*             is_calibrating;
+    const int*              num_gravity_samples;
+    const std::array<NavigationVector, Sensors::kNumImus>* g;  // Acc offsets (gravitational acc)
+    const int*              num_gyro_samples;
+    const std::array<NavigationVector, Sensors::kNumImus>* gyro_offsets;
+
+    // Most up-to-date values of pod's acceleration, velocity and displacement in 3D
+    const NavigationVector* acceleration;
+    const NavigationVector* velocity;
+    const NavigationVector* displacement;
+    const uint16_t*        stripe_count;
+
+    const Quaternion<NavigationType>* orientation;
+    NavigationType braking_dist;
+    NavigationType em_braking_dist;
   };
 
   /**
@@ -98,7 +138,7 @@ class Navigation {
    */
   Navigation(Barrier& post_calibration_barrier,
              Logger& log = System::getLogger(),
-             const Settings& settings = kDefaultSettings);
+             std::string file_path = "../BeagleBone_black/data/configuration/NavSettings.txt");
 
   /**
    * @brief Get the acceleration value
@@ -126,11 +166,23 @@ class Navigation {
    */
   NavigationType getEmergencyBrakingDistance() const;
   /**
+   * @brief Get the braking distances in metres
+   *
+   * @return NavigationType braking distance in metres
+   */
+  NavigationType getBrakingDistance() const;
+  /**
    * @brief Get the status of the nav module
    *
    * @return ModuleStatus Status of the nav module
    */
   ModuleStatus getStatus() const;
+  /**
+   * @brief Get the all nav data. Useful for debugging and analysis
+   *
+   * @return const FullOutput&
+   */
+  const FullOutput& getAll();
   /**
    * @brief Starts the calibration phase if the module's status is `kInit`.
    *
@@ -153,6 +205,7 @@ class Navigation {
    * @param readings  Latest sensor readings
    */
   void init(SensorCalibration sc, Sensors readings);
+  void update(Input);
 
  private:
   /**
@@ -160,12 +213,14 @@ class Navigation {
    *        likely temporary and will be replaced by an array or other suitable data structure once
    *        the algorithm using it is complete.
    */
+#ifdef PROXI
   struct Proximities {
     float fr;  // mm
     float rr;  // mm
     float rl;  // mm
     float fl;  // mm
   };
+#endif
 
   static constexpr int kMinNumCalibrationSamples = 200000;
   static const Settings kDefaultSettings;
@@ -178,29 +233,7 @@ class Navigation {
    *                                       next 2 stripes (both should be positive).
    */
   std::array<NavigationType, 3> getNearestStripeDists(uint16_t stripe_count);
-  /**
-   * @brief Updates navigation values based on new IMU reading. This should be called when new IMU
-   *        reading is available but no other data has been updated.
-   *
-   * @param[in] imus Datapoint of an array of IMU readings
-   */
-  void update(DataPoint<ImuArray> imus);
-  /**
-   * @brief Updates navigation based on new IMU and proxi readings. Should be called when IMU and
-   *        proxi have been updated but there is no update from stripe counter.
-   *
-   * @param[in] imus   Datapoint of an array of IMU readings
-   * @param[in] proxis Array of proximity readings
-   */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis);
-  /**
-   * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
-   *        IMU and stripe counter have been updated but there is no update from proximity sensors.
-   *
-   * @param imus         Datapoint of an array of IMU readings
-   * @param scs          Array of stripe counter readings
-   */
-  void update(DataPoint<ImuArray> imus, StripeCounterArray scs);
+
   /**
    * @brief Updates navigation based on new IMU and stripe counter readings. Should be called when
    *        IMU, proximity sensors, and stripe counter have all been updated.
@@ -209,32 +242,40 @@ class Navigation {
    * @param[in] proxis   Array of proximity readings
    * @param scs          Array of stripe counter readings
    */
-  void update(DataPoint<ImuArray> imus, ProximityArray proxis, StripeCounterArray scs);
 
+  void imuUpdate(DataPoint<ImuArray> imus);
+#ifdef PROXI
+  void proximityUpdate(ProximityArray proxis);
+#endif
   void calibrationUpdate(ImuArray imus);
   void gyroUpdate(DataPoint<NavigationVector> angular_velocity);  // Point number 1
   void accelerometerUpdate(DataPoint<NavigationVector> acceleration);  // Points 3, 4, 5, 6
+#ifdef PROXI
   void proximityOrientationUpdate(Proximities ground, Proximities rail);  // Point number 7
   void proximityDisplacementUpdate(Proximities ground, Proximities rail);  // Point number 7
+#endif
   void stripeCounterUpdate(StripeCounterArray scs);  // Point number 7
+  void opticalEncoderUpdate(array<float, Sensors::kNumOptEnc> optical_enc_distance);
+  void readDataFromFile(std::string file_path);
 
   // Admin stuff
   Barrier& post_calibration_barrier_;
   Logger& log_;
-  const Settings settings_;
+  Settings settings_;
   ModuleStatus status_;
+  FullOutput out_;
 
   // Calibration variables
   bool is_calibrating_;
   int num_gravity_samples_;
-  NavigationVector g_;  // Acceleration due to gravity. Measured during calibration.
+  std::array<NavigationVector, Sensors::kNumImus> g_;  // Acc offsets (gravitational acc)
   int num_gyro_samples_;
   std::array<NavigationVector, Sensors::kNumImus> gyro_offsets_;  // Measured during calibration
 
   // Most up-to-date values of pod's acceleration, velocity and displacement in 3D; used for output
   NavigationVector acceleration_;
-  NavigationVector velocity_;
-  NavigationVector displacement_;
+  DataPoint<NavigationVector> velocity_;
+  DataPoint<NavigationVector> displacement_;
   uint16_t stripe_count_;
 
   // Internal data that is not published
@@ -244,12 +285,15 @@ class Navigation {
   // Filters for reducing noise in sensor data before processing the data in any other way
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> acceleration_filter_;  // One for each IMU
   std::array<Kalman<NavigationVector>, Sensors::kNumImus> gyro_filter_;          // One for each IMU
+#ifdef PROXI
   std::array<Kalman<float>, 2*Sensors::kNumProximities> proximity_filter_;
-
+#endif
   Integrator<NavigationVector> acceleration_integrator_;  // Acceleration to velocity
   Integrator<NavigationVector> velocity_integrator_;      // Velocity to displacement
   Differentiator<NavigationType> stripe_differentiator_;  // Stripe cnt distance to velocity
+#ifdef PROXI
   Differentiator<Vector<NavigationType, 2>> proxi_differentiator_;
+#endif
 };
 
 }}  // namespace hyped::navigation

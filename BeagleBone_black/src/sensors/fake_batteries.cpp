@@ -35,19 +35,28 @@ FakeBatteries::FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal)
       is_high_voltage_(is_high_voltage),
       voltage_(1100),
       current_(200),
-      temperature_(30)
+      temperature_(30),
+      charge_(75),
+      low_voltage_cell_(3300),
+      high_voltage_cell_(3600)
 {}
 
 void FakeBatteries::getData(Battery* battery)
 {
   if (is_high_voltage_) {
-    battery->voltage     = voltage_;
-    battery->temperature = temperature_;
-    battery->current     = current_;
+    battery->voltage           = voltage_;
+    battery->temperature       = temperature_;
+    battery->current           = current_;
+    battery->charge            = charge_;
+    battery->low_voltage_cell  = low_voltage_cell_;
+    battery->high_voltage_cell = high_voltage_cell_;
   } else {
-    battery->voltage     = 170;
-    battery->temperature = temperature_;
-    battery->current     = 200;
+    battery->voltage           = 170;
+    battery->temperature       = temperature_;
+    battery->current           = 200;
+    battery->charge            = charge_;
+    battery->low_voltage_cell  = 0;
+    battery->high_voltage_cell = 0;
   }
 }
 

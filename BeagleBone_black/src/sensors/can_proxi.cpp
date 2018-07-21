@@ -19,6 +19,7 @@
  *    limitations under the License.
  */
 
+#ifdef PROXI
 #include "sensors/can_proxi.hpp"
 
 
@@ -66,6 +67,8 @@ void CanProxi::getData(Proximity* proxi)
   proxi->operational = isOnline();
 }
 
+void CanProxi::startRanging() {}
+
 // ---------------------------------------------------------------------
 // CanProcessor
 // ---------------------------------------------------------------------
@@ -110,4 +113,4 @@ bool CanProxi::hasId(uint32_t id, bool extended)
 
 
 }}  // namespace hyped::sensors
-
+#endif

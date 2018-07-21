@@ -15,7 +15,7 @@ script:
 - docker run --name travis -it hyped/hyped-2018:latest uname -a
 - docker cp . travis:/test/
 - docker commit travis hyped/current
-- docker run -it hyped/current make -C BeagleBone_black -j --silent clean all
+- docker run -it hyped/current make -C BeagleBone_black -j --silent clean hyped
 
 notifications:
   slack:

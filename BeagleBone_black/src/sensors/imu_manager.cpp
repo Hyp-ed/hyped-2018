@@ -40,7 +40,7 @@ ImuManager::ImuManager(Logger& log,
     : ImuManagerInterface(log),
       sys_(System::getSystem()),
       sensors_imu_(imu),
-      chip_select_ {31, 50, 48, 51},
+      chip_select_ {48, 49, 115, 117},
       is_calibrated_(false),
       calib_counter_(0)
 {
@@ -61,22 +61,26 @@ ImuManager::ImuManager(Logger& log,
         imu_[i] = new FakeImu(log,
                 "../BeagleBone_black/data/in/fake_imu_acc_offline_suddenly.txt",
                 "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                 "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       }
       imu_[data::Sensors::kNumImus-1] = new FakeImu(log,
                   "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                  "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
     } else if (sys_.fail_dec_imu) {
       for (int i = 0; i < data::Sensors::kNumImus - 1; i++) {
         imu_[i] = new FakeImu(log,
                 "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                 "../BeagleBone_black/data/in/fake_imu_dec_offline_suddenly.txt",
+                "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                 "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       }
       imu_[data::Sensors::kNumImus-1] = new FakeImu(log,
                   "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                  "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                   "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
     } else {
       // Nominal fake IMUs
@@ -87,6 +91,7 @@ ImuManager::ImuManager(Logger& log,
           imu_[i] = new FakeImu(log,
                     "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                    "../BeagleBone_black/data/in/fake_imu_input_em.txt",
                     "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
         }
       }

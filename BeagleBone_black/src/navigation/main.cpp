@@ -26,6 +26,7 @@ namespace hyped {
 
 using data::ModuleStatus;
 using data::State;
+using utils::concurrent::ScopedLock;
 using utils::System;
 
 namespace navigation {
@@ -44,6 +45,7 @@ void Main::run()
   std::unique_ptr<Sensors> readings(new Sensors());
 
   // Views of the Sensors structs
+#ifdef PROXI
   std::unique_ptr<Navigation::ProximityArray> last_proxis(new Navigation::ProximityArray());
   std::unique_ptr<Navigation::ProximityArray> proxis(new Navigation::ProximityArray());
   // Set up pointers as to unify the front and rear proxis in a single array
@@ -53,9 +55,12 @@ void Main::run()
     (*last_proxis)[i] = &(last_readings->proxi_front.value[i]);
     (*last_proxis)[i + Sensors::kNumProximities] = &(last_readings->proxi_back.value[i]);
   }
+#endif
   log_.INFO("NAV", "Main started");
 
-  while (1) {
+  System& sys = System::getSystem();
+  while (sys.running_) {
+    ScopedLock L(&l_);
     // State updates
     State current_state = data_.getStateMachineData().current_state;
     switch (current_state) {
@@ -81,8 +86,10 @@ void Main::run()
             continue;
           }
         }
-      case State::kReady :
         break;
+      case State::kReady :
+        yield();
+        continue;
       case State::kAccelerating :
         if (nav_.is_calibrating_) {
           if (nav_.finishCalibration())
@@ -109,20 +116,36 @@ void Main::run()
       yield();
       continue;
     }
-    if (proxiChanged(*last_readings, *readings) && stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis, readings->keyence_stripe_counter);
-    else if (proxiChanged(*last_readings, *readings))
-      nav_.update(readings->imu, *proxis);
-    else if (stripeCntChanged(*last_readings, *readings))
-      nav_.update(readings->imu, readings->keyence_stripe_counter);
-    else
-      nav_.update(readings->imu);
+    Navigation::Input input;
+#ifdef PROXI
+     if (proxiChanged(*last_readings, *readings)) {
+      input.proxis = &(*proxis);
+     }
+#endif
+     if (stripeCntChanged(*last_readings, *readings)) {
+      input.sc = &readings->keyence_stripe_counter;
+     }
+     if (opticalEncDistChanged(*last_readings, *readings)) {
+      input.optical_enc_distance = &readings->optical_enc_distance;
+     }
+     if (imuChanged(*last_readings, *readings)) {
+      input.imus = &readings->imu;
+     }
+     nav_.update(input);
 
     updateData();
 
     readings.swap(last_readings);
+#ifdef PROXI
     proxis.swap(last_proxis);
+#endif
   }
+}
+
+const Navigation::FullOutput& Main::getAllNavData()
+{
+  ScopedLock L(&l_);
+  return nav_.getAll();
 }
 
 bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
@@ -130,17 +153,29 @@ bool Main::imuChanged(const Sensors& old_data, const Sensors& new_data)
   return new_data.imu.timestamp != old_data.imu.timestamp;
 }
 
+#ifdef PROXI
 bool Main::proxiChanged(const Sensors& old_data, const Sensors& new_data)
 {
   // Both front and back should be always updated at the same time
   return old_data.proxi_front.timestamp != new_data.proxi_front.timestamp &&
          old_data.proxi_back.timestamp  != new_data.proxi_back.timestamp;
 }
+#endif
 
 inline bool Main::stripeCntChanged(const Sensors& old_data, const Sensors& new_data)
 {
   for (int i = 0; i < Sensors::kNumKeyence; i++) {
     if (new_data.keyence_stripe_counter[i].count.value != old_data.keyence_stripe_counter[i].count.value) //NOLINT
+      return true;
+  }
+
+  return false;
+}
+
+inline bool Main::opticalEncDistChanged(const Sensors& old_data, const Sensors& new_data)
+{
+  for (int i = 0; i < Sensors::kNumOptEnc; i++) {
+    if (new_data.optical_enc_distance[i] != old_data.optical_enc_distance[i])
       return true;
   }
 
@@ -156,15 +191,16 @@ void Main::updateData()
   nav_data.velocity                   = nav_.getVelocity();
   nav_data.acceleration               = nav_.getAcceleration();
   nav_data.emergency_braking_distance = nav_.getEmergencyBrakingDistance();
+  nav_data.braking_distance           = nav_.getBrakingDistance();
 
   data_.setNavigationData(nav_data);
   log_.DBG1("NAV",
-      "Update: ms=%d, a=(%.2f, %.2f, %.2f), v=(%.2f, %.2f, %.2f), d=(%.2f, %.2f, %.2f), ebd=%.2f",
+      "Update: ms=%d, a=(%.2f, %.2f, %.2f), v=(%.2f, %.2f, %.2f), d=(%.2f, %.2f, %.2f), bd=%.2f, ebd=%.2f, calib=%d", //NOLINT
       nav_.status_,
       nav_.acceleration_[0], nav_.acceleration_[1], nav_.acceleration_[2],
-      nav_.velocity_[0], nav_.velocity_[1], nav_.velocity_[2],
-      nav_.displacement_[0], nav_.displacement_[1], nav_.displacement_[2],
-      nav_.getEmergencyBrakingDistance());
+      nav_.velocity_.value[0], nav_.velocity_.value[1], nav_.velocity_.value[2],
+      nav_.displacement_.value[0], nav_.displacement_.value[1], nav_.displacement_.value[2],
+      nav_.getBrakingDistance(), nav_.getEmergencyBrakingDistance(), nav_.num_gravity_samples_);
 }
 
 }}  // namespace hyped::navigation

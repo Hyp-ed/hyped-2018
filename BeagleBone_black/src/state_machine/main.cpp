@@ -27,6 +27,7 @@
 
 #include "data/data.hpp"
 #include "utils/timer.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 namespace state_machine {
@@ -44,7 +45,8 @@ Main::Main(uint8_t id, Logger& log)
 
 void Main::run()
 {
-  while (1) {
+  utils::System& sys = utils::System::getSystem();
+  while (sys.running_) {
     comms_data_     = data_.getCommunicationsData();
     nav_data_       = data_.getNavigationData();
     sm_data_        = data_.getStateMachineData();
@@ -54,37 +56,37 @@ void Main::run()
 
     switch (sm_data_.current_state) {
       case data::State::kIdle:
-        // if (checkCriticalFailure())     break;   // TODO(anyone): discuss this transition again
-        if (checkInitialised())         break;
+        if (checkCommsCriticalFailure()) break;   // TODO(anyone): discuss this transition again
+        if (checkInitialised())          break;
         break;
       case data::State::kCalibrating:
-        if (checkCriticalFailure())     break;
-        if (checkSystemsChecked())      break;
+        if (checkCriticalFailure())      break;
+        if (checkSystemsChecked())       break;
         break;
       case data::State::kReady:
-        if (checkCriticalFailure())     break;
-        if (checkOnStart())             break;
+        if (checkCriticalFailure())      break;
+        if (checkOnStart())              break;
         break;
       case data::State::kAccelerating:
-        if (checkCriticalFailure())     break;
-        if (checkTimer())               break;
-        if (checkMaxDistanceReached())  break;
+        if (checkCriticalFailure())      break;
+        if (checkTimer())                break;
+        if (checkMaxDistanceReached())   break;
         break;
       case data::State::kDecelerating:
-        if (checkCriticalFailure())     break;
-        if (checkTimer())               break;
-        if (checkVelocityZeroReached()) break;
+        if (checkCriticalFailure())      break;
+        if (checkTimer())                break;
+        if (checkVelocityZeroReached())  break;
         break;
       case data::State::kRunComplete:
-        if (checkCriticalFailure())     break;
-        if (checkOnExit())              break;
+        if (checkCriticalFailure())      break;
+        if (checkOnExit())               break;
         break;
       case data::State::kExiting:
-        if (checkCriticalFailure())     break;
-        if (checkFinish())              break;
+        if (checkCriticalFailure())      break;
+        if (checkFinish())               break;
         break;
       case data::State::kEmergencyBraking:
-        if (checkVelocityZeroReached()) break;
+        if (checkVelocityZeroReached())  break;
         break;
       // we cannot recover from these states
       case data::State::kInvalid:
@@ -134,6 +136,16 @@ bool Main::checkOnStart()
 
     // also setup timer for going to emergency braking state
     time_start_ = utils::Timer::getTimeMicros();
+    return true;
+  }
+  return false;
+}
+
+bool Main::checkCommsCriticalFailure()
+{
+  if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
+    log_.ERR("STATE", "Critical failure caused by communications ");
+    hypedMachine.handleEvent(kCriticalFailure);
     return true;
   }
   return false;
@@ -210,8 +222,9 @@ bool Main::checkFinish()
 
 bool Main::checkVelocityZeroReached()
 {
-  if (nav_data_.velocity <= 0.1) {
-    log_.INFO("STATE", "Zero velocity reached");
+  if (motor_data_.velocity_1 == 0 && motor_data_.velocity_2 == 0
+      && motor_data_.velocity_3 == 0 && motor_data_.velocity_4 == 0) {
+    log_.INFO("STATE", "RPM reached zero.");
     hypedMachine.handleEvent(kVelocityZeroReached);
     return true;
   }

@@ -25,6 +25,7 @@ SRCS := \
   sensors/fake_gpio_counter.cpp \
   sensors/gpio_counter.cpp \
   sensors/fake_proxi.cpp \
+  sensors/em_brake.cpp \
   communications/main.cpp \
   communications/communications.cpp \
   communications/receiver.cpp \
@@ -46,6 +47,7 @@ MAINS := \
   demo_data \
   demo_machine \
   demo_motor \
+  demo_navigation \
   demo_motor_testing \
   demo_communications \
   demo_threading \
@@ -57,8 +59,9 @@ MAINS := \
   demo_statistics\
   demo_can \
   demo_mpu9250 \
-  demo_fake_proxi \
   demo_optical_encoder \
-  demo_imus \
+  demo_sensors \
   test_proxis \
+  demo_fake_proxis \
+  demo_imus \
   test_imus \

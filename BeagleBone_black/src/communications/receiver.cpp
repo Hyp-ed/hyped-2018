@@ -21,20 +21,24 @@
 #include "communications/receiver.hpp"
 
 namespace hyped {
+
+using utils::System;
+
 namespace communications {
 
 ReceiverThread::ReceiverThread(Logger& log, Communications* base_communicator)
     : Thread(),
+      sys_(System::getSystem()),
       log_(log),
-      base_communicator_(base_communicator),
-      data_(data::Data::getInstance())
+      data_(data::Data::getInstance()),
+      base_communicator_(base_communicator)
 { /* Empty */ }
 
 void ReceiverThread::run()
 {
   data::Communications cmn_;
 
-  while (1) {
+  while (sys_.running_) {
     cmn_ = data_.getCommunicationsData();
     int command = base_communicator_->receiveMessage();
 

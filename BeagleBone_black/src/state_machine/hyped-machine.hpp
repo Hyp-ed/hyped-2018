@@ -43,13 +43,16 @@ class HypedMachine {
   void transition(State *state);
   void reset();
 
+  static void setupEmbrakes();
+  static void engageEmbrakes();
+
  private:
   State*             current_state_;
   utils::Logger&     log_;
   data::StateMachine state_machine_;
 
-  GPIO pin_em1_;
-  GPIO pin_em2_;
+  static GPIO* pin_embrake_;
+  static GPIO* pin_water_;
 };
 
 }}   // namespace hyped::state_machine

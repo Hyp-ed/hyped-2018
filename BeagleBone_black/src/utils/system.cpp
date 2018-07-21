@@ -26,6 +26,7 @@
 #include <getopt.h>
 #include <csignal>
 
+#include "state_machine/hyped-machine.hpp"
 
 #define DEFAULT_VERBOSE -1
 #define DEFAULT_DEBUG   -1
@@ -49,8 +50,12 @@ void printUsage()
     "    Set system-wide debug level. All DBG[n] where n <= level messages are printed.\n"
     "\n  --debug_motor, --debug_nav, --debug_sensor, --debug_state, --debug_cmn\n"
     "    Set module-specific debug level. All DBG[n] where n <= level messages are printed.\n"
-    "\n  --fake_imu --fake_proxi --fake_motors --fake_sensors --fake_keyence --fake_embrakes\n"
+    "\n  --fake_imu --fake_proxi --fake_motors --fake_sensors --fake_keyence --fake_batteries\n"
     "    Make the system use the fake data drivers.\n"
+    "\n  --fail_dec_imu --fail_acc_imu --fail_motors --miss_keyence --double_keyence\n"
+    "    Make the system use the fake data drivers and fail them for testing.\n"
+    "\n  --accurate\n"
+    "    Make the system use the accurate fake system\n"
     "");
 }
 }
@@ -83,7 +88,8 @@ System::System(int argc, char* argv[])
       fail_motors(false),
       miss_keyence(false),
       double_keyence(false),
-      accurate(false)
+      accurate(false),
+      running_(true)
 {
   int c;
   int option_index = 0;
@@ -255,8 +261,10 @@ System* System::system_ = 0;
 
 void System::parseArgs(int argc, char* argv[])
 {
-  if (system_) delete system_;
+  if (system_) return;
+
   system_ = new System(argc, argv);
+  state_machine::HypedMachine::setupEmbrakes();
 }
 
 System& System::getSystem()
@@ -277,16 +285,44 @@ Logger& System::getLogger()
 
 static void gracefulExit(int x)
 {
+  Logger log(true, 0);
+  log.INFO("SYSTEM", "termination signal received, exiting gracefully");
   exit(0);
 }
 
-void System::setExitFunction()
+static void segfaultHandler(int x)
 {
-  static bool signal_set = false;
-  if (signal_set) return;
+  // first thing: engage embrakes
+  state_machine::HypedMachine::engageEmbrakes();
 
-  std::signal(SIGINT, &gracefulExit);
-  signal_set = true;
+  // start turning the system off
+  System& sys = System::getSystem();
+  sys.running_ = false;
+
+  Logger log(true, 0);
+  log.ERR("SYSTEM", "forced termination detected (segfault?)");
+  exit(0);
 }
 
+bool System::setExitFunction()
+{
+  static bool signal_set = false;
+  if (signal_set) return true;
+
+  // nominal termination
+  std::signal(SIGINT, &gracefulExit);
+
+  // forced termination
+  std::signal(SIGSEGV, &segfaultHandler);
+  std::signal(SIGABRT, &segfaultHandler);
+  std::signal(SIGFPE,  &segfaultHandler);
+  std::signal(SIGILL,  &segfaultHandler);
+  std::signal(SIGTERM, &segfaultHandler);
+
+  signal_set = true;
+  return true;
+}
+
+
+bool handle_registeres = System::setExitFunction();
 }}  // namespace hyped::utils

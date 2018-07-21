@@ -1,8 +1,8 @@
 /*
  * Author: Jack Horsburgh
  * Organisation: HYPED
- * Date: 17/07/18
- * Description: Main class for fake IMUs.
+ * Date: 19/06/18
+ * Description: EM brakes to update data structure if EM brakes deploy
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,46 +18,35 @@
  *    limitations under the License.
  */
 
-#ifndef BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_
-#define BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_
-
-#include <string>
-#include <vector>
+#ifndef BEAGLEBONE_BLACK_SENSORS_EM_BRAKE_HPP_
+#define BEAGLEBONE_BLACK_SENSORS_EM_BRAKE_HPP_
 
 #include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/interface.hpp"
+#include "utils/system.hpp"
+#include "utils/io/gpio.hpp"
 
 namespace hyped {
 
+using utils::concurrent::Thread;
 using utils::Logger;
-using data::Data;
+using utils::io::GPIO;
 
 namespace sensors {
 
-
-class FakeBatteries : public BMSInterface {
+class EmBrake: public Thread {
  public:
-  FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal);
-  void getData(Battery* battery) override;
-  bool isOnline() override;
+  EmBrake(Logger& log, bool is_front);
+  void run()    override;
 
  private:
-  void init();
-  bool checkTime();
-
-  Data& data_;
-  bool is_started_;
-  bool is_high_voltage_;
-  uint64_t ref_time_;
-
-  uint16_t voltage_;
-  int16_t current_;
-  int8_t temperature_;
-  uint8_t charge_;
-  uint16_t low_voltage_cell_;
-  uint16_t high_voltage_cell_;
+  utils::System&    sys_;
+  data::Data&       data_;
+  GPIO gpio_pin_;
+  static data::EmergencyBrakes em_data_;
+  bool is_front_;
 };
-}}    // namespace hyped::sensors
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_
+}}  // namespace hyped::sensors
+
+#endif  // BEAGLEBONE_BLACK_SENSORS_EM_BRAKE_HPP_
