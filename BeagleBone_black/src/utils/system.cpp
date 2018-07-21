@@ -86,6 +86,8 @@ System::System(int argc, char* argv[])
       fail_dec_imu(false),
       fail_acc_imu(false),
       fail_motors(false),
+      fail_acc_batteries(false),
+      fail_dec_batteries(false),
       miss_keyence(false),
       double_keyence(false),
       accurate(false),
@@ -121,7 +123,8 @@ System::System(int argc, char* argv[])
       {"fake_embrakes", optional_argument, 0, 'n'},
       {"accurate", optional_argument, 0, 'N'},
       {"fake_batteries", optional_argument, 0, 'o'},
-      {"fail_batteries", optional_argument, 0, 'O'},
+      {"fail_acc_batteries", optional_argument, 0, 'O'},
+      {"fail_dec_batteries", optional_argument, 0, 'p'},
       {0, 0, 0, 0}
     };
     c = getopt_long(argc, argv, "vd::h", long_options, &option_index);
@@ -234,9 +237,13 @@ System::System(int argc, char* argv[])
         if (optarg) fake_batteries = atoi(optarg);
         else        fake_batteries = 1;
         break;
-        case 'O':
-        if (optarg) fail_batteries = atoi(optarg);
-        else        fail_batteries = 1;
+      case 'O':
+        if (optarg) fail_acc_batteries = atoi(optarg);
+        else        fail_acc_batteries = 1;
+        break;
+      case 'p':
+        if (optarg) fail_dec_batteries = atoi(optarg);
+        else        fail_dec_batteries = 1;
         break;
       default:
         printUsage();

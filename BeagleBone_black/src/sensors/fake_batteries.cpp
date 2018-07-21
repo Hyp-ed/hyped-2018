@@ -53,7 +53,9 @@ void FakeBatteries::getData(Battery* battery)
     battery->low_voltage_cell  = low_voltage_cell_;
     battery->high_voltage_cell = high_voltage_cell_;
   } else {
-    if (sm_data_.current_state == data::State::kDecelerating && sys_.fail_batteries) {
+    if (sm_data_.current_state == data::State::kDecelerating && sys_.fail_dec_batteries) {
+      battery->voltage     = 350;
+    } else if (sm_data_.current_state == data::State::kAccelerating && sys_.fail_acc_batteries) {
       battery->voltage     = 350;
     } else {
       battery->voltage           = 170;
