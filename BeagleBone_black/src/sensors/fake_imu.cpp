@@ -56,7 +56,8 @@ FakeImu::FakeImu(utils::Logger& log,
       dec_started_(false),
       em_started_(false),
       data_(data::Data::getInstance()),
-      operational_(true)
+      operational_(true),
+      prev_operational_(true)
 {
   NavigationVector acc;
   acc[0] = 0.0;
@@ -117,7 +118,7 @@ void FakeImu::getData(Imu* imu)
         prev_gyr_ = gyr_val_read_[gyr_count_];
       }
     }
-  } else if (state == data::State::kDecelerating || state == data::State::kEmergencyBraking) {
+  } else if (state == data::State::kDecelerating) {
     if (!dec_started_) {
       log_.INFO("Fake-IMUs", "Start decelerating...");
       dec_started_ = true;
@@ -144,6 +145,31 @@ void FakeImu::getData(Imu* imu)
         prev_gyr_ = gyr_val_read_[gyr_count_];
       }
     }
+  } else if (state == data::State::kEmergencyBraking) {
+    if (!em_started_) {
+      log_.INFO("Fake-IMUs", "Start emergency breaking...");
+      em_started_ = true;
+      startEm();
+    }
+
+    if (accCheckTime()) {
+      acc_count_ = std::min(acc_count_, (int64_t) em_val_read_.size());
+      // Check so you don't go out of bounds
+      if (acc_count_ == (int64_t) em_val_read_.size()) {
+        prev_acc_ = em_val_read_[acc_count_-1];
+      } else {
+        prev_acc_ = em_val_read_[acc_count_];
+      }
+    }
+
+    if (gyrCheckTime()) {
+      gyr_count_ = std::min(gyr_count_, (int64_t) gyr_val_read_.size());
+      if (gyr_count_ ==  (int64_t) gyr_val_read_.size()) {
+        prev_gyr_ = gyr_val_read_[gyr_count_-1];
+      } else {
+        prev_gyr_ = gyr_val_read_[gyr_count_];
+      }
+    }
   } else {
     prev_acc_ = addNoiseToData(acc_val_, acc_noise_);
     prev_gyr_ = addNoiseToData(gyr_val_, gyr_noise_);
@@ -151,6 +177,8 @@ void FakeImu::getData(Imu* imu)
   }
   imu->acc = prev_acc_;
   imu->gyr = prev_gyr_;
+  if (!prev_operational_) operational_ = prev_operational_;
+  prev_operational_ = operational_;
   imu->operational = operational_;
 }
 
