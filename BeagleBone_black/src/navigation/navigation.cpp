@@ -129,7 +129,7 @@ NavigationType Navigation::getBrakingDistance() const
 {
   // A polynomial fit for the braking distance at a specific (normalised) velocity, where
   // kCoeff_slow for < 50m/s and kCoeff_fast for > 50m/s because kCoeff_fast is inaccurate
-  // for < 10m/s but they agree at ~50m/s.
+  // for < 10m/s but they agree between ~10 and ~50m/s.
   static constexpr std::array<NavigationType, 16> kCoeff_slow = {
        136.3132, 158.9403,  63.6093, -35.4894, -149.2755, 152.6967, 502.5464, -218.4689,
       -779.534,   95.7285, 621.1013,  50.4598, -245.099,  -54.5,     38.0642,   12.3548};
