@@ -52,9 +52,9 @@ def graph(device, axis, imu, process_noise):
             next(file)
         for row in file:
             temp = row.split()
-            u_timestamp.append(temp[0])
-            u_data.append(temp[column])
-    plt.plot(u_timestamp[100:200], u_data[100:200], '-o', label = 'unfiltered')
+            u_timestamp.append(int(temp[0]))
+            u_data.append(float(temp[column]))
+    plt.plot(u_timestamp[0:100], u_data[0:100], '-o', label = 'unfiltered')
     plt.legend()
 
     # Get and plot filtered data
@@ -65,11 +65,12 @@ def graph(device, axis, imu, process_noise):
     with open('data/test/filtered/' + filtered_file_name) as file:
         for row in file:
             temp = row.split()
-            f_timestamp.append(temp[0])
-            f_data.append(temp[column])
-    plt.plot(f_timestamp[100:200], f_data[100:200], '-o', label = 'p = ' + str(process_noise))
+            f_timestamp.append(int(temp[0]))
+            f_data.append(float(temp[column]))
+    plt.plot(f_timestamp[0:100], f_data[0:100], '-o', label = 'p = ' + str(process_noise))
     plt.legend()
 
+    plt.axis([f_timestamp[0]-1, f_timestamp[99]+1, 0.3, 0.6])
     plt.show()
     return
 
