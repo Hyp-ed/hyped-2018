@@ -39,7 +39,7 @@ else
     printf "Creating remote directory and cloning the repo..."
     ssh hyped@35.177.87.64 "mkdir $NAME;\
                             cd ~/$NAME;\
-                            git clone --quiet https://github.com/Hyp-ed/hyped-2018.git > /dev/null"
+                            git clone --quiet --recursive https://github.com/Hyp-ed/hyped-2018.git > /dev/null"
     printf "DONE\n"
 fi
 

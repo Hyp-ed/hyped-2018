@@ -33,7 +33,8 @@ void print(hyped::data::DataPoint<double> x)
 
 int main()
 {
-  hyped::utils::math::Integrator<double> area;
+  hyped::data::DataPoint<double> x(0,0);
+  hyped::utils::math::Integrator<double> area(&x);
   print(area.update(a));
   print(area.update(b));
   print(area.update(c));

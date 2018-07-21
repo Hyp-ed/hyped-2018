@@ -20,6 +20,7 @@
 
 #ifndef BEAGLEBONE_BLACK_SENSORS_PROXI_MANAGER_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_PROXI_MANAGER_HPP_
+#ifdef PROXI
 
 #include <cstdint>
 
@@ -65,5 +66,5 @@ class ProxiManager: public ProxiManagerInterface {
 };
 
 }}  // namespace hyped::sensors
-
+#endif
 #endif  // BEAGLEBONE_BLACK_SENSORS_PROXI_MANAGER_HPP_

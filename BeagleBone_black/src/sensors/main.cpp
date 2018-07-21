@@ -27,7 +27,9 @@
 #include "data/data.hpp"
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
+#ifdef PROXI
 #include "sensors/proxi_manager.hpp"
+#endif
 #include "sensors/fake_gpio_counter.hpp"
 #include "sensors/gpio_counter.hpp"
 #include "sensors/em_brake.hpp"
@@ -49,8 +51,10 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance()),
       sys_(System::getSystem()),
       imu_manager_(new ImuManager(log, &sensors_.imu)),
+#ifdef PROXI
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
+#endif
       battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
@@ -92,19 +96,27 @@ void Main::run()
 {
   // start all managers
   imu_manager_->start();
+#ifdef PROXI
   proxi_manager_front_->start();
   proxi_manager_back_->start();
+#endif
   battery_manager_->start();
 
   // init loop
   while (!sensor_init_) {
-    if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
+    if (imu_manager_->updated()
+#ifdef PROXI
+    && proxi_manager_front_->updated() && proxi_manager_back_->updated()
+#endif
+      ) {
       data_.setSensorsData(sensors_);
 
       // Get calibration data
       SensorCalibration sensor_calibration_data;
+#ifdef PROXI
       sensor_calibration_data.proxi_front_variance = proxi_manager_front_->getCalibrationData();
       sensor_calibration_data.proxi_back_variance  = proxi_manager_back_->getCalibrationData();
+#endif
       sensor_calibration_data.imu_variance         = imu_manager_->getCalibrationData();
       data_.setCalibrationData(sensor_calibration_data);
       sensor_init_ = true;
@@ -143,13 +155,13 @@ void Main::run()
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
     }
-
+#ifdef PROXI
     if (proxi_manager_front_->updated() && proxi_manager_back_->updated()) {
       data_.setSensorsData(sensors_);
       proxi_manager_front_->resetTimestamp();
       proxi_manager_back_->resetTimestamp();
     }
-
+#endif
     // Update battery data only when there is some change
     if (battery_manager_->updated()) {
       battery_manager_->resetTimestamp();
@@ -176,7 +188,7 @@ bool Main::batteriesInRange()
   // check LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
     auto& battery = batteries_.low_power_batteries[i];
-    if (battery.voltage < 140 || battery.voltage > 294) {   // voltage in 14V to 29.4V
+    if (battery.voltage < 140 || battery.voltage > 252) {   // voltage in 14V to 25.2V
       log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
       return false;
     }
@@ -193,20 +205,20 @@ bool Main::batteriesInRange()
   }
 
   // check HP
-  for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
-    auto& battery = batteries_.low_power_batteries[i];
-    if (battery.voltage < 720 || battery.voltage > 1200) {   // voltage in 72V to 120V
-      log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
+  for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
+    auto& battery = batteries_.high_power_batteries[i];
+    if (battery.voltage < 720 || battery.voltage > 1246) {   // voltage in 72V to 124.6V
+      log_.ERR("SENSORS", "BMS HP %d voltage out of range: %d", i, battery.voltage);
       return false;
     }
 
-    if (battery.current < 0 || battery.current > 15000) {       // current in 0A to 1500A
-      log_.ERR("SENSORS", "BMS LP %d current out of range: %d", i, battery.current);
+    if (battery.current < -4000 || battery.current > 13500) {       // current in -400A to 1350A
+      log_.ERR("SENSORS", "BMS HP %d current out of range: %d", i, battery.current);
       return false;
     }
 
     if (battery.temperature < -20 || battery.temperature > 70) {  // temperature in -20C to 70C
-      log_.ERR("SENSORS", "BMS LP %d temperature out of range: %d", i, battery.temperature);
+      log_.ERR("SENSORS", "BMS HP %d temperature out of range: %d", i, battery.temperature);
       return false;
     }
   }

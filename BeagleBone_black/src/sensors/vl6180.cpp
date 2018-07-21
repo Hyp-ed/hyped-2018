@@ -17,6 +17,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+#ifdef PROXI
 #include "sensors/vl6180.hpp"
 
 #include <cstdint>
@@ -321,3 +322,5 @@ bool VL6180::writeByte(uint16_t reg_add, char data)
 }
 
 }}   // namespace hyped::sensors
+
+#endif

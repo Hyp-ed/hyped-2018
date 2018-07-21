@@ -25,6 +25,7 @@ namespace hyped {
 namespace state_machine {
 
 GPIO* HypedMachine::pin_embrake_ = nullptr;
+GPIO* HypedMachine::pin_water_   = nullptr;
 
 HypedMachine::HypedMachine(utils::Logger& log)
     : current_state_(State::alloc_)
@@ -45,9 +46,6 @@ void HypedMachine::transition(State *state)
   // NOTE, no use of argument state, as all react() functions allocate all new
   // states directly to current_state_ variable through common State::alloc_ pointer
   current_state_->entry();
-  if (current_state_->state_ == data::State::kEmergencyBraking) {
-    engageEmbrakes();
-  }
   log_.INFO("STATE", "Transitioned to %s"
     , data::states[current_state_->state_]);
   state_machine_.current_state = current_state_->state_;
@@ -66,7 +64,9 @@ void HypedMachine::reset()
 void HypedMachine::setupEmbrakes()
 {
   pin_embrake_ = new GPIO(46, utils::io::gpio::Direction::kOut);
+  pin_water_   = new GPIO(47, utils::io::gpio::Direction::kOut);
   pin_embrake_->set();
+  pin_water_->set();
 }
 
 void HypedMachine::engageEmbrakes()
