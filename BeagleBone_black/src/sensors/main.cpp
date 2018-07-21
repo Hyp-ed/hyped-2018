@@ -27,7 +27,9 @@
 #include "data/data.hpp"
 #include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
+#ifdef PROXI
 #include "sensors/proxi_manager.hpp"
+#endif
 #include "sensors/fake_gpio_counter.hpp"
 #include "sensors/gpio_counter.hpp"
 #include "sensors/em_brake.hpp"
@@ -49,8 +51,10 @@ Main::Main(uint8_t id, Logger& log)
       data_(data::Data::getInstance()),
       sys_(System::getSystem()),
       imu_manager_(new ImuManager(log, &sensors_.imu)),
+#ifdef PROXI
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
+#endif
       battery_manager_(new BmsManager(log,
                                          &batteries_.low_power_batteries,
                                          &batteries_.high_power_batteries)),
@@ -92,19 +96,27 @@ void Main::run()
 {
   // start all managers
   imu_manager_->start();
+#ifdef PROXI
   proxi_manager_front_->start();
   proxi_manager_back_->start();
+#endif
   battery_manager_->start();
 
   // init loop
   while (!sensor_init_) {
-    if (imu_manager_->updated() && proxi_manager_front_->updated() && proxi_manager_back_->updated()) { //NOLINT
+    if (imu_manager_->updated()
+#ifdef PROXI
+    && proxi_manager_front_->updated() && proxi_manager_back_->updated()
+#endif
+      ) {
       data_.setSensorsData(sensors_);
 
       // Get calibration data
       SensorCalibration sensor_calibration_data;
+#ifdef PROXI
       sensor_calibration_data.proxi_front_variance = proxi_manager_front_->getCalibrationData();
       sensor_calibration_data.proxi_back_variance  = proxi_manager_back_->getCalibrationData();
+#endif
       sensor_calibration_data.imu_variance         = imu_manager_->getCalibrationData();
       data_.setCalibrationData(sensor_calibration_data);
       sensor_init_ = true;
@@ -143,13 +155,13 @@ void Main::run()
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
     }
-
+#ifdef PROXI
     if (proxi_manager_front_->updated() && proxi_manager_back_->updated()) {
       data_.setSensorsData(sensors_);
       proxi_manager_front_->resetTimestamp();
       proxi_manager_back_->resetTimestamp();
     }
-
+#endif
     // Update battery data only when there is some change
     if (battery_manager_->updated()) {
       battery_manager_->resetTimestamp();
