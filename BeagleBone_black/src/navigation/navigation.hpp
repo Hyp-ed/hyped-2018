@@ -222,7 +222,7 @@ class Navigation {
   };
 #endif
 
-  static constexpr int kMinNumCalibrationSamples = 200000;
+  static constexpr int kMinNumCalibrationSamples = 100;
   static const Settings kDefaultSettings;
   /**
    * @brief Calculates distance to the given stripe, the next stripe and the one after that.
