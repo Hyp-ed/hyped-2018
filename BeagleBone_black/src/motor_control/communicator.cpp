@@ -38,8 +38,8 @@ Communicator::Communicator(Logger& log)
 {
   if (!sys_.fake_motors) {
     controller1_ = new Controller(log, 1);
-    controller2_ = new Controller(log, 2);
-    controller3_ = new Controller(log, 3);
+    // controller2_ = new Controller(log, 2);
+    // controller3_ = new Controller(log, 3);
     controller4_ = new Controller(log, 4);
   } else {
     if (sys_.fail_motors) {
@@ -47,8 +47,8 @@ Communicator::Communicator(Logger& log)
     } else {
       controller1_ = new FakeController(log, 1, false);
     }
-    controller2_ = new FakeController(log, 2, false);
-    controller3_ = new FakeController(log, 3, false);
+    // controller2_ = new FakeController(log, 2, false);
+    // controller3_ = new FakeController(log, 3, false);
     controller4_ = new FakeController(log, 4, false);
 
     log_.INFO("MOTOR", "Fake motors created");
@@ -58,8 +58,8 @@ Communicator::Communicator(Logger& log)
 void Communicator::registerControllers()
 {
   controller1_->registerController();
-  controller2_->registerController();
-  controller3_->registerController();
+  // controller2_->registerController();
+  // controller3_->registerController();
   controller4_->registerController();
   log_.INFO("MOTOR", "Controllers registered on CAN bus");
 }
@@ -67,13 +67,13 @@ void Communicator::registerControllers()
 void Communicator::configureControllers()
 {
   controller1_->configure();
-  controller2_->configure();
-  controller3_->configure();
+  // controller2_->configure();
+  // controller3_->configure();
   controller4_->configure();
   bool f1, f2, f3, f4;
   f1 = controller1_->getFailure();
-  f2 = controller2_->getFailure();
-  f3 = controller3_->getFailure();
+  f2 = // controller2_->getFailure();
+  f3 = // controller3_->getFailure();
   f4 = controller4_->getFailure();
   if (f1 || f2 || f3 || f4) {
     critical_failure_ = true;
@@ -86,8 +86,8 @@ void Communicator::configureControllers()
 void Communicator::prepareMotors()
 {
   controller1_->enterOperational();
-  controller2_->enterOperational();
-  controller3_->enterOperational();
+  // controller2_->enterOperational();
+  // controller3_->enterOperational();
   controller4_->enterOperational();
   if (controller1_->getControllerState() != kOperationEnabled
      || controller1_->getControllerState() != kOperationEnabled
@@ -104,8 +104,8 @@ void Communicator::prepareMotors()
 void Communicator::enterPreOperational()
 {
   controller1_->enterPreOperational();
-  controller2_->enterPreOperational();
-  controller3_->enterPreOperational();
+  // controller2_->enterPreOperational();
+  // controller3_->enterPreOperational();
   controller4_->enterPreOperational();
 }
 
@@ -113,20 +113,20 @@ void Communicator::sendTargetVelocity(int32_t target_velocity)
 {
   // TODO(anyone) need to check if this is correct for our set-up of motors
   controller1_->sendTargetVelocity(target_velocity);
-  controller2_->sendTargetVelocity(-target_velocity);
-  controller3_->sendTargetVelocity(target_velocity);
-  controller4_->sendTargetVelocity(-target_velocity);
+  // controller2_->sendTargetVelocity(-target_velocity);
+  // controller3_->sendTargetVelocity(target_velocity);
+  controller4_->sendTargetVelocity(target_velocity);
 }
 
 MotorVelocity Communicator::requestActualVelocity()
 {
   controller1_->updateActualVelocity();
-  controller2_->updateActualVelocity();
-  controller3_->updateActualVelocity();
+  // controller2_->updateActualVelocity();
+  // controller3_->updateActualVelocity();
   controller4_->updateActualVelocity();
   motor_velocity_.velocity_1 = controller1_->getVelocity();
-  motor_velocity_.velocity_2 = -controller2_->getVelocity();
-  motor_velocity_.velocity_3 = controller3_->getVelocity();
+  // motor_velocity_.velocity_2 = -// controller2_->getVelocity();
+  // motor_velocity_.velocity_3 = // controller3_->getVelocity();
   motor_velocity_.velocity_4 = -controller4_->getVelocity();
 
   log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
@@ -141,21 +141,21 @@ MotorVelocity Communicator::requestActualVelocity()
 void Communicator::quickStopAll()
 {
   controller1_->quickStop();
-  controller2_->quickStop();
-  controller3_->quickStop();
+  // controller2_->quickStop();
+  // controller3_->quickStop();
   controller4_->quickStop();
 }
 
 void Communicator::healthCheck()
 {
   controller1_->healthCheck();
-  controller2_->healthCheck();
-  controller3_->healthCheck();
+  // controller2_->healthCheck();
+  // controller3_->healthCheck();
   controller4_->healthCheck();
   bool f1, f2, f3, f4;
   f1 = controller1_->getFailure();
-  f2 = controller2_->getFailure();
-  f3 = controller3_->getFailure();
+  // f2 = // controller2_->getFailure();
+  // f3 = // controller3_->getFailure();
   f4 = controller4_->getFailure();
   if (f1 || f2 || f3 || f4) {
     critical_failure_ = true;
