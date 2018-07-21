@@ -36,6 +36,17 @@ inline void delay(int ms)
   std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
 }
 
+class Demo: public hyped::utils::io::CanProccesor {
+ public:
+  bool hasId(uint32_t id, bool extended) override {
+    return true;
+  }
+  void processNewData(hyped::utils::io::can::Frame& message) {
+    static hyped::utils::Logger& log = hyped::utils::System::getLogger();
+    log.INFO("DEMO", "received id 0x%x [%d]", message.id, message.len);
+  }
+};
+
 int main(int argc, char* argv[])
 {
   hyped::utils::System::parseArgs(argc, argv);
