@@ -143,8 +143,7 @@ bool Main::checkOnStart()
 
 bool Main::checkCommsCriticalFailure()
 {
-if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure)
-  {
+  if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
     log_.ERR("STATE", "Critical failure caused by communications ");
     hypedMachine.handleEvent(kCriticalFailure);
     return true;
