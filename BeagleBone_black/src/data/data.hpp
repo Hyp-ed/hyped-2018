@@ -175,7 +175,7 @@ struct Motors : public Module {
 struct Communications : public Module {
   bool launch_command;
   bool reset_command;
-  int run_length;  // in metres
+  float run_length;  // in metres
   bool service_propulsion_go;
 };
 

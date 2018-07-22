@@ -40,7 +40,7 @@ void ReceiverThread::run()
 
   while (sys_.running_) {
     cmn_ = data_.getCommunicationsData();
-    log_.DBG1("COMN", "Before receiving message (launch=%d, reset=%d, length=%d, spg=%d)",
+    log_.DBG1("COMN", "Before receiving message (launch=%d, reset=%d, length=%.3fm, spg=%d)",
         cmn_.launch_command, cmn_.reset_command, cmn_.run_length, cmn_.service_propulsion_go);
     int command = base_communicator_->receiveMessage();
 
@@ -61,8 +61,8 @@ void ReceiverThread::run()
         log_.INFO("COMN", "Received 3 (RESET)");                    // 3: RESET
         break;
       case 4:
-        cmn_.run_length = base_communicator_->receiveRunLength();
-        log_.INFO("COMN", "Received 4 (TRACK LENGTH = %dm)", cmn_.run_length);  // 4: TRACK LENGTH
+        cmn_.run_length = static_cast<float>(base_communicator_->receiveRunLength());
+        log_.INFO("COMN", "Received 4 (TRACK LENGTH = %.3fm)", cmn_.run_length);  // 4: TRACK LENGTH
         break;
       case 5:
         cmn_.service_propulsion_go = true;
@@ -80,7 +80,7 @@ void ReceiverThread::run()
     }
 
     data_.setCommunicationsData(cmn_);
-    log_.DBG1("COMN", "After receiving message (launch=%d, reset=%d, length=%d, spg=%d)",
+    log_.DBG1("COMN", "After receiving message (launch=%d, reset=%d, length=%.3fm, spg=%d)",
         cmn_.launch_command, cmn_.reset_command, cmn_.run_length, cmn_.service_propulsion_go);
   }
 }
