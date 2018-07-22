@@ -40,6 +40,8 @@ void ReceiverThread::run()
 
   while (sys_.running_) {
     cmn_ = data_.getCommunicationsData();
+    log_.DBG1("COMN", "Before receiving message (launch=%d, reset=%d, length=%.3fm, spg=%d)",
+        cmn_.launch_command, cmn_.reset_command, cmn_.run_length, cmn_.service_propulsion_go);
     int command = base_communicator_->receiveMessage();
 
     switch (command) {
@@ -47,37 +49,39 @@ void ReceiverThread::run()
         log_.INFO("COMN", "Received 0 (ACK FROM SERVER)");          // 0: ACK
         break;
       case 1:
-        log_.INFO("COMN", "Received 1 (STOP)");                     // 1: STOP
         cmn_.module_status = data::ModuleStatus::kCriticalFailure;
+        log_.INFO("COMN", "Received 1 (STOP)");                     // 1: STOP
         break;
       case 2:
-        log_.INFO("COMN", "Received 2 (LAUNCH)");                   // 2: LAUNCH
         cmn_.launch_command = true;
+        log_.INFO("COMN", "Received 2 (LAUNCH)");                   // 2: LAUNCH
         break;
       case 3:
-        log_.INFO("COMN", "Received 3 (RESET)");                    // 3: RESET
         cmn_.reset_command = true;
+        log_.INFO("COMN", "Received 3 (RESET)");                    // 3: RESET
         break;
       case 4:
-        log_.INFO("COMN", "Received 4 (TRACK LENGTH)");             // 4: TRACK LENGTH
-        cmn_.run_length = static_cast<float>(base_communicator_->receiveRunLength())/1000;
+        cmn_.run_length = static_cast<float>(base_communicator_->receiveRunLength());
+        log_.INFO("COMN", "Received 4 (TRACK LENGTH = %.3fm)", cmn_.run_length);  // 4: TRACK LENGTH
         break;
       case 5:
-        log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");    // 5: SERVICE PROPULSION GO
         cmn_.service_propulsion_go = true;
+        log_.INFO("COMN", "Received 5 (SERVICE PROPULSION GO)");    // 5: SERVICE PROPULSION GO
         break;
       case 6:
-        log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // 6: SERVICE PROPULSION STOP
         cmn_.service_propulsion_go = false;
+        log_.INFO("COMN", "Received 6 (SERVICE PROPULSION STOP)");  // 6: SERVICE PROPULSION STOP
         break;
       default:
-        log_.ERR("COMN", "CONNECTION LOST (STOP)");
         cmn_.module_status = data::ModuleStatus::kCriticalFailure;  // DEFAULT: Critical Failure
         data_.setCommunicationsData(cmn_);
+        log_.ERR("COMN", "CONNECTION LOST (STOP)");
         return;
     }
 
     data_.setCommunicationsData(cmn_);
+    log_.DBG1("COMN", "After receiving message (launch=%d, reset=%d, length=%.3fm, spg=%d)",
+        cmn_.launch_command, cmn_.reset_command, cmn_.run_length, cmn_.service_propulsion_go);
   }
 }
 

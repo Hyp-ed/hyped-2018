@@ -56,7 +56,7 @@ class Communications
   /**
    * @brief Reads run length data from Server
    *
-   * @return int Returns length of track in mm. Buffer assumes test track will be < 100,000mm
+   * @return float Returns length of track in m. Buffer assumes test track will be < 1250m.
    */
   int receiveRunLength();
   /**
