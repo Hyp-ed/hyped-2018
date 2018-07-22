@@ -104,7 +104,7 @@ int Communications::receiveRunLength()
   }
 
   int run_length = atoi(buffer_);
-  log_.INFO("COMN", "Received track length of %f", static_cast<float>(run_length));
+  log_.INFO("COMN", "Received track length of %dm", run_length);
 
   return run_length;
 }
