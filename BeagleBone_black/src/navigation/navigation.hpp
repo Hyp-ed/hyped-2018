@@ -78,7 +78,7 @@ constexpr NavigationType kEmergencyDeceleration = 24;  // m/s^2
 //      944.88,  975.36, 1005.84, 1036.32, 1066.8, 1097.28, 1127.76, 1158.24, 1188.72, 1219.2,
 //     1249.68};
 constexpr std::array<NavigationType, 10> kStripeLocations = {0.0,
-      1.0,   2.0,   3.0,  4.0,  5.0,  6.0,  7.0,  8.0,  9.0};
+      3.048,  6.096,   9.144,  12.192,  15.24,  18.288,  21.336,  24.384,  27.432};
 
 class Navigation {
   friend class Main;
