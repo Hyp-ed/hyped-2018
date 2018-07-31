@@ -106,23 +106,23 @@ void Navigation::readDataFromFile(std::string file_path)
 
 NavigationType Navigation::getAcceleration() const
 {
-  return acceleration_[0];
+  return acceleration_[1];
 }
 
 NavigationType Navigation::getVelocity() const
 {
-  return velocity_.value[0];
+  return velocity_.value[1];
 }
 
 NavigationType Navigation::getDisplacement() const
 {
-  return displacement_.value[0];
+  return displacement_.value[1];
 }
 
 NavigationType Navigation::getEmergencyBrakingDistance() const
 {
   // TODO(Brano): Account for actuation delay and/or communication latency?
-  return velocity_.value[0]*velocity_.value[0] / kEmergencyDeceleration;
+  return velocity_.value[1]*velocity_.value[1] / kEmergencyDeceleration;
 }
 
 NavigationType Navigation::getBrakingDistance() const
