@@ -32,7 +32,7 @@ constexpr uint8_t kAccelConfig2             = 0x1D;
 constexpr uint8_t  kGyroConfig              = 0x1B;
 
 constexpr uint8_t kWhoAmIMpu9250            = 0x75;
-constexpr uint8_t kWhoAmIResetValue1        = 0x71;
+constexpr uint8_t kWhoAmIResetValue1        = 0x70;
 constexpr uint8_t kWhoAmIResetValue2        = 0x73;
 
 // Power Management
