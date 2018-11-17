@@ -67,7 +67,7 @@ namespace sensors {
 
 MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale)
     : log_(log),
-    gpio_(pin, kDirection, log),
+    // gpio_(pin, kDirection, log),
     acc_scale_(acc_scale),
     gyro_scale_(gyro_scale),
     is_online_(false)
@@ -79,7 +79,7 @@ MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scal
 void MPU9250::init()
 {
   // Set pin high
-  gpio_.set();
+  // gpio_.set();
 
   writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
   Thread::sleep(200);
@@ -106,7 +106,7 @@ bool MPU9250::whoAmI()
       is_online_ = true;
       break;
     } else {
-      log_.DBG1("MPU9250", "Cannot initialise. Who am I is incorrect");
+      log_.DBG1("MPU9250", "Cannot initialise. Who am I is incorrect: %d", data);
       is_online_ = false;
       Thread::yield();
     }
@@ -156,11 +156,11 @@ void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 
 void MPU9250::select()
 {
-  gpio_.clear();
+  // gpio_.clear();
 }
 void  MPU9250::deSelect()
 {
-  gpio_.set();
+  // gpio_.set();
 }
 
 void MPU9250::setGyroScale(int scale)

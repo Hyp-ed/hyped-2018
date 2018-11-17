@@ -75,7 +75,7 @@ class MPU9250 : public ImuInterface {
   // SPI& spi_ = SPI::getInstance();
   I2C& spi_ = I2C::getInstance();
   Logger& log_;
-  GPIO gpio_;
+  // GPIO gpio_;
   uint8_t acc_scale_;
   uint8_t gyro_scale_;
   double acc_divider_;
