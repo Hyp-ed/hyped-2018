@@ -123,27 +123,35 @@ MPU9250::~MPU9250()
   log_.INFO("MPU9250", "Deconstructing sensor object");
 }
 
+uint8_t sensor_addr_ = 0x68;
+
 void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
 {
   // ',' instead of ';' is to inform the compiler not to reorder function calls
   // chip selects signals must have exact ordering with respect to the spi access
-  select(),
-  spi_.write(write_reg, &write_data, 1),
-  deSelect();
+  // select(),
+
+  uint8_t buffer[2];
+  buffer[0] = write_reg;
+  buffer[1] = write_data;
+  spi_.write(sensor_addr_, buffer, 2);  // this is i2c now
+  // deSelect();
 }
 
 void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
 {
-  select(),
-  spi_.read(read_reg | kReadFlag, read_data, 1),
-  deSelect();
+  // select(),
+  // spi_.read(read_reg | kReadFlag, read_data, 1),
+  // deSelect();
+  readBytes(read_reg, read_data, 1);
 }
 
 void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
 {
-  select(),
-  spi_.read(read_reg | kReadFlag, read_data, length),
-  deSelect();
+  // select(),
+  spi_.write(sensor_addr_, &read_reg, 1);
+  spi_.read(sensor_addr_, read_data, length);
+  // deSelect();
 }
 
 void MPU9250::select()

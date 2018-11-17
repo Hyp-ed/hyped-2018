@@ -24,11 +24,13 @@
 #include "sensors/interface.hpp"
 #include "utils/logger.hpp"
 #include "utils/io/spi.hpp"
+#include "utils/io/i2c.hpp"
 #include "utils/io/gpio.hpp"
 
 
 namespace hyped {
 
+using hyped::utils::io::I2C;
 using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
@@ -70,7 +72,8 @@ class MPU9250 : public ImuInterface {
   void writeByte(uint8_t write_reg, uint8_t write_data);
   void readByte(uint8_t read_reg, uint8_t *read_data);
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
-  SPI& spi_ = SPI::getInstance();
+  // SPI& spi_ = SPI::getInstance();
+  I2C& spi_ = I2C::getInstance();
   Logger& log_;
   GPIO gpio_;
   uint8_t acc_scale_;
